@@ -1,0 +1,95 @@
+# ===========================================
+# SNS 게시 설정
+# ===========================================
+
+# --- Instagram 설정 ---
+instagram:
+  enabled: true
+  post_types:
+    image:
+      max_caption_length: 2200
+      image_sizes:
+        square: { width: 1080, height: 1080 }
+        portrait: { width: 1080, height: 1350 }
+        landscape: { width: 1080, height: 566 }
+      default_aspect: "square"
+    carousel:
+      max_slides: 10
+      image_size: { width: 1080, height: 1080 }
+    story:
+      image_size: { width: 1080, height: 1920 }
+      max_duration_sec: 15
+
+  hashtag:
+    max_count: 30
+    default_tags:
+      - "#주식"
+      - "#투자"
+      - "#주식투자"
+      - "#재테크"
+      - "#주식시장"
+      - "#증시"
+
+# --- X (Twitter) 설정 ---
+x:
+  enabled: true
+  post_types:
+    tweet:
+      max_length: 280
+      max_images: 4
+      image_size: { width: 1200, height: 675 }
+      max_image_size_mb: 5
+    thread:
+      max_tweets: 10
+      max_length_per_tweet: 280
+
+  hashtag:
+    max_count: 5
+    default_tags:
+      - "#주식"
+      - "#증시"
+
+# --- 게시 스케줄 ---
+posting_schedule:
+  morning_briefing:
+    time: "08:00"
+    platforms: ["instagram", "x"]
+    instagram_type: "image"
+    x_type: "thread"
+
+  closing_review:
+    time: "16:30"
+    platforms: ["instagram", "x"]
+    instagram_type: "carousel"
+    x_type: "thread"
+
+  stock_analysis:
+    times: ["12:00", "19:00"]
+    platforms: ["instagram", "x"]
+    instagram_type: "carousel"
+    x_type: "thread"
+
+  weekly_review:
+    time: "SAT 10:00"
+    platforms: ["instagram", "x"]
+    instagram_type: "carousel"
+    x_type: "thread"
+
+  breaking_news:
+    platforms: ["x"]
+    x_type: "tweet"
+    instagram_type: "story"
+
+# --- 재시도 설정 ---
+retry:
+  max_attempts: 3
+  delay_between_sec: 300  # 5분
+
+# --- Rate Limiting ---
+rate_limit:
+  instagram:
+    max_posts_per_hour: 5
+    max_posts_per_day: 25
+  x:
+    max_tweets_per_15min: 15
+    max_tweets_per_day: 100

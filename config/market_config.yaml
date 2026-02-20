@@ -1,0 +1,88 @@
+# ===========================================
+# 시장 분석 설정
+# ===========================================
+
+# --- 한국 시장 ---
+korea:
+  indices:
+    - name: "KOSPI"
+      code: "1001"
+    - name: "KOSDAQ"
+      code: "2001"
+
+  watchlist:
+    - { ticker: "005930", name: "삼성전자" }
+    - { ticker: "000660", name: "SK하이닉스" }
+    - { ticker: "373220", name: "LG에너지솔루션" }
+    - { ticker: "207940", name: "삼성바이오로직스" }
+    - { ticker: "005380", name: "현대자동차" }
+    - { ticker: "006400", name: "삼성SDI" }
+    - { ticker: "051910", name: "LG화학" }
+    - { ticker: "035420", name: "NAVER" }
+    - { ticker: "035720", name: "카카오" }
+    - { ticker: "068270", name: "셀트리온" }
+
+# --- 미국 시장 ---
+us:
+  indices:
+    - name: "S&P 500"
+      ticker: "^GSPC"
+    - name: "NASDAQ"
+      ticker: "^IXIC"
+    - name: "DOW"
+      ticker: "^DJI"
+    - name: "VIX"
+      ticker: "^VIX"
+
+  watchlist:
+    - { ticker: "AAPL", name: "Apple" }
+    - { ticker: "MSFT", name: "Microsoft" }
+    - { ticker: "NVDA", name: "NVIDIA" }
+    - { ticker: "GOOGL", name: "Alphabet" }
+    - { ticker: "AMZN", name: "Amazon" }
+    - { ticker: "META", name: "Meta" }
+    - { ticker: "TSLA", name: "Tesla" }
+    - { ticker: "TSM", name: "TSMC" }
+    - { ticker: "AVGO", name: "Broadcom" }
+    - { ticker: "JPM", name: "JPMorgan" }
+
+# --- 기술적 분석 파라미터 ---
+technical:
+  sma_periods: [5, 20, 60, 120]
+  ema_periods: [12, 26]
+  rsi_period: 14
+  rsi_overbought: 70
+  rsi_oversold: 30
+  macd:
+    fast: 12
+    slow: 26
+    signal: 9
+  bollinger:
+    period: 20
+    std_dev: 2
+  golden_cross_pairs:
+    - [5, 20]
+    - [20, 60]
+
+# --- 기본적 분석 기준 ---
+fundamental:
+  valuation:
+    per_max: 30
+    pbr_max: 5
+    psr_max: 10
+  profitability:
+    roe_min: 10
+    roa_min: 5
+    operating_margin_min: 10
+  growth:
+    revenue_growth_min: 5  # YoY %
+    earnings_growth_min: 10  # YoY %
+
+# --- 스크리닝 가중치 ---
+screening:
+  weights:
+    technical: 0.5
+    fundamental: 0.5
+  top_n: 10
+  min_market_cap_krw: 1000000000000  # 1조원
+  min_market_cap_usd: 10000000000    # 100억 달러

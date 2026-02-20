@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+*.whl
+
+# 가상환경
+.venv/
+venv/
+env/
+
+# 환경변수 (API 키 등 민감 정보)
+.env
+.env.local
+.env.production
+
+# 데이터 (대용량, git 관리 불필요)
+data/raw/
+data/processed/
+data/cache/
+data/db/
+
+# 로그
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 테스트/커버리지
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Jupyter
+.ipynb_checkpoints/

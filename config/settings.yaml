@@ -1,0 +1,56 @@
+# ===========================================
+# 글로벌 설정
+# ===========================================
+
+app:
+  name: "주식부자프로젝트"
+  version: "0.1.0"
+  env: "development"  # development / production
+
+# --- Claude AI 모델 설정 ---
+claude:
+  default_model: "claude-sonnet-4-6"
+  models:
+    general: "claude-sonnet-4-6"      # 일반 콘텐츠
+    deep_analysis: "claude-opus-4-6"  # 심층 분석
+    summary: "claude-haiku-4-5-20251001"  # 요약/분류
+  max_tokens:
+    general: 4096
+    deep_analysis: 8192
+    summary: 1024
+  temperature:
+    general: 0.7
+    deep_analysis: 0.5
+    summary: 0.3
+
+# --- 스케줄 설정 ---
+schedule:
+  timezone: "Asia/Seoul"
+  morning_briefing: "08:00"
+  closing_review: "16:30"
+  stock_analysis:
+    - "12:00"
+    - "19:00"
+  weekly_review: "SAT 10:00"
+  news_collection:
+    market_hours_interval_min: 30
+    off_hours_interval_min: 120
+
+# --- 데이터베이스 ---
+database:
+  url: "sqlite:///data/db/stock_rich.db"
+  echo: false  # SQL 로그 출력 여부
+
+# --- 로깅 ---
+logging:
+  level: "INFO"
+  format: "json"  # json / console
+  file: "logs/app.log"
+  rotation: "10 MB"
+  retention: "30 days"
+
+# --- 재시도 설정 ---
+retry:
+  max_attempts: 3
+  wait_exponential_min: 1  # 초
+  wait_exponential_max: 30  # 초

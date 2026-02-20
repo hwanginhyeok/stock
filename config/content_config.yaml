@@ -1,0 +1,76 @@
+# ===========================================
+# 콘텐츠 생성 설정
+# ===========================================
+
+# --- 기사 유형별 설정 ---
+article_types:
+  morning_briefing:
+    display_name: "모닝브리핑"
+    model: "general"
+    min_length: 800
+    max_length: 1200
+    template: "templates/articles/morning_briefing.j2"
+    prompt_template: "templates/prompts/morning_briefing.j2"
+    schedule: "08:00"
+    requires_disclaimer: true
+
+  closing_review:
+    display_name: "장마감 리뷰"
+    model: "general"
+    min_length: 1000
+    max_length: 1500
+    template: "templates/articles/closing_review.j2"
+    prompt_template: "templates/prompts/closing_review.j2"
+    schedule: "16:30"
+    requires_disclaimer: true
+
+  stock_analysis:
+    display_name: "종목분석 리포트"
+    model: "deep_analysis"
+    min_length: 1500
+    max_length: 2500
+    template: "templates/articles/stock_analysis.j2"
+    prompt_template: "templates/prompts/stock_analysis.j2"
+    schedule: ["12:00", "19:00"]
+    requires_disclaimer: true
+
+  weekly_review:
+    display_name: "주간 리뷰"
+    model: "deep_analysis"
+    min_length: 2000
+    max_length: 3000
+    template: "templates/articles/weekly_review.j2"
+    prompt_template: "templates/prompts/weekly_review.j2"
+    schedule: "SAT 10:00"
+    requires_disclaimer: true
+
+# --- 면책조항 ---
+disclaimer:
+  ko: |
+    본 콘텐츠는 투자 참고 자료이며, 투자 권유나 종목 추천이 아닙니다.
+    투자에 대한 최종 결정과 책임은 투자자 본인에게 있습니다.
+  en: |
+    This content is for informational purposes only and does not constitute
+    investment advice or a recommendation to buy or sell any security.
+
+# --- 금지 표현 ---
+prohibited_expressions:
+  - "무조건"
+  - "확실한 수익"
+  - "반드시 오른다"
+  - "손해 없는"
+  - "원금 보장"
+  - "수익 보장"
+  - "100% 상승"
+  - "놓치면 후회"
+  - "지금 당장 매수"
+  - "무조건 매도"
+  - "대박 종목"
+  - "비밀 종목"
+
+# --- 톤 & 스타일 ---
+style:
+  tone: "professional_friendly"  # 전문적이면서 친근한
+  target_audience: "개인 투자자"
+  formality: "반말/존댓말 혼용 (존댓말 기본)"
+  emoji_usage: "minimal"  # SNS 콘텐츠에서만 사용

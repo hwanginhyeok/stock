@@ -1,0 +1,64 @@
+# ===========================================
+# 뉴스 소스 설정
+# ===========================================
+
+# --- 한국 뉴스 소스 ---
+korea:
+  - name: "네이버 금융뉴스"
+    type: "rss"
+    url: "https://news.naver.com/main/list.naver?mode=LSD&mid=sec&sid1=101"
+    category: "종합"
+    language: "ko"
+    enabled: true
+
+  - name: "한국경제"
+    type: "rss"
+    url: "https://www.hankyung.com/feed/stock"
+    category: "종합"
+    language: "ko"
+    enabled: true
+
+  - name: "매일경제"
+    type: "rss"
+    url: "https://www.mk.co.kr/rss/30000001/"
+    category: "종합"
+    language: "ko"
+    enabled: true
+
+  - name: "연합뉴스 경제"
+    type: "rss"
+    url: "https://www.yna.co.kr/economy/all/index?site=topnews01"
+    category: "종합"
+    language: "ko"
+    enabled: true
+
+# --- 미국 뉴스 소스 ---
+us:
+  - name: "Reuters Business"
+    type: "rss"
+    url: "https://www.reutersagency.com/feed/?taxonomy=best-sectors&post_type=best"
+    category: "종합"
+    language: "en"
+    enabled: true
+
+  - name: "Yahoo Finance"
+    type: "rss"
+    url: "https://finance.yahoo.com/news/rssindex"
+    category: "종합"
+    language: "en"
+    enabled: true
+
+  - name: "CNBC"
+    type: "rss"
+    url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114"
+    category: "종합"
+    language: "en"
+    enabled: true
+
+# --- 수집 설정 ---
+collection:
+  max_articles_per_source: 20
+  dedup_similarity_threshold: 0.85
+  dedup_window_hours: 24
+  request_timeout_sec: 15
+  request_delay_sec: 2  # 소스 간 딜레이 (rate limiting)
