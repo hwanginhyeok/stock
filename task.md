@@ -34,7 +34,6 @@
 - [ ] `tests/test_workflows/` — 워크플로우 통합 테스트
 
 ### 기타
-- [x] `PROJECT_MAP.md` — 프로젝트 전체 구조 지도 (디렉토리/파일별 설명)
 - [ ] 에이전트별 시작 전 체크리스트 작성 (`agents/checklists/`)
 - [ ] 에이전트별 스킬 매뉴얼 작성 (`agents/manuals/`)
 - [ ] CI/CD 파이프라인 구성 (GitHub Actions)
@@ -110,6 +109,17 @@ _(현재 진행 중인 작업 없음)_
 - [x] `src/generators/insight.py` — InsightGenerator (SNS용 한줄 코멘트)
 - [x] `src/generators/image.py` — ImageGenerator (matplotlib 차트 이미지)
 - [x] `src/generators/__init__.py` — 패키지 export
+
+### 엑셀 차트 개선
+- [x] X/Y축 라벨 추가 (축 제목 + 숫자 포맷)
+- [x] Y축 10% 패딩 (가격 범위 여유 공간)
+- [x] 10등분 눈금 + 숫자 표시 (Y축 majorUnit, X축 tickLblSkip)
+- [x] 축 라벨 가시성 수정 (delete=False 명시, yyyy-mm Excel 호환 포맷)
+- [x] VIX/RSI 기준선 (참조 라인 시리즈)
+
+### 문서 / 기타
+- [x] `PROJECT_MAP.md` — 프로젝트 전체 구조 지도 (디렉토리/파일별 설명)
+- [x] GitHub 리포지토리 연동 (`hwanginhyeok/stock`)
 
 ---
 
