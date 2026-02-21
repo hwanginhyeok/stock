@@ -1,0 +1,42 @@
+## 작성 요청: 모닝브리핑
+
+오늘의 주식 시장 모닝브리핑을 작성해 주세요.
+전일 해외 시장 동향을 정리하고, 오늘 국내 시장 전망을 제시합니다.
+
+---
+
+## 시장 데이터
+
+{% for snapshot in market_snapshots %}
+### {{ snapshot.index_name }} ({{ snapshot.market | upper }})
+- 지수: {{ snapshot.index_value | format_number }}
+- 등락률: {{ snapshot.change_percent | sign }}%
+- 거래량: {{ snapshot.volume | format_number(0) }}
+- 심리: {{ snapshot.sentiment }}
+{% if snapshot.top_gainers %}
+- 상승 상위: {% for g in snapshot.top_gainers[:3] %}{{ g.name }}({{ g.change_percent | sign }}%) {% endfor %}
+{% endif %}
+{% if snapshot.top_losers %}
+- 하락 상위: {% for l in snapshot.top_losers[:3] %}{{ l.name }}({{ l.change_percent | sign }}%) {% endfor %}
+{% endif %}
+{% endfor %}
+
+---
+
+## 주요 뉴스
+
+{% for news in news_headlines[:10] %}
+{{ loop.index }}. **{{ news.title }}** ({{ news.source }})
+   - 감성: {{ news.sentiment_score | sign }}
+   {% if news.related_tickers %}- 관련 종목: {{ news.related_tickers | join(', ') }}{% endif %}
+{% endfor %}
+
+---
+
+## 작성 가이드
+
+- **분량**: 800~1,200자
+- **톤**: 전문적이면서 친근한 존댓말
+- **구조**: 제목(# 한 줄) → 해외 시장 요약 → 국내 영향 분석 → 오늘의 포인트 → 주목 섹터/종목
+- **금지**: 투자 권유, 종목 추천, "무조건", "확실한 수익" 등 단정적 표현
+- **포맷**: 마크다운. 제목은 `# 제목` 형식으로 첫 줄에 작성

@@ -29,6 +29,8 @@ us:
       ticker: "^GSPC"
     - name: "NASDAQ"
       ticker: "^IXIC"
+    - name: "Russell 2000"
+      ticker: "^RUT"
     - name: "DOW"
       ticker: "^DJI"
     - name: "VIX"
@@ -86,3 +88,9 @@ screening:
   top_n: 10
   min_market_cap_krw: 1000000000000  # 1조원
   min_market_cap_usd: 10000000000    # 100억 달러
+
+# --- 캐시 설정 ---
+cache:
+  indices_ttl_hours: 4
+  stocks_ttl_hours: 4
+  sentiment_ttl_hours: 6

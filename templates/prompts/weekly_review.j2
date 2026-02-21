@@ -1,0 +1,81 @@
+## 작성 요청: 주간 리뷰
+
+이번 주 주식 시장을 종합적으로 리뷰하고, 다음 주 전망을 제시해 주세요.
+한국과 미국 시장 모두를 커버합니다.
+
+---
+
+## 금주 시장 데이터
+
+{% for snapshot in market_snapshots %}
+### {{ snapshot.index_name }} ({{ snapshot.market | upper }})
+- 종가: {{ snapshot.index_value | format_number }}
+- 주간 등락률: {{ snapshot.change_percent | sign }}%
+- 거래량: {{ snapshot.volume | format_number(0) }}
+- 심리: {{ snapshot.sentiment }}
+{% if snapshot.top_gainers %}
+- 주간 상승 상위: {% for g in snapshot.top_gainers[:5] %}{{ g.name }}({{ g.change_percent | sign }}%) {% endfor %}
+{% endif %}
+{% if snapshot.top_losers %}
+- 주간 하락 상위: {% for l in snapshot.top_losers[:5] %}{{ l.name }}({{ l.change_percent | sign }}%) {% endfor %}
+{% endif %}
+{% endfor %}
+
+---
+
+## 금주 주요 뉴스
+
+{% for news in news_headlines[:15] %}
+{{ loop.index }}. **{{ news.title }}** ({{ news.source }}, {{ news.importance }})
+   - 감성: {{ news.sentiment_score | sign }}
+   {% if news.related_tickers %}- 관련 종목: {{ news.related_tickers | join(', ') }}{% endif %}
+{% endfor %}
+
+---
+
+{% if analyses %}
+## 주목 종목 (주간 분석)
+
+{% for analysis in analyses[:10] %}
+### {{ analysis.name }} ({{ analysis.ticker }})
+- 종합 점수: {{ analysis.composite_score | format_number(1) }}/100
+- 기술: {{ analysis.technical_score | format_number(1) }} | 기본: {{ analysis.fundamental_score | format_number(1) }}
+- 시그널: {{ analysis.signals | join(', ') }}
+{% endfor %}
+{% endif %}
+
+---
+
+{% if extra %}
+## 추가 데이터
+
+{% if extra.weekly_sector_performance %}
+### 섹터별 주간 수익률
+{% for sector, perf in extra.weekly_sector_performance.items() %}
+- {{ sector }}: {{ perf | sign }}%
+{% endfor %}
+{% endif %}
+
+{% if extra.vix %}
+### 변동성 지수
+- VIX: {{ extra.vix | format_number }}
+{% endif %}
+
+{% if extra.key_events %}
+### 다음 주 주요 일정
+{% for event in extra.key_events %}
+- {{ event }}
+{% endfor %}
+{% endif %}
+{% endif %}
+
+---
+
+## 작성 가이드
+
+- **분량**: 2,000~3,000자
+- **톤**: 전문적이면서 친근한 존댓말
+- **구조**: 제목(# 한 줄) → 주간 시장 총평 → 한국 시장 리뷰 → 미국 시장 리뷰 → 업종/테마 분석 → 주목 종목 → 다음 주 전망 & 관전 포인트
+- **금지**: 투자 권유, 종목 추천, "무조건", "확실한 수익" 등 단정적 표현
+- **포맷**: 마크다운. 제목은 `# 제목` 형식으로 첫 줄에 작성
+- **참고**: 한 주의 흐름을 스토리텔링하되, 데이터와 수치를 근거로 작성

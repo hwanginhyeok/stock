@@ -1,0 +1,63 @@
+## 작성 요청: 장마감 리뷰
+
+오늘의 주식 시장 장마감 리뷰를 작성해 주세요.
+당일 시장 결과를 분석하고 수급 동향과 함께 내일의 관전 포인트를 제시합니다.
+
+---
+
+## 시장 데이터
+
+{% for snapshot in market_snapshots %}
+### {{ snapshot.index_name }} ({{ snapshot.market | upper }})
+- 지수: {{ snapshot.index_value | format_number }}
+- 등락률: {{ snapshot.change_percent | sign }}%
+- 거래량: {{ snapshot.volume | format_number(0) }}
+- 심리: {{ snapshot.sentiment }}
+{% if snapshot.top_gainers %}
+- 상승 상위: {% for g in snapshot.top_gainers[:5] %}{{ g.name }}({{ g.change_percent | sign }}%) {% endfor %}
+{% endif %}
+{% if snapshot.top_losers %}
+- 하락 상위: {% for l in snapshot.top_losers[:5] %}{{ l.name }}({{ l.change_percent | sign }}%) {% endfor %}
+{% endif %}
+{% if snapshot.extra_data %}
+{% if snapshot.extra_data.foreign_net_buy is defined %}
+- 외국인 순매수: {{ snapshot.extra_data.foreign_net_buy | format_number }}억원
+{% endif %}
+{% if snapshot.extra_data.institution_net_buy is defined %}
+- 기관 순매수: {{ snapshot.extra_data.institution_net_buy | format_number }}억원
+{% endif %}
+{% endif %}
+{% endfor %}
+
+---
+
+## 주요 뉴스
+
+{% for news in news_headlines[:10] %}
+{{ loop.index }}. **{{ news.title }}** ({{ news.source }})
+   - 감성: {{ news.sentiment_score | sign }}
+   {% if news.related_tickers %}- 관련 종목: {{ news.related_tickers | join(', ') }}{% endif %}
+{% endfor %}
+
+---
+
+{% if analyses %}
+## 주목 종목
+
+{% for analysis in analyses[:5] %}
+### {{ analysis.name }} ({{ analysis.ticker }})
+- 종합 점수: {{ analysis.composite_score | format_number(1) }}/100
+- 기술 점수: {{ analysis.technical_score | format_number(1) }} | 기본 점수: {{ analysis.fundamental_score | format_number(1) }}
+- 시그널: {{ analysis.signals | join(', ') }}
+{% endfor %}
+{% endif %}
+
+---
+
+## 작성 가이드
+
+- **분량**: 1,000~1,500자
+- **톤**: 전문적이면서 친근한 존댓말
+- **구조**: 제목(# 한 줄) → 오늘의 시장 총평 → 업종/테마 동향 → 수급 분석 → 내일 관전 포인트
+- **금지**: 투자 권유, 종목 추천, "무조건", "확실한 수익" 등 단정적 표현
+- **포맷**: 마크다운. 제목은 `# 제목` 형식으로 첫 줄에 작성

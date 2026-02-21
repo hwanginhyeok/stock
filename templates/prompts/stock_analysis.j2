@@ -1,0 +1,63 @@
+## 작성 요청: 종목 심층분석 리포트
+
+아래 종목에 대한 심층 분석 리포트를 작성해 주세요.
+기술적 분석, 기본적 분석, 뉴스/이슈를 종합하여 투자 참고 자료를 제공합니다.
+
+---
+
+{% if analyses %}
+## 분석 대상 종목
+
+{% for analysis in analyses %}
+### {{ analysis.name }} ({{ analysis.ticker }}) — {{ analysis.market | upper }}
+
+#### 종합 점수: {{ analysis.composite_score | format_number(1) }}/100
+
+**기술적 분석 ({{ analysis.technical_score | format_number(1) }}/100)**
+{% if analysis.technical_indicators %}
+{% for key, value in analysis.technical_indicators.items() %}
+- {{ key }}: {{ value }}
+{% endfor %}
+{% endif %}
+- 시그널: {{ analysis.signals | join(', ') }}
+
+**기본적 분석 ({{ analysis.fundamental_score | format_number(1) }}/100)**
+{% if analysis.fundamental_data %}
+{% for key, value in analysis.fundamental_data.items() %}
+- {{ key }}: {{ value }}
+{% endfor %}
+{% endif %}
+
+{% if analysis.recommendation %}
+**분석 의견**: {{ analysis.recommendation }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+---
+
+## 시장 배경
+
+{% for snapshot in market_snapshots[:2] %}
+- {{ snapshot.index_name }}: {{ snapshot.index_value | format_number }} ({{ snapshot.change_percent | sign }}%)
+{% endfor %}
+
+---
+
+## 관련 뉴스
+
+{% for news in news_headlines[:5] %}
+{{ loop.index }}. **{{ news.title }}** ({{ news.source }})
+   {% if news.summary %}- {{ news.summary | truncate_text(150) }}{% endif %}
+{% endfor %}
+
+---
+
+## 작성 가이드
+
+- **분량**: 1,500~2,500자
+- **톤**: 전문적이고 분석적인 존댓말
+- **구조**: 제목(# 한 줄) → 종목 개요 → 기술적 분석 요약 → 기본적 분석 요약 → 최근 이슈/뉴스 → 리스크 요인 → 종합 의견
+- **금지**: 투자 권유, 매수/매도 추천, "무조건", "확실한 수익" 등 단정적 표현
+- **포맷**: 마크다운. 제목은 `# 제목` 형식으로 첫 줄에 작성
+- **참고**: 객관적 데이터와 수치를 근거로 분석하되, 최종 투자 판단은 독자에게 맡기는 어조
