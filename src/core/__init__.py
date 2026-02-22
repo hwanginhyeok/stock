@@ -47,6 +47,7 @@ from src.core.exceptions import (
     PublishError,
     RateLimitError,
     StockRichError,
+    WorkflowError,
 )
 from src.core.logger import get_logger, setup_logging
 from src.core.models import (
@@ -98,6 +99,7 @@ __all__ = [
     "ContentError",
     "PublishError",
     "DatabaseError",
+    "WorkflowError",
     # models - enums
     "Market",
     "Importance",

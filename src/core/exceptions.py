@@ -56,3 +56,7 @@ class PublishError(StockRichError):
 
 class DatabaseError(StockRichError):
     """Database operation error."""
+
+
+class WorkflowError(StockRichError):
+    """Workflow execution error."""

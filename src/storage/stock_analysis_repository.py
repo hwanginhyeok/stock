@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from sqlalchemy import select
 
 from src.core.database import StockAnalysisDB, get_session
@@ -75,6 +77,34 @@ class StockAnalysisRepository(BaseRepository[StockAnalysis]):
             descending=True,
             limit=limit,
         )
+
+    def get_by_date_range(
+        self,
+        start: datetime,
+        end: datetime,
+        market: Market | None = None,
+    ) -> list[StockAnalysis]:
+        """Get analyses within a date range.
+
+        Args:
+            start: Range start (inclusive).
+            end: Range end (inclusive).
+            market: Optional market filter.
+
+        Returns:
+            List of StockAnalysis within the date range.
+        """
+        with get_session() as session:
+            stmt = (
+                select(StockAnalysisDB)
+                .where(StockAnalysisDB.created_at >= start)
+                .where(StockAnalysisDB.created_at <= end)
+            )
+            if market is not None:
+                stmt = stmt.where(StockAnalysisDB.market == market.value)
+            stmt = stmt.order_by(StockAnalysisDB.composite_score.desc())
+            results = session.execute(stmt).scalars().all()
+            return [self._orm_to_pydantic(obj) for obj in results]
 
     def get_latest_by_ticker(self, ticker: str) -> StockAnalysis | None:
         """Get the most recent analysis for a ticker.

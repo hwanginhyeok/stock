@@ -23,9 +23,13 @@ data/raw/
 data/processed/
 data/cache/
 data/db/
+data/generated/
 
 # 로그
 logs/
+
+# Claude Code
+.claude/
 
 # IDE
 .vscode/

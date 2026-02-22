@@ -13,14 +13,6 @@
 - [ ] `src/publishers/instagram.py` — InstagramPublisher (instagrapi)
 - [ ] `src/publishers/x.py` — XPublisher (tweepy)
 
-### Phase 5: 워크플로우 (workflows)
-- [ ] `src/workflows/base.py` — BaseWorkflow 추상 클래스
-- [ ] `src/workflows/morning.py` — MorningBriefingWorkflow (모닝브리핑)
-- [ ] `src/workflows/closing.py` — ClosingReviewWorkflow (장마감 리뷰)
-- [ ] `src/workflows/weekly.py` — WeeklyReviewWorkflow (주간 리뷰)
-- [ ] `src/workflows/breaking.py` — BreakingNewsWorkflow (속보)
-- [ ] `src/workflows/research.py` — ResearchWorkflow (온디맨드 리서치)
-
 ### Phase 6: 템플릿
 - [x] `templates/prompts/` — Claude 프롬프트 템플릿 (모닝브리핑, 장마감, 종목분석, 주간) ← Phase 3에서 완료
 - [ ] `templates/articles/` — 기사 출력 포맷 템플릿
@@ -117,6 +109,16 @@ _(현재 진행 중인 작업 없음)_
 - [x] 축 라벨 가시성 수정 (delete=False 명시, yyyy-mm Excel 호환 포맷)
 - [x] VIX/RSI 기준선 (참조 라인 시리즈)
 
+### Phase 5: 워크플로우 (workflows)
+- [x] `src/workflows/base.py` — BaseWorkflow 추상 클래스 (step 실행, 타이밍, 에러 처리)
+- [x] `src/workflows/morning.py` — MorningBriefingWorkflow (시장수집→뉴스→분석→기사→이미지→저장)
+- [x] `src/workflows/closing.py` — ClosingReviewWorkflow (한국마감→미국프리마켓→뉴스→스크리닝→기사→이미지)
+- [x] `src/workflows/weekly.py` — WeeklyReviewWorkflow (주간데이터→DB뉴스집계→분석집계→기사→이미지)
+- [x] `src/workflows/breaking.py` — BreakingNewsWorkflow (컨텍스트수집→관련뉴스→기사→SNS인사이트)
+- [x] `src/workflows/research.py` — ResearchWorkflow (데이터수집→분석→뉴스→리포트→DB저장)
+- [x] `src/workflows/__init__.py` — 패키지 export
+- [x] `scripts/run_workflow.py` — CLI 실행기 + APScheduler 스케줄러
+
 ### 문서 / 기타
 - [x] `PROJECT_MAP.md` — 프로젝트 전체 구조 지도 (디렉토리/파일별 설명)
 - [x] GitHub 리포지토리 연동 (`hwanginhyeok/stock`)
@@ -131,8 +133,8 @@ _(현재 진행 중인 작업 없음)_
 | 2 | 수집 + 분석 + 저장 + 내보내기 | **완료** | 100% |
 | 3 | 콘텐츠 생성 (generators) + 프롬프트 템플릿 | **완료** | 100% |
 | 4 | SNS 게시 (publishers) | 미착수 | 0% |
-| 5 | 워크플로우 (workflows) | 미착수 | 0% |
+| 5 | 워크플로우 (workflows) | **완료** | 100% |
 | 6 | 템플릿 (templates) | 미착수 | 0% |
 | 7 | 테스트 (tests) | 미착수 | 0% |
 
-**전체 진행률: ~55% (Phase 1-3 완료, Phase 4-7 미착수)**
+**전체 진행률: ~70% (Phase 1-3, 5 완료 / Phase 4, 6-7 미착수)**
