@@ -6,17 +6,9 @@
 
 ## 해야 할 일 (TODO)
 
-### Phase 4: SNS 게시 (publishers)
-- [ ] `src/publishers/base.py` — BasePublisher 추상 클래스
-- [ ] `src/publishers/formatter.py` — ContentFormatter (플랫폼별 포맷 변환)
-- [ ] `src/publishers/media.py` — MediaProcessor (이미지 리사이징/최적화)
-- [ ] `src/publishers/instagram.py` — InstagramPublisher (instagrapi)
-- [ ] `src/publishers/x.py` — XPublisher (tweepy)
-
 ### Phase 6: 템플릿
 - [x] `templates/prompts/` — Claude 프롬프트 템플릿 (모닝브리핑, 장마감, 종목분석, 주간) ← Phase 3에서 완료
 - [ ] `templates/articles/` — 기사 출력 포맷 템플릿
-- [ ] `templates/sns/` — SNS 게시 포맷 템플릿 (Instagram, X)
 
 ### Phase 7: 테스트
 - [ ] `tests/test_collectors/` — 수집기 단위 테스트
@@ -132,9 +124,8 @@ _(현재 진행 중인 작업 없음)_
 | 1 | 기반 구축 (core, config, agents) | **완료** | 100% |
 | 2 | 수집 + 분석 + 저장 + 내보내기 | **완료** | 100% |
 | 3 | 콘텐츠 생성 (generators) + 프롬프트 템플릿 | **완료** | 100% |
-| 4 | SNS 게시 (publishers) | 미착수 | 0% |
 | 5 | 워크플로우 (workflows) | **완료** | 100% |
 | 6 | 템플릿 (templates) | 미착수 | 0% |
 | 7 | 테스트 (tests) | 미착수 | 0% |
 
-**전체 진행률: ~70% (Phase 1-3, 5 완료 / Phase 4, 6-7 미착수)**
+**전체 진행률: ~80% (Phase 1-3, 5 완료 / Phase 6-7 미착수)**
