@@ -21,6 +21,7 @@ dependencies = [
     # 심리 지표
     "fear-and-greed>=0.4.0",
     "xlrd>=2.0.1",
+    "pytrends>=4.9.0",
 
     # 분석
     "pandas>=2.2.0",

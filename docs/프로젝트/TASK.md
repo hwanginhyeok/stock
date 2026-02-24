@@ -51,3 +51,5 @@
 | T-011 | StockTwits 수집기 | 2026-02-24 | 무료 API, Bullish/Bearish 태그 |
 | T-012 | AAII 투자자 설문 수집기 | 2026-02-24 | 주간 XLS 다운로드 |
 | T-013 | 자체 F&G 6컴포넌트 확장 | 2026-02-24 | 동적 가중치, CNN 참조 분리 |
+| T-014 | Reddit 커뮤니티 수집기 | 2026-02-24 | WSB/stocks/investing, 트렌딩 티커 |
+| T-015 | Google Trends 수집기 | 2026-02-24 | US+KR, spike ratio 감성 프록시 |

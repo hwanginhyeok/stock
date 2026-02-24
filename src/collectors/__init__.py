@@ -20,8 +20,10 @@ from src.collectors.news import BaseNewsCollector, RSSNewsCollector, TitleDedupl
 from src.collectors.sentiment import (
     AAIISentimentCollector,
     CNNFearGreedCollector,
+    GoogleTrendsCollector,
     NaverCommunityCollector,
     PutCallRatioCollector,
+    RedditSentimentCollector,
     StockTwitsCollector,
 )
 
@@ -38,4 +40,6 @@ __all__ = [
     "NaverCommunityCollector",
     "StockTwitsCollector",
     "AAIISentimentCollector",
+    "RedditSentimentCollector",
+    "GoogleTrendsCollector",
 ]
