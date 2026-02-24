@@ -257,6 +257,30 @@ class CommunitySentimentDB(Base):
     )
 
 
+class OHLCVDB(Base):
+    """ORM model for historical OHLCV price data."""
+
+    __tablename__ = "ohlcv_history"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    date: Mapped[str] = mapped_column(String(10))
+    ticker: Mapped[str] = mapped_column(String(20))
+    market: Mapped[str] = mapped_column(String(10), default="us")
+    open: Mapped[float] = mapped_column(Float, default=0.0)
+    high: Mapped[float] = mapped_column(Float, default=0.0)
+    low: Mapped[float] = mapped_column(Float, default=0.0)
+    close: Mapped[float] = mapped_column(Float, default=0.0)
+    volume: Mapped[int] = mapped_column(Integer, default=0)
+    adjusted_close: Mapped[float] = mapped_column(Float, default=0.0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_ohlcv_date", "date"),
+        Index("ix_ohlcv_ticker", "ticker"),
+        Index("ix_ohlcv_ticker_date", "ticker", "date", unique=True),
+    )
+
+
 class TrendsRecordDB(Base):
     """ORM model for Google Trends interest data."""
 
@@ -393,6 +417,7 @@ def _get_orm_map() -> dict[type, type[Base]]:
             CommunitySentiment,
             MarketSnapshot,
             NewsItem,
+            OHLCVRecord,
             ResearchReport,
             SNSPost,
             SentimentRecord,
@@ -410,6 +435,7 @@ def _get_orm_map() -> dict[type, type[Base]]:
             SentimentRecord: SentimentRecordDB,
             CommunitySentiment: CommunitySentimentDB,
             TrendsRecord: TrendsRecordDB,
+            OHLCVRecord: OHLCVDB,
         })
     return _ORM_MAP
 

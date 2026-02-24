@@ -252,6 +252,20 @@ class TrendsRecord(BaseEntity, TimestampMixin):
     attention_level: str = "Normal"
 
 
+class OHLCVRecord(BaseEntity, TimestampMixin):
+    """Historical OHLCV price record for a single ticker/date."""
+
+    date: str
+    ticker: str
+    market: Market = Market.US
+    open: float = 0.0
+    high: float = 0.0
+    low: float = 0.0
+    close: float = 0.0
+    volume: int = 0
+    adjusted_close: float = 0.0
+
+
 class ReportSection(BaseModel):
     """A section within a research report."""
 

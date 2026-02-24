@@ -54,3 +54,4 @@
 | T-014 | Reddit 커뮤니티 수집기 | 2026-02-24 | WSB/stocks/investing, 트렌딩 티커 |
 | T-015 | Google Trends 수집기 | 2026-02-24 | US+KR, spike ratio 감성 프록시 |
 | T-016 | 감성 데이터 DB 모델 + 리포지토리 + 백필 스크립트 | 2026-02-24 | SentimentRecord/CommunitySentiment/TrendsRecord ORM, 백필 CLI |
+| T-017 | 백테스트 프레임워크 + OHLCV 10년치 수집 인프라 | 2026-02-24 | data/strategy/engine/metrics/report 5모듈, 41 tests |

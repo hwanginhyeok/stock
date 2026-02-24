@@ -12,6 +12,7 @@ from src.storage.base import BaseRepository
 from src.storage.community_sentiment_repository import CommunitySentimentRepository
 from src.storage.market_snapshot_repository import MarketSnapshotRepository
 from src.storage.news_repository import NewsRepository
+from src.storage.ohlcv_repository import OHLCVRepository
 from src.storage.research_report_repository import ResearchReportRepository
 from src.storage.sentiment_repository import SentimentRepository
 from src.storage.sns_post_repository import SNSPostRepository
@@ -29,4 +30,5 @@ __all__ = [
     "SentimentRepository",
     "CommunitySentimentRepository",
     "TrendsRepository",
+    "OHLCVRepository",
 ]
