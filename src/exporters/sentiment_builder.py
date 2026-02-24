@@ -108,33 +108,40 @@ def build_sentiment_sheet(
     row = write_label_value(ws, row, "> 30", "High (Fear)")
     row += 1
 
-    # VIX chart data + chart
+    # VIX chart data (right-side columns R+) + chart at D1
+    # Data is placed in columns 18-22 (R-V) to avoid overlap with
+    # both the VIX chart display area and the report/trend table.
     vix_ohlcv = vix_data.get("ohlcv")
     if vix_ohlcv is not None and not vix_ohlcv.empty and "Close" in vix_ohlcv.columns:
-        chart_data_start = row
-        style_cell(ws, chart_data_start, 4, "Date", font=HDR_FONT, fill=HDR_FILL,
+        vix_data_col = 18  # Column R
+        chart_data_start = 4  # Fixed row, separate from report flow
+
+        style_cell(ws, chart_data_start, vix_data_col, "Date",
+                   font=HDR_FONT, fill=HDR_FILL,
                    alignment=Alignment(horizontal="center"))
-        style_cell(ws, chart_data_start, 5, "VIX", font=HDR_FONT, fill=HDR_FILL,
+        style_cell(ws, chart_data_start, vix_data_col + 1, "VIX",
+                   font=HDR_FONT, fill=HDR_FILL,
                    alignment=Alignment(horizontal="center"))
-        ws.column_dimensions["D"].width = 13
-        ws.column_dimensions["E"].width = 13
 
         vix_n = len(vix_ohlcv)
         for i in range(vix_n):
             r = chart_data_start + 1 + i
             dt = vix_ohlcv.index[i]
             date_val = dt.tz_localize(None) if hasattr(dt, 'tz_localize') and dt.tzinfo else dt
-            ws.cell(row=r, column=4, value=date_val).number_format = "YYYY-MM-DD"
-            ws.cell(row=r, column=5, value=round(float(vix_ohlcv["Close"].iloc[i]), 2))
+            ws.cell(row=r, column=vix_data_col,
+                    value=date_val).number_format = "YYYY-MM-DD"
+            ws.cell(row=r, column=vix_data_col + 1,
+                    value=round(float(vix_ohlcv["Close"].iloc[i]), 2))
 
         data_end = chart_data_start + vix_n
 
-        # VIX reference-line constant columns (F=6, G=7, H=8)
-        write_constant_column(ws, 6, chart_data_start, vix_n, 12, "VIX 12")
-        write_constant_column(ws, 7, chart_data_start, vix_n, 20, "VIX 20")
-        write_constant_column(ws, 8, chart_data_start, vix_n, 30, "VIX 30")
-        for col_letter in ("F", "G", "H"):
-            ws.column_dimensions[col_letter].width = 10
+        # VIX reference-line constant columns
+        write_constant_column(ws, vix_data_col + 2, chart_data_start,
+                              vix_n, 12, "VIX 12")
+        write_constant_column(ws, vix_data_col + 3, chart_data_start,
+                              vix_n, 20, "VIX 20")
+        write_constant_column(ws, vix_data_col + 4, chart_data_start,
+                              vix_n, 30, "VIX 30")
 
         vix_chart = LineChart()
         vix_chart.title = "VIX History"
@@ -146,27 +153,31 @@ def build_sentiment_sheet(
         apply_axis_labels(vix_chart, x_title="Date", y_title="VIX",
                           y_numfmt="0.00", x_numfmt="yyyy-mm")
         vix_close = vix_ohlcv["Close"]
-        vix_data_min = min(float(vix_close.min()), 12)  # include ref lines
+        vix_data_min = min(float(vix_close.min()), 12)
         vix_data_max = max(float(vix_close.max()), 30)
         apply_y_axis_padding(vix_chart, vix_data_min, vix_data_max)
         apply_x_axis_tick_interval(vix_chart, vix_n)
 
-        dates_ref = Reference(ws, min_col=4, min_row=chart_data_start + 1,
+        dates_ref = Reference(ws, min_col=vix_data_col,
+                              min_row=chart_data_start + 1,
                               max_row=data_end)
-        vix_ref = Reference(ws, min_col=5, min_row=chart_data_start,
+        vix_ref = Reference(ws, min_col=vix_data_col + 1,
+                            min_row=chart_data_start,
                             max_row=data_end)
         vix_chart.add_data(vix_ref, titles_from_data=True)
         vix_chart.set_categories(dates_ref)
         style_line_series(vix_chart.series[0], "C00000", LINE_WIDTH_HEAVY)
 
         # VIX 12 (green), 20 (orange), 30 (red) reference lines
-        add_reference_line_series(vix_chart, ws, 6, chart_data_start, data_end, GREEN)
-        add_reference_line_series(vix_chart, ws, 7, chart_data_start, data_end, ORANGE)
-        add_reference_line_series(vix_chart, ws, 8, chart_data_start, data_end, RED)
+        add_reference_line_series(vix_chart, ws, vix_data_col + 2,
+                                  chart_data_start, data_end, GREEN)
+        add_reference_line_series(vix_chart, ws, vix_data_col + 3,
+                                  chart_data_start, data_end, ORANGE)
+        add_reference_line_series(vix_chart, ws, vix_data_col + 4,
+                                  chart_data_start, data_end, RED)
 
         ws.add_chart(vix_chart, "D1")
-
-        row = max(row, data_end + 2)
+        # Report row is NOT advanced — chart data is in separate columns
     else:
         row += 1
 

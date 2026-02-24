@@ -10,13 +10,6 @@
 - [x] `templates/prompts/` — Claude 프롬프트 템플릿 (모닝브리핑, 장마감, 종목분석, 주간) ← Phase 3에서 완료
 - [ ] `templates/articles/` — 기사 출력 포맷 템플릿
 
-### Phase 7: 테스트
-- [ ] `tests/test_collectors/` — 수집기 단위 테스트
-- [ ] `tests/test_analyzers/` — 분석기 단위 테스트
-- [ ] `tests/test_generators/` — 생성기 단위 테스트
-- [ ] `tests/test_exporters/` — 내보내기 단위 테스트
-- [ ] `tests/test_workflows/` — 워크플로우 통합 테스트
-
 ### 기타
 - [ ] 에이전트별 시작 전 체크리스트 작성 (`agents/checklists/`)
 - [ ] 에이전트별 스킬 매뉴얼 작성 (`agents/manuals/`)
@@ -28,7 +21,7 @@
 
 ## 진행 중 (IN PROGRESS)
 
-_(현재 진행 중인 작업 없음)_
+(없음)
 
 ---
 
@@ -111,6 +104,22 @@ _(현재 진행 중인 작업 없음)_
 - [x] `src/workflows/__init__.py` — 패키지 export
 - [x] `scripts/run_workflow.py` — CLI 실행기 + APScheduler 스케줄러
 
+### Phase 7: 테스트
+- [x] `tests/conftest.py` + 전역 fixture 설정 (mock_config autouse, 도메인 모델 팩토리)
+- [x] `tests/test_core/` — 모델 9개 Enum + 6개 도메인 모델 + 예외 계층 (43 tests)
+- [x] `tests/test_analyzers/` — 기술/트렌드/시장심리/기본/감성/스크리너 (100 tests)
+- [x] `tests/test_collectors/` — 중복필터/RSS파싱/미국·한국수집기 (46 tests)
+- [x] `tests/test_generators/` — 기사/해시태그/베이스 생성기 (39 tests)
+- [x] `tests/test_exporters/` — 유틸 함수 (20 tests)
+- [x] `tests/test_storage/` — in-memory SQLite CRUD (17 tests)
+- [x] `tests/test_workflows/` — BaseWorkflow + MorningBriefing mock (15 tests)
+- [x] 총 290 tests passed, 51% coverage (핵심 로직 85%+)
+
+### 엑셀 차트 위치 최상단 재배치
+- [x] `dashboard_builder.py` — 차트를 최상단(A5)에 배치, 테이블은 하단(row 72+), 차트 데이터는 우측 열(N+)로 분리
+- [x] `index_detail_builder.py` — 차트 데이터를 row 76+로 이동 (차트 표시 영역 아래)
+- [x] `sentiment_builder.py` — VIX 차트 데이터를 우측 열(R+)로 이동, 보고서 흐름과 분리
+
 ### 문서 / 기타
 - [x] `PROJECT_MAP.md` — 프로젝트 전체 구조 지도 (디렉토리/파일별 설명)
 - [x] GitHub 리포지토리 연동 (`hwanginhyeok/stock`)
@@ -126,6 +135,6 @@ _(현재 진행 중인 작업 없음)_
 | 3 | 콘텐츠 생성 (generators) + 프롬프트 템플릿 | **완료** | 100% |
 | 5 | 워크플로우 (workflows) | **완료** | 100% |
 | 6 | 템플릿 (templates) | 미착수 | 0% |
-| 7 | 테스트 (tests) | 미착수 | 0% |
+| 7 | 테스트 (tests) | **완료** | 100% |
 
-**전체 진행률: ~80% (Phase 1-3, 5 완료 / Phase 6-7 미착수)**
+**전체 진행률: ~90% (Phase 1-3, 5, 7 완료 / Phase 6 미착수)**

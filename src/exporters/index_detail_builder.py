@@ -183,8 +183,9 @@ def build_index_detail_sheet(
     back_cell.font = LINK_FONT
     back_cell.hyperlink = "#Overview!A1"
 
-    # ===== CHART DATA (D+ columns) =====
-    chart_data_row = 2
+    # ===== CHART DATA (D+ columns, below chart display area) =====
+    # Charts span rows 1-75 approx; place data below to avoid overlap.
+    chart_data_row = 76
     chart_headers = [
         "Date", "Close", "SMA_20", "SMA_60", "BB_Upper", "BB_Lower",
         "Volume", "RSI_14", "MACD", "MACD_Signal", "MACD_Hist",
