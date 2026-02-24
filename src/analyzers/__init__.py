@@ -8,6 +8,7 @@ Usage::
 """
 
 from src.analyzers.base import BaseAnalyzer
+from src.analyzers.expected_move import ExpectedMoveAnalyzer
 from src.analyzers.fundamental import FundamentalAnalyzer
 from src.analyzers.screener import StockScreener
 from src.analyzers.sentiment import SentimentAnalyzer
@@ -19,4 +20,5 @@ __all__ = [
     "FundamentalAnalyzer",
     "SentimentAnalyzer",
     "StockScreener",
+    "ExpectedMoveAnalyzer",
 ]
