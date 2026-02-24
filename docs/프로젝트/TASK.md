@@ -45,3 +45,9 @@
 | — | 엑셀 차트 위치 최상단 재배치 | 2026-02 | 100% |
 | — | PROJECT_MAP.md + GitHub 연동 | 2026-02 | 100% |
 | T-007 | CLAUDE.md 분리 + TASK 관리 체계 구축 | 2026-02-24 | rules/skills 구조, TASK.md 신설 |
+| T-008 | CNN Fear & Greed 수집기 | 2026-02-24 | `fear-and-greed` 패키지 + 직접 API |
+| T-009 | CBOE Put/Call Ratio 수집기 | 2026-02-24 | 3종 CSV (total/equity/index) |
+| T-010 | 네이버 종목토론실 스크래퍼 | 2026-02-24 | 공감/비공감 기반 감성 |
+| T-011 | StockTwits 수집기 | 2026-02-24 | 무료 API, Bullish/Bearish 태그 |
+| T-012 | AAII 투자자 설문 수집기 | 2026-02-24 | 주간 XLS 다운로드 |
+| T-013 | 자체 F&G 6컴포넌트 확장 | 2026-02-24 | 동적 가중치, CNN 참조 분리 |
