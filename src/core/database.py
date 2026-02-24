@@ -212,6 +212,73 @@ class ResearchReportDB(Base):
     )
 
 
+class SentimentRecordDB(Base):
+    """ORM model for historical sentiment indicators."""
+
+    __tablename__ = "sentiment_history"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    date: Mapped[str] = mapped_column(String(10))
+    source: Mapped[str] = mapped_column(String(30))
+    score: Mapped[float] = mapped_column(Float, default=0.0)
+    level: Mapped[str] = mapped_column(String(30), default="")
+    components: Mapped[str] = mapped_column(Text, default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_sentiment_date", "date"),
+        Index("ix_sentiment_source", "source"),
+        Index("ix_sentiment_date_source", "date", "source", unique=True),
+    )
+
+
+class CommunitySentimentDB(Base):
+    """ORM model for per-ticker community sentiment."""
+
+    __tablename__ = "community_sentiment"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    date: Mapped[str] = mapped_column(String(10))
+    ticker: Mapped[str] = mapped_column(String(20))
+    name: Mapped[str] = mapped_column(String(100), default="")
+    market: Mapped[str] = mapped_column(String(10), default="us")
+    source: Mapped[str] = mapped_column(String(30), default="")
+    posts_count: Mapped[int] = mapped_column(Integer, default=0)
+    bullish_ratio: Mapped[float] = mapped_column(Float, default=0.5)
+    sentiment_score: Mapped[float] = mapped_column(Float, default=0.5)
+    sentiment: Mapped[str] = mapped_column(String(20), default="Neutral")
+    details: Mapped[str] = mapped_column(Text, default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_community_date", "date"),
+        Index("ix_community_ticker", "ticker"),
+        Index("ix_community_source", "source"),
+    )
+
+
+class TrendsRecordDB(Base):
+    """ORM model for Google Trends interest data."""
+
+    __tablename__ = "trends_history"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    date: Mapped[str] = mapped_column(String(10))
+    keyword: Mapped[str] = mapped_column(String(100))
+    geo: Mapped[str] = mapped_column(String(10), default="")
+    current_interest: Mapped[int] = mapped_column(Integer, default=0)
+    average_interest: Mapped[float] = mapped_column(Float, default=0.0)
+    spike_ratio: Mapped[float] = mapped_column(Float, default=0.0)
+    trend_direction: Mapped[str] = mapped_column(String(20), default="Stable")
+    attention_level: Mapped[str] = mapped_column(String(20), default="Normal")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_trends_date", "date"),
+        Index("ix_trends_keyword", "keyword"),
+    )
+
+
 # ============================================================
 # Engine & Session Management
 # ============================================================
@@ -311,7 +378,7 @@ _JSON_FIELDS = frozenset({
     "related_tickers", "related_sectors", "top_gainers", "top_losers",
     "extra_data", "signals", "technical_indicators", "fundamental_data",
     "hashtags", "media_paths", "sections", "risk_factors", "swot",
-    "data_sources",
+    "data_sources", "components", "details",
 })
 
 # Lazy-initialized Pydantic -> ORM type mapping
@@ -323,11 +390,14 @@ def _get_orm_map() -> dict[type, type[Base]]:
     if not _ORM_MAP:
         from src.core.models import (
             Article,
+            CommunitySentiment,
             MarketSnapshot,
             NewsItem,
             ResearchReport,
             SNSPost,
+            SentimentRecord,
             StockAnalysis,
+            TrendsRecord,
         )
 
         _ORM_MAP.update({
@@ -337,6 +407,9 @@ def _get_orm_map() -> dict[type, type[Base]]:
             Article: ArticleDB,
             SNSPost: SNSPostDB,
             ResearchReport: ResearchReportDB,
+            SentimentRecord: SentimentRecordDB,
+            CommunitySentiment: CommunitySentimentDB,
+            TrendsRecord: TrendsRecordDB,
         })
     return _ORM_MAP
 

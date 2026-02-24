@@ -203,6 +203,55 @@ class SNSPost(BaseEntity, TimestampMixin):
     error_message: str = ""
 
 
+class SentimentSource(StrEnum):
+    """Sentiment data source identifier."""
+
+    CNN_FEAR_GREED = "cnn_fear_greed"
+    CBOE_PUTCALL_TOTAL = "cboe_putcall_total"
+    CBOE_PUTCALL_EQUITY = "cboe_putcall_equity"
+    CBOE_PUTCALL_INDEX = "cboe_putcall_index"
+    AAII_SURVEY = "aaii_survey"
+    CUSTOM_FEAR_GREED = "custom_fear_greed"
+
+
+class SentimentRecord(BaseEntity, TimestampMixin):
+    """Historical sentiment indicator record (market-level, daily)."""
+
+    date: str
+    source: SentimentSource
+    score: float = 0.0
+    level: str = ""
+    components: dict[str, Any] = Field(default_factory=dict)
+
+
+class CommunitySentiment(BaseEntity, TimestampMixin):
+    """Per-ticker community sentiment snapshot."""
+
+    date: str
+    ticker: str
+    name: str = ""
+    market: Market = Market.US
+    source: str = ""
+    posts_count: int = 0
+    bullish_ratio: float = 0.5
+    sentiment_score: float = 0.5
+    sentiment: str = "Neutral"
+    details: dict[str, Any] = Field(default_factory=dict)
+
+
+class TrendsRecord(BaseEntity, TimestampMixin):
+    """Google Trends interest record for a keyword."""
+
+    date: str
+    keyword: str
+    geo: str = ""
+    current_interest: int = 0
+    average_interest: float = 0.0
+    spike_ratio: float = 0.0
+    trend_direction: str = "Stable"
+    attention_level: str = "Normal"
+
+
 class ReportSection(BaseModel):
     """A section within a research report."""
 

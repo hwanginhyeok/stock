@@ -9,11 +9,14 @@ Usage::
 
 from src.storage.article_repository import ArticleRepository
 from src.storage.base import BaseRepository
+from src.storage.community_sentiment_repository import CommunitySentimentRepository
 from src.storage.market_snapshot_repository import MarketSnapshotRepository
 from src.storage.news_repository import NewsRepository
 from src.storage.research_report_repository import ResearchReportRepository
+from src.storage.sentiment_repository import SentimentRepository
 from src.storage.sns_post_repository import SNSPostRepository
 from src.storage.stock_analysis_repository import StockAnalysisRepository
+from src.storage.trends_repository import TrendsRepository
 
 __all__ = [
     "BaseRepository",
@@ -23,4 +26,7 @@ __all__ = [
     "ArticleRepository",
     "SNSPostRepository",
     "ResearchReportRepository",
+    "SentimentRepository",
+    "CommunitySentimentRepository",
+    "TrendsRepository",
 ]
