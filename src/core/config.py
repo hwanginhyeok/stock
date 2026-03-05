@@ -69,7 +69,7 @@ class ClaudeModelConfig(BaseModel):
     models: dict[str, str] = Field(default_factory=lambda: {
         "general": "claude-sonnet-4-6",
         "deep_analysis": "claude-opus-4-6",
-        "summary": "claude-haiku-4-5-20251001",
+        "summary": "claude-sonnet-4-6",
     })
     max_tokens: dict[str, int] = Field(default_factory=lambda: {
         "general": 4096,
@@ -91,6 +91,10 @@ class ScheduleConfig(BaseModel):
     closing_review: str = "16:30"
     stock_analysis: list[str] = Field(default_factory=lambda: ["12:00", "19:00"])
     weekly_review: str = "SAT 10:00"
+    ohlcv_update: dict[str, str] = Field(default_factory=lambda: {
+        "time": "17:00",
+        "timezone": "America/New_York",
+    })
     news_collection: dict[str, int] = Field(default_factory=lambda: {
         "market_hours_interval_min": 30,
         "off_hours_interval_min": 120,
@@ -120,6 +124,23 @@ class RetryConfig(BaseModel):
     max_attempts: int = 3
     wait_exponential_min: int = 1
     wait_exponential_max: int = 30
+
+
+class EmailRecipient(BaseModel):
+    """Single email recipient."""
+
+    name: str = ""
+    address: str = ""
+
+
+class EmailConfig(BaseModel):
+    """Email delivery configuration."""
+
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    sender_name: str = "주식부자리포트"
+    attach_excel: bool = True
+    recipients: list[EmailRecipient] = Field(default_factory=list)
 
 
 # ============================================================
@@ -204,6 +225,9 @@ class TechnicalConfig(BaseModel):
     golden_cross_pairs: list[list[int]] = Field(
         default_factory=lambda: [[5, 20], [20, 60]],
     )
+    trend_ema_periods: list[int] = Field(default_factory=lambda: [20, 50, 200])
+    adx_strong: int = 25
+    adx_weak: int = 20
 
 
 class ValuationThresholds(BaseModel):
@@ -411,6 +435,8 @@ class AppConfig(BaseSettings):
 
     # --- Environment variables (from .env) ---
     anthropic_api_key: str = ""
+    gmail_address: str = ""
+    gmail_app_password: str = ""
     x_api_key: str = ""
     x_api_secret: str = ""
     x_access_token: str = ""
@@ -426,6 +452,7 @@ class AppConfig(BaseSettings):
     app: AppInfo = Field(default_factory=AppInfo)
     claude: ClaudeModelConfig = Field(default_factory=ClaudeModelConfig)
     schedule: ScheduleConfig = Field(default_factory=ScheduleConfig)
+    email: EmailConfig = Field(default_factory=EmailConfig)
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     retry: RetryConfig = Field(default_factory=RetryConfig)
@@ -454,6 +481,15 @@ class AppConfig(BaseSettings):
             self.logging = LoggingConfig(**settings["logging"])
         if "retry" in settings:
             self.retry = RetryConfig(**settings["retry"])
+        if "email" in settings:
+            email_data = settings["email"]
+            recipients_raw = email_data.pop("recipients", [])
+            recipients = [EmailRecipient(**r) for r in recipients_raw]
+            # If self-address not set in YAML, fall back to gmail_address from .env
+            for r in recipients:
+                if not r.address:
+                    r.address = self.gmail_address
+            self.email = EmailConfig(**email_data, recipients=recipients)
 
         # news_sources.yaml
         news_data = _load_yaml("news_sources.yaml")

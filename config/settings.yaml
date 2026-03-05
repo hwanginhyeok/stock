@@ -11,9 +11,9 @@ app:
 claude:
   default_model: "claude-sonnet-4-6"
   models:
-    general: "claude-sonnet-4-6"      # 일반 콘텐츠
-    deep_analysis: "claude-opus-4-6"  # 심층 분석
-    summary: "claude-haiku-4-5-20251001"  # 요약/분류
+    general: "claude-sonnet-4-6"        # 일반 콘텐츠 (팀장, 뉴스분석가, 시장분석가, SNS매니저)
+    deep_analysis: "claude-opus-4-6"   # 심층 분석 (아티클작성가, 리서치어시스턴트)
+    summary: "claude-sonnet-4-6"        # 요약/분류
   max_tokens:
     general: 4096
     deep_analysis: 8192
@@ -22,6 +22,19 @@ claude:
     general: 0.7
     deep_analysis: 0.5
     summary: 0.3
+
+# --- 이메일 설정 ---
+email:
+  smtp_host: "smtp.gmail.com"
+  smtp_port: 587
+  sender_name: "주식부자리포트"
+  attach_excel: true
+  recipients:
+    - name: "본인"
+      address: "dlsgur5560@gmail.com"
+  # 추후 수신자 추가 예시:
+  # - name: "홍길동"
+  #   address: "hong@example.com"
 
 # --- 스케줄 설정 ---
 schedule:
@@ -32,6 +45,9 @@ schedule:
     - "12:00"
     - "19:00"
   weekly_review: "SAT 10:00"
+  ohlcv_update:
+    time: "17:00"                       # 미국 장 마감(16:00 ET) + 1시간 여유
+    timezone: "America/New_York"        # DST 자동 반영 (EST/EDT)
   news_collection:
     market_hours_interval_min: 30
     off_hours_interval_min: 120
