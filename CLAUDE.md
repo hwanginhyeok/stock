@@ -92,8 +92,8 @@
 | `.claude/skills/feedback-tracking.md` | 퇴고 피드백 추적 — 기록·분류·패턴 감지·원칙 승격 | 퇴고 피드백 수령 시 / 세션 시작 시 |
 | `.claude/skills/image-markers.md` | 📎 이미지 마커 배치 & 교차 검증 — 배치 원칙 + 매핑 + 파일 간 정합성 | v1 작성 시 / 시각화 후 / 퇴고·변환 시 |
 | `.claude/skills/naver-packaging.md` | 네이버 변환 패키징 — HTML 변환 + 이미지 리네이밍 + README + QA | X 게시 완료 후 네이버 변환 시 |
-| `.claude/skills/schedule-briefing.md` | 스케줄 브리핑 — 4-way 불일치 탐지 + 리포트 출력 | "스케줄 알려줘" / 세션 시작 시 |
-| `.claude/skills/schedule-sync.md` | 스케줄 동기화 — 3개 소스 동시 갱신 + 교차 검증 + 시각화 재생성 | 아티클 상태 변경 시 / 불일치 발견 시 |
+| `.claude/skills/schedule-briefing.md` | 스케줄 브리핑 — 마스터 vs 실제폴더 2-way 검증 + 리포트 출력 | "스케줄 알려줘" / 세션 시작 시 |
+| `.claude/skills/schedule-sync.md` | 스케줄 동기화 — 마스터 테이블 1곳 갱신 + 시각화 재생성 | 아티클 상태 변경 시 / 불일치 발견 시 |
 
 > 스킬은 반복적인 작업 절차를 정의한 파일. 해당 작업 수행 시 반드시 읽고 절차를 따른다.
 > 새 스킬 추가 시 이 테이블도 함께 업데이트할 것.

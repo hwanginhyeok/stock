@@ -65,6 +65,9 @@ technical:
   golden_cross_pairs:
     - [5, 20]
     - [20, 60]
+  trend_ema_periods: [20, 50, 200]
+  adx_strong: 25
+  adx_weak: 20
 
 # --- 기본적 분석 기준 ---
 fundamental:

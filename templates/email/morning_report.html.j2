@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주식부자 모닝 리포트 {{ report_date }}</title>
+</head>
+<body style="margin:0;padding:0;background:#0f1117;font-family:'Helvetica Neue',Arial,sans-serif;color:#e2e8f0;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#0f1117;">
+<tr><td align="center" style="padding:24px 12px;">
+
+<!-- ── Wrapper ──────────────────────────────────────────────── -->
+<table width="620" cellpadding="0" cellspacing="0" style="max-width:620px;width:100%;">
+
+  <!-- ── Header ──────────────────────────────────────────────── -->
+  <tr>
+    <td style="background:linear-gradient(135deg,#1a1f2e 0%,#0d1526 100%);
+               border-radius:12px 12px 0 0;padding:28px 32px;border-bottom:2px solid #2d3a55;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td>
+            <div style="font-size:11px;color:#64748b;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">
+              DAILY MARKET INTELLIGENCE
+            </div>
+            <div style="font-size:22px;font-weight:700;color:#f1f5f9;">
+              📊 주식부자 모닝 리포트
+            </div>
+            <div style="font-size:13px;color:#94a3b8;margin-top:4px;">
+              {{ report_date }} &nbsp;|&nbsp; {{ report_time }} KST
+            </div>
+          </td>
+          <td align="right" valign="top">
+            {% if net_liquidity is not none %}
+            <div style="background:#1e2d45;border-radius:8px;padding:10px 16px;text-align:center;">
+              <div style="font-size:10px;color:#64748b;letter-spacing:1px;">NET LIQUIDITY</div>
+              <div style="font-size:18px;font-weight:700;color:{% if net_liquidity_wow and net_liquidity_wow > 0 %}#34d399{% else %}#f87171{% endif %};">
+                ${{ "%.0f"|format(net_liquidity) }}B
+              </div>
+              {% if net_liquidity_wow is not none %}
+              <div style="font-size:11px;color:{% if net_liquidity_wow > 0 %}#34d399{% else %}#f87171{% endif %};">
+                {{ "%+.0f"|format(net_liquidity_wow) }}B WoW
+              </div>
+              {% endif %}
+            </div>
+            {% endif %}
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- ── Section 1: 유동성 공급 측 ──────────────────────────── -->
+  <tr>
+    <td style="background:#131929;padding:24px 32px 16px;">
+      <div style="font-size:13px;font-weight:600;color:#60a5fa;letter-spacing:1px;
+                  text-transform:uppercase;margin-bottom:16px;border-bottom:1px solid #1e2d45;
+                  padding-bottom:8px;">
+        🏦 유동성 공급 측 (FRED)
+      </div>
+
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <!-- Fed BS row -->
+        <tr style="border-bottom:1px solid #1a2236;">
+          <td style="padding:8px 0;font-size:13px;color:#94a3b8;width:40%;">Fed 자산 총계{% if fred.walcl_date %}<div style="font-size:10px;color:#334155;margin-top:2px;">{{ fred.walcl_date }}</div>{% endif %}</td>
+          <td style="padding:8px 0;font-size:14px;font-weight:600;color:#f1f5f9;text-align:right;">
+            {% if fred.walcl_b is not none %}${{ "%.0f"|format(fred.walcl_b) }}B{% else %}—{% endif %}
+          </td>
+          <td style="padding:8px 0;font-size:12px;text-align:right;width:100px;">
+            {% if fred.walcl_wow is not none %}
+            <span style="color:{% if fred.walcl_wow > 0 %}#34d399{% else %}#f87171{% endif %};">
+              {{ "%+.0f"|format(fred.walcl_wow) }}B WoW
+            </span>
+            {% endif %}
+          </td>
+        </tr>
+        <!-- TGA row -->
+        <tr style="border-bottom:1px solid #1a2236;">
+          <td style="padding:8px 0;font-size:13px;color:#94a3b8;">TGA 잔고{% if fred.tga_date %}<div style="font-size:10px;color:#334155;margin-top:2px;">{{ fred.tga_date }}</div>{% endif %}</td>
+          <td style="padding:8px 0;font-size:14px;font-weight:600;color:#f1f5f9;text-align:right;">
+            {% if fred.tga_b is not none %}${{ "%.0f"|format(fred.tga_b) }}B{% else %}—{% endif %}
+          </td>
+          <td style="padding:8px 0;font-size:12px;text-align:right;">
+            {% if fred.tga_wow is not none %}
+            <span style="color:{% if fred.tga_wow < 0 %}#34d399{% else %}#f87171{% endif %};">
+              {{ "%+.0f"|format(fred.tga_wow) }}B WoW
+            </span>
+            {% endif %}
+          </td>
+        </tr>
+        <!-- RRP row -->
+        <tr style="border-bottom:1px solid #1a2236;">
+          <td style="padding:8px 0;font-size:13px;color:#94a3b8;">RRP 잔고{% if fred.rrp_date %}<div style="font-size:10px;color:#334155;margin-top:2px;">{{ fred.rrp_date }}</div>{% endif %}</td>
+          <td style="padding:8px 0;font-size:14px;font-weight:600;color:#f1f5f9;text-align:right;">
+            {% if fred.rrp_b is not none %}${{ "%.1f"|format(fred.rrp_b) }}B{% else %}—{% endif %}
+          </td>
+          <td style="padding:8px 0;font-size:12px;text-align:right;">
+            {% if fred.rrp_wow is not none %}
+            <span style="color:{% if fred.rrp_wow < 0 %}#34d399{% else %}#f87171{% endif %};">
+              {{ "%+.1f"|format(fred.rrp_wow) }}B WoW
+            </span>
+            {% endif %}
+          </td>
+        </tr>
+        <!-- MMF rows -->
+        <tr style="border-bottom:1px solid #1a2236;">
+          <td style="padding:8px 0;font-size:13px;color:#94a3b8;">MMF 잔고 (주간추적){% if fred.mmf_weekly_date %}<div style="font-size:10px;color:#334155;margin-top:2px;">{{ fred.mmf_weekly_date }}</div>{% endif %}</td>
+          <td style="padding:8px 0;font-size:14px;font-weight:600;color:#f1f5f9;text-align:right;">
+            {% if fred.mmf_weekly_b is not none %}${{ "%.0f"|format(fred.mmf_weekly_b) }}B{% else %}—{% endif %}
+          </td>
+          <td style="padding:8px 0;font-size:12px;text-align:right;">
+            {% if fred.mmf_flow_b is not none %}
+            <span style="color:{% if fred.mmf_flow_b > 0 %}#f87171{% else %}#34d399{% endif %};">
+              순유출입 {{ "%+.1f"|format(fred.mmf_flow_b) }}B
+            </span>
+            {% endif %}
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #1a2236;">
+          <td style="padding:8px 0;font-size:13px;color:#94a3b8;">MMF 전체 (분기){% if fred.mmf_total_date %}<div style="font-size:10px;color:#334155;margin-top:2px;">{{ fred.mmf_total_date }}</div>{% endif %}</td>
+          <td style="padding:8px 0;font-size:14px;font-weight:600;color:#f1f5f9;text-align:right;" colspan="2">
+            {% if fred.mmf_total_b is not none %}${{ "%.0f"|format(fred.mmf_total_b) }}B{% else %}—{% endif %}
+          </td>
+        </tr>
+        <!-- Yield curve -->
+        <tr style="border-bottom:1px solid #1a2236;">
+          <td style="padding:8px 0;font-size:13px;color:#94a3b8;">2s10s 스프레드{% if fred.yield_2s10s_date %}<div style="font-size:10px;color:#334155;margin-top:2px;">{{ fred.yield_2s10s_date }}</div>{% endif %}</td>
+          <td style="padding:8px 0;font-size:14px;font-weight:600;text-align:right;
+                     color:{% if fred.yield_2s10s_b is not none and fred.yield_2s10s_b > 0 %}#34d399{% else %}#f87171{% endif %};">
+            {% if fred.yield_2s10s_b is not none %}{{ "%+.2f"|format(fred.yield_2s10s_b) }}%{% else %}—{% endif %}
+          </td>
+          <td style="padding:8px 0;font-size:12px;color:#64748b;text-align:right;">
+            2Y {{ "%.2f"|format(fred.dgs2_b) if fred.dgs2_b is not none else "—" }}%
+            / 10Y {{ "%.2f"|format(fred.dgs10_b) if fred.dgs10_b is not none else "—" }}%
+          </td>
+        </tr>
+        <!-- HY Spread -->
+        <tr>
+          <td style="padding:8px 0;font-size:13px;color:#94a3b8;">HY 크레딧 스프레드{% if fred.hy_spread_date %}<div style="font-size:10px;color:#334155;margin-top:2px;">{{ fred.hy_spread_date }}</div>{% endif %}</td>
+          <td style="padding:8px 0;font-size:14px;font-weight:600;text-align:right;
+                     color:{% if fred.hy_spread_b is not none and fred.hy_spread_b < 4 %}#34d399{% elif fred.hy_spread_b is not none and fred.hy_spread_b > 6 %}#f87171{% else %}#f1f5f9{% endif %};">
+            {% if fred.hy_spread_b is not none %}{{ "%.2f"|format(fred.hy_spread_b) }}%{% else %}—{% endif %}
+          </td>
+          <td style="padding:8px 0;font-size:12px;color:#64748b;text-align:right;">
+            {% if fred.hy_spread_b is not none %}
+              {% if fred.hy_spread_b < 3.5 %}극도 타이트{% elif fred.hy_spread_b < 5 %}정상{% else %}확대{% endif %}
+            {% endif %}
+          </td>
+        </tr>
+      </table>
+
+      {% if charts and charts.liquidity %}
+      <div style="margin-top:16px;margin-bottom:6px;font-size:11px;color:#475569;">유동성 공급 측 (2년)</div>
+      <img src="data:image/png;base64,{{ charts.liquidity }}"
+           style="width:100%;max-width:556px;display:block;border-radius:6px;margin-bottom:12px;" alt="Liquidity Chart">
+      {% endif %}
+      {% if charts and charts.mmf %}
+      <div style="margin-bottom:6px;font-size:11px;color:#475569;">MMF 자금 동향</div>
+      <img src="data:image/png;base64,{{ charts.mmf }}"
+           style="width:100%;max-width:556px;display:block;border-radius:6px;" alt="MMF Chart">
+      {% endif %}
+    </td>
+  </tr>
+
+  <!-- ── Section 2: 흐름 신호 (통화) ────────────────────────── -->
+  <tr>
+    <td style="background:#0f1520;padding:20px 32px 16px;border-top:1px solid #1a2236;">
+      {%- set _ns = namespace(date="") -%}
+      {%- for _, d in currencies.items() -%}{%- if _ns.date == "" and "error" not in d and d.date -%}{%- set _ns.date = d.date -%}{%- endif -%}{%- endfor -%}
+      <div style="font-size:13px;font-weight:600;color:#a78bfa;letter-spacing:1px;
+                  text-transform:uppercase;margin-bottom:16px;border-bottom:1px solid #1e2d45;
+                  padding-bottom:8px;">
+        💱 흐름 신호 (통화){% if _ns.date %}<span style="float:right;font-size:10px;color:#475569;font-weight:400;letter-spacing:0;text-transform:none;">기준 {{ _ns.date }}</span>{% endif %}
+      </div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr style="border-bottom:1px solid #1a2236;">
+          <td style="padding:4px 0;font-size:11px;color:#475569;font-weight:600;">통화</td>
+          <td style="padding:4px 0;font-size:11px;color:#475569;text-align:right;">현재</td>
+          <td style="padding:4px 0;font-size:11px;color:#475569;text-align:right;">1일</td>
+          <td style="padding:4px 0;font-size:11px;color:#475569;text-align:right;">1주</td>
+          <td style="padding:4px 0;font-size:11px;color:#475569;text-align:right;">1개월</td>
+        </tr>
+        {% for name, d in currencies.items() %}
+        {% if "error" not in d %}
+        <tr style="border-bottom:1px solid #131929;">
+          <td style="padding:7px 0;font-size:13px;color:#cbd5e1;">{{ name }}</td>
+          <td style="padding:7px 0;font-size:13px;font-weight:600;color:#f1f5f9;text-align:right;">
+            {{ "%.4g"|format(d.last) }}
+          </td>
+          <td style="padding:7px 0;font-size:12px;text-align:right;
+                     color:{% if d.pct_1d is not none and d.pct_1d > 0 %}#34d399{% elif d.pct_1d is not none %}#f87171{% else %}#64748b{% endif %};">
+            {% if d.pct_1d is not none %}{{ "%+.2f"|format(d.pct_1d) }}%{% else %}—{% endif %}
+          </td>
+          <td style="padding:7px 0;font-size:12px;text-align:right;
+                     color:{% if d.pct_1w is not none and d.pct_1w > 0 %}#34d399{% elif d.pct_1w is not none %}#f87171{% else %}#64748b{% endif %};">
+            {% if d.pct_1w is not none %}{{ "%+.2f"|format(d.pct_1w) }}%{% else %}—{% endif %}
+          </td>
+          <td style="padding:7px 0;font-size:12px;text-align:right;
+                     color:{% if d.pct_1m is not none and d.pct_1m > 0 %}#34d399{% elif d.pct_1m is not none %}#f87171{% else %}#64748b{% endif %};">
+            {% if d.pct_1m is not none %}{{ "%+.2f"|format(d.pct_1m) }}%{% else %}—{% endif %}
+          </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+      </table>
+
+      {% if charts and charts.currencies %}
+      <div style="margin-top:16px;margin-bottom:6px;font-size:11px;color:#475569;">통화 흐름 신호 (1년)</div>
+      <img src="data:image/png;base64,{{ charts.currencies }}"
+           style="width:100%;max-width:556px;display:block;border-radius:6px;" alt="Currency Chart">
+      {% endif %}
+    </td>
+  </tr>
+
+  <!-- ── Section 3: 도착지 신호 ──────────────────────────────── -->
+  <tr>
+    <td style="background:#131929;padding:20px 32px 16px;border-top:1px solid #1a2236;">
+      {%- set _ns = namespace(date="") -%}
+      {%- for _, d in destinations.items() -%}{%- if _ns.date == "" and "error" not in d and d.date -%}{%- set _ns.date = d.date -%}{%- endif -%}{%- endfor -%}
+      <div style="font-size:13px;font-weight:600;color:#fb923c;letter-spacing:1px;
+                  text-transform:uppercase;margin-bottom:16px;border-bottom:1px solid #1e2d45;
+                  padding-bottom:8px;">
+        🏁 도착지 신호 (자산){% if _ns.date %}<span style="float:right;font-size:10px;color:#475569;font-weight:400;letter-spacing:0;text-transform:none;">기준 {{ _ns.date }}</span>{% endif %}
+      </div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr style="border-bottom:1px solid #1a2236;">
+          <td style="padding:4px 0;font-size:11px;color:#475569;font-weight:600;">자산</td>
+          <td style="padding:4px 0;font-size:11px;color:#475569;text-align:right;">현재가</td>
+          <td style="padding:4px 0;font-size:11px;color:#475569;text-align:right;">1일</td>
+          <td style="padding:4px 0;font-size:11px;color:#475569;text-align:right;">1주</td>
+          <td style="padding:4px 0;font-size:11px;color:#475569;text-align:right;">1개월</td>
+        </tr>
+        {% for name, d in destinations.items() %}
+        {% if "error" not in d %}
+        <tr style="border-bottom:1px solid #0f1520;">
+          <td style="padding:7px 0;font-size:13px;color:#cbd5e1;">{{ name }}</td>
+          <td style="padding:7px 0;font-size:13px;font-weight:600;color:#f1f5f9;text-align:right;">
+            {% if d.last >= 1000 %}{{ "%.0f"|format(d.last) }}
+            {% elif d.last >= 10 %}{{ "%.2f"|format(d.last) }}
+            {% else %}{{ "%.4f"|format(d.last) }}
+            {% endif %}
+          </td>
+          <td style="padding:7px 0;font-size:12px;text-align:right;
+                     color:{% if d.pct_1d is not none and d.pct_1d > 0 %}#34d399{% elif d.pct_1d is not none %}#f87171{% else %}#64748b{% endif %};">
+            {% if d.pct_1d is not none %}{{ "%+.2f"|format(d.pct_1d) }}%{% else %}—{% endif %}
+          </td>
+          <td style="padding:7px 0;font-size:12px;text-align:right;
+                     color:{% if d.pct_1w is not none and d.pct_1w > 0 %}#34d399{% elif d.pct_1w is not none %}#f87171{% else %}#64748b{% endif %};">
+            {% if d.pct_1w is not none %}{{ "%+.2f"|format(d.pct_1w) }}%{% else %}—{% endif %}
+          </td>
+          <td style="padding:7px 0;font-size:12px;text-align:right;
+                     color:{% if d.pct_1m is not none and d.pct_1m > 0 %}#34d399{% elif d.pct_1m is not none %}#f87171{% else %}#64748b{% endif %};">
+            {% if d.pct_1m is not none %}{{ "%+.2f"|format(d.pct_1m) }}%{% else %}—{% endif %}
+          </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+      </table>
+
+      {% if charts and charts.destinations %}
+      <div style="margin-top:16px;margin-bottom:6px;font-size:11px;color:#475569;">도착지 자산 (1년, 기준=100)</div>
+      <img src="data:image/png;base64,{{ charts.destinations }}"
+           style="width:100%;max-width:556px;display:block;border-radius:6px;" alt="Destination Chart">
+      {% endif %}
+    </td>
+  </tr>
+
+  <!-- ── Section 4: 섹터 ETF ─────────────────────────────────── -->
+  {% if sectors %}
+  <tr>
+    <td style="background:#131929;padding:20px 32px 16px;border-top:1px solid #1a2236;">
+      {%- set _ns = namespace(date="") -%}
+      {%- for _, d in sectors.items() -%}{%- if _ns.date == "" and "error" not in d and d.date -%}{%- set _ns.date = d.date -%}{%- endif -%}{%- endfor -%}
+      <div style="font-size:13px;font-weight:600;color:#22d3ee;letter-spacing:1px;
+                  text-transform:uppercase;margin-bottom:16px;border-bottom:1px solid #1e2d45;
+                  padding-bottom:8px;">
+        🔄 섹터 순환 (S&amp;P 500 GICS){% if _ns.date %}<span style="float:right;font-size:10px;color:#475569;font-weight:400;letter-spacing:0;text-transform:none;">기준 {{ _ns.date }}</span>{% endif %}
+      </div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr style="border-bottom:1px solid #1a2236;">
+          <td style="padding:4px 0;font-size:11px;color:#475569;font-weight:600;width:42%;">섹터</td>
+          <td style="padding:4px 0;font-size:11px;color:#64748b;text-align:right;">1주</td>
+          <td style="padding:4px 0;font-size:11px;color:#64748b;text-align:right;">1달</td>
+          <td style="padding:4px 0;font-size:11px;color:#64748b;text-align:right;">3달</td>
+          <td style="padding:4px 0;font-size:11px;color:#64748b;text-align:right;">1년</td>
+        </tr>
+        {% for name, d in sectors.items() %}
+        {% if "error" not in d %}
+        <tr style="border-bottom:1px solid #0f1520;">
+          <td style="padding:6px 0;font-size:12px;color:#cbd5e1;">{{ name }}</td>
+          {# 1주 #}
+          <td style="padding:6px 0;font-size:12px;font-weight:600;text-align:right;
+                     color:{% if d.pct_1w is not none and d.pct_1w > 0 %}#34d399{% elif d.pct_1w is not none %}#f87171{% else %}#64748b{% endif %};">
+            {% if d.pct_1w is not none %}{{ "%+.1f"|format(d.pct_1w) }}%{% else %}—{% endif %}
+          </td>
+          {# 1달 #}
+          <td style="padding:6px 0;font-size:12px;text-align:right;
+                     color:{% if d.pct_1m is not none and d.pct_1m > 0 %}#34d399{% elif d.pct_1m is not none %}#f87171{% else %}#64748b{% endif %};">
+            {% if d.pct_1m is not none %}{{ "%+.1f"|format(d.pct_1m) }}%{% else %}—{% endif %}
+          </td>
+          {# 3달 #}
+          <td style="padding:6px 0;font-size:12px;text-align:right;
+                     color:{% if d.pct_3m is not none and d.pct_3m > 0 %}#34d399{% elif d.pct_3m is not none %}#f87171{% else %}#64748b{% endif %};">
+            {% if d.pct_3m is not none %}{{ "%+.1f"|format(d.pct_3m) }}%{% else %}—{% endif %}
+          </td>
+          {# 1년 #}
+          <td style="padding:6px 0;font-size:12px;text-align:right;
+                     color:{% if d.pct_1y is not none and d.pct_1y > 0 %}#34d399{% elif d.pct_1y is not none %}#f87171{% else %}#64748b{% endif %};">
+            {% if d.pct_1y is not none %}{{ "%+.1f"|format(d.pct_1y) }}%{% else %}—{% endif %}
+          </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+      </table>
+
+      {% if charts and charts.sectors %}
+      <div style="margin-top:16px;margin-bottom:6px;font-size:11px;color:#475569;">섹터 순환 (1년 추세 + 1주 성과)</div>
+      <img src="data:image/png;base64,{{ charts.sectors }}"
+           style="width:100%;max-width:556px;display:block;border-radius:6px;" alt="Sector Chart">
+      {% endif %}
+    </td>
+  </tr>
+  {% endif %}
+
+  <!-- ── Section 5: 크립토 ──────────────────────────────────── -->
+  {% if crypto and (crypto.btc or crypto.eth) %}
+  <tr>
+    <td style="background:#0f1520;padding:20px 32px 16px;border-top:1px solid #1a2236;">
+      <div style="font-size:13px;font-weight:600;color:#f7931a;letter-spacing:1px;
+                  text-transform:uppercase;margin-bottom:16px;border-bottom:1px solid #1e2d45;
+                  padding-bottom:8px;">
+        ₿ 크립토 시장{% if crypto.btc and crypto.btc.date %}<span style="float:right;font-size:10px;color:#475569;font-weight:400;letter-spacing:0;text-transform:none;">기준 {{ crypto.btc.date }}</span>{% endif %}
+      </div>
+
+      <!-- BTC / ETH 가격 테이블 -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
+        <tr style="border-bottom:1px solid #1a2236;">
+          <td style="padding:4px 0;font-size:11px;color:#475569;font-weight:600;width:24%;">자산</td>
+          <td style="padding:4px 0;font-size:11px;color:#475569;text-align:right;">현재가</td>
+          <td style="padding:4px 0;font-size:11px;color:#475569;text-align:right;">1일</td>
+          <td style="padding:4px 0;font-size:11px;color:#475569;text-align:right;">1주</td>
+          <td style="padding:4px 0;font-size:11px;color:#475569;text-align:right;">1달</td>
+          <td style="padding:4px 0;font-size:11px;color:#475569;text-align:right;">3달</td>
+          <td style="padding:4px 0;font-size:11px;color:#475569;text-align:right;">1년</td>
+        </tr>
+
+        {# BTC row #}
+        {% if crypto.btc and "error" not in crypto.btc %}
+        <tr style="border-bottom:1px solid #131929;">
+          <td style="padding:8px 0;font-size:13px;font-weight:600;color:#f7931a;">₿ Bitcoin</td>
+          <td style="padding:8px 0;font-size:14px;font-weight:700;color:#f1f5f9;text-align:right;">
+            ${{ "{:,.0f}".format(crypto.btc.price) }}
+          </td>
+          {% for k in ["pct_1d", "pct_1w", "pct_1m", "pct_3m", "pct_1y"] %}
+          <td style="padding:8px 0;font-size:12px;text-align:right;
+                     color:{% if crypto.btc[k] is not none and crypto.btc[k] > 0 %}#34d399{% elif crypto.btc[k] is not none %}#f87171{% else %}#64748b{% endif %};">
+            {% if crypto.btc[k] is not none %}{{ "%+.1f"|format(crypto.btc[k]) }}%{% else %}—{% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endif %}
+
+        {# ETH row #}
+        {% if crypto.eth and "error" not in crypto.eth %}
+        <tr style="border-bottom:1px solid #131929;">
+          <td style="padding:8px 0;font-size:13px;font-weight:600;color:#627eea;">⟠ Ethereum</td>
+          <td style="padding:8px 0;font-size:14px;font-weight:700;color:#f1f5f9;text-align:right;">
+            ${{ "{:,.0f}".format(crypto.eth.price) }}
+          </td>
+          {% for k in ["pct_1d", "pct_1w", "pct_1m", "pct_3m", "pct_1y"] %}
+          <td style="padding:8px 0;font-size:12px;text-align:right;
+                     color:{% if crypto.eth[k] is not none and crypto.eth[k] > 0 %}#34d399{% elif crypto.eth[k] is not none %}#f87171{% else %}#64748b{% endif %};">
+            {% if crypto.eth[k] is not none %}{{ "%+.1f"|format(crypto.eth[k]) }}%{% else %}—{% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endif %}
+      </table>
+
+      <!-- DeFi TVL 요약 (가로 3칸) -->
+      {% if crypto.eth_tvl_b is not none or crypto.l2_tvl_b is not none or crypto.total_tvl_b is not none %}
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+        <tr>
+          <td style="padding:8px 12px;background:#131929;border-radius:6px;text-align:center;width:33%;">
+            <div style="font-size:10px;color:#64748b;letter-spacing:1px;margin-bottom:4px;">ETH DeFi TVL</div>
+            <div style="font-size:16px;font-weight:700;color:#627eea;">
+              {% if crypto.eth_tvl_b is not none %}${{ crypto.eth_tvl_b }}B{% else %}—{% endif %}
+            </div>
+          </td>
+          <td width="8"></td>
+          <td style="padding:8px 12px;background:#131929;border-radius:6px;text-align:center;width:33%;">
+            <div style="font-size:10px;color:#64748b;letter-spacing:1px;margin-bottom:4px;">L2 TVL 합계</div>
+            <div style="font-size:16px;font-weight:700;color:#22d3ee;">
+              {% if crypto.l2_tvl_b is not none %}${{ crypto.l2_tvl_b }}B{% else %}—{% endif %}
+            </div>
+          </td>
+          <td width="8"></td>
+          <td style="padding:8px 12px;background:#131929;border-radius:6px;text-align:center;width:33%;">
+            <div style="font-size:10px;color:#64748b;letter-spacing:1px;margin-bottom:4px;">전체 DeFi TVL</div>
+            <div style="font-size:16px;font-weight:700;color:#34d399;">
+              {% if crypto.total_tvl_b is not none %}${{ "{:,.0f}".format(crypto.total_tvl_b) }}B{% else %}—{% endif %}
+            </div>
+          </td>
+        </tr>
+      </table>
+      {% endif %}
+
+      <!-- 마켓 심리 지표 (BTC 도미넌스 / ETH/BTC / 공포탐욕) -->
+      {% if crypto.btc_dominance is not none or crypto.eth_btc_ratio is not none or crypto.fear_greed %}
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="padding:8px 12px;background:#131929;border-radius:6px;text-align:center;width:33%;">
+            <div style="font-size:10px;color:#64748b;letter-spacing:1px;margin-bottom:4px;">BTC 도미넌스</div>
+            <div style="font-size:16px;font-weight:700;color:#f7931a;">
+              {% if crypto.btc_dominance is not none %}{{ "%.1f"|format(crypto.btc_dominance) }}%{% else %}—{% endif %}
+            </div>
+          </td>
+          <td width="8"></td>
+          <td style="padding:8px 12px;background:#131929;border-radius:6px;text-align:center;width:33%;">
+            <div style="font-size:10px;color:#64748b;letter-spacing:1px;margin-bottom:4px;">ETH / BTC</div>
+            <div style="font-size:16px;font-weight:700;color:#627eea;">
+              {% if crypto.eth_btc_ratio is not none %}{{ "%.5f"|format(crypto.eth_btc_ratio) }}{% else %}—{% endif %}
+            </div>
+          </td>
+          <td width="8"></td>
+          <td style="padding:8px 12px;background:#131929;border-radius:6px;text-align:center;width:33%;">
+            <div style="font-size:10px;color:#64748b;letter-spacing:1px;margin-bottom:4px;">공포 &amp; 탐욕</div>
+            {% if crypto.fear_greed %}
+            {%- set fg = crypto.fear_greed.value -%}
+            <div style="font-size:16px;font-weight:700;
+                        color:{% if fg <= 24 %}#f87171{% elif fg <= 49 %}#fb923c{% elif fg <= 74 %}#34d399{% else %}#4ade80{% endif %};">
+              {{ fg }}
+            </div>
+            <div style="font-size:10px;color:#64748b;margin-top:2px;">{{ crypto.fear_greed.label }}</div>
+            {% else %}
+            <div style="font-size:16px;font-weight:700;color:#64748b;">—</div>
+            {% endif %}
+          </td>
+        </tr>
+      </table>
+      {% endif %}
+
+      {% if charts and charts.crypto_price %}
+      <div style="margin-top:16px;margin-bottom:6px;font-size:11px;color:#475569;">BTC / ETH 가격 추이 (1년, 기준=100)</div>
+      <img src="data:image/png;base64,{{ charts.crypto_price }}"
+           style="width:100%;max-width:556px;display:block;border-radius:6px;margin-bottom:12px;" alt="Crypto Price Chart">
+      {% endif %}
+      {% if charts and charts.eth_tvl %}
+      <div style="margin-bottom:6px;font-size:11px;color:#475569;">ETH DeFi TVL (1년)</div>
+      <img src="data:image/png;base64,{{ charts.eth_tvl }}"
+           style="width:100%;max-width:556px;display:block;border-radius:6px;" alt="ETH TVL Chart">
+      {% endif %}
+
+    </td>
+  </tr>
+  {% endif %}
+
+  <!-- ── Footer ──────────────────────────────────────────────── -->
+  <tr>
+    <td style="background:#0a0f1a;border-radius:0 0 12px 12px;padding:16px 32px;
+               border-top:1px solid #1a2236;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="font-size:10px;color:#334155;line-height:1.6;">
+            본 리포트는 투자 참고용이며 투자 권유가 아닙니다. 투자 결정은 본인 판단과 책임 하에 이루어져야 합니다.
+            FRED 데이터 기준일은 발표 주기에 따라 최대 7~10일 지연될 수 있습니다.
+          </td>
+          <td align="right" style="font-size:10px;color:#1e3a5f;white-space:nowrap;padding-left:16px;">
+            주식부자프로젝트
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+</table>
+<!-- /Wrapper -->
+
+</td></tr>
+</table>
+
+</body>
+</html>

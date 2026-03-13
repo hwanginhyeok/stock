@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -78,6 +79,10 @@ class PriceLoader:
 
             close_val = float(row.get("Close", 0))
             adj_close = float(row.get("Adj Close", close_val))
+
+            # Skip rows with NaN values (incomplete data from yfinance)
+            if math.isnan(close_val) or math.isnan(adj_close):
+                continue
 
             records.append(
                 OHLCVRecord(
