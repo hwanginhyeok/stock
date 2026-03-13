@@ -10,6 +10,7 @@ build/
 
 # 가상환경
 .venv/
+.venv-wsl/
 venv/
 env/
 
@@ -24,6 +25,8 @@ data/processed/
 data/cache/
 data/db/
 data/generated/
+data/articles/
+data/research/
 
 # 로그
 logs/
