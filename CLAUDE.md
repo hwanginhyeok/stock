@@ -94,6 +94,9 @@
 | `.claude/skills/naver-packaging.md` | 네이버 변환 패키징 — HTML 변환 + 이미지 리네이밍 + README + QA | X 게시 완료 후 네이버 변환 시 |
 | `.claude/skills/schedule-briefing.md` | 스케줄 브리핑 — 마스터 vs 실제폴더 2-way 검증 + 리포트 출력 | "스케줄 알려줘" / 세션 시작 시 |
 | `.claude/skills/schedule-sync.md` | 스케줄 동기화 — 마스터 테이블 1곳 갱신 + 시각화 재생성 | 아티클 상태 변경 시 / 불일치 발견 시 |
+| `.claude/skills/morning-email.md` | 모닝 이메일 실행 (데이터 수집→검수→dry-run→발송) | "모닝 이메일", "이메일 보내줘" |
+| `.claude/skills/sigma-analysis.md` | IV 시그마 분석 (장중/장외 분기, IV/HV20 폴백) | "시그마 분석", "IV 분석", 종목 변동성 확인 시 |
+| `.claude/skills/signal-report.md` | 시그널 리포트 + 대시보드 Excel 생성 + 이상치 검수 | "시그널 리포트", "대시보드", 주간 리포트 시 |
 
 > 스킬은 반복적인 작업 절차를 정의한 파일. 해당 작업 수행 시 반드시 읽고 절차를 따른다.
 > 새 스킬 추가 시 이 테이블도 함께 업데이트할 것.
