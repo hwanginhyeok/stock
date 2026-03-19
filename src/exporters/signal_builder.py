@@ -111,6 +111,8 @@ def build_signal_sheet(
     market_data: dict[str, Any],
     stock_data: list[dict[str, Any]],
     sigma_data: list[dict[str, Any]],
+    *,
+    market: str = "us",
 ) -> None:
     """Build the Integrated_Signal sheet with 3 sections.
 
@@ -127,12 +129,18 @@ def build_signal_sheet(
             ticker, name, price, change_1d, change_1w, market_cap,
             rsi, rsi_state, macd_signal, supertrend_dir, adx, adx_trend, tech_score
         sigma_data: List of sigma analysis dicts from analyze_ticker().
+        market: "us" or "kr" — controls section titles and data formatting.
     """
+    is_kr = market == "kr"
     ws = wb.create_sheet(title="Integrated_Signal")
 
     # Title
+    market_label = "KR" if is_kr else "US"
     ws.merge_cells("A1:O1")
-    title_cell = ws.cell(row=1, column=1, value="Integrated Signal Report")
+    title_cell = ws.cell(
+        row=1, column=1,
+        value=f"Integrated Signal Report — {market_label} Market",
+    )
     title_cell.font = TITLE_FONT
     title_cell.alignment = Alignment(vertical="center")
     ws.row_dimensions[1].height = 30
@@ -149,15 +157,15 @@ def build_signal_sheet(
     row = 4
 
     # ===== Section 1: Market Trend & Sentiment =====
-    row = _build_market_section(ws, row, market_data)
+    row = _build_market_section(ws, row, market_data, is_kr=is_kr)
     row += 2
 
     # ===== Section 2: Stock Trend & Technical =====
-    row = _build_stock_section(ws, row, stock_data)
+    row = _build_stock_section(ws, row, stock_data, is_kr=is_kr)
     row += 2
 
     # ===== Section 3: Sigma Bands =====
-    row = _build_sigma_section(ws, row, sigma_data)
+    row = _build_sigma_section(ws, row, sigma_data, is_kr=is_kr)
 
     ws.freeze_panes = "A4"
     ws.sheet_properties.tabColor = PURPLE
@@ -173,6 +181,8 @@ def _build_market_section(
     ws: Any,
     start_row: int,
     market_data: dict[str, Any],
+    *,
+    is_kr: bool = False,
 ) -> int:
     """Build Section 1: market indices + sentiment indicators + diagnosis.
 
@@ -180,6 +190,7 @@ def _build_market_section(
         ws: Worksheet.
         start_row: Starting row.
         market_data: Market data dict.
+        is_kr: If True, use KR-specific section title and skip US-only indicators.
 
     Returns:
         Next available row.
@@ -187,7 +198,8 @@ def _build_market_section(
     row = start_row
 
     # Section header
-    row = write_section_header(ws, row, "Section 1: Market Trend & Sentiment", cols=10)
+    section_title = "Section 1: KR Market Trend" if is_kr else "Section 1: Market Trend & Sentiment"
+    row = write_section_header(ws, row, section_title, cols=10)
 
     # --- Index table ---
     idx_headers = [
@@ -268,23 +280,26 @@ def _build_market_section(
 
     row += 1
 
-    # --- Sentiment indicators (label-value) ---
-    # VIX
+    # --- VIX / VKOSPI ---
     vix_info = market_data.get("vix", {})
     vix_val = vix_info.get("current", 0)
     vix_level = vix_info.get("level", "N/A")
-    if vix_val >= 30:
-        vix_color = RED
-    elif vix_val >= 20:
-        vix_color = ORANGE
-    elif vix_val <= 12:
-        vix_color = GREEN
-    else:
-        vix_color = MED_BLUE
 
-    row = write_label_value(ws, row, "VIX",
-                            f"{vix_val:.2f}  ({vix_level})",
-                            val_font=Font(bold=True, color=vix_color, size=11))
+    # US: always show; KR: show only when proxy value exists
+    if not is_kr or vix_val > 0:
+        if vix_val >= 30:
+            vix_color = RED
+        elif vix_val >= 20:
+            vix_color = ORANGE
+        elif vix_val <= 12:
+            vix_color = GREEN
+        else:
+            vix_color = MED_BLUE
+
+        vix_label = vix_info.get("label", "VIX")
+        row = write_label_value(ws, row, vix_label,
+                                f"{vix_val:.2f}  ({vix_level})",
+                                val_font=Font(bold=True, color=vix_color, size=11))
 
     # Fear & Greed
     fg = market_data.get("fear_greed", {})
@@ -296,25 +311,27 @@ def _build_market_section(
         fg_color = RED
     else:
         fg_color = ORANGE
-    row = write_label_value(ws, row, "Fear & Greed",
+    fg_label = "Fear & Greed (simplified)" if is_kr else "Fear & Greed"
+    row = write_label_value(ws, row, fg_label,
                             f"{fg_score:.1f}  ({fg_level})",
                             val_font=Font(bold=True, color=fg_color, size=11))
 
-    # Put/Call Ratio (optional)
-    putcall = market_data.get("putcall")
-    if putcall:
-        pc_ratio = putcall.get("ratio", "N/A")
-        pc_sent = putcall.get("sentiment", "")
-        row = write_label_value(ws, row, "Put/Call Ratio",
-                                f"{pc_ratio}  ({pc_sent})" if pc_sent else str(pc_ratio))
+    if not is_kr:
+        # Put/Call Ratio (US only, optional)
+        putcall = market_data.get("putcall")
+        if putcall:
+            pc_ratio = putcall.get("ratio", "N/A")
+            pc_sent = putcall.get("sentiment", "")
+            row = write_label_value(ws, row, "Put/Call Ratio",
+                                    f"{pc_ratio}  ({pc_sent})" if pc_sent else str(pc_ratio))
 
-    # CNN Fear & Greed (optional)
-    cnn_fg = market_data.get("cnn_fg")
-    if cnn_fg:
-        cnn_score = cnn_fg.get("score", "N/A")
-        cnn_level = cnn_fg.get("level", "")
-        row = write_label_value(ws, row, "CNN Fear & Greed",
-                                f"{cnn_score}  ({cnn_level})" if cnn_level else str(cnn_score))
+        # CNN Fear & Greed (US only, optional)
+        cnn_fg = market_data.get("cnn_fg")
+        if cnn_fg:
+            cnn_score = cnn_fg.get("score", "N/A")
+            cnn_level = cnn_fg.get("level", "")
+            row = write_label_value(ws, row, "CNN Fear & Greed",
+                                    f"{cnn_score}  ({cnn_level})" if cnn_level else str(cnn_score))
 
     row += 1
 
@@ -554,6 +571,8 @@ def _build_stock_section(
     ws: Any,
     start_row: int,
     stock_data: list[dict[str, Any]],
+    *,
+    is_kr: bool = False,
 ) -> int:
     """Build Section 2: per-stock trend and technical indicators.
 
@@ -561,6 +580,7 @@ def _build_stock_section(
         ws: Worksheet.
         start_row: Starting row.
         stock_data: List of stock dicts sorted by market cap.
+        is_kr: If True, use KR formatting (KRW prices, no sector).
 
     Returns:
         Next available row.
@@ -568,7 +588,8 @@ def _build_stock_section(
     row = start_row
 
     # Section header
-    row = write_section_header(ws, row, "Section 2: Stock Trend & Technical", cols=17)
+    section_title = "Section 2: KR Stock Trend & Technical" if is_kr else "Section 2: Stock Trend & Technical"
+    row = write_section_header(ws, row, section_title, cols=17)
 
     # Trend color legend row
     # Layout: 6 items spread across 16 columns — each gets ~2-3 merged cols
@@ -626,7 +647,8 @@ def _build_stock_section(
                    font=Font(size=10, color=GRAY),
                    alignment=Alignment(horizontal="center"))
 
-        style_cell(ws, row, 5, s.get("price", 0), num_fmt="#,##0.00",
+        price_fmt = "#,##0" if is_kr else "#,##0.00"
+        style_cell(ws, row, 5, s.get("price", 0), num_fmt=price_fmt,
                    alignment=Alignment(horizontal="right"))
 
         # 1D%
@@ -781,6 +803,8 @@ def _build_sigma_section(
     ws: Any,
     start_row: int,
     sigma_data: list[dict[str, Any]],
+    *,
+    is_kr: bool = False,
 ) -> int:
     """Build Section 3: sigma band analysis per stock.
 
@@ -790,6 +814,7 @@ def _build_sigma_section(
         ws: Worksheet.
         start_row: Starting row.
         sigma_data: List of analyze_ticker() result dicts.
+        is_kr: If True, use KR formatting (KRW prices, HV20 label).
 
     Returns:
         Next available row.
@@ -800,7 +825,11 @@ def _build_sigma_section(
         return row
 
     # Section header
-    row = write_section_header(ws, row, "Section 3: Sigma Bands (Option Volatility)", cols=12)
+    if is_kr:
+        section_title = "Section 3: Sigma Bands (HV20 Volatility)"
+    else:
+        section_title = "Section 3: Sigma Bands (Option Volatility)"
+    row = write_section_header(ws, row, section_title, cols=12)
 
     # Column headers
     sig_headers = [
@@ -857,11 +886,12 @@ def _build_sigma_section(
             bg_fill = alt_fill if use_alt else None
 
             # Ticker + Price only on first row for this ticker
+            price_fmt = "#,##0" if is_kr else "$#,##0.00"
             if first_period:
                 style_cell(ws, row, 1, ticker,
                            font=Font(bold=True, size=10, color=tk_color),
                            fill=bg_fill)
-                style_cell(ws, row, 2, price, num_fmt="$#,##0.00",
+                style_cell(ws, row, 2, price, num_fmt=price_fmt,
                            alignment=Alignment(horizontal="right"),
                            fill=bg_fill)
                 style_cell(ws, row, 3,
@@ -899,16 +929,17 @@ def _build_sigma_section(
             s2_lower = s2.get("lower", 0)
             s2_upper = s2.get("upper", 0)
 
-            style_cell(ws, row, 7, s1_lower, num_fmt="$#,##0.00",
+            band_price_fmt = "#,##0" if is_kr else "$#,##0.00"
+            style_cell(ws, row, 7, s1_lower, num_fmt=band_price_fmt,
                        alignment=Alignment(horizontal="right"),
                        fill=bg_fill)
-            style_cell(ws, row, 8, s1_upper, num_fmt="$#,##0.00",
+            style_cell(ws, row, 8, s1_upper, num_fmt=band_price_fmt,
                        alignment=Alignment(horizontal="right"),
                        fill=bg_fill)
-            style_cell(ws, row, 9, s2_lower, num_fmt="$#,##0.00",
+            style_cell(ws, row, 9, s2_lower, num_fmt=band_price_fmt,
                        alignment=Alignment(horizontal="right"),
                        fill=bg_fill)
-            style_cell(ws, row, 10, s2_upper, num_fmt="$#,##0.00",
+            style_cell(ws, row, 10, s2_upper, num_fmt=band_price_fmt,
                        alignment=Alignment(horizontal="right"),
                        fill=bg_fill)
 

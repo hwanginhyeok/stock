@@ -1,4 +1,4 @@
-"""Fetch index constituent tickers from Wikipedia."""
+"""Fetch index constituent tickers from Wikipedia and KRX."""
 
 from __future__ import annotations
 
@@ -10,6 +10,9 @@ import requests
 from src.core.logger import get_logger
 
 logger = get_logger(__name__)
+
+# KR preferred-stock suffixes to exclude (끝자리 5/7/8/9 → 우선주)
+_KR_PREF_SUFFIXES = {"5", "7", "8", "9"}
 
 _SP500_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
 _NDX100_URL = "https://en.wikipedia.org/wiki/Nasdaq-100"
@@ -109,3 +112,68 @@ def get_combined_universe() -> list[str]:
         total=len(combined),
     )
     return combined
+
+
+def fetch_kr_top_tickers(
+    n: int = 200,
+    *,
+    exclude_preferred: bool = True,
+) -> list[tuple[str, str, int]]:
+    """Fetch KOSPI + KOSDAQ top-N tickers by market capitalization.
+
+    Uses FinanceDataReader to list all stocks from both exchanges,
+    merges them, sorts by Marcap descending, and returns top N.
+
+    Args:
+        n: Number of top tickers to return.
+        exclude_preferred: If True, exclude preferred stocks
+            (codes ending in 5/7/8/9).
+
+    Returns:
+        List of (code, name, marcap) tuples sorted by market cap desc.
+        Returns empty list on failure.
+    """
+    try:
+        import FinanceDataReader as fdr
+
+        frames = []
+        for market in ("KOSPI", "KOSDAQ"):
+            df = fdr.StockListing(market)
+            if df is not None and not df.empty:
+                frames.append(df)
+
+        if not frames:
+            logger.error("kr_listing_empty")
+            return []
+
+        combined = pd.concat(frames, ignore_index=True)
+
+        # Ensure required columns exist
+        if "Code" not in combined.columns or "Marcap" not in combined.columns:
+            logger.error(
+                "kr_listing_missing_columns",
+                columns=list(combined.columns),
+            )
+            return []
+
+        # Filter preferred stocks
+        if exclude_preferred:
+            combined = combined[
+                ~combined["Code"].str[-1].isin(_KR_PREF_SUFFIXES)
+            ]
+
+        # Drop rows with missing Marcap and sort
+        combined = combined.dropna(subset=["Marcap"])
+        combined = combined.sort_values("Marcap", ascending=False)
+        top = combined.head(n)
+
+        result = [
+            (str(row["Code"]), str(row["Name"]), int(row["Marcap"]))
+            for _, row in top.iterrows()
+        ]
+        logger.info("kr_top_tickers_fetched", count=len(result))
+        return result
+
+    except Exception as e:
+        logger.error("kr_top_tickers_failed", error=str(e))
+        return []

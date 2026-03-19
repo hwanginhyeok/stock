@@ -13,6 +13,8 @@ license = "MIT"
 dependencies = [
     # 데이터 수집
     "pykrx>=1.0.45",
+    "finance-datareader>=0.9.60",
+    "setuptools<72",
     "yfinance>=0.2.36",
     "requests>=2.31.0",
     "beautifulsoup4>=4.12.3",
