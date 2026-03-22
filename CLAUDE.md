@@ -61,17 +61,14 @@
 - **갱신 규칙**: 상세 내용은 `.claude/rules/workflow.md` 참조
 - **상세 로그**: 설계 결정이 포함된 작업은 `docs/프로젝트/task/{ID}.md`에 기록
 
-## 상세 규칙 (세션 시작 시 필수 로딩)
+## 상세 규칙 (세션 시작 시 자동 로딩)
 
-| 파일 | 내용 | 로딩 시점 |
-|------|------|-----------|
-| `.claude/rules/coding.md` | Python 컨벤션, 코드 패턴, 품질 체크리스트 | 세션 시작 |
-| `.claude/rules/workflow.md` | 워크플로우 원칙, 보안 규칙, TASK 갱신 규칙 | 세션 시작 |
-| `.claude/rules/architecture.md` | 디렉토리 구조, 에이전트 역할 | 세션 시작 |
-| `.claude/rules/git.md` | Git 컨벤션 | 세션 시작 |
-| `.claude/rules/article-writing.md` | 아티클 구조·포맷·카테고리·시각화 규칙 | 아티클 작성 시 |
-| `.claude/rules/writing-voice.md` | 저자의 목소리·문체·감정·논리 전개 패턴 + 퇴고 피드백 로그 | 아티클 초안 작성·퇴고 시 |
-| `.claude/rules/naver-html.md` | 네이버 블로그 HTML 형식·스타일·색상·워크플로우 가이드 | 네이버 HTML 변환 시 |
+| 파일 | 내용 |
+|------|------|
+| `.claude/rules/coding.md` | Python 컨벤션, 코드 패턴, 품질 체크리스트 |
+| `.claude/rules/workflow.md` | 워크플로우 원칙, 보안 규칙, TASK 갱신 규칙 |
+| `.claude/rules/architecture.md` | 디렉토리 구조, 에이전트 역할 |
+| `.claude/rules/git.md` | Git 컨벤션 |
 
 ## 커맨드 (슬래시로 직접 실행)
 
@@ -84,6 +81,9 @@
 | 파일 | 내용 | 트리거 |
 |------|------|--------|
 | `.claude/skills/README.md` | 스킬 작성 가이드 | 새 스킬 추가 시 |
+| `.claude/skills/article-writing.md` | 아티클 구조·포맷·카테고리·시각화 규칙 | 아티클 작성 시 |
+| `.claude/skills/writing-voice.md` | 저자의 목소리·문체·감정·논리 전개 패턴 + 퇴고 피드백 로그 | 아티클 초안 작성·퇴고 시 |
+| `.claude/skills/naver-html.md` | 네이버 블로그 HTML 형식·스타일·색상·워크플로우 가이드 | 네이버 HTML 변환 시 |
 | `.claude/skills/article-research.md` | 아티클 리서치 4단계 워크플로우 | 투자 아티클 기획/리서치 시 |
 | `.claude/skills/generate-visuals.md` | 1080×1080 PNG 시각화 생성 (matplotlib + QA) | 아티클 시각화 생성 시 |
 | `.claude/skills/publish-x.md` | X Notes 게시 체크리스트 + 주제별 해시태그 | 아티클 X 게시 시 |
