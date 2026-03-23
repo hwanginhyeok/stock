@@ -170,7 +170,7 @@ def convert(md: str) -> str:
         raw = lines[i]
         line = raw.strip()
 
-        # ── 빈 줄 (연속 2줄 이상 → 의도적 시각 간격)
+        # ── 빈 줄 (문단 구분 → 스페이서 삽입)
         if not line:
             blank_count = 0
             while i < len(lines) and not lines[i].strip():
@@ -179,6 +179,8 @@ def convert(md: str) -> str:
             if blank_count >= 2:
                 for _ in range(blank_count - 1):
                     out.append(SPACER)
+            else:
+                _add_spacer(out)
             continue
 
         # ── 헤딩
@@ -223,6 +225,7 @@ def convert(md: str) -> str:
 
         # ── 펜스드 코드블록
         if line.startswith("```"):
+            _add_spacer(out)
             i += 1
             code_lines = []
             while i < len(lines) and not lines[i].strip().startswith("```"):
@@ -231,18 +234,18 @@ def convert(md: str) -> str:
             i += 1  # 닫는 ``` 스킵
             code_text = "\n".join(code_lines)
             out.append(f'<pre style="{S["pre"]}"><code>{code_text}</code></pre>')
+            _add_spacer(out)
             continue
 
         # ── 이미지 플레이스홀더 (📎 마커)
         if is_image_placeholder(line):
-            # 이미지 설명 추출
+            _add_spacer(out)
             desc = re.sub(r"[>📎*\[\]]+", "", line).strip()
             out.append(
                 f'<div style="{S["img_ph"]}">'
-                f"📷 {desc}<br>"
-                f'<span style="font-size:12px;">'
-                f"(네이버 에디터에서 이미지를 직접 삽입해주세요)</span></div>"
+                f"📷 {desc}</div>"
             )
+            _add_spacer(out)
             i += 1
             continue
 
@@ -273,6 +276,7 @@ def convert(md: str) -> str:
                 )
                 i += 1
             out.append(f'<ul style="{S["ul"]}">{"".join(items)}</ul>')
+            _add_spacer(out)
             continue
 
         # ── 순서 있는 목록
@@ -283,6 +287,7 @@ def convert(md: str) -> str:
                 items.append(f'<li style="{S["li"]}">{inline(text)}</li>')
                 i += 1
             out.append(f'<ol style="{S["ol"]}">{"".join(items)}</ol>')
+            _add_spacer(out)
             continue
 
         # ── 테이블
