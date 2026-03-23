@@ -207,15 +207,21 @@ class RSSNewsCollector(BaseNewsCollector):
         if not title:
             return None
 
-        # Extract content / summary
+        # Extract content / summary — use best available text
         content = ""
         if hasattr(entry, "content") and entry.content:
             content = entry.content[0].get("value", "")
-        summary = getattr(entry, "summary", "")
+        summary = getattr(entry, "summary", "") or getattr(
+            entry, "description", ""
+        )
 
         # Clean HTML
         content = self._extract_text(content)
         summary = self._extract_text(summary)
+
+        # If content is empty but summary exists, promote summary to content
+        if not content and summary:
+            content = summary
 
         # Parse published date
         published_at = self._parse_date(entry)

@@ -1,0 +1,64 @@
+══════════════════════════════════════════════════
+  시황 브리핑 | {{ date }} 오전 {{ time }}
+  한국시장 시작 준비 + 미국시장 마감 정리
+══════════════════════════════════════════════════
+
+{% if us_market %}
+▣ 미국 마감
+{% for idx in us_market %}
+  {{ "%-12s"|format(idx.name) }} {{ "%10s"|format(idx.value) }}  {{ idx.change }}
+{% endfor %}
+{% endif %}
+
+{% if kr_premarket %}
+▣ 한국 프리마켓
+{% for idx in kr_premarket %}
+  {{ "%-12s"|format(idx.name) }} {{ "%10s"|format(idx.value) }}  {{ idx.change }}
+{% endfor %}
+{% endif %}
+{% if earnings_facts %}
+
+━━ 실적 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{% for f in earnings_facts %}
+  [{{ f.label }}] {{ f.claim }}{% if f.numbers %} ({{ f.numbers }}){% endif %}
+
+{% endfor %}
+{% endif %}
+{% if policy_facts %}
+━━ 정책/매크로 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{% for f in policy_facts %}
+  [{{ f.label }}] {{ f.claim }}{% if f.numbers %} ({{ f.numbers }}){% endif %}
+
+{% endfor %}
+{% endif %}
+{% if deal_facts %}
+━━ 딜/투자 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{% for f in deal_facts %}
+  [{{ f.label }}] {{ f.claim }}{% if f.numbers %} ({{ f.numbers }}){% endif %}
+
+{% endfor %}
+{% endif %}
+{% if event_facts %}
+━━ 이벤트 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{% for f in event_facts %}
+  [{{ f.label }}] {{ f.claim }}{% if f.numbers %} ({{ f.numbers }}){% endif %}
+
+{% endfor %}
+{% endif %}
+{% if forecast_facts %}
+━━ 전망 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{% for f in forecast_facts %}
+  [{{ f.label }}] {{ f.claim }}{% if f.numbers %} ({{ f.numbers }}){% endif %}
+
+{% endfor %}
+{% endif %}
+{% if top_movers %}
+━━ 주요 수치 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{% for f in top_movers %}
+  [{{ f.label }}] {{ f.claim }}{% if f.numbers %} ({{ f.numbers }}){% endif %}
+
+{% endfor %}
+{% endif %}
+──────────────────────────────────────────────────
+  팩트 {{ total_facts }}개 (실적 {{ earnings_count }} / 정책 {{ policy_count }} / 딜 {{ deal_count }})
+══════════════════════════════════════════════════

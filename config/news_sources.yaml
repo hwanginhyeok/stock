@@ -4,20 +4,6 @@
 
 # --- 한국 뉴스 소스 ---
 korea:
-  - name: "네이버 금융뉴스"
-    type: "rss"
-    url: "https://news.naver.com/main/list.naver?mode=LSD&mid=sec&sid1=101"
-    category: "종합"
-    language: "ko"
-    enabled: true
-
-  - name: "한국경제"
-    type: "rss"
-    url: "https://www.hankyung.com/feed/stock"
-    category: "종합"
-    language: "ko"
-    enabled: true
-
   - name: "매일경제"
     type: "rss"
     url: "https://www.mk.co.kr/rss/30000001/"
@@ -25,22 +11,36 @@ korea:
     language: "ko"
     enabled: true
 
+  - name: "한국경제"
+    type: "rss"
+    url: "https://www.hankyung.com/feed/economy"
+    category: "종합"
+    language: "ko"
+    enabled: true
+
+  - name: "한국경제 금융"
+    type: "rss"
+    url: "https://www.hankyung.com/feed/finance"
+    category: "금융"
+    language: "ko"
+    enabled: true
+
   - name: "연합뉴스 경제"
     type: "rss"
-    url: "https://www.yna.co.kr/economy/all/index?site=topnews01"
+    url: "https://www.yna.co.kr/rss/economy.xml"
+    category: "종합"
+    language: "ko"
+    enabled: true
+
+  - name: "Investing.com 한국"
+    type: "rss"
+    url: "https://kr.investing.com/rss/news.rss"
     category: "종합"
     language: "ko"
     enabled: true
 
 # --- 미국 뉴스 소스 ---
 us:
-  - name: "Reuters Business"
-    type: "rss"
-    url: "https://www.reutersagency.com/feed/?taxonomy=best-sectors&post_type=best"
-    category: "종합"
-    language: "en"
-    enabled: true
-
   - name: "Yahoo Finance"
     type: "rss"
     url: "https://finance.yahoo.com/news/rssindex"
@@ -51,6 +51,27 @@ us:
   - name: "CNBC"
     type: "rss"
     url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114"
+    category: "종합"
+    language: "en"
+    enabled: true
+
+  - name: "MarketWatch"
+    type: "rss"
+    url: "https://feeds.content.dowjones.io/public/rss/mw_topstories"
+    category: "종합"
+    language: "en"
+    enabled: true
+
+  - name: "WSJ Markets"
+    type: "rss"
+    url: "https://feeds.a.dj.com/rss/RSSMarketsMain.xml"
+    category: "종합"
+    language: "en"
+    enabled: true
+
+  - name: "Bloomberg"
+    type: "rss"
+    url: "https://feeds.bloomberg.com/markets/news.rss"
     category: "종합"
     language: "en"
     enabled: true
