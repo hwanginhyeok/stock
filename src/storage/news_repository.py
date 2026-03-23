@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+import json
+from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from src.core.database import NewsItemDB, get_session
 from src.core.models import Market, NewsItem
@@ -98,11 +99,6 @@ class NewsRepository(BaseRepository[NewsItem]):
         Returns:
             List of title strings.
         """
-        cutoff = datetime.now(timezone.utc).replace(
-            hour=datetime.now(timezone.utc).hour,
-        )
-        from datetime import timedelta
-
         cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
         with get_session() as session:
             stmt = (
@@ -112,3 +108,163 @@ class NewsRepository(BaseRepository[NewsItem]):
             )
             results = session.execute(stmt).scalars().all()
             return list(results)
+
+    # ------------------------------------------------------------------
+    # Extended queries for timeline & ticker filtering
+    # ------------------------------------------------------------------
+
+    def get_by_tickers(
+        self,
+        tickers: list[str],
+        hours: int = 24,
+        limit: int = 50,
+    ) -> list[NewsItem]:
+        """Get news items mentioning any of the given tickers.
+
+        Uses JSON LIKE search on the related_tickers column.
+
+        Args:
+            tickers: List of ticker symbols to search for.
+            hours: Look-back window in hours.
+            limit: Maximum number of results.
+
+        Returns:
+            List of matching NewsItem, newest first.
+        """
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
+        with get_session() as session:
+            stmt = (
+                select(NewsItemDB)
+                .where(NewsItemDB.created_at >= cutoff)
+            )
+            # Build OR conditions for each ticker (LIKE on JSON text)
+            from sqlalchemy import or_
+            ticker_conditions = [
+                NewsItemDB.related_tickers.contains(f'"{t}"')
+                for t in tickers
+            ]
+            if ticker_conditions:
+                stmt = stmt.where(or_(*ticker_conditions))
+            stmt = stmt.order_by(NewsItemDB.created_at.desc()).limit(limit)
+            results = session.execute(stmt).scalars().all()
+            return [self._orm_to_pydantic(obj) for obj in results]
+
+    def get_by_importance(
+        self,
+        importance: str,
+        hours: int = 24,
+        limit: int = 50,
+    ) -> list[NewsItem]:
+        """Get news items by importance level.
+
+        Args:
+            importance: Importance level ("high", "medium", "low").
+            hours: Look-back window in hours.
+            limit: Maximum number of results.
+
+        Returns:
+            List of matching NewsItem, newest first.
+        """
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
+        with get_session() as session:
+            stmt = (
+                select(NewsItemDB)
+                .where(NewsItemDB.created_at >= cutoff)
+                .where(NewsItemDB.importance == importance)
+                .order_by(NewsItemDB.created_at.desc())
+                .limit(limit)
+            )
+            results = session.execute(stmt).scalars().all()
+            return [self._orm_to_pydantic(obj) for obj in results]
+
+    def get_timeline(
+        self,
+        market: Market | None = None,
+        hours: int = 24,
+        limit: int = 100,
+    ) -> list[NewsItem]:
+        """Get a chronological news timeline.
+
+        Sorted by published_at when available, falling back to created_at.
+
+        Args:
+            market: Optional market filter.
+            hours: Look-back window in hours.
+            limit: Maximum number of results.
+
+        Returns:
+            List of NewsItem sorted by time descending.
+        """
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
+        with get_session() as session:
+            stmt = (
+                select(NewsItemDB)
+                .where(NewsItemDB.created_at >= cutoff)
+            )
+            if market is not None:
+                stmt = stmt.where(NewsItemDB.market == market.value)
+            # published_at이 있으면 그걸로 정렬, 없으면 created_at
+            stmt = stmt.order_by(
+                func.coalesce(
+                    NewsItemDB.published_at,
+                    NewsItemDB.created_at,
+                ).desc(),
+            ).limit(limit)
+            results = session.execute(stmt).scalars().all()
+            return [self._orm_to_pydantic(obj) for obj in results]
+
+    def update_sentiment(self, news_id: str, score: float) -> None:
+        """Update the sentiment score for a news item.
+
+        Args:
+            news_id: UUID of the news item.
+            score: New sentiment score (-1.0 to +1.0).
+        """
+        self.update(news_id, sentiment_score=score)
+
+    def update_tickers(self, news_id: str, tickers: list[str]) -> None:
+        """Update the related tickers for a news item.
+
+        Args:
+            news_id: UUID of the news item.
+            tickers: List of ticker symbols.
+        """
+        self.update(news_id, related_tickers=tickers)
+
+    def get_stats(self, hours: int = 24) -> dict[str, int]:
+        """Get summary statistics for recent news.
+
+        Args:
+            hours: Look-back window in hours.
+
+        Returns:
+            Dict with total, by_market, and by_importance counts.
+        """
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
+        with get_session() as session:
+            # Total count
+            total = session.execute(
+                select(func.count())
+                .select_from(NewsItemDB)
+                .where(NewsItemDB.created_at >= cutoff),
+            ).scalar_one()
+
+            # By market
+            market_counts = session.execute(
+                select(NewsItemDB.market, func.count())
+                .where(NewsItemDB.created_at >= cutoff)
+                .group_by(NewsItemDB.market),
+            ).all()
+
+            # By importance
+            imp_counts = session.execute(
+                select(NewsItemDB.importance, func.count())
+                .where(NewsItemDB.created_at >= cutoff)
+                .group_by(NewsItemDB.importance),
+            ).all()
+
+            return {
+                "total": total,
+                "by_market": {m: c for m, c in market_counts},
+                "by_importance": {i: c for i, c in imp_counts},
+            }
