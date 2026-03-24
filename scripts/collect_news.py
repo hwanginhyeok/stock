@@ -26,9 +26,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Collect news from RSS sources")
     parser.add_argument(
         "--market",
-        choices=["kr", "us", "all"],
+        choices=["kr", "us", "tesla", "all"],
         required=True,
-        help="Target market: kr, us, or all",
+        help="Target market: kr, us, tesla, or all",
     )
     args = parser.parse_args()
 
@@ -38,9 +38,15 @@ def main() -> None:
     if args.market == "all":
         items = collector.collect_and_store()
         print(f"[{now}] ALL: {len(items)} articles stored")
+    elif args.market == "tesla":
+        items = collector.collect_tesla()
+        if items:
+            stored = collector._repo.create_many(items)
+            print(f"[{now}] TESLA: {len(stored)} articles stored")
+        else:
+            print(f"[{now}] TESLA: 0 articles (no new items)")
     elif args.market == "kr":
         items = collector.collect_by_market(Market.KOREA)
-        # store via repo directly
         if items:
             stored = collector._repo.create_many(items)
             print(f"[{now}] KR: {len(stored)} articles stored")

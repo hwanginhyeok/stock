@@ -65,6 +65,14 @@ class RSSNewsCollector(BaseNewsCollector):
             all_items.extend(items)
             time.sleep(self._settings.request_delay_sec)
 
+        # Tesla-specific sources (tagged as US market)
+        for source in self._news_config.tesla:
+            if not source.enabled:
+                continue
+            items = self._fetch_source(source, Market.US)
+            all_items.extend(items)
+            time.sleep(self._settings.request_delay_sec)
+
         # Deduplicate against each other
         all_items = self._deduplicator.deduplicate(all_items)
 
@@ -95,6 +103,21 @@ class RSSNewsCollector(BaseNewsCollector):
         stored = self._repo.create_many(items)
         self._logger.info("news_stored", count=len(stored))
         return stored
+
+    def collect_tesla(self) -> list[NewsItem]:
+        """Collect news from Tesla-specific RSS sources.
+
+        Returns:
+            Deduplicated list of NewsItem from Tesla sources.
+        """
+        all_items: list[NewsItem] = []
+        for source in self._news_config.tesla:
+            if not source.enabled:
+                continue
+            items = self._fetch_source(source, Market.US)
+            all_items.extend(items)
+            time.sleep(self._settings.request_delay_sec)
+        return self._deduplicator.deduplicate(all_items)
 
     def collect_by_market(self, market: Market) -> list[NewsItem]:
         """Collect news for a single market.

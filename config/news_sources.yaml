@@ -76,6 +76,22 @@ us:
     language: "en"
     enabled: true
 
+# --- 테슬라/머스크 특화 소스 ---
+tesla:
+  - name: "Teslarati"
+    type: "rss"
+    url: "https://www.teslarati.com/feed/"
+    category: "테슬라"
+    language: "en"
+    enabled: true
+
+  - name: "Electrek Tesla"
+    type: "rss"
+    url: "https://electrek.co/guides/tesla/feed/"
+    category: "테슬라"
+    language: "en"
+    enabled: true
+
 # --- 수집 설정 ---
 collection:
   max_articles_per_source: 20
