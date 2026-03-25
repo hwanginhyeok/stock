@@ -18,10 +18,24 @@ korea:
     language: "ko"
     enabled: true
 
+  - name: "연합뉴스 경제"
+    type: "rss"
+    url: "https://www.yna.co.kr/rss/economy.xml"
+    category: "경제"
+    language: "ko"
+    enabled: true
+
   - name: "연합뉴스 산업"
     type: "rss"
     url: "https://www.yna.co.kr/rss/industry.xml"
     category: "산업"
+    language: "ko"
+    enabled: true
+
+  - name: "한국경제 증권"
+    type: "rss"
+    url: "https://www.hankyung.com/feed/finance"
+    category: "증권"
     language: "ko"
     enabled: true
 
