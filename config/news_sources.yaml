@@ -4,43 +4,50 @@
 
 # --- 한국 뉴스 소스 ---
 korea:
-  - name: "네이버 금융뉴스"
-    type: "rss"
-    url: "https://news.naver.com/main/list.naver?mode=LSD&mid=sec&sid1=101"
-    category: "종합"
-    language: "ko"
-    enabled: true
-
-  - name: "한국경제"
-    type: "rss"
-    url: "https://www.hankyung.com/feed/stock"
-    category: "종합"
-    language: "ko"
-    enabled: true
-
-  - name: "매일경제"
+  - name: "매일경제 헤드라인"
     type: "rss"
     url: "https://www.mk.co.kr/rss/30000001/"
     category: "종합"
     language: "ko"
     enabled: true
 
-  - name: "연합뉴스 경제"
+  - name: "매일경제 경제"
     type: "rss"
-    url: "https://www.yna.co.kr/economy/all/index?site=topnews01"
-    category: "종합"
+    url: "https://www.mk.co.kr/rss/30100041/"
+    category: "경제"
+    language: "ko"
+    enabled: true
+
+  - name: "연합뉴스 산업"
+    type: "rss"
+    url: "https://www.yna.co.kr/rss/industry.xml"
+    category: "산업"
+    language: "ko"
+    enabled: true
+
+  - name: "서울경제"
+    type: "rss"
+    url: "https://www.sedaily.com/RSS/Economy"
+    category: "경제"
+    language: "ko"
+    enabled: true
+
+  - name: "동아일보 경제"
+    type: "rss"
+    url: "https://rss.donga.com/economy.xml"
+    category: "경제"
+    language: "ko"
+    enabled: true
+
+  - name: "전자신문"
+    type: "rss"
+    url: "https://rss.etnews.com/Section901.xml"
+    category: "IT"
     language: "ko"
     enabled: true
 
 # --- 미국 뉴스 소스 ---
 us:
-  - name: "Reuters Business"
-    type: "rss"
-    url: "https://www.reutersagency.com/feed/?taxonomy=best-sectors&post_type=best"
-    category: "종합"
-    language: "en"
-    enabled: true
-
   - name: "Yahoo Finance"
     type: "rss"
     url: "https://finance.yahoo.com/news/rssindex"

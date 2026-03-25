@@ -23,6 +23,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from src.collectors.news.news_pipeline import NewsPipeline, PipelineResult
 from src.core.config import get_config
 from src.core.logger import get_logger
+from src.core.models import Market
 
 logger = get_logger(__name__)
 
@@ -158,8 +159,6 @@ class NewsCollectionScheduler:
         Returns:
             PipelineResult from the pipeline execution.
         """
-        from src.core.models import Market
-
         market = None
         if market_str:
             market = Market.KOREA if market_str.lower() == "kr" else Market.US

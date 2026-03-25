@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from src.core.logger import get_logger
 from src.core.models import Importance, Market, NewsItem
@@ -164,8 +164,6 @@ class NewsTimelineService:
             # 시간: published_at 우선, 없으면 created_at
             ts = item.published_at or item.created_at
             if ts.tzinfo:
-                # KST로 변환
-                from zoneinfo import ZoneInfo
                 ts = ts.astimezone(ZoneInfo("Asia/Seoul"))
             time_str = ts.strftime("%m/%d %H:%M")
 

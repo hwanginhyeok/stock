@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import json
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 
 from src.core.database import NewsItemDB, get_session
 from src.core.models import Market, NewsItem
@@ -138,7 +137,6 @@ class NewsRepository(BaseRepository[NewsItem]):
                 .where(NewsItemDB.created_at >= cutoff)
             )
             # Build OR conditions for each ticker (LIKE on JSON text)
-            from sqlalchemy import or_
             ticker_conditions = [
                 NewsItemDB.related_tickers.contains(f'"{t}"')
                 for t in tickers

@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
+import re
 import time
-from collections import Counter
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
 
 from src.analyzers.sentiment import SentimentAnalyzer
 from src.collectors.news.dedup import TitleDeduplicator
@@ -64,8 +63,6 @@ class PipelineResult:
 _MIN_KEYWORD_LEN = 4
 # 동일 키워드가 이 수 이상의 소스에서 등장하면 브레이킹으로 판정
 _BREAKING_SOURCE_THRESHOLD = 3
-# 브레이킹 감지 시간 윈도우 (분)
-_BREAKING_WINDOW_MIN = 60
 
 
 class NewsPipeline:
@@ -267,7 +264,6 @@ class NewsPipeline:
             "market", "says", "report", "news",
         }
 
-        import re
         # 한글 2글자 이상 또는 영어 3글자 이상 단어 추출
         words = re.findall(r"[가-힣]{2,}|[a-zA-Z]{3,}", title)
         return [
