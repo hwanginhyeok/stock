@@ -48,12 +48,18 @@ class RSSNewsCollector(BaseNewsCollector):
             Deduplicated list of NewsItem from all sources.
         """
         all_items: list[NewsItem] = []
+        self._failed_sources: list[str] = []
+        self._success_sources: list[str] = []
 
         # Korea sources
         for source in self._news_config.korea:
             if not source.enabled:
                 continue
             items = self._fetch_source(source, Market.KOREA)
+            if items:
+                self._success_sources.append(source.name)
+            else:
+                self._failed_sources.append(source.name)
             all_items.extend(items)
             time.sleep(self._settings.request_delay_sec)
 
@@ -62,6 +68,10 @@ class RSSNewsCollector(BaseNewsCollector):
             if not source.enabled:
                 continue
             items = self._fetch_source(source, Market.US)
+            if items:
+                self._success_sources.append(source.name)
+            else:
+                self._failed_sources.append(source.name)
             all_items.extend(items)
             time.sleep(self._settings.request_delay_sec)
 
@@ -79,8 +89,23 @@ class RSSNewsCollector(BaseNewsCollector):
                 if not self._deduplicator.is_duplicate(item.title, existing_titles)
             ]
 
-        self._logger.info("rss_collection_complete", total_items=len(all_items))
+        self._logger.info(
+            "rss_collection_complete",
+            total_items=len(all_items),
+            success_sources=len(self._success_sources),
+            failed_sources=len(self._failed_sources),
+        )
+        if self._failed_sources:
+            self._logger.warning(
+                "rss_sources_failed",
+                sources=self._failed_sources,
+            )
         return all_items
+
+    @property
+    def failed_sources(self) -> list[str]:
+        """Names of sources that failed during the last collect() call."""
+        return getattr(self, "_failed_sources", [])
 
     def collect_and_store(self) -> list[NewsItem]:
         """Collect news and persist to the database.

@@ -39,6 +39,7 @@ class PipelineResult:
     breaking_count: int = 0
     tickers_found: int = 0
     sentiment_analyzed: int = 0
+    failed_sources: list[str] = field(default_factory=list)
     elapsed_sec: float = 0.0
     errors: list[str] = field(default_factory=list)
 
@@ -55,6 +56,8 @@ class PipelineResult:
             parts.append(f"티커매핑 {self.tickers_found}")
         if self.sentiment_analyzed:
             parts.append(f"감성분석 {self.sentiment_analyzed}")
+        if self.failed_sources:
+            parts.append(f"소스실패 {len(self.failed_sources)}")
         parts.append(f"{self.elapsed_sec:.1f}초")
         return " | ".join(parts)
 
@@ -110,6 +113,7 @@ class NewsPipeline:
             else:
                 items = self._collector.collect()
             result.collected = len(items)
+            result.failed_sources = self._collector.failed_sources
         except Exception as e:
             logger.error("pipeline_collection_failed", error=str(e))
             result.errors.append(f"수집 실패: {e}")
