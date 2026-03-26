@@ -466,7 +466,7 @@ data/research/stocks/tesla/
 |---|------|------|--------|------|--------|------|------|
 | 1-23 | 시스템 | 크립토 생태계 기업 모니터링 이메일 섹션 추가 | P2 | AI | 2026-03-01 | 예정 | COIN/HOOD/BMNR/SQ/BLK/MSTR 주가+뉴스, Circle 뉴스 추적. 상세 → task/1-23.md |
 | 1-24 | 시스템 | 네이버 블로그 시황 자동화 (오전 6시 + 저녁 6시) | P2 | AI | 2026-03-22 | 예정 | 오전 6시: KR 시황 + US 마감 정리, 저녁 6시: KR 마감 정리 + US 시작 자료. 네이버 블로그용 정형 포맷. 출력 → `/home/window11/naver_blog/시황/reports/` |
-| 1-25 | 시스템 | 실시간 뉴스 수집 스케줄러 + 파이프라인 + 타임라인 | P2 | AI | 2026-03-23 | 완료 | 4 Phase 전체 구현 완료. 티커 추출기, 파이프라인, APScheduler 데몬, 타임라인 서비스+CLI |
+
 
 ### ── P2 선행 작업 대기 ──
 
@@ -525,6 +525,9 @@ data/research/stocks/tesla/
 
 | # | 분야 | 작업 | 완료일 | 비고 |
 |---|------|------|--------|------|
+| 1-28 | 테스트 | 뉴스 수집기 단위 테스트 17건 | 2026-03-26 | TickerExtractor 9건 + NewsPipeline 6건 + BreakingDetection 2건 |
+| 1-27 | 코드 | RSS 수집기 안정성 보강 — 실패 소스 추적 | 2026-03-26 | failed_sources 속성, PipelineResult 연동, 테스트 7건 |
+| 1-26 | 수정 | 모닝 이메일 Graceful Degradation | 2026-03-26 | 부분 실패 허용, [일부 누락] 접두사, 템플릿 누락 배너, 테스트 7건 |
 | 1-25 | 시스템 | 실시간 뉴스 수집 스케줄러 + 파이프라인 + 타임라인 | 2026-03-23 | Phase 1~4 전체 구현: 티커 추출기, 뉴스 파이프라인(수집→중복제거→티커→감성→DB), APScheduler 데몬(장중30분/장외2시간), 타임라인 서비스+CLI, Repository 5개 메서드 추가 |
 | 2-9 | 코드 | US 시그마 병렬화 + KR VKOSPI 프록시 추가 | 2026-03-19 | ThreadPoolExecutor 15-thread 병렬 (8-20분→~2분), `_compute_hv_from_df()` 재사용으로 HV 중복 HTTP 제거, KODEX200 HV20 VKOSPI 프록시, `--sigma-workers` CLI, US cron `--skip-sigma` 제거 |
 | 2-8 | 코드 | 시그널 리포트 확장: US 풀 유니버스 + KR 시장 + cron 스케줄링 | 2026-03-19 | `--market us\|kr`, `--universe full\|watchlist`, KR Top200 (FinanceDataReader), HV20 시그마, cron 17:00 KR / 06:00 US |
