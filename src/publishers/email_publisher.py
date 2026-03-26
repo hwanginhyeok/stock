@@ -54,7 +54,7 @@ class EmailPublisher:
         template_dir = PROJECT_ROOT / "templates" / "email"
         self._jinja = Environment(
             loader=FileSystemLoader(str(template_dir)),
-            autoescape=False,
+            autoescape=True,
         )
 
     # ── Public API ────────────────────────────────────────────────────────
