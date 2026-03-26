@@ -29,6 +29,11 @@
             <div style="font-size:13px;color:#94a3b8;margin-top:4px;">
               {{ report_date }} &nbsp;|&nbsp; {{ report_time }} KST
             </div>
+            {% if failed_sections %}
+            <div style="background:#78350f;color:#fbbf24;border-radius:6px;padding:6px 12px;margin-top:8px;font-size:12px;">
+              ⚠️ 데이터 누락: {{ failed_sections | join(', ') }}
+            </div>
+            {% endif %}
           </td>
           <td align="right" valign="top">
             {% if net_liquidity is not none %}

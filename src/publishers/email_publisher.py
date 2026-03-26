@@ -66,6 +66,7 @@ class EmailPublisher:
         excel_path: Path | None = None,
         charts: dict[str, str] | None = None,
         crypto_data: dict[str, Any] | None = None,
+        failed_sections: list[str] | None = None,
     ) -> bool:
         """Build and send the morning liquidity + market report.
 
@@ -75,6 +76,7 @@ class EmailPublisher:
             excel_path: Optional path to Excel file to attach.
             charts: Base64-encoded chart PNGs from build_all_charts() and build_crypto_charts().
             crypto_data: Output from CryptoCollector.collect().
+            failed_sections: List of section names that failed to collect.
 
         Returns:
             True if all recipients received the email, False otherwise.
@@ -86,9 +88,12 @@ class EmailPublisher:
             if fred_data.get("net_liquidity_b") is not None
             else f"[주식부자] 모닝 리포트 — {now.strftime('%Y-%m-%d')}"
         )
+        if failed_sections:
+            subject = f"[일부 누락] {subject}"
 
         html_body = self._render_html(
-            fred_data, fx_data, now, charts=charts, crypto_data=crypto_data
+            fred_data, fx_data, now, charts=charts, crypto_data=crypto_data,
+            failed_sections=failed_sections or [],
         )
         recipients = self._active_recipients()
 
@@ -135,6 +140,7 @@ class EmailPublisher:
         now: datetime,
         charts: dict[str, str] | None = None,
         crypto_data: dict[str, Any] | None = None,
+        failed_sections: list[str] | None = None,
     ) -> str:
         """Render Jinja2 HTML template with report data.
 
@@ -145,6 +151,7 @@ class EmailPublisher:
             charts: Base64-encoded chart PNGs (liquidity, mmf, currencies,
                     destinations, sectors, crypto_price, eth_tvl).
             crypto_data: Output from CryptoCollector.collect().
+            failed_sections: List of data sections that failed to collect.
 
         Returns:
             Rendered HTML string.
@@ -161,6 +168,7 @@ class EmailPublisher:
             sectors=fx_data.get("sectors", {}),
             charts=charts or {},
             crypto=crypto_data or {},
+            failed_sections=failed_sections or [],
         )
 
     def _build_message(

@@ -132,29 +132,51 @@ def main() -> None:
     print("  Morning Liquidity Report — Email Sender")
     print("=" * 56)
 
+    # 수집 실패 섹션 추적
+    failed_sections: list[str] = []
+
     # ── Step 1: FRED 수집 ──────────────────────────────────────
     print("\n[1/3] FRED 유동성 데이터 수집 중...")
-    fred_data = FREDCollector().collect()
-    print("  OK")
+    fred_data: dict = {}
+    try:
+        fred_data = FREDCollector().collect()
+        print("  OK")
+    except Exception as e:
+        logger.error("fred_collection_failed", error=str(e))
+        print(f"  ✗ FRED 수집 실패: {e}")
+        failed_sections.append("FRED")
 
     # ── Step 2: FX + 도착지 수집 ───────────────────────────────
     print("[2/3] FX / 도착지 데이터 수집 중...")
     fx_collector = FXCollector()
-    fx_data = fx_collector.collect()
-    print("  OK")
+    fx_data: dict = {}
+    try:
+        fx_data = fx_collector.collect()
+        print("  OK")
+    except Exception as e:
+        logger.error("fx_collection_failed", error=str(e))
+        print(f"  ✗ FX 수집 실패: {e}")
+        failed_sections.append("FX")
 
-    _print_summary(fred_data, fx_data)
+    if fred_data and fx_data:
+        _print_summary(fred_data, fx_data)
 
     # ── Step 2.5: 크립토 수집 ──────────────────────────────────
     crypto_data: dict = {}
+    crypto_collector: CryptoCollector | None = None
     if not args.no_crypto:
         print("[2.5] 크립토 데이터 수집 중 (BTC / ETH + DeFiLlama TVL)...")
-        crypto_collector = CryptoCollector()
-        crypto_data = crypto_collector.collect()
-        btc_price = crypto_data.get("btc", {}).get("price", "?")
-        eth_price = crypto_data.get("eth", {}).get("price", "?")
-        eth_tvl   = crypto_data.get("eth_tvl_b", "?")
-        print(f"  OK  BTC ${btc_price:,.0f}  ETH ${eth_price:,.0f}  ETH-DeFi TVL ${eth_tvl}B")
+        try:
+            crypto_collector = CryptoCollector()
+            crypto_data = crypto_collector.collect()
+            btc_price = crypto_data.get("btc", {}).get("price", "?")
+            eth_price = crypto_data.get("eth", {}).get("price", "?")
+            eth_tvl   = crypto_data.get("eth_tvl_b", "?")
+            print(f"  OK  BTC ${btc_price:,.0f}  ETH ${eth_price:,.0f}  ETH-DeFi TVL ${eth_tvl}B")
+        except Exception as e:
+            logger.error("crypto_collection_failed", error=str(e))
+            print(f"  ✗ 크립토 수집 실패: {e}")
+            failed_sections.append("Crypto")
     else:
         print("[2.5] 크립토 생략 (--no-crypto)")
 
@@ -162,17 +184,28 @@ def main() -> None:
     charts: dict = {}
     if not args.no_charts:
         print("[2.7] 차트 생성 중 (FRED 2년 + FX 1년 + 크립토 1년)...")
-        import matplotlib
-        matplotlib.use("Agg")  # headless backend (no display needed)
-        fred_series   = FREDCollector().collect_series(lookback_years=2)
-        fx_series     = fx_collector.collect_series(period="1y")
-        charts        = build_all_charts(fred_series, fx_series)
-        if not args.no_crypto:
-            crypto_series = crypto_collector.collect_series(period="1y")
-            charts.update(build_crypto_charts(crypto_series))
-        print(f"  OK ({len(charts)}개 차트)")
+        try:
+            import matplotlib
+            matplotlib.use("Agg")  # headless backend (no display needed)
+            fred_series   = FREDCollector().collect_series(lookback_years=2)
+            fx_series     = fx_collector.collect_series(period="1y")
+            charts        = build_all_charts(fred_series, fx_series)
+            if not args.no_crypto and crypto_collector is not None:
+                crypto_series = crypto_collector.collect_series(period="1y")
+                charts.update(build_crypto_charts(crypto_series))
+            print(f"  OK ({len(charts)}개 차트)")
+        except Exception as e:
+            logger.error("chart_generation_failed", error=str(e))
+            print(f"  ✗ 차트 생성 실패: {e}")
+            failed_sections.append("Charts")
     else:
         print("[2.7] 차트 생략 (--no-charts)")
+
+    # ── 전체 실패 시 조기 종료 ────────────────────────────────
+    if not fred_data and not fx_data:
+        print("\n  ✗ 핵심 데이터(FRED + FX) 모두 수집 실패 — 이메일 발송 스킵")
+        logger.error("morning_email_skipped_all_failed", failed=failed_sections)
+        sys.exit(1)
 
     # ── Dry-run: HTML 파일로 저장 후 종료 ─────────────────────
     if args.dry_run:
@@ -210,6 +243,8 @@ def main() -> None:
         sys.exit(1)
 
     print(f"  수신자: {', '.join(r.address for r in recipients)}")
+    if failed_sections:
+        print(f"  ⚠️  누락 섹션: {', '.join(failed_sections)}")
     publisher = EmailPublisher()
     ok = publisher.send_morning_report(
         fred_data=fred_data,
@@ -217,6 +252,7 @@ def main() -> None:
         excel_path=excel_path,
         charts=charts if charts else None,
         crypto_data=crypto_data if crypto_data else None,
+        failed_sections=failed_sections,
     )
 
     if ok:
