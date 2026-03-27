@@ -27,7 +27,10 @@ OUT  = HERE / "visuals"
 OUT.mkdir(exist_ok=True)
 
 # ── korean font ───────────────────────────────────────────────────────────────
-_FONT_PATH = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
+_FONT_PATH = os.path.expanduser("~/.fonts/NotoSansCJK-Regular.ttc")
+_FONT_PATH_FALLBACK = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
+if not os.path.exists(_FONT_PATH):
+    _FONT_PATH = _FONT_PATH_FALLBACK
 if os.path.exists(_FONT_PATH):
     fm.fontManager.addfont(_FONT_PATH)
     plt.rcParams["font.family"] = "Noto Sans CJK JP"
@@ -451,16 +454,16 @@ def make_moon_pivot() -> dict:
 def make_cost_unlocks() -> dict:
     tiers = [
         ("$2,700",  "현재 (Falcon 9)", [
-            "Starlink (9,400기)", "상업 위성", "ISS 보급",
+            "Starlink 위성 배치", "ISS 보급",
         ], GRAY),
         ("$100",    "Starship 초기", [
-            "궤도 제조 (ZBLAN, 바이오)", "우주 관광",
+            "테라팹 D3 위성 대량 투입", "Optimus 궤도 투입",
         ], YELLOW),
         ("$50",     "Starship 성숙", [
-            "궤도 데이터센터", "우주 반도체",
+            "궤도 데이터센터 — xAI 연산 이전", "",
         ], BLUE),
         ("$20",     "대량 운용", [
-            "달 정기 화물", "우주 태양광 발전 (SBSP)",
+            "달 정기 화물", "Tesla Energy + Optimus 달 기지",
         ], CYAN),
         ("$10",     "장기 목표", [
             "달 산업 기지", "화성 전초기지",
