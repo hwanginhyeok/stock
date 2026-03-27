@@ -20,6 +20,7 @@
 | 4-12 | 아티클 | KR-07: 곱셈이 사라진다 — 1, 0, -1과 반도체의 미래 | 사용자 + AI | 리서치 완료 (15개 기술 + BitNet-삼성3진법 연결) | **사용자 구조안 확정** → 아웃라인 → 초안 |
 | 4-16 | 아티클 | 026 TeraFab의 시작 — 팹을 가장 빨리 짓는 법 | 사용자 + AI | v1 초안 완료 (271줄, Samsung 브릿지 반영) | 퇴고 → v2 → 시각화 → 게시 |
 | 4-17 | 아티클 | 027 파운드리의 역설 — 애플이 가장 잘 만드는 회사가 될 수 없는 이유 | 사용자 + AI | 아웃라인 제안 완료, 승인 대기 | 아웃라인 확정 → v1 초안 |
+| 4-18 | 아티클 | 테슬라·xAI·SpaceX의 테라팹 — 일론 머스크 생태계와 제조 혁신 | 사용자 + AI | 예정 | 리서치 → 테제 확정 → 아웃라인 → 초안 |
 | 4-13 | 아티클 | 일론머스크 생태계 카드뉴스 | 사용자 + AI | 기획 단계 | 콘셉트·포맷·범위 확정 → 리서치 → 제작 |
 | 4-14 | 아티클 | 일론머스크 생태계 상상콘텐츠 (웹 룰렛) | 사용자 | 요구사항 문서 완료 (`task/4-14_elon_ecosystem_roulette.md`) → 별도 프로젝트에서 구현 중 | 웹앱 구현 → 호스팅 → X 공유 |
 | 3-1 | 분석 | 지표 장단점·맹점 분석 + 해석 체계 고도화 | 사용자 + AI | Q6 완료, 해석 원칙 8개 정립 | Tech Score 역발상 편향 개선/해석 방향 논의 |
@@ -393,6 +394,78 @@ data/research/articles/001_apple-samsung-google_tesla-hyundai-nvidia/
 
 ---
 
+### 1-24 자동 시황 브리핑 시스템 (오선 스타일)
+
+**우선순위**: P1 (가장 중요)
+**레퍼런스**: [오선의 미국 증시 라이브](https://www.youtube.com/@futuresnow) — 본장 전 시황 브리핑, 주요 뉴스/실적/경제일정 정리
+
+**목표**: 매일 자동으로 한국/미국 시황 브리핑을 생성하는 시스템
+
+**스케줄**:
+| 시간 | 내용 |
+|------|------|
+| **오전 6시** | 한국시장 시작 준비 + 미국 시황 마감 정리 |
+| **오후 6시** | 미국시장 시작 준비 + 한국시장 마감 정리 |
+
+**브리핑 스타일 (오선 참고)**:
+- 주요 뉴스 요약 (Bloomberg, CNBC, Reuters, WSJ 등)
+- 기업 실적 발표 일정
+- 주요 경제 지표/이벤트
+- 선물/지수 동향
+- 크립토 동향
+
+**구현 방향 (설계 필요)**:
+- [ ] 데이터 소스 확정 (기존 뉴스 수집기 활용 + 추가 소스)
+- [ ] 브리핑 포맷/템플릿 설계
+- [ ] 자동 생성 파이프라인 (cron 스케줄)
+- [ ] 출력 채널 확정 (이메일? 텔레그램? 파일?)
+
+**관련 기존 시스템**:
+- `scripts/collect_news.py` — 뉴스 수집
+- `src/collectors/` — 시장 데이터 수집
+- 모닝 이메일 시스템 (1-13) — 참고 아키텍처
+
+---
+
+### 1-25 뉴스 온톨로지 + 제1원칙 분석 + 타임라인
+
+**목표**: 수집된 뉴스를 팔란티어 온톨로지 형식으로 정리하고, 일론 머스크의 제1원칙 사고로 분석하여 타임라인을 생성
+
+**팔란티어 온톨로지 구조**:
+- **Entity** — 기업, 인물, 기관 (이름, 유형, 티커, 시장)
+- **Event** — 사건 (제목, 유형, 심각도, 상태)
+- **Link** — Entity↔Event↔News 관계 (유형, 신뢰도, 근거)
+- **Action/Evaluation** — 분석 결과 (제1원칙 분해)
+
+**제1원칙 분석 레이어**:
+1. 통념 식별 — 시장이 당연시하는 가정
+2. 근본 진실 분해 — 가정을 제거하고 남는 팩트
+3. Gap 발견 — 통념과 현실 사이의 괴리
+4. 가능성 추론 — Gap에서 투자 기회 도출
+
+**타임라인 생성**:
+- politics-stat `remotion/templates/Timeline.tsx` 참고 (Remotion 애니메이션)
+- 이벤트 시계열 → 시각적 타임라인 렌더링
+
+**참조 파일 (이 프로젝트)**:
+- `scripts/ontology_io.py` — Entity/Event/Link 추출/적용 CLI
+- `scripts/story_io.py` — 뉴스 스토리 분류/추적
+- `src/storage/ontology_repository.py` — DB CRUD
+- `src/core/models.py` — OntologyEntity, OntologyEvent, OntologyLink 모델
+
+**참조 파일 (politics-stat)**:
+- `/home/gint_pcd/politics-stat/lib/domains/ontology/types.ts` — 팔란티어식 4블록 타입
+- `/home/gint_pcd/politics-stat/lib/domains/ontology/services.ts` — 등급/색상/필터 서비스
+- `/home/gint_pcd/politics-stat/remotion/templates/Timeline.tsx` — 타임라인 컴포넌트
+
+**다음 단계**:
+- [ ] 기존 ontology_io.py 현황 점검 (DB 데이터 유무)
+- [ ] 제1원칙 분석 프롬프트/파이프라인 설계
+- [ ] 타임라인 출력 형식 확정 (matplotlib PNG? Remotion 영상? HTML?)
+- [ ] 1-24 브리핑 시스템과 연동 방안
+
+---
+
 ### 3-1 지표 분석 상세
 
 **목표**: 리포트의 각 지표가 실제로 얼마나 예측력이 있는지 검증하고, 해석 체계를 정립.
@@ -528,7 +601,9 @@ data/research/stocks/tesla/
 | 1-28 | 테스트 | 뉴스 수집기 단위 테스트 17건 | 2026-03-26 | TickerExtractor 9건 + NewsPipeline 6건 + BreakingDetection 2건 |
 | 1-27 | 코드 | RSS 수집기 안정성 보강 — 실패 소스 추적 | 2026-03-26 | failed_sources 속성, PipelineResult 연동, 테스트 7건 |
 | 1-26 | 수정 | 모닝 이메일 Graceful Degradation | 2026-03-26 | 부분 실패 허용, [일부 누락] 접두사, 템플릿 누락 배너, 테스트 7건 |
-| 1-25 | 시스템 | 실시간 뉴스 수집 스케줄러 + 파이프라인 + 타임라인 | 2026-03-23 | Phase 1~4 전체 구현: 티커 추출기, 뉴스 파이프라인(수집→중복제거→티커→감성→DB), APScheduler 데몬(장중30분/장외2시간), 타임라인 서비스+CLI, Repository 5개 메서드 추가 |
+| 1-25 | 시스템 | 뉴스 온톨로지 + 제1원칙 분석 + 타임라인 | 2026-03-23 | 2레이어 구조 (매크로 6 + 종목 104), 교차링크(impacts), 타임라인 PNG, FPA 모델 |
+| 1-24 | 시스템 | 자동 시황 브리핑 시스템 (오선 스타일) | 2026-03-23 | cron 05:53/17:47 KST 평일, 네이버 HTML 변환, 팩트 카테고리별 리니어 포맷 |
+| 2-11 | 코드 | 뉴스 팩트 추출 파이프라인 | 2026-03-23 | 규칙 기반 추출 + enrich(URL 스크래핑) + CLI 7커맨드 + 보안 검토 완료 |
 | 2-9 | 코드 | US 시그마 병렬화 + KR VKOSPI 프록시 추가 | 2026-03-19 | ThreadPoolExecutor 15-thread 병렬 (8-20분→~2분), `_compute_hv_from_df()` 재사용으로 HV 중복 HTTP 제거, KODEX200 HV20 VKOSPI 프록시, `--sigma-workers` CLI, US cron `--skip-sigma` 제거 |
 | 2-8 | 코드 | 시그널 리포트 확장: US 풀 유니버스 + KR 시장 + cron 스케줄링 | 2026-03-19 | `--market us\|kr`, `--universe full\|watchlist`, KR Top200 (FinanceDataReader), HV20 시그마, cron 17:00 KR / 06:00 US |
 | 4-9 | 아티클 | 019 HIMS — 약은 누구나 팔 수 있다 | 2026-03-06 | X Notes 게시 완료 |

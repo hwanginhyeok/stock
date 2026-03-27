@@ -281,6 +281,222 @@ class OHLCVDB(Base):
     )
 
 
+class StoryThreadDB(Base):
+    """ORM model for news story threads."""
+
+    __tablename__ = "story_threads"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    title: Mapped[str] = mapped_column(String(500))
+    summary: Mapped[str] = mapped_column(Text, default="")
+    market: Mapped[str] = mapped_column(String(10), default="korea")
+    status: Mapped[str] = mapped_column(String(20), default="active")
+    related_tickers: Mapped[str] = mapped_column(Text, default="[]")
+    article_count: Mapped[int] = mapped_column(Integer, default=0)
+    first_seen_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    last_updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_story_status", "status"),
+        Index("ix_story_market", "market"),
+        Index("ix_story_last_updated", "last_updated_at"),
+    )
+
+
+class NewsStoryLinkDB(Base):
+    """ORM model linking news items to story threads."""
+
+    __tablename__ = "news_story_links"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    news_id: Mapped[str] = mapped_column(String(36))
+    story_id: Mapped[str] = mapped_column(String(36))
+    relevance_score: Mapped[float] = mapped_column(Float, default=1.0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_link_news_id", "news_id"),
+        Index("ix_link_story_id", "story_id"),
+        Index("ix_link_news_story", "news_id", "story_id", unique=True),
+    )
+
+
+class OntologyEntityDB(Base):
+    """ORM model for ontology entities."""
+
+    __tablename__ = "ontology_entities"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    name: Mapped[str] = mapped_column(String(200))
+    entity_type: Mapped[str] = mapped_column(String(30), default="company")
+    ticker: Mapped[str] = mapped_column(String(20), default="")
+    market: Mapped[str] = mapped_column(String(10), default="korea")
+    properties: Mapped[str] = mapped_column(Text, default="{}")
+    status: Mapped[str] = mapped_column(String(20), default="active")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_ont_entity_name", "name"),
+        Index("ix_ont_entity_type", "entity_type"),
+        Index("ix_ont_entity_ticker", "ticker"),
+        Index("ix_ont_entity_market", "market"),
+    )
+
+
+class OntologyEventDB(Base):
+    """ORM model for ontology events."""
+
+    __tablename__ = "ontology_events"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    title: Mapped[str] = mapped_column(String(500))
+    summary: Mapped[str] = mapped_column(Text, default="")
+    event_type: Mapped[str] = mapped_column(String(30), default="macro")
+    severity: Mapped[str] = mapped_column(String(20), default="moderate")
+    market: Mapped[str] = mapped_column(String(10), default="korea")
+    started_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    last_article_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    status: Mapped[str] = mapped_column(String(20), default="developing")
+    article_count: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_ont_event_type", "event_type"),
+        Index("ix_ont_event_severity", "severity"),
+        Index("ix_ont_event_market", "market"),
+        Index("ix_ont_event_status", "status"),
+        Index("ix_ont_event_started", "started_at"),
+        Index("ix_ont_event_last_article", "last_article_at"),
+    )
+
+
+class OntologyLinkDB(Base):
+    """ORM model for ontology links (relationships between objects)."""
+
+    __tablename__ = "ontology_links"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    link_type: Mapped[str] = mapped_column(String(20))
+    source_type: Mapped[str] = mapped_column(String(20))
+    source_id: Mapped[str] = mapped_column(String(36))
+    target_type: Mapped[str] = mapped_column(String(20))
+    target_id: Mapped[str] = mapped_column(String(36))
+    confidence: Mapped[float] = mapped_column(Float, default=1.0)
+    evidence: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_ont_link_type", "link_type"),
+        Index("ix_ont_link_source", "source_type", "source_id"),
+        Index("ix_ont_link_target", "target_type", "target_id"),
+        Index(
+            "ix_ont_link_unique",
+            "link_type", "source_type", "source_id", "target_type", "target_id",
+            unique=True,
+        ),
+    )
+
+
+class MarketReactionDB(Base):
+    """ORM model for market reactions."""
+
+    __tablename__ = "ontology_reactions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    event_id: Mapped[str] = mapped_column(String(36))
+    entity_id: Mapped[str] = mapped_column(String(36))
+    reaction_type: Mapped[str] = mapped_column(String(20), default="price")
+    magnitude: Mapped[float] = mapped_column(Float, default=0.0)
+    direction: Mapped[str] = mapped_column(String(20), default="neutral")
+    details: Mapped[str] = mapped_column(Text, default="{}")
+    observed_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_ont_reaction_event", "event_id"),
+        Index("ix_ont_reaction_entity", "entity_id"),
+        Index("ix_ont_reaction_observed", "observed_at"),
+    )
+
+
+class ThesisDB(Base):
+    """ORM model for investment theses."""
+
+    __tablename__ = "ontology_theses"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    title: Mapped[str] = mapped_column(String(500))
+    summary: Mapped[str] = mapped_column(Text, default="")
+    market: Mapped[str] = mapped_column(String(10), default="korea")
+    status: Mapped[str] = mapped_column(String(20), default="active")
+    related_tickers: Mapped[str] = mapped_column(Text, default="[]")
+    strength: Mapped[float] = mapped_column(Float, default=0.0)
+    evidence_count: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_ont_thesis_status", "status"),
+        Index("ix_ont_thesis_market", "market"),
+        Index("ix_ont_thesis_strength", "strength"),
+    )
+
+
+class NewsFactDB(Base):
+    """ORM model for extracted news facts."""
+
+    __tablename__ = "news_facts"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    news_id: Mapped[str] = mapped_column(String(36))
+    fact_type: Mapped[str] = mapped_column(String(20), default="numerical")
+    claim: Mapped[str] = mapped_column(Text)
+    entities: Mapped[str] = mapped_column(Text, default="[]")
+    tickers: Mapped[str] = mapped_column(Text, default="[]")
+    numbers: Mapped[str] = mapped_column(Text, default="{}")
+    source_quote: Mapped[str] = mapped_column(Text, default="")
+    market: Mapped[str] = mapped_column(String(10), default="korea")
+    confidence: Mapped[float] = mapped_column(Float, default=1.0)
+    published_at: Mapped[datetime | None] = mapped_column(
+        DateTime, nullable=True,
+    )
+    extracted_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_fact_news_id", "news_id"),
+        Index("ix_fact_type", "fact_type"),
+        Index("ix_fact_market", "market"),
+        Index("ix_fact_confidence", "confidence"),
+        Index("ix_fact_published_at", "published_at"),
+        Index("ix_fact_extracted_at", "extracted_at"),
+    )
+
+
+class FirstPrincipleAnalysisDB(Base):
+    """ORM model for first-principles analyses."""
+
+    __tablename__ = "first_principle_analyses"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    event_id: Mapped[str] = mapped_column(String(36))
+    event_title: Mapped[str] = mapped_column(String(500), default="")
+    conventional_wisdom: Mapped[str] = mapped_column(Text, default="")
+    fundamental_truths: Mapped[str] = mapped_column(Text, default="[]")
+    gap: Mapped[str] = mapped_column(Text, default="")
+    opportunity: Mapped[str] = mapped_column(Text, default="")
+    related_fact_ids: Mapped[str] = mapped_column(Text, default="[]")
+    market: Mapped[str] = mapped_column(String(10), default="korea")
+    status: Mapped[str] = mapped_column(String(20), default="draft")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_fpa_event_id", "event_id"),
+        Index("ix_fpa_market", "market"),
+        Index("ix_fpa_status", "status"),
+    )
+
+
 class TrendsRecordDB(Base):
     """ORM model for Google Trends interest data."""
 
@@ -403,6 +619,10 @@ _JSON_FIELDS = frozenset({
     "extra_data", "signals", "technical_indicators", "fundamental_data",
     "hashtags", "media_paths", "sections", "risk_factors", "swot",
     "data_sources", "components", "details",
+    # StoryThread uses related_tickers (already listed above)
+    "properties",  # OntologyEntity
+    "entities", "tickers", "numbers",  # NewsFact
+    "fundamental_truths", "related_fact_ids",  # FirstPrincipleAnalysis
 })
 
 # Lazy-initialized Pydantic -> ORM type mapping
@@ -415,13 +635,22 @@ def _get_orm_map() -> dict[type, type[Base]]:
         from src.core.models import (
             Article,
             CommunitySentiment,
+            MarketReaction,
             MarketSnapshot,
+            FirstPrincipleAnalysis,
+            NewsFact,
             NewsItem,
+            NewsStoryLink,
             OHLCVRecord,
+            OntologyEntity,
+            OntologyEvent,
+            OntologyLink,
             ResearchReport,
             SNSPost,
             SentimentRecord,
             StockAnalysis,
+            StoryThread,
+            Thesis,
             TrendsRecord,
         )
 
@@ -436,6 +665,15 @@ def _get_orm_map() -> dict[type, type[Base]]:
             CommunitySentiment: CommunitySentimentDB,
             TrendsRecord: TrendsRecordDB,
             OHLCVRecord: OHLCVDB,
+            StoryThread: StoryThreadDB,
+            NewsStoryLink: NewsStoryLinkDB,
+            OntologyEntity: OntologyEntityDB,
+            OntologyEvent: OntologyEventDB,
+            OntologyLink: OntologyLinkDB,
+            MarketReaction: MarketReactionDB,
+            Thesis: ThesisDB,
+            NewsFact: NewsFactDB,
+            FirstPrincipleAnalysis: FirstPrincipleAnalysisDB,
         })
     return _ORM_MAP
 

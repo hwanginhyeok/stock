@@ -75,6 +75,14 @@ class RSSNewsCollector(BaseNewsCollector):
             all_items.extend(items)
             time.sleep(self._settings.request_delay_sec)
 
+        # Tesla-specific sources (tagged as US market)
+        for source in self._news_config.tesla:
+            if not source.enabled:
+                continue
+            items = self._fetch_source(source, Market.US)
+            all_items.extend(items)
+            time.sleep(self._settings.request_delay_sec)
+
         # Deduplicate against each other
         all_items = self._deduplicator.deduplicate(all_items)
 
@@ -120,6 +128,21 @@ class RSSNewsCollector(BaseNewsCollector):
         stored = self._repo.create_many(items)
         self._logger.info("news_stored", count=len(stored))
         return stored
+
+    def collect_tesla(self) -> list[NewsItem]:
+        """Collect news from Tesla-specific RSS sources.
+
+        Returns:
+            Deduplicated list of NewsItem from Tesla sources.
+        """
+        all_items: list[NewsItem] = []
+        for source in self._news_config.tesla:
+            if not source.enabled:
+                continue
+            items = self._fetch_source(source, Market.US)
+            all_items.extend(items)
+            time.sleep(self._settings.request_delay_sec)
+        return self._deduplicator.deduplicate(all_items)
 
     def collect_by_market(self, market: Market) -> list[NewsItem]:
         """Collect news for a single market.
@@ -232,15 +255,21 @@ class RSSNewsCollector(BaseNewsCollector):
         if not title:
             return None
 
-        # Extract content / summary
+        # Extract content / summary — use best available text
         content = ""
         if hasattr(entry, "content") and entry.content:
             content = entry.content[0].get("value", "")
-        summary = getattr(entry, "summary", "")
+        summary = getattr(entry, "summary", "") or getattr(
+            entry, "description", ""
+        )
 
         # Clean HTML
         content = self._extract_text(content)
         summary = self._extract_text(summary)
+
+        # If content is empty but summary exists, promote summary to content
+        if not content and summary:
+            content = summary
 
         # Parse published date
         published_at = self._parse_date(entry)

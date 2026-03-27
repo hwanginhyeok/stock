@@ -1,0 +1,990 @@
+{
+  "date": "2026-03-23",
+  "market": "korea",
+  "count": 50,
+  "facts": [
+    {
+      "id": "7d542a49-fa1a-4f63-9b24-505fe9aff4d2",
+      "news_id": "66fd12ec-9619-466b-80f2-b036cea1e530",
+      "fact_type": "deal",
+      "claim": "[수익률 상위 1% 투자자 오전 9시30분 거래동향] 삼전·하닉, 한전 KPS에 순매수 몰려 현대차, 한화솔루션등에는 매도 포지션주식 투자 수익률 상위 1% 초고수들은 23일 오전..",
+      "entities": [
+        "현대차"
+      ],
+      "tickers": [
+        "005380"
+      ],
+      "numbers": {
+        "raw_values": [
+          "1%",
+          "1%"
+        ],
+        "count": 2
+      },
+      "source_quote": "[수익률 상위 1% 투자자 오전 9시30분 거래동향] 삼전·하닉, 한전 KPS에 순매수 몰려 현대차, 한화솔루션등에는 매도 포지션주식 투자 수익률 상위 1% 초고수들은 23일 오전..",
+      "market": "korea",
+      "confidence": 1.0,
+      "published_at": "2026-03-23 01:40:51",
+      "extracted_at": "2026-03-23 01:58:53.875333"
+    },
+    {
+      "id": "2bda671f-58bc-4102-a800-5d670357848c",
+      "news_id": "9d4cdc04-cb29-4048-b542-a40e528661bb",
+      "fact_type": "numerical",
+      "claim": "화물운송업계 “기름값 한달에 1000만원” 경제 혈관에 ‘디젤쇼크’…원가 연쇄 상승 “우크라이나 전쟁 때보다 더 심각” 우려미국 경제의 혈관 역할을 하는 화물 운송업계가 ‘디젤 쇼..",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "1000만"
+        ],
+        "count": 1
+      },
+      "source_quote": "화물운송업계 “기름값 한달에 1000만원” 경제 혈관에 ‘디젤쇼크’…원가 연쇄 상승 “우크라이나 전쟁 때보다 더 심각” 우려미국 경제의 혈관 역할을 하는 화물 운송업계가 ‘디젤 쇼..",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 01:38:25",
+      "extracted_at": "2026-03-23 01:58:53.875189"
+    },
+    {
+      "id": "c2154da2-3fc7-4cc3-8326-a1fdf25fe0ad",
+      "news_id": "0f99a036-8219-42c1-856f-fa6b077ea31f",
+      "fact_type": "deal",
+      "claim": "3.3㎡당 평균 1755만원…분양가 상한제 적용 23일 특공 시작…31일 당첨자 발표·4월 계약호반건설은 경기 시흥시 거모지구에 선보이는 ‘호반써밋 시흥거모 B1블록’ 견본주택에 ..",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "1755만"
+        ],
+        "count": 1
+      },
+      "source_quote": "3.3㎡당 평균 1755만원…분양가 상한제 적용 23일 특공 시작…31일 당첨자 발표·4월 계약호반건설은 경기 시흥시 거모지구에 선보이는 ‘호반써밋 시흥거모 B1블록’ 견본주택에 ..",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 01:37:22",
+      "extracted_at": "2026-03-23 01:58:53.875114"
+    },
+    {
+      "id": "69bb5666-1d5c-42cc-a060-39cc53603698",
+      "news_id": "bc2b8981-5c34-4ce2-9dca-4798e76967d1",
+      "fact_type": "deal",
+      "claim": "투자 연계형 등 4개 분야별 공모 2013년부터 총 114개 과제 지원대구시가 대구경북첨단의료복합단지(첨복단지) 입주기업의 연구개발 역량 강화와 사업화 촉진을 위해 ‘2026년 첨..",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "4개",
+          "114개"
+        ],
+        "count": 2
+      },
+      "source_quote": "투자 연계형 등 4개 분야별 공모 2013년부터 총 114개 과제 지원대구시가 대구경북첨단의료복합단지(첨복단지) 입주기업의 연구개발 역량 강화와 사업화 촉진을 위해 ‘2026년 첨..",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 01:36:30",
+      "extracted_at": "2026-03-23 01:58:53.875058"
+    },
+    {
+      "id": "bd80864b-5d21-4afc-a8d5-cdc8a7972c46",
+      "news_id": "cdaa753f-9c69-4189-b8bc-fe2e3e4e0f28",
+      "fact_type": "policy",
+      "claim": "3000원·1000원 할인쿠폰 9일간 매일 1억원어치 지급신한은행은 23일부터 31일까지 ‘2026 신한 SOL KBO 리그’ 개막을 맞아 배달앱 땡겨요에서 매일 1억원 규모의 할..",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "1억",
+          "1억"
+        ],
+        "count": 2
+      },
+      "source_quote": "3000원·1000원 할인쿠폰 9일간 매일 1억원어치 지급신한은행은 23일부터 31일까지 ‘2026 신한 SOL KBO 리그’ 개막을 맞아 배달앱 땡겨요에서 매일 1억원 규모의 할..",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 01:33:37",
+      "extracted_at": "2026-03-23 01:58:53.874992"
+    },
+    {
+      "id": "92016b3b-0b35-4039-90f2-1ba0781a9a83",
+      "news_id": "a00101b0-9aed-412a-9a7c-54757f991c1d",
+      "fact_type": "numerical",
+      "claim": "‘랜더스 쇼핑페스타’ 4월 1일 개막 이마트·신세계百 등서 12일간 열려 생필품 최대 60% 할인, 야구장 팝업이마트, 신세계백화점, SSG닷컴, G마켓 등 신세계그룹 계열사들이 ..",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "60%"
+        ],
+        "count": 1
+      },
+      "source_quote": "‘랜더스 쇼핑페스타’ 4월 1일 개막 이마트·신세계百 등서 12일간 열려 생필품 최대 60% 할인, 야구장 팝업이마트, 신세계백화점, SSG닷컴, G마켓 등 신세계그룹 계열사들이 ..",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 01:29:13",
+      "extracted_at": "2026-03-23 01:58:53.874872"
+    },
+    {
+      "id": "5bd3d3b4-3d03-42bf-a7d9-95f8c09532ed",
+      "news_id": "8ceb281c-7bc3-4572-ba16-b96c67dc5618",
+      "fact_type": "numerical",
+      "claim": "'26만 아미들 다 어디갔나'…'재고 떨이' 날벼락 맞은 편의점",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "26만"
+        ],
+        "count": 1
+      },
+      "source_quote": "'26만 아미들 다 어디갔나'…'재고 떨이' 날벼락 맞은 편의점",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 01:37:58",
+      "extracted_at": "2026-03-23 01:58:53.874791"
+    },
+    {
+      "id": "7e3661a0-16cc-4ed1-9d99-b8516985357c",
+      "news_id": "3eacf90e-9b87-4be6-b4a6-c91524fb2516",
+      "fact_type": "numerical",
+      "claim": "[속보] 3月 1∼20일 수출 533억달러, 50.4%↑…일평균 40.4%↑",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "533억",
+          "50.4%",
+          "40.4%"
+        ],
+        "count": 3
+      },
+      "source_quote": "[속보] 3月 1∼20일 수출 533억달러, 50.4%↑…일평균 40.4%↑",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 00:06:11",
+      "extracted_at": "2026-03-23 01:58:53.874645"
+    },
+    {
+      "id": "0788e2dd-ed54-44f4-ad3f-f28cbd3ae608",
+      "news_id": "c5f80121-865a-47cd-b5e1-95211c7ce2f0",
+      "fact_type": "policy",
+      "claim": "[임현우 기자의 키워드 시사경제] 美 \"16개국 조사\"…새 관세 도입 '빌드업'",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "16개"
+        ],
+        "count": 1
+      },
+      "source_quote": "[임현우 기자의 키워드 시사경제] 美 \"16개국 조사\"…새 관세 도입 '빌드업'",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 00:00:23",
+      "extracted_at": "2026-03-23 01:58:53.874609"
+    },
+    {
+      "id": "6652e748-2ffe-4580-a6b4-31668670b418",
+      "news_id": "ab995d0d-a303-42ec-84a5-b65174ae99ab",
+      "fact_type": "numerical",
+      "claim": "'3070억 달러' 빠져나갈 수도…중동 은행권 '뱅크런' 경고 [글로벌 머니 X파일]",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "3070억"
+        ],
+        "count": 1
+      },
+      "source_quote": "'3070억 달러' 빠져나갈 수도…중동 은행권 '뱅크런' 경고 [글로벌 머니 X파일]",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-22 22:00:02",
+      "extracted_at": "2026-03-23 01:58:53.874548"
+    },
+    {
+      "id": "37b277cd-abf7-49cc-8556-642b532ded26",
+      "news_id": "306130b6-baf3-4f6c-a0ed-ebdae3ff1fdc",
+      "fact_type": "policy",
+      "claim": "금리 전망 '인하→인상' 돌아서자…주가 8% 넘게 급락한 종목 [종목+]",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "8%"
+        ],
+        "count": 1
+      },
+      "source_quote": "금리 전망 '인하→인상' 돌아서자…주가 8% 넘게 급락한 종목 [종목+]",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 01:12:56",
+      "extracted_at": "2026-03-23 01:58:53.874486"
+    },
+    {
+      "id": "a52f511a-9902-44dc-8f8c-3f1f00bcd87c",
+      "news_id": "69d511e1-bcd1-47f4-a983-b13508a608fb",
+      "fact_type": "numerical",
+      "claim": "\"내 계좌 불려보자\" 개미들 우르르…30조 '뭉칫돈' 몰렸다",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "30조"
+        ],
+        "count": 1
+      },
+      "source_quote": "\"내 계좌 불려보자\" 개미들 우르르…30조 '뭉칫돈' 몰렸다",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 01:00:02",
+      "extracted_at": "2026-03-23 01:58:53.874454"
+    },
+    {
+      "id": "58530a2c-b8ec-4735-973b-9109d09df87e",
+      "news_id": "b63f343e-eaab-4ccf-9512-5a21bf328acf",
+      "fact_type": "event",
+      "claim": "사람인, 김익래 전 다우키움 회장 공개매수 소식에 20%↑",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "20%"
+        ],
+        "count": 1
+      },
+      "source_quote": "사람인, 김익래 전 다우키움 회장 공개매수 소식에 20%↑",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 00:40:50",
+      "extracted_at": "2026-03-23 01:58:53.874392"
+    },
+    {
+      "id": "172bf624-4834-4454-abb1-d6f38fac8a44",
+      "news_id": "8a1afbb0-f6d3-4fd1-baf3-740526d30945",
+      "fact_type": "numerical",
+      "claim": "\"BTS 컴백했는데 왜 이래?\"…하이브 주가 13% 급락 이유는 [종목+]",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "13%"
+        ],
+        "count": 1
+      },
+      "source_quote": "\"BTS 컴백했는데 왜 이래?\"…하이브 주가 13% 급락 이유는 [종목+]",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 00:31:39",
+      "extracted_at": "2026-03-23 01:58:53.874352"
+    },
+    {
+      "id": "402f5386-8642-4211-a87d-0a6b32f356af",
+      "news_id": "0d5812be-fe4a-4c0b-8a3e-2025e47418e3",
+      "fact_type": "numerical",
+      "claim": "\"하루 7억 넘게 번다\" 유조선 대박 터지자…주가 19% 뛴 회사 [종목+]",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "7억",
+          "19%"
+        ],
+        "count": 2
+      },
+      "source_quote": "\"하루 7억 넘게 번다\" 유조선 대박 터지자…주가 19% 뛴 회사 [종목+]",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 00:15:49",
+      "extracted_at": "2026-03-23 01:58:53.874304"
+    },
+    {
+      "id": "d491990c-44f7-424a-ae9f-b60045446603",
+      "news_id": "b03ea5ca-4196-4edf-9acd-ee6e086cf48e",
+      "fact_type": "forecast",
+      "claim": "[마켓PRO] Today's Pick: DL이앤씨, 목표가 100% 상향…\"반등 시작\"",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "100%"
+        ],
+        "count": 1
+      },
+      "source_quote": "[마켓PRO] Today's Pick: DL이앤씨, 목표가 100% 상향…\"반등 시작\"",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-22 23:35:21",
+      "extracted_at": "2026-03-23 01:58:53.874241"
+    },
+    {
+      "id": "e96cb443-2292-43cf-95ec-7d7514d5f405",
+      "news_id": "7cfaa5d7-1284-4a8a-ab43-ebc05607d542",
+      "fact_type": "numerical",
+      "claim": "[스타워즈] 메리츠證 나상하, 누적 수익률 20%로 1위 사수",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "20%"
+        ],
+        "count": 1
+      },
+      "source_quote": "[스타워즈] 메리츠證 나상하, 누적 수익률 20%로 1위 사수",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-22 23:34:16",
+      "extracted_at": "2026-03-23 01:58:53.874206"
+    },
+    {
+      "id": "010a0a85-5eb0-4cee-9bf1-2007e36ac658",
+      "news_id": "3ad21643-b0f4-4f59-9c57-dee126f873cf",
+      "fact_type": "numerical",
+      "claim": "(제주=연합뉴스) 고성식 기자 = 제주도는 지난 한 달간 도내 수출액이 총 4천172만 달러를 기록해 작년 2월 대비 97.6% 증가했다고 23...",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "172만",
+          "97.6%"
+        ],
+        "count": 2
+      },
+      "source_quote": "(제주=연합뉴스) 고성식 기자 = 제주도는 지난 한 달간 도내 수출액이 총 4천172만 달러를 기록해 작년 2월 대비 97.6% 증가했다고 23...",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 01:28:20",
+      "extracted_at": "2026-03-23 01:58:53.874078"
+    },
+    {
+      "id": "d97116c4-38be-42e0-bc45-715b605d4650",
+      "news_id": "5ceb5c88-63c4-445c-bd50-9f6cfef84e52",
+      "fact_type": "numerical",
+      "claim": "(부산=연합뉴스) 박성제 기자 = 부산 시민 10명 중 7명은 HMM 본사의 부산 이전이 올해 안에 필요하다고 생각하는 것으로 나타났다.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "10명",
+          "7명"
+        ],
+        "count": 2
+      },
+      "source_quote": "(부산=연합뉴스) 박성제 기자 = 부산 시민 10명 중 7명은 HMM 본사의 부산 이전이 올해 안에 필요하다고 생각하는 것으로 나타났다.",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 01:04:10",
+      "extracted_at": "2026-03-23 01:58:53.873913"
+    },
+    {
+      "id": "28e7dddf-ab46-4e0f-8b67-a5003887ce2d",
+      "news_id": "dcd229df-b81d-4d8c-bc49-4c4db071729e",
+      "fact_type": "numerical",
+      "claim": "“호르무즈 봉쇄 3주 시 韓 제조업 생산비 5.4%↑”",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "5.4%"
+        ],
+        "count": 1
+      },
+      "source_quote": "“호르무즈 봉쇄 3주 시 韓 제조업 생산비 5.4%↑”",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 00:43:24",
+      "extracted_at": "2026-03-23 01:58:53.873795"
+    },
+    {
+      "id": "c3ef772e-2333-4414-b1f8-c9e9ef2ffd50",
+      "news_id": "146f7321-5d8c-47b1-a6cb-6c0a481de0a3",
+      "fact_type": "numerical",
+      "claim": "39억 달러 현금 배당",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "39억"
+        ],
+        "count": 1
+      },
+      "source_quote": "39억 달러 현금 배당",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-23 00:23:13",
+      "extracted_at": "2026-03-23 01:58:53.873708"
+    },
+    {
+      "id": "1e51fe4d-7504-4e05-b512-53deb4edc512",
+      "news_id": "abc",
+      "fact_type": "numerical",
+      "claim": "test claim",
+      "entities": [],
+      "tickers": [],
+      "numbers": {},
+      "source_quote": "",
+      "market": "korea",
+      "confidence": 1.0,
+      "published_at": null,
+      "extracted_at": "2026-03-23 01:53:41.053727"
+    },
+    {
+      "id": "e389ca61-ac6d-4c9e-8717-35bb6501ce74",
+      "news_id": "519070c3-4e87-4a89-a7e7-1727d6142b5d",
+      "fact_type": "event",
+      "claim": "외국인 입국객 전년 대비 32.7% ↑ 법무부, 특별 입국심사 대책 시행 인천공항, 입국 완화 위한 대책 발표방탄소년단(BTS) 광화문 공연을 앞두고 한국을 찾는 외국인 관광객이 ..",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "32.7%"
+        ],
+        "count": 1
+      },
+      "source_quote": "외국인 입국객 전년 대비 32.7% ↑ 법무부, 특별 입국심사 대책 시행 인천공항, 입국 완화 위한 대책 발표방탄소년단(BTS) 광화문 공연을 앞두고 한국을 찾는 외국인 관광객이 ..",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 01:49:29",
+      "extracted_at": "2026-03-23 01:30:06.923192"
+    },
+    {
+      "id": "cf876f9d-1587-450e-94e3-844c814112af",
+      "news_id": "96b142b7-3765-4424-9e93-d4c940ee5db7",
+      "fact_type": "numerical",
+      "claim": "UAE·쿠웨이트·요르단에 방공무기·레이더 공급 의회 검토 없는 ‘긴급 조항’ 적용해 “신속 지원”미국이 중동 국가에 230억 달러(약 34조원) 규모의 무기를 판매한다.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "230억",
+          "34조"
+        ],
+        "count": 2
+      },
+      "source_quote": "UAE·쿠웨이트·요르단에 방공무기·레이더 공급 의회 검토 없는 ‘긴급 조항’ 적용해 “신속 지원”미국이 중동 국가에 230억 달러(약 34조원) 규모의 무기를 판매한다.",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 01:48:24",
+      "extracted_at": "2026-03-23 01:30:06.923148"
+    },
+    {
+      "id": "e19faa98-7233-4e32-8273-f75504bcfa85",
+      "news_id": "22b65c0b-ac8f-45a2-b29d-120b76fafe7c",
+      "fact_type": "policy",
+      "claim": "청년월세 지원사업, 계속사업 전환 이달 30일부터 신규 신청 월 최대 20만원씩 최장 24개월 지원치솟는 월세 부담에 시달리던 청년층을 위해 정부가 월세 지원 정책 사업을 올해부터..",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "20만",
+          "24개"
+        ],
+        "count": 2
+      },
+      "source_quote": "청년월세 지원사업, 계속사업 전환 이달 30일부터 신규 신청 월 최대 20만원씩 최장 24개월 지원치솟는 월세 부담에 시달리던 청년층을 위해 정부가 월세 지원 정책 사업을 올해부터..",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 01:31:29",
+      "extracted_at": "2026-03-23 01:30:06.923012"
+    },
+    {
+      "id": "e240d2d5-4c69-48ce-87aa-0739f402aec6",
+      "news_id": "8e657304-4830-4507-8f9d-b1dcaec5cf98",
+      "fact_type": "numerical",
+      "claim": "지리자동차그룹은 지난 2월 전 세계 판매량이 20만6160대를 기록해 성장세를 이어갔다고 20일 밝혔다.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "20만",
+          "6160대"
+        ],
+        "count": 2
+      },
+      "source_quote": "지리자동차그룹은 지난 2월 전 세계 판매량이 20만6160대를 기록해 성장세를 이어갔다고 20일 밝혔다.",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 01:24:18",
+      "extracted_at": "2026-03-23 01:30:06.922906"
+    },
+    {
+      "id": "d2c2d987-8a0c-4a8f-b454-b5be21d5615d",
+      "news_id": "8e657304-4830-4507-8f9d-b1dcaec5cf98",
+      "fact_type": "numerical",
+      "claim": "올해 1~2월 지리차그룹의 글로벌 누적 판매는 47만6327대로, 중국 승..",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "47만",
+          "6327대"
+        ],
+        "count": 2
+      },
+      "source_quote": "올해 1~2월 지리차그룹의 글로벌 누적 판매는 47만6327대로, 중국 승..",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 01:24:18",
+      "extracted_at": "2026-03-23 01:30:06.922906"
+    },
+    {
+      "id": "d381c809-82cd-48cb-9abc-b23d7453cded",
+      "news_id": "a92af3ef-954a-4977-b46a-432acd2b2230",
+      "fact_type": "numerical",
+      "claim": "저축은행 이익 8405억원 증가 상호금융 이익은 1조원 밑돌아 “건전성 제고 유도할 계획”지난 2년간 적자상태였던 저축은행이 흑자전환했다.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "8405억",
+          "1조"
+        ],
+        "count": 2
+      },
+      "source_quote": "저축은행 이익 8405억원 증가 상호금융 이익은 1조원 밑돌아 “건전성 제고 유도할 계획”지난 2년간 적자상태였던 저축은행이 흑자전환했다.",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 02:00:21",
+      "extracted_at": "2026-03-23 01:30:06.922356"
+    },
+    {
+      "id": "7ae67699-0a31-4e32-9d3a-105607db50cd",
+      "news_id": "a92af3ef-954a-4977-b46a-432acd2b2230",
+      "fact_type": "numerical",
+      "claim": "연체율도 6%대로 떨어졌다.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "6%"
+        ],
+        "count": 1
+      },
+      "source_quote": "연체율도 6%대로 떨어졌다.",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 02:00:21",
+      "extracted_at": "2026-03-23 01:30:06.922356"
+    },
+    {
+      "id": "08d35557-660a-4af1-be26-a7f6c5b4eef9",
+      "news_id": "5a5a0279-a9cc-4cbe-bc91-67f6ad565ac7",
+      "fact_type": "numerical",
+      "claim": "경기 침체로 중소기업 연체율이 계속 올라 1%에 육박한 것으로 나타났다.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "1%"
+        ],
+        "count": 1
+      },
+      "source_quote": "경기 침체로 중소기업 연체율이 계속 올라 1%에 육박한 것으로 나타났다.",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 01:58:30",
+      "extracted_at": "2026-03-23 01:30:06.922309"
+    },
+    {
+      "id": "b17ba5b2-716e-489d-a953-ae0ffe41bcfd",
+      "news_id": "8aac6c11-e4fa-4393-bec8-a8b64af21603",
+      "fact_type": "numerical",
+      "claim": "메리어트 글로벌 확장, 145개국 9800개 호텔 운영 아태 지역 신규 개관 109곳, 컨버전 전략 비중 35% 한국 메리어트 호텔 42곳, 회원 수 연평균 12% 성장 코트야드 ..",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "35%",
+          "12%",
+          "145개",
+          "9800개"
+        ],
+        "count": 4
+      },
+      "source_quote": "메리어트 글로벌 확장, 145개국 9800개 호텔 운영 아태 지역 신규 개관 109곳, 컨버전 전략 비중 35% 한국 메리어트 호텔 42곳, 회원 수 연평균 12% 성장 코트야드 ..",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 01:55:57",
+      "extracted_at": "2026-03-23 01:30:06.922245"
+    },
+    {
+      "id": "c1e2be10-20ef-4844-a801-0ea39785ed65",
+      "news_id": "de9bf4b4-bcb9-467c-9d8e-59900827e8c8",
+      "fact_type": "numerical",
+      "claim": "비트코인이 밤중 한 때 7만달러를 하회했다.",
+      "entities": [
+        "비트코인"
+      ],
+      "tickers": [
+        "BTC"
+      ],
+      "numbers": {
+        "raw_values": [
+          "7만"
+        ],
+        "count": 1
+      },
+      "source_quote": "비트코인이 밤중 한 때 7만달러를 하회했다.",
+      "market": "korea",
+      "confidence": 1.0,
+      "published_at": "2026-03-20 01:55:46",
+      "extracted_at": "2026-03-23 01:30:06.922195"
+    },
+    {
+      "id": "29de4d6b-a265-4396-b3de-9c026f3b2ba5",
+      "news_id": "de9bf4b4-bcb9-467c-9d8e-59900827e8c8",
+      "fact_type": "numerical",
+      "claim": "미국-이란 전쟁 이후 반등세를 타던 비트코인이 7만달러선 아래로 떨어진 건 일주일만에 처음이다.",
+      "entities": [
+        "비트코인"
+      ],
+      "tickers": [
+        "BTC"
+      ],
+      "numbers": {
+        "raw_values": [
+          "7만"
+        ],
+        "count": 1
+      },
+      "source_quote": "미국-이란 전쟁 이후 반등세를 타던 비트코인이 7만달러선 아래로 떨어진 건 일주일만에 처음이다.",
+      "market": "korea",
+      "confidence": 1.0,
+      "published_at": "2026-03-20 01:55:46",
+      "extracted_at": "2026-03-23 01:30:06.922195"
+    },
+    {
+      "id": "2060ce54-4616-407a-a9e3-6efc3808a7e0",
+      "news_id": "167687d3-5c3c-40a5-920e-e51e5a186974",
+      "fact_type": "earnings",
+      "claim": "[수익률 상위 1% 투자자 오전 9시30분 거래동향] 카타르 LNG 공급우려 등에 두산에너빌리티 ‘올인’ 삼성전자, 역대급 실적 전망에도 차익 실현 나서주식 투자 수익률 상위 1%..",
+      "entities": [
+        "삼성전자"
+      ],
+      "tickers": [
+        "005930"
+      ],
+      "numbers": {
+        "raw_values": [
+          "1%",
+          "1%"
+        ],
+        "count": 2
+      },
+      "source_quote": "[수익률 상위 1% 투자자 오전 9시30분 거래동향] 카타르 LNG 공급우려 등에 두산에너빌리티 ‘올인’ 삼성전자, 역대급 실적 전망에도 차익 실현 나서주식 투자 수익률 상위 1%..",
+      "market": "korea",
+      "confidence": 1.0,
+      "published_at": "2026-03-20 01:54:56",
+      "extracted_at": "2026-03-23 01:30:06.922165"
+    },
+    {
+      "id": "5c98a57f-e4de-49d3-8409-e5a1cf9704e7",
+      "news_id": "eaeb23ae-6db4-4928-9241-15c066df0da2",
+      "fact_type": "event",
+      "claim": "외국인 입국객 전년 대비 32.7% ↑ 법무부, 특별 입국심사 대책 시행 인천공항, 입국 완화 위한 대책 발표방탄소년단(BTS) 광화문 공연을 앞두고 한국을 찾는 외국인 관광객이 ..",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "32.7%"
+        ],
+        "count": 1
+      },
+      "source_quote": "외국인 입국객 전년 대비 32.7% ↑ 법무부, 특별 입국심사 대책 시행 인천공항, 입국 완화 위한 대책 발표방탄소년단(BTS) 광화문 공연을 앞두고 한국을 찾는 외국인 관광객이 ..",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 01:49:29",
+      "extracted_at": "2026-03-23 01:30:06.922057"
+    },
+    {
+      "id": "1fda2104-8acf-4ee7-ba9c-26e630c2120f",
+      "news_id": "e6e542af-0ff8-4cca-85eb-74c0ebe354c5",
+      "fact_type": "numerical",
+      "claim": "3주 만에 알루미늄값 20% 급등…\"재고 한달치 남았다\"",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "20%"
+        ],
+        "count": 1
+      },
+      "source_quote": "3주 만에 알루미늄값 20% 급등…\"재고 한달치 남았다\"",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-19 14:00:01",
+      "extracted_at": "2026-03-23 01:30:06.921925"
+    },
+    {
+      "id": "15e662a4-f787-459f-b3a5-5db6bcd64adb",
+      "news_id": "20d461fa-7e39-4750-a9dc-03be4a7d09c2",
+      "fact_type": "earnings",
+      "claim": "우진비앤지, 작년 별도 영업이익 22억원…주식액면병합 추진",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "22억"
+        ],
+        "count": 1
+      },
+      "source_quote": "우진비앤지, 작년 별도 영업이익 22억원…주식액면병합 추진",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-19 23:52:33",
+      "extracted_at": "2026-03-23 01:30:06.921884"
+    },
+    {
+      "id": "140ec6ee-1885-4d22-b416-c0999e242b17",
+      "news_id": "ecf83aac-56f2-4d4b-aa10-556f2964bdd2",
+      "fact_type": "earnings",
+      "claim": "\"SK케미칼, 1분기 104억원 영업손실 전망돼…목표가↓\"-DB",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "104억"
+        ],
+        "count": 1
+      },
+      "source_quote": "\"SK케미칼, 1분기 104억원 영업손실 전망돼…목표가↓\"-DB",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-19 23:37:12",
+      "extracted_at": "2026-03-23 01:30:06.921859"
+    },
+    {
+      "id": "37d1743d-33c1-4fdd-b6ee-634fa7a66ddd",
+      "news_id": "806d690a-b904-4b08-a45e-93bdc21429c9",
+      "fact_type": "numerical",
+      "claim": "네타냐후 \"이란, 핵 능력 상실\"…3대지수 낙폭 줄여 마감 [뉴욕증시 브리핑]",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "3대"
+        ],
+        "count": 1
+      },
+      "source_quote": "네타냐후 \"이란, 핵 능력 상실\"…3대지수 낙폭 줄여 마감 [뉴욕증시 브리핑]",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-19 22:32:17",
+      "extracted_at": "2026-03-23 01:30:06.921811"
+    },
+    {
+      "id": "15debc0d-2171-495d-a404-3cc0a5d7754a",
+      "news_id": "6e411e7c-ef89-4c16-b3e0-7e837449c065",
+      "fact_type": "numerical",
+      "claim": "\"나도 원전주\" 선언…중동 전쟁 와중에 50% 치솟았다 [종목+]",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "50%"
+        ],
+        "count": 1
+      },
+      "source_quote": "\"나도 원전주\" 선언…중동 전쟁 와중에 50% 치솟았다 [종목+]",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-19 21:30:06",
+      "extracted_at": "2026-03-23 01:30:06.921786"
+    },
+    {
+      "id": "e0d24174-7267-4389-9d2b-33fee02df6dd",
+      "news_id": "d90e3333-9a04-47c4-8ee7-da342b4003d1",
+      "fact_type": "numerical",
+      "claim": "삼성생명·화재, 삼성전자 주식 1.5조 매각",
+      "entities": [
+        "삼성전자"
+      ],
+      "tickers": [
+        "005930"
+      ],
+      "numbers": {
+        "raw_values": [
+          "1.5조"
+        ],
+        "count": 1
+      },
+      "source_quote": "삼성생명·화재, 삼성전자 주식 1.5조 매각",
+      "market": "korea",
+      "confidence": 1.0,
+      "published_at": "2026-03-19 11:45:47",
+      "extracted_at": "2026-03-23 01:30:06.921754"
+    },
+    {
+      "id": "d7e829f0-714a-4644-9d4d-8d0920ad64d9",
+      "news_id": "a7e8c17d-89a2-43e0-b00f-b4cc61413569",
+      "fact_type": "deal",
+      "claim": "\"올해 AI 투자 2배 늘릴 것\"…텐센트, 메신저 위챗 강화",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "2배",
+          "2배"
+        ],
+        "count": 2
+      },
+      "source_quote": "\"올해 AI 투자 2배 늘릴 것\"…텐센트, 메신저 위챗 강화",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-19 09:05:01",
+      "extracted_at": "2026-03-23 01:30:06.921711"
+    },
+    {
+      "id": "7a754b5f-2089-4152-855b-9d240e9f4469",
+      "news_id": "44f5fe6d-bf58-47a7-a504-1f81b67b6a79",
+      "fact_type": "numerical",
+      "claim": "▲ 중소기업사랑나눔재단은 20일 경기 양주시 제25보병사단을 찾아 간편식인 브리또 9천700개(3천만원 상당)를 제공했다고 밝혔다.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "700개"
+        ],
+        "count": 1
+      },
+      "source_quote": "▲ 중소기업사랑나눔재단은 20일 경기 양주시 제25보병사단을 찾아 간편식인 브리또 9천700개(3천만원 상당)를 제공했다고 밝혔다.",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 02:00:01",
+      "extracted_at": "2026-03-23 01:30:06.921670"
+    },
+    {
+      "id": "a99e1f2a-3675-4aa3-8494-09a5d0914b88",
+      "news_id": "4288c79f-41a7-4ec0-8fc7-77b4a1b65c1c",
+      "fact_type": "numerical",
+      "claim": "▲ 부산해양수산청은 외항선사 78개 사를 대상으로 20일부터 다음 달 7일까지 정기 근로감독을 실시한다.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "78개"
+        ],
+        "count": 1
+      },
+      "source_quote": "▲ 부산해양수산청은 외항선사 78개 사를 대상으로 20일부터 다음 달 7일까지 정기 근로감독을 실시한다.",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 01:57:04",
+      "extracted_at": "2026-03-23 01:30:06.921595"
+    },
+    {
+      "id": "23084075-a4f1-4ba5-9f80-0ac328c46be4",
+      "news_id": "abdc6344-badc-4b90-ac7a-a5fa415441e2",
+      "fact_type": "numerical",
+      "claim": "■ 카타르 LNG 수출용량 17% 손실…공급차질 장기화·가격급등 우려",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "17%"
+        ],
+        "count": 1
+      },
+      "source_quote": "■ 카타르 LNG 수출용량 17% 손실…공급차질 장기화·가격급등 우려",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 01:30:00",
+      "extracted_at": "2026-03-23 01:30:06.921437"
+    },
+    {
+      "id": "5e87565c-d2b6-4922-bc74-34111a83f3c5",
+      "news_id": "c389e057-2bcb-4f87-b0dd-e1da4d4baa29",
+      "fact_type": "numerical",
+      "claim": "갭 CEO 브라이트바드, 갭(GPS) 주식 20.1만 달러 매각",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "20.1만"
+        ],
+        "count": 1
+      },
+      "source_quote": "갭 CEO 브라이트바드, 갭(GPS) 주식 20.1만 달러 매각",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 01:41:44",
+      "extracted_at": "2026-03-23 01:30:06.921383"
+    },
+    {
+      "id": "8d82e641-ff0a-4472-b845-90ab46609421",
+      "news_id": "a92d3f3a-6037-4d13-92ca-626748c4ee3d",
+      "fact_type": "numerical",
+      "claim": "갭 CFO 오코넬, 2억 1000달러 상당 자사주 매각",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "2억"
+        ],
+        "count": 1
+      },
+      "source_quote": "갭 CFO 오코넬, 2억 1000달러 상당 자사주 매각",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 01:41:40",
+      "extracted_at": "2026-03-23 01:30:06.921356"
+    },
+    {
+      "id": "b1df6492-5a99-4b31-9846-350be46258bb",
+      "news_id": "49b479af-f257-4845-9a4d-46727da95988",
+      "fact_type": "numerical",
+      "claim": "OneMove Capital, Sylogist 지분 10% 이상으로 확대",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "10%"
+        ],
+        "count": 1
+      },
+      "source_quote": "OneMove Capital, Sylogist 지분 10% 이상으로 확대",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 01:28:32",
+      "extracted_at": "2026-03-23 01:30:06.921316"
+    },
+    {
+      "id": "ec70f109-b351-40be-b6e6-ea4a3ccc2569",
+      "news_id": "303ad66b-6db7-4ea1-9f7f-743de1cce889",
+      "fact_type": "numerical",
+      "claim": "Ramaco Resources 이사, 1,52억 원 상당의 주식 매도",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "1,52억"
+        ],
+        "count": 1
+      },
+      "source_quote": "Ramaco Resources 이사, 1,52억 원 상당의 주식 매도",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 01:27:12",
+      "extracted_at": "2026-03-23 01:30:06.921289"
+    },
+    {
+      "id": "507b2586-c292-4756-9548-083813ad81d9",
+      "news_id": "fe9ec8fd-521a-4094-9828-c6aafa49ab09",
+      "fact_type": "numerical",
+      "claim": "Fleury, Terawulf CFO, WULF 주식 960만 달러 매각",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "960만"
+        ],
+        "count": 1
+      },
+      "source_quote": "Fleury, Terawulf CFO, WULF 주식 960만 달러 매각",
+      "market": "korea",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 01:26:52",
+      "extracted_at": "2026-03-23 01:30:06.921256"
+    }
+  ]
+}

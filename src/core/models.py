@@ -84,6 +84,84 @@ class ResearchType(StrEnum):
     CROSS_MARKET = "cross_market"
 
 
+class StoryStatus(StrEnum):
+    """Story thread lifecycle status."""
+
+    ACTIVE = "active"
+    STALE = "stale"
+    CLOSED = "closed"
+
+
+class FactType(StrEnum):
+    """News fact claim type."""
+
+    NUMERICAL = "numerical"
+    EVENT = "event"
+    POLICY = "policy"
+    EARNINGS = "earnings"
+    FORECAST = "forecast"
+    DEAL = "deal"
+
+
+class EntityType(StrEnum):
+    """Ontology entity type."""
+
+    COMPANY = "company"
+    PERSON = "person"
+    ASSET = "asset"
+    INSTITUTION = "institution"
+    SECTOR = "sector"
+    COUNTRY = "country"
+
+
+class EventType(StrEnum):
+    """Ontology event type."""
+
+    WAR = "war"
+    POLICY = "policy"
+    EARNINGS = "earnings"
+    PRODUCT = "product"
+    REGULATION = "regulation"
+    MACRO = "macro"
+    DEAL = "deal"
+
+
+class Severity(StrEnum):
+    """Event severity level."""
+
+    CRITICAL = "critical"
+    MAJOR = "major"
+    MODERATE = "moderate"
+    MINOR = "minor"
+
+
+class EventStatus(StrEnum):
+    """Ontology event lifecycle status."""
+
+    DEVELOPING = "developing"
+    RESOLVED = "resolved"
+    STALE = "stale"
+
+
+class LinkType(StrEnum):
+    """Ontology link type between objects."""
+
+    MENTIONS = "mentions"
+    TRIGGERS = "triggers"
+    INVOLVES = "involves"
+    IMPACTS = "impacts"
+    REACTS_TO = "reacts_to"
+    SUPPORTS = "supports"
+
+
+class ThesisStatus(StrEnum):
+    """Investment thesis lifecycle status."""
+
+    ACTIVE = "active"
+    INVALIDATED = "invalidated"
+    ARCHIVED = "archived"
+
+
 class ClaudeTask(StrEnum):
     """Claude API task type for model/parameter selection."""
 
@@ -266,6 +344,27 @@ class OHLCVRecord(BaseEntity, TimestampMixin):
     adjusted_close: float = 0.0
 
 
+class StoryThread(BaseEntity, TimestampMixin):
+    """A developing news story that accumulates related articles over time."""
+
+    title: str
+    summary: str = ""
+    market: Market = Market.KOREA
+    status: StoryStatus = StoryStatus.ACTIVE
+    related_tickers: list[str] = Field(default_factory=list)
+    article_count: int = 0
+    first_seen_at: datetime = Field(default_factory=_utcnow)
+    last_updated_at: datetime = Field(default_factory=_utcnow)
+
+
+class NewsStoryLink(BaseEntity, TimestampMixin):
+    """Link between a news item and a story thread."""
+
+    news_id: str
+    story_id: str
+    relevance_score: float = 1.0
+
+
 class ReportSection(BaseModel):
     """A section within a research report."""
 
@@ -287,3 +386,107 @@ class ResearchReport(BaseEntity, TimestampMixin):
     swot: dict[str, list[str]] = Field(default_factory=dict)
     data_sources: list[str] = Field(default_factory=list)
     model_used: str = ""
+
+
+# ============================================================
+# Ontology models
+# ============================================================
+
+
+class OntologyEntity(BaseEntity, TimestampMixin):
+    """A real-world entity: company, person, asset, institution, etc."""
+
+    name: str
+    entity_type: EntityType = EntityType.COMPANY
+    ticker: str = ""
+    market: Market = Market.KOREA
+    properties: dict[str, Any] = Field(default_factory=dict)
+    status: str = "active"
+
+
+class OntologyEvent(BaseEntity, TimestampMixin):
+    """A discrete event with a time axis (absorbs/extends StoryThread)."""
+
+    title: str
+    summary: str = ""
+    event_type: EventType = EventType.MACRO
+    severity: Severity = Severity.MODERATE
+    market: Market = Market.KOREA
+    started_at: datetime = Field(default_factory=_utcnow)
+    last_article_at: datetime = Field(default_factory=_utcnow)
+    status: EventStatus = EventStatus.DEVELOPING
+    article_count: int = 0
+
+
+class OntologyLink(BaseEntity, TimestampMixin):
+    """A typed, directional link between two ontology objects."""
+
+    link_type: LinkType
+    source_type: str
+    source_id: str
+    target_type: str
+    target_id: str
+    confidence: float = 1.0
+    evidence: str = ""
+
+
+class MarketReaction(BaseEntity, TimestampMixin):
+    """Market reaction to an event (price/sentiment change)."""
+
+    event_id: str
+    entity_id: str
+    reaction_type: str = "price"
+    magnitude: float = 0.0
+    direction: str = "neutral"
+    details: dict[str, Any] = Field(default_factory=dict)
+    observed_at: datetime = Field(default_factory=_utcnow)
+
+
+class Thesis(BaseEntity, TimestampMixin):
+    """An investment thesis built from accumulated events and reactions."""
+
+    title: str
+    summary: str = ""
+    market: Market = Market.KOREA
+    status: ThesisStatus = ThesisStatus.ACTIVE
+    related_tickers: list[str] = Field(default_factory=list)
+    strength: float = 0.0
+    evidence_count: int = 0
+
+
+class NewsFact(BaseEntity, TimestampMixin):
+    """A structured fact extracted from a news article.
+
+    Captures numerical data, events, policy decisions, and other
+    verifiable claims along with their source evidence.
+    """
+
+    news_id: str
+    fact_type: FactType = FactType.NUMERICAL
+    claim: str
+    entities: list[str] = Field(default_factory=list)
+    tickers: list[str] = Field(default_factory=list)
+    numbers: dict[str, Any] = Field(default_factory=dict)
+    source_quote: str = ""
+    market: Market = Market.KOREA
+    confidence: float = 1.0
+    published_at: datetime | None = None
+    extracted_at: datetime = Field(default_factory=_utcnow)
+
+
+class FirstPrincipleAnalysis(BaseEntity, TimestampMixin):
+    """First-principles analysis of an ontology event.
+
+    Follows the pattern: conventional wisdom → decompose →
+    identify gap → derive opportunity.
+    """
+
+    event_id: str
+    event_title: str = ""
+    conventional_wisdom: str = ""
+    fundamental_truths: list[str] = Field(default_factory=list)
+    gap: str = ""
+    opportunity: str = ""
+    related_fact_ids: list[str] = Field(default_factory=list)
+    market: Market = Market.KOREA
+    status: str = "draft"

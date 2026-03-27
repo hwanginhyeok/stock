@@ -25,8 +25,17 @@ data/processed/
 data/cache/
 data/db/
 data/generated/
-data/articles/
 data/research/
+
+# 아티클: 텍스트만 추적, 이미지는 제외
+data/articles/**/*.png
+data/articles/**/*.jpg
+data/articles/**/*.jpeg
+data/articles/**/*.webp
+data/articles/**/*.jfif
+data/articles/**/*.avif
+data/articles/**/*.gif
+data/articles/**/*.pyc
 
 # 로그
 logs/

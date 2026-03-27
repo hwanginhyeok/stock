@@ -4,7 +4,7 @@
 
 # --- 한국 뉴스 소스 ---
 korea:
-  - name: "매일경제 헤드라인"
+  - name: "매일경제"
     type: "rss"
     url: "https://www.mk.co.kr/rss/30000001/"
     category: "종합"
@@ -15,6 +15,20 @@ korea:
     type: "rss"
     url: "https://www.mk.co.kr/rss/30100041/"
     category: "경제"
+    language: "ko"
+    enabled: true
+
+  - name: "한국경제"
+    type: "rss"
+    url: "https://www.hankyung.com/feed/economy"
+    category: "종합"
+    language: "ko"
+    enabled: true
+
+  - name: "한국경제 금융"
+    type: "rss"
+    url: "https://www.hankyung.com/feed/finance"
+    category: "금융"
     language: "ko"
     enabled: true
 
@@ -29,13 +43,6 @@ korea:
     type: "rss"
     url: "https://www.yna.co.kr/rss/industry.xml"
     category: "산업"
-    language: "ko"
-    enabled: true
-
-  - name: "한국경제 증권"
-    type: "rss"
-    url: "https://www.hankyung.com/feed/finance"
-    category: "증권"
     language: "ko"
     enabled: true
 
@@ -60,6 +67,13 @@ korea:
     language: "ko"
     enabled: true
 
+  - name: "Investing.com 한국"
+    type: "rss"
+    url: "https://kr.investing.com/rss/news.rss"
+    category: "종합"
+    language: "ko"
+    enabled: true
+
 # --- 미국 뉴스 소스 ---
 us:
   - name: "Yahoo Finance"
@@ -73,6 +87,43 @@ us:
     type: "rss"
     url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114"
     category: "종합"
+    language: "en"
+    enabled: true
+
+  - name: "MarketWatch"
+    type: "rss"
+    url: "https://feeds.content.dowjones.io/public/rss/mw_topstories"
+    category: "종합"
+    language: "en"
+    enabled: true
+
+  - name: "WSJ Markets"
+    type: "rss"
+    url: "https://feeds.a.dj.com/rss/RSSMarketsMain.xml"
+    category: "종합"
+    language: "en"
+    enabled: true
+
+  - name: "Bloomberg"
+    type: "rss"
+    url: "https://feeds.bloomberg.com/markets/news.rss"
+    category: "종합"
+    language: "en"
+    enabled: true
+
+# --- 테슬라/머스크 특화 소스 ---
+tesla:
+  - name: "Teslarati"
+    type: "rss"
+    url: "https://www.teslarati.com/feed/"
+    category: "테슬라"
+    language: "en"
+    enabled: true
+
+  - name: "Electrek Tesla"
+    type: "rss"
+    url: "https://electrek.co/guides/tesla/feed/"
+    category: "테슬라"
     language: "en"
     enabled: true
 

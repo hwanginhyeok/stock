@@ -1,0 +1,247 @@
+{
+  "date": "2026-03-23",
+  "market": "us",
+  "count": 12,
+  "facts": [
+    {
+      "id": "8da94107-3815-4568-9424-4f633570f52c",
+      "news_id": "1a6c8661-03b3-4399-b6d8-d5dcd91177c8",
+      "fact_type": "numerical",
+      "claim": "President Donald Trump's National Economic Council director, Kevin Hassett, said Sunday that the war has already cost $12 billion.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "$12 billion",
+          "12 billion"
+        ],
+        "count": 2
+      },
+      "source_quote": "President Donald Trump's National Economic Council director, Kevin Hassett, said Sunday that the war has already cost $12 billion.",
+      "market": "us",
+      "confidence": 0.7,
+      "published_at": "2026-03-19 17:41:06",
+      "extracted_at": "2026-03-23 01:30:06.922594"
+    },
+    {
+      "id": "2df54d96-cd22-4de0-963a-86428c175774",
+      "news_id": "8408ce6d-9f4f-4f61-b5b3-865f449aec03",
+      "fact_type": "numerical",
+      "claim": "The metals shed around 5% and 10%, respectively, while mining stocks and ETFs linked to gold and silver also fell.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "5%",
+          "10%"
+        ],
+        "count": 2
+      },
+      "source_quote": "The metals shed around 5% and 10%, respectively, while mining stocks and ETFs linked to gold and silver also fell.",
+      "market": "us",
+      "confidence": 0.7,
+      "published_at": "2026-03-19 20:27:07",
+      "extracted_at": "2026-03-23 01:30:06.922510"
+    },
+    {
+      "id": "69092177-010b-42a8-96ad-3b065649a481",
+      "news_id": "213f32a0-12f3-431e-8013-0c1948661de5",
+      "fact_type": "numerical",
+      "claim": "Lumentum Soars 12% — and NVIDIA’s AI Boom Is a Big Reason Why",
+      "entities": [
+        "NVIDIA"
+      ],
+      "tickers": [
+        "NVDA"
+      ],
+      "numbers": {
+        "raw_values": [
+          "12%"
+        ],
+        "count": 1
+      },
+      "source_quote": "Lumentum Soars 12% — and NVIDIA’s AI Boom Is a Big Reason Why",
+      "market": "us",
+      "confidence": 1.0,
+      "published_at": "2026-03-18 14:11:28",
+      "extracted_at": "2026-03-23 01:30:06.921066"
+    },
+    {
+      "id": "2f08919d-b5ac-43fe-a88d-5db0122bd138",
+      "news_id": "a4aa1881-d731-44d7-90a7-927d52167848",
+      "fact_type": "numerical",
+      "claim": "President Donald Trump's National Economic Council director, Kevin Hassett, said Sunday that the war has already cost $12 billion.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "$12 billion",
+          "12 billion"
+        ],
+        "count": 2
+      },
+      "source_quote": "President Donald Trump's National Economic Council director, Kevin Hassett, said Sunday that the war has already cost $12 billion.",
+      "market": "us",
+      "confidence": 0.7,
+      "published_at": "2026-03-19 17:41:06",
+      "extracted_at": "2026-03-23 01:30:06.920892"
+    },
+    {
+      "id": "ad640b73-5f18-48af-92f9-e482013549f8",
+      "news_id": "ff87ac52-87a2-45fa-bd1b-bcf29e02503e",
+      "fact_type": "numerical",
+      "claim": "The metals shed around 5% and 10%, respectively, while mining stocks and ETFs linked to gold and silver also fell.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "5%",
+          "10%"
+        ],
+        "count": 2
+      },
+      "source_quote": "The metals shed around 5% and 10%, respectively, while mining stocks and ETFs linked to gold and silver also fell.",
+      "market": "us",
+      "confidence": 0.7,
+      "published_at": "2026-03-19 20:27:07",
+      "extracted_at": "2026-03-23 01:30:06.920805"
+    },
+    {
+      "id": "c76604b7-e8ca-4e83-951a-a55a167407a8",
+      "news_id": "ff8d04f8-1d3d-4876-804f-0c66446d76e2",
+      "fact_type": "deal",
+      "claim": "Eight state attorneys general have filed an antitrust suit against the $6.2 billion Nexstar-Tegna merger, which the Trump administration backed after Nexstar moved to suspend Kimmel’s show.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "$6.2 billion",
+          "6.2 billion"
+        ],
+        "count": 2
+      },
+      "source_quote": "Eight state attorneys general have filed an antitrust suit against the $6.2 billion Nexstar-Tegna merger, which the Trump administration backed after Nexstar moved to suspend Kimmel’s show.",
+      "market": "us",
+      "confidence": 0.7,
+      "published_at": "2026-03-20 00:53:00",
+      "extracted_at": "2026-03-23 01:30:06.920678"
+    },
+    {
+      "id": "4189746d-f942-4523-80c8-9b10032a3eb5",
+      "news_id": "7ba1f332-8464-40d8-abb2-e0c1536ea335",
+      "fact_type": "numerical",
+      "claim": "Nvidia was down 16%.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "16%"
+        ],
+        "count": 1
+      },
+      "source_quote": "Nvidia was down 16%.",
+      "market": "us",
+      "confidence": 0.7,
+      "published_at": "2025-01-27 19:26:00",
+      "extracted_at": "2026-03-23 01:30:06.920571"
+    },
+    {
+      "id": "c8f69c32-74ea-42f7-8e25-48c19b9e8aa2",
+      "news_id": "168ed097-6486-48c7-a347-8fe5dc233459",
+      "fact_type": "numerical",
+      "claim": "Gold settled 1.4% lower, down two of the past three sessions, and silver fell 2.5%, down three of the past four sessions.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "1.4%",
+          "2.5%"
+        ],
+        "count": 2
+      },
+      "source_quote": "Gold settled 1.4% lower, down two of the past three sessions, and silver fell 2.5%, down three of the past four sessions.",
+      "market": "us",
+      "confidence": 0.7,
+      "published_at": "2025-01-27 19:01:00",
+      "extracted_at": "2026-03-23 01:30:06.920534"
+    },
+    {
+      "id": "a010196d-d610-4fe6-8fa9-4db2e9d3fa82",
+      "news_id": "068847d5-3259-467e-85c9-457da5b0ef9d",
+      "fact_type": "earnings",
+      "claim": "Iran’s latest attack on Qatar, which severely damaged the world’s largest liquefied natural gas export facility, will cost the country’s state energy company about $20 billion of lost revenue.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "$20 billion",
+          "20 billion"
+        ],
+        "count": 2
+      },
+      "source_quote": "Iran’s latest attack on Qatar, which severely damaged the world’s largest liquefied natural gas export facility, will cost the country’s state energy company about $20 billion of lost revenue.",
+      "market": "us",
+      "confidence": 0.7,
+      "published_at": "2026-03-19 21:34:12",
+      "extracted_at": "2026-03-23 01:30:06.920229"
+    },
+    {
+      "id": "1e5b7e1c-6bc0-48f5-b2c9-e505e20c9470",
+      "news_id": "ce67da7a-c423-4b0c-9723-980aec35b589",
+      "fact_type": "numerical",
+      "claim": "Poland’s central bank, the world’s biggest reported buyer of gold, is boosting purchases by another 150 tons as it braces for more of the geopolitical instability that has driven prices to record highs.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "150 tons"
+        ],
+        "count": 1
+      },
+      "source_quote": "Poland’s central bank, the world’s biggest reported buyer of gold, is boosting purchases by another 150 tons as it braces for more of the geopolitical instability that has driven prices to record highs.",
+      "market": "us",
+      "confidence": 0.7,
+      "published_at": "2026-03-19 22:42:48",
+      "extracted_at": "2026-03-23 01:30:06.920151"
+    },
+    {
+      "id": "95271c63-64f4-4efc-8f6e-3246faaac67f",
+      "news_id": "bf79ac3f-ce7a-4513-840e-edb835fbacda",
+      "fact_type": "policy",
+      "claim": "The two-year rate jumped as much as 40 basis points to 4.49% after the Bank of England on Thursday said it “stands ready” to act to prevent inflation from accelerating.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "4.49%"
+        ],
+        "count": 1
+      },
+      "source_quote": "The two-year rate jumped as much as 40 basis points to 4.49% after the Bank of England on Thursday said it “stands ready” to act to prevent inflation from accelerating.",
+      "market": "us",
+      "confidence": 0.7,
+      "published_at": "2026-03-19 21:43:11",
+      "extracted_at": "2026-03-23 01:30:06.919856"
+    },
+    {
+      "id": "79c3b94a-0f6c-4b7e-a7ec-a34798f24df8",
+      "news_id": "72a1008b-71c6-4be1-be48-5f4c14365511",
+      "fact_type": "numerical",
+      "claim": "The Pentagon has asked for an additional $200 billion from Congress to pay for the war against Iran, a person familiar with the matter said, as Defense Secretary Pete Hegseth argued that the campaign was ahead of schedule and disputed that the US was getting embroiled in a quagmire.",
+      "entities": [],
+      "tickers": [],
+      "numbers": {
+        "raw_values": [
+          "$200 billion",
+          "200 billion"
+        ],
+        "count": 2
+      },
+      "source_quote": "The Pentagon has asked for an additional $200 billion from Congress to pay for the war against Iran, a person familiar with the matter said, as Defense Secretary Pete Hegseth argued that the campaign was ahead of schedule and disputed that the US was getting embroiled in a quagmire.",
+      "market": "us",
+      "confidence": 0.7,
+      "published_at": "2026-03-19 21:32:19",
+      "extracted_at": "2026-03-23 01:30:06.919648"
+    }
+  ]
+}
