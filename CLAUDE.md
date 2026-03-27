@@ -96,6 +96,7 @@
 | `.claude/skills/schedule-sync.md` | 스케줄 동기화 — 마스터 테이블 1곳 갱신 + 시각화 재생성 | 아티클 상태 변경 시 / 불일치 발견 시 |
 | `.claude/skills/news-fact-extraction.md` | 뉴스 팩트 추출 — 규칙 기반 자동 + Claude Code 수동 하이브리드 | "팩트 추출", "뉴스 정리", 시황 브리핑 데이터 준비 시 |
 | `.claude/skills/ontology-analysis.md` | 온톨로지 분석 + 제1원칙 사고 — 팩트→그래프→통념분해→Gap→기회 | "온톨로지 분석", "제1원칙 분석", 심층 뉴스 분석 시 |
+| `.claude/skills/article-shipping.md` | 아티클 마감 — WIP 제한 + 타임박스 + 게시 후 학습 루프 | 게시 대기 마무리 시 / 세션 시작 시 WIP 체크 |
 | `.claude/skills/morning-email.md` | 모닝 이메일 실행 (데이터 수집→검수→dry-run→발송) | "모닝 이메일", "이메일 보내줘" |
 | `.claude/skills/sigma-analysis.md` | IV 시그마 분석 (장중/장외 분기, IV/HV20 폴백) | "시그마 분석", "IV 분석", 종목 변동성 확인 시 |
 | `.claude/skills/signal-report.md` | 시그널 리포트 + 대시보드 Excel 생성 + 이상치 검수 | "시그널 리포트", "대시보드", 주간 리포트 시 |

@@ -10,13 +10,13 @@
 
 ## 절차
 
-### Phase 1: 직감 정리 (Intuition Capture)
-1. 아이디어의 핵심 테제를 1~2문장으로 정리
-2. 비유/유추 구조 정리 (A:B = C:D 형태)
-3. `data/articles/{순번}_{티커}_{slug}/` 디렉토리 생성 (아래 네이밍 규칙 참조)
-4. 아이디어 메모를 `research/thesis.md`에 기록
+### Phase 1: 직감 정리 (Intuition Capture) — 담당: **사용자** (AI 보조)
+1. 아이디어의 핵심 테제를 1~2문장으로 정리 — **사용자가 제시**
+2. 비유/유추 구조 정리 (A:B = C:D 형태) — **사용자 또는 공동**
+3. `data/articles/{순번}_{티커}_{slug}/` 디렉토리 생성 — **AI 실행**
+4. 아이디어 메모를 `research/thesis.md`에 기록 — **AI 실행**
 
-### Phase 2: 데이터 검증 (Data Verification)
+### Phase 2: 데이터 검증 (Data Verification) — 담당: **AI** (사용자 검토)
 1. 테제의 각 주장을 분해 (claim 단위)
 2. 각 claim에 대해:
    - 뒷받침하는 데이터 검색 (뉴스, 실적, 시장 점유율 등)
@@ -24,7 +24,7 @@
 3. 검증 결과를 `research/claims.md`에 기록
 4. 출처는 반드시 URL + 날짜 포함
 
-### Phase 3: 뒷받침 자료 선정 (Supporting Evidence)
+### Phase 3: 뒷받침 자료 선정 (Supporting Evidence) — 담당: **AI** (사용자 확인)
 1. 검증된 claim 중 아티클에 사용할 핵심 데이터 선별
 2. 자료 유형별 분류:
    - 📊 정량 데이터: 매출, 점유율, 주가, 밸류에이션
@@ -32,7 +32,7 @@
    - 📈 시계열 데이터: 트렌드, 성장률, 비교 차트용
 3. 수집한 원본 자료는 `research/` 하위에 저장
 
-### Phase 4: 시각화 계획 (Visualization Plan)
+### Phase 4: 시각화 계획 (Visualization Plan) — 담당: **AI** (사용자 QA)
 1. 아티클 스토리라인에 맞는 차트/그래픽 목록 작성
 2. 차트 유형 결정:
    - 타임라인: 연도별 이벤트 흐름
@@ -40,6 +40,9 @@
    - 카드: 핵심 개념 비교 (2×2)
    - 바 차트: 수치 비교 (gap, 성장률)
 3. 시각화는 `generate-visuals` 스킬에 따라 생성 → `visuals/`에 저장
+
+### WIP 체크 (article-shipping 연동)
+**Phase 1 시작 전**: 게시 대기 ≥3건이면 새 리서치 시작 금지. 먼저 게시하라.
 
 ## 디렉토리 구조
 
