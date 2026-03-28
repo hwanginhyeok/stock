@@ -15,6 +15,7 @@ import yaml
 
 from src.core.claude_client import ClaudeClient
 from src.core.models import (
+    ClaudeTask,
     FirstPrincipleAnalysis,
     Market,
     OntologyEvent,
@@ -120,14 +121,25 @@ def analyze_event(
 
     try:
         response = claude_client.generate(
-            prompt=prompt,
-            model=fpa_config.get("model", "claude-sonnet-4-6"),
-            max_tokens=fpa_config.get("max_tokens", 1500),
-            temperature=fpa_config.get("temperature", 0.3),
+            task=ClaudeTask.DEEP_ANALYSIS,
+            user_message=prompt,
+            system_prompt="투자 뉴스 이벤트에 대한 제1원칙 분석을 수행하는 분석가입니다. 반드시 JSON만 출력하세요.",
         )
 
-        # JSON 파싱
-        result = json.loads(response)
+        # JSON 파싱 — 응답에 마크다운/텍스트가 섞일 수 있으므로 {} 블록 추출
+        raw = response.content.strip()
+        # ```json ... ``` 블록 추출
+        if "```json" in raw:
+            raw = raw.split("```json")[1].split("```")[0].strip()
+        elif "```" in raw:
+            raw = raw.split("```")[1].split("```")[0].strip()
+        # { ... } 블록만 추출
+        start = raw.find("{")
+        end = raw.rfind("}") + 1
+        if start >= 0 and end > start:
+            raw = raw[start:end]
+
+        result = json.loads(raw)
 
         analysis = FirstPrincipleAnalysis(
             event_id=event.id,
