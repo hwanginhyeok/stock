@@ -34,29 +34,38 @@ python scripts/ontology_io.py briefing --market all
 python scripts/ontology_io.py graph --market kr
 ```
 
-### Step 3: 제1원칙 분석 (Claude Code 세션)
+### Step 3: 제1원칙 분석 (자동)
 
-이벤트 목록에서 분석 대상을 선택하고, 아래 스키마로 분석 수행:
+```python
+from src.analyzers.first_principle_analyzer import analyze_top_events, format_analysis_report
 
-```json
-{
-    "event_id": "<온톨로지 이벤트 UUID>",
-    "event_title": "KOSPI -6% 급락",
-    "conventional_wisdom": "시장이 당연시하는 가정 — 예: '중동 전쟁이 한국 수출에 직격탄'",
-    "fundamental_truths": [
-        "가정을 제거하고 남는 팩트 1",
-        "가정을 제거하고 남는 팩트 2",
-        "가정을 제거하고 남는 팩트 3"
-    ],
-    "gap": "통념과 현실 사이의 괴리 — 예: '실제 수출은 50.4% 증가 중'",
-    "opportunity": "Gap에서 도출한 투자 기회",
-    "related_fact_ids": ["<팩트 UUID 1>", "<팩트 UUID 2>"],
-    "market": "korea",
-    "status": "draft"
-}
+# 상위 이벤트 자동 분석 (Claude Sonnet 사용)
+analyses = analyze_top_events(hours=24, market="kr", max_events=5)
+print(format_analysis_report(analyses))
 ```
 
-### Step 4: 타임라인 생성
+또는 CLI:
+```bash
+python -c "
+from src.analyzers.first_principle_analyzer import analyze_top_events, format_analysis_report
+analyses = analyze_top_events(hours=24, max_events=5)
+print(format_analysis_report(analyses))
+"
+```
+
+### Step 4: 테제 후보 추출 (아티클 연결)
+
+분석 결과에서 Gap이 충분히 구체적인 항목을 아티클 테제 후보로 추출:
+
+```python
+from src.analyzers.first_principle_analyzer import extract_thesis_candidates
+
+candidates = extract_thesis_candidates(analyses)
+for c in candidates:
+    print(f"  {c['title']}: {c['thesis']}")
+```
+
+### Step 5: 타임라인 생성
 
 ```bash
 python scripts/generate_timeline.py --market kr --days 7
@@ -90,11 +99,18 @@ Gap: 수출은 역대 최고인데 코스피는 -6%. 중동 리스크가 과대 
 
 ---
 
+## 설정
+
+스토리 클러스터와 엔티티 분류는 `config/ontology_config.yaml`에서 관리.
+새 테마(예: "AI 수출규제", "테라팹")나 인물 추가 시 YAML만 수정하면 됨. 코드 변경 불필요.
+
 ## 관련 파일
 
 | 파일 | 역할 |
 |------|------|
-| `src/analyzers/ontology_builder.py` | 팩트→온톨로지 자동 구축 |
+| `config/ontology_config.yaml` | 스토리 클러스터 + 엔티티 분류 + 분석 설정 |
+| `src/analyzers/ontology_builder.py` | 팩트→온톨로지 자동 구축 (config 기반) |
+| `src/analyzers/first_principle_analyzer.py` | 이벤트→제1원칙 분석 (Claude) + 테제 후보 추출 |
 | `src/core/models.py` | `FirstPrincipleAnalysis` 모델 |
 | `scripts/ontology_io.py` | 온톨로지 CRUD CLI |
 | `scripts/generate_timeline.py` | 타임라인 시각화 |

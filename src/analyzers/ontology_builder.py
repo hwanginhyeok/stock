@@ -3,13 +3,19 @@
 Automatically creates OntologyEntity nodes from fact entities/tickers,
 clusters related facts into OntologyEvents, and links them together.
 No LLM API required — purely rule-based.
+
+Config-driven: story clusters and entity classification loaded from
+config/ontology_config.yaml. New themes/entities can be added without code changes.
 """
 
 from __future__ import annotations
 
 from collections import defaultdict
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
+
+import yaml
 
 from src.core.models import (
     EventStatus,
@@ -28,6 +34,8 @@ from src.storage import (
     OntologyEventRepository,
     OntologyLinkRepository,
 )
+
+_CONFIG_PATH = Path("config/ontology_config.yaml")
 
 # Fact type → Event type mapping
 _FACT_TO_EVENT_TYPE: dict[str, EventType] = {
@@ -48,6 +56,66 @@ _FACT_TO_SEVERITY: dict[str, Severity] = {
     "forecast": Severity.MINOR,
     "numerical": Severity.MINOR,
 }
+
+# ── Config loading ──────────────────────────────────────────────────────────
+
+_cached_config: dict[str, Any] | None = None
+
+
+def _load_config() -> dict[str, Any]:
+    """Load ontology config from YAML. Cached after first load."""
+    global _cached_config
+    if _cached_config is not None:
+        return _cached_config
+
+    if _CONFIG_PATH.exists():
+        with open(_CONFIG_PATH, encoding="utf-8") as f:
+            _cached_config = yaml.safe_load(f) or {}
+    else:
+        _cached_config = {}
+    return _cached_config
+
+
+def _get_story_clusters() -> list[tuple[str, str, EventType, Severity, list[str]]]:
+    """Load story clusters from config."""
+    config = _load_config()
+    clusters = config.get("story_clusters", [])
+
+    event_type_map = {
+        "war": EventType.WAR,
+        "macro": EventType.MACRO,
+        "policy": EventType.POLICY,
+        "earnings": EventType.EARNINGS,
+        "deal": EventType.DEAL,
+    }
+    severity_map = {
+        "critical": Severity.CRITICAL,
+        "major": Severity.MAJOR,
+        "moderate": Severity.MODERATE,
+        "minor": Severity.MINOR,
+    }
+
+    result = []
+    for c in clusters:
+        result.append((
+            c["title"],
+            c.get("market", "us"),
+            event_type_map.get(c.get("event_type", "macro"), EventType.MACRO),
+            severity_map.get(c.get("severity", "moderate"), Severity.MODERATE),
+            c.get("keywords", []),
+        ))
+    return result
+
+
+def _get_entity_classification() -> dict[str, set[str]]:
+    """Load entity classification rules from config."""
+    config = _load_config()
+    classification = config.get("entity_classification", {})
+
+    result: dict[str, set[str]] = {}
+    for entity_type, names in classification.items():
+        result[entity_type] = set(names)
+    return result
 
 
 def _resolve_market(market_str: str) -> Market:
@@ -86,41 +154,13 @@ def ensure_entities(
             if key in name_to_id:
                 continue
 
-            # Determine entity type from context
+            # Determine entity type from config (no hardcoding)
+            classification = _get_entity_classification()
             entity_type = "company"  # default
-            if entity_name in (
-                "Fed", "FOMC", "한국은행", "한은", "금통위", "ECB", "BOJ",
-                "SEC", "금감원", "공정위", "금융위", "기재부",
-                "관세청", "Pentagon", "국방부", "의회", "Congress",
-                "NATO", "OPEC", "EU",
-            ):
-                entity_type = "institution"
-            elif entity_name in (
-                "미국", "한국", "중국", "일본", "러시아",
-                "이란", "Iran", "카타르", "Qatar",
-                "UAE", "쿠웨이트", "요르단", "이스라엘", "Israel",
-                "사우디", "Saudi", "인도", "India",
-                "베트남", "Vietnam", "영국",
-            ):
-                entity_type = "country"
-            elif entity_name in (
-                "파월", "Powell", "머스크", "Musk", "트럼프", "Trump",
-                "바이든", "Biden", "이재용", "정의선", "최태원",
-                "젠슨황", "Jensen Huang",
-                "네타냐후", "Netanyahu", "푸틴", "Putin", "시진핑",
-            ):
-                entity_type = "person"
-            elif entity_name in (
-                "비트코인", "Bitcoin", "BTC", "이더리움", "Ethereum", "ETH",
-                "리플", "XRP", "솔라나", "SOL",
-                "원유", "WTI", "금값", "LNG", "디젤",
-            ):
-                entity_type = "asset"
-            elif entity_name in (
-                "코스피", "코스닥", "나스닥", "S&P", "다우",
-                "KOSPI", "KOSDAQ", "NASDAQ", "Dow",
-            ):
-                entity_type = "sector"
+            for etype, names in classification.items():
+                if entity_name in names:
+                    entity_type = etype
+                    break
 
             # Find ticker if available
             ticker = ""
@@ -143,59 +183,8 @@ def ensure_entities(
     return name_to_id
 
 
-# Story clusters: keyword groups that should be merged into one event
-_STORY_CLUSTERS: list[tuple[str, str, EventType, Severity, list[str]]] = [
-    # (story_title, market, event_type, severity, keywords)
-    (
-        "미국-이란 전쟁 + 중동 긴장",
-        "us",
-        EventType.WAR,
-        Severity.CRITICAL,
-        ["이란", "Iran", "중동", "Pentagon", "카타르", "Qatar",
-         "UAE", "호르무즈", "Hormuz", "LNG", "네타냐후", "Netanyahu",
-         "war against Iran", "이란 공격", "이란 긴장", "확전"],
-    ),
-    (
-        "에너지 가격 급등 + 디젤 쇼크",
-        "korea",
-        EventType.MACRO,
-        Severity.MAJOR,
-        ["유가", "WTI", "원유", "디젤", "diesel", "oil price",
-         "에너지 수입", "fuel", "기름값"],
-    ),
-    (
-        "트럼프 관세 + 무역 정책",
-        "us",
-        EventType.POLICY,
-        Severity.MAJOR,
-        ["관세", "tariff", "trade war", "무역", "16개국 조사",
-         "Trump tariff", "수입 규제"],
-    ),
-    (
-        "한국 증시 급락 + 매크로 리스크",
-        "korea",
-        EventType.MACRO,
-        Severity.MAJOR,
-        ["코스피 급락", "사이드카", "서킷브레이커", "반대매매",
-         "코스피지수", "패닉", "폭락", "급락"],
-    ),
-    (
-        "한은 통화정책 전환",
-        "korea",
-        EventType.POLICY,
-        Severity.MAJOR,
-        ["한은 총재", "금통위", "기준금리", "금리 인상", "금리 인하",
-         "매파", "비둘기"],
-    ),
-    (
-        "BTC/크립토 시장 동향",
-        "us",
-        EventType.MACRO,
-        Severity.MODERATE,
-        ["비트코인", "Bitcoin", "BTC", "이더리움", "ETH",
-         "채굴", "mining", "크립토"],
-    ),
-]
+# Story clusters loaded from config/ontology_config.yaml
+# No hardcoded clusters — add new themes by editing the YAML file
 
 
 def _match_story_cluster(fact: NewsFact) -> str | None:
@@ -204,7 +193,7 @@ def _match_story_cluster(fact: NewsFact) -> str | None:
     Returns story title if matched, None otherwise.
     """
     text = (fact.claim + " " + fact.source_quote).lower()
-    for title, _, _, _, keywords in _STORY_CLUSTERS:
+    for title, _, _, _, keywords in _get_story_clusters():
         if any(kw.lower() in text for kw in keywords):
             return title
     return None
@@ -270,7 +259,7 @@ def cluster_facts_to_events(
     # fact_id → [event_id, event_id, ...]
     fact_to_events: dict[str, list[str]] = defaultdict(list)
 
-    story_meta = {t: (m, et, sv) for t, m, et, sv, _ in _STORY_CLUSTERS}
+    story_meta = {t: (m, et, sv) for t, m, et, sv, _ in _get_story_clusters()}
 
     # ── Pass 1: Macro story clustering ──
     for f in facts:
@@ -294,18 +283,15 @@ def cluster_facts_to_events(
     for f in facts:
         tickers = f.tickers or []
         # Also include non-ticker entities that are companies
+        # Exclude non-company entities (loaded from config)
+        classification = _get_entity_classification()
+        non_company_names: set[str] = set()
+        for etype in ("institution", "country", "person", "asset", "sector"):
+            non_company_names.update(classification.get(etype, set()))
+
         company_entities = [
             e for e in f.entities
-            if e not in (
-                "Fed", "FOMC", "한은", "금통위", "ECB", "BOJ",
-                "SEC", "금감원", "Pentagon", "Congress",
-                "이란", "Iran", "카타르", "Qatar", "UAE",
-                "미국", "한국", "중국", "일본", "러시아",
-                "코스피", "코스닥", "나스닥", "S&P", "다우",
-                "원유", "WTI", "LNG", "디젤", "호르무즈",
-                "트럼프", "Trump", "파월", "Powell",
-                "네타냐후", "Netanyahu",
-            )
+            if e not in non_company_names
         ]
 
         stock_keys: set[str] = set()
