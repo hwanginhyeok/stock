@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이란 전쟁 지정학 온톨로지</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0d1117; color: #e6edf3; font-family: -apple-system, 'Noto Sans KR', sans-serif; overflow: hidden; }
+
+#container { display: flex; height: 100vh; }
+#graph { flex: 1; position: relative; }
+#sidebar { width: 380px; background: #161b22; border-left: 1px solid #30363d; overflow-y: auto; padding: 20px; }
+
+h1 { font-size: 16px; color: #58a6ff; margin-bottom: 4px; }
+h2 { font-size: 14px; color: #8b949e; margin-bottom: 16px; font-weight: normal; }
+h3 { font-size: 13px; color: #58a6ff; margin: 16px 0 8px; border-bottom: 1px solid #30363d; padding-bottom: 4px; }
+
+.node-info { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+.node-info .flag { font-size: 28px; }
+.node-info .name { font-size: 18px; font-weight: bold; margin: 4px 0; }
+.node-info .role { font-size: 12px; padding: 2px 8px; border-radius: 12px; display: inline-block; margin-bottom: 8px; }
+.node-info .detail { font-size: 12px; color: #8b949e; line-height: 1.6; }
+.node-info .detail strong { color: #e6edf3; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #8b949e; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+.timeline { margin-top: 16px; }
+.timeline-item { display: flex; gap: 8px; margin-bottom: 8px; font-size: 11px; }
+.timeline-date { color: #58a6ff; min-width: 45px; font-weight: bold; }
+.timeline-event { color: #8b949e; line-height: 1.4; }
+.timeline-event.critical { color: #f85149; }
+.timeline-event.major { color: #d29922; }
+
+.tooltip { position: absolute; background: #161b22; border: 1px solid #58a6ff; border-radius: 6px; padding: 8px 12px; font-size: 12px; pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 100; }
+
+.hormuz-banner { background: linear-gradient(90deg, #f8514922, #d2992222); border: 1px solid #f85149; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+.hormuz-banner .title { color: #f85149; font-size: 13px; font-weight: bold; }
+.hormuz-banner .stat { color: #d29922; font-size: 20px; font-weight: bold; margin: 4px 0; }
+.hormuz-banner .desc { color: #8b949e; font-size: 11px; }
+
+svg text { user-select: none; }
+</style>
+</head>
+<body>
+<div id="container">
+  <div id="graph">
+    <div class="tooltip" id="tooltip"></div>
+  </div>
+  <div id="sidebar">
+    <h1>이란 전쟁 지정학 온톨로지</h1>
+    <h2>2026.2.28 ~ 현재 | 나라별 연관관계</h2>
+
+    <div class="hormuz-banner">
+      <div class="title">🌊 호르무즈 해협 봉쇄</div>
+      <div class="stat">-1,000만 bpd</div>
+      <div class="desc">세계 석유 공급의 ~10% 차질 (3/12 기준)<br>이란, 중국 선박 차단 + 통행료 부과 시도 (3/27)</div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#f85149"></div>교전국(공격)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d29922"></div>교전국(방어)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#db6d28"></div>프록시</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#58a6ff"></div>동맹/기지</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#6e7681"></div>간접영향</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#bc8cff"></div>병목</div>
+    </div>
+
+    <div id="node-detail">
+      <div class="node-info">
+        <div class="detail">노드를 클릭하면 상세 정보가 표시됩니다.</div>
+      </div>
+    </div>
+
+    <h3>주요 타임라인</h3>
+    <div class="timeline">
+      <div class="timeline-item"><div class="timeline-date">2/28</div><div class="timeline-event critical">미국+이스라엘, 이란 선제 공습. 하메네이 사망</div></div>
+      <div class="timeline-item"><div class="timeline-date">3/5</div><div class="timeline-event major">이란 미사일 500+, 드론 2,000+ 발사</div></div>
+      <div class="timeline-item"><div class="timeline-date">3/8</div><div class="timeline-event">모흐타바 하메네이 최고지도자 선출</div></div>
+      <div class="timeline-item"><div class="timeline-date">3/12</div><div class="timeline-event critical">호르무즈 봉쇄 → 석유 -1,000만 bpd</div></div>
+      <div class="timeline-item"><div class="timeline-date">3/15</div><div class="timeline-event major">이스파한/시라즈/테헤란 대규모 공습</div></div>
+      <div class="timeline-item"><div class="timeline-date">3/26</div><div class="timeline-event">에너지 공격 유예 연장 (→4/6)</div></div>
+      <div class="timeline-item"><div class="timeline-date">3/27</div><div class="timeline-event major">사우디 미 공군기지 피격, 중국 선박 차단</div></div>
+      <div class="timeline-item"><div class="timeline-date">3/28</div><div class="timeline-event critical">후티, 이스라엘 향 탄도미사일 발사</div></div>
+    </div>
+
+    <h3>한국 영향</h3>
+    <div class="node-info">
+      <div class="detail">
+        <strong>유가 급등</strong> → 에너지 수입비 연 150조원<br>
+        <strong>카타르 헬륨</strong> 60-70% 수입 → 반도체 위협<br>
+        <strong>수출 타격</strong> 자동차 -18.6%, 철강 -15%<br>
+        <strong>최악 시나리오</strong> 유가 $150 → 성장률 -0.8%p
+      </div>
+    </div>
+
+    <h3>다음 추적</h3>
+    <div class="timeline">
+      <div class="timeline-item"><div class="timeline-date">4/6</div><div class="timeline-event critical">에너지 시설 공격 유예 만료</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const nodes = [
+  // 교전국
+  { id: "us", label: "🇺🇸 미국", group: "attacker", r: 30, detail: "Operation Epic Fury. 이란 선제 공습 주도. 카타르/바레인/UAE/사우디에 기지.", role: "공격측 주도국" },
+  { id: "israel", label: "🇮🇱 이스라엘", group: "attacker", r: 25, detail: "Operation Roaring Lion. 핵시설 타격. 헤즈볼라+후티 동시 교전.", role: "공격측" },
+  { id: "iran", label: "🇮🇷 이란", group: "defender", r: 30, detail: "미사일 500+, 드론 2,000+ 발사. 호르무즈 봉쇄 시도. 하메네이 사망 → 후계 선출.", role: "방어측" },
+
+  // 프록시
+  { id: "hezbollah", label: "🇱🇧 헤즈볼라", group: "proxy", r: 18, detail: "이란 프록시. 2024 휴전 파기, 이스라엘에 로켓 재발사. 시리아 경유 보급.", role: "이란 프록시" },
+  { id: "houthi", label: "🇾🇪 후티", group: "proxy", r: 18, detail: "3/28 이스라엘 향 탄도미사일 발사. 홍해 통항 위협. 이란 무기/드론 기술 지원.", role: "이란 프록시" },
+  { id: "iraq_militia", label: "🇮🇶 민병대", group: "proxy", r: 15, detail: "이라크 내 미군 기지 공격. IRGC 쿠드스군 지휘.", role: "이란 프록시" },
+
+  // 동맹/기지 제공
+  { id: "qatar", label: "🇶🇦 카타르", group: "ally", r: 20, detail: "Al Udeid 미 공군기지. LNG 허브. 이란 미사일 피격. 한국 헬륨 60-70% 수입처.", role: "미국 동맹 (피격)" },
+  { id: "bahrain", label: "🇧🇭 바레인", group: "ally", r: 15, detail: "미국 5함대 본부. 이란 미사일 공격 대상.", role: "미국 동맹 (피격)" },
+  { id: "uae", label: "🇦🇪 UAE", group: "ally", r: 18, detail: "미국 군사 자산 소재. 석유 수출국. 이란 미사일/드론 피격.", role: "미국 동맹 (피격)" },
+  { id: "saudi", label: "🇸🇦 사우디", group: "ally", r: 22, detail: "석유 최대 수출국. 3/27 미 공군기지 피격. 이란-사우디 프록시전 역사.", role: "미국 동맹 (피격)" },
+  { id: "jordan", label: "🇯🇴 요르단", group: "ally", r: 14, detail: "미국 동맹, 물류 거점. 이란 미사일 경유/피격 가능.", role: "미국 동맹" },
+
+  // 간접 영향
+  { id: "korea", label: "🇰🇷 한국", group: "affected", r: 22, detail: "유가 급등 → 에너지 수입비 150조. 카타르 헬륨 수급 차질 → 반도체 위협. 수출 타격.", role: "간접 영향" },
+  { id: "china", label: "🇨🇳 중국", group: "affected", r: 22, detail: "이란 석유 수입국. 호르무즈 봉쇄 피해. 3/27 선박 차단됨. 외교 중재 시도.", role: "간접 영향" },
+  { id: "japan", label: "🇯🇵 일본", group: "affected", r: 18, detail: "호르무즈 의존도 80%+. 에너지 비축 대응.", role: "간접 영향" },
+  { id: "russia", label: "🇷🇺 러시아", group: "affected", r: 18, detail: "이란 군사/외교 협력. UN에서 미국 비난. 직접 개입 회피.", role: "간접 영향" },
+
+  // 병목
+  { id: "hormuz", label: "🌊 호르무즈", group: "chokepoint", r: 24, detail: "일일 2,000만 배럴 (세계 20%). 봉쇄 시 -1,000만 bpd. 이란 통행료 부과 시도.", role: "전략 병목" },
+];
+
+const links = [
+  // 공격 관계
+  { source: "us", target: "iran", type: "attack", label: "합동 공습" },
+  { source: "israel", target: "iran", type: "attack", label: "합동 공습" },
+  { source: "us", target: "israel", type: "alliance", label: "합동 작전" },
+
+  // 이란 반격
+  { source: "iran", target: "israel", type: "attack", label: "미사일 반격" },
+  { source: "iran", target: "qatar", type: "attack", label: "미사일 공격" },
+  { source: "iran", target: "bahrain", type: "attack", label: "미사일 공격" },
+  { source: "iran", target: "uae", type: "attack", label: "미사일 공격" },
+  { source: "iran", target: "saudi", type: "attack", label: "기지 공격" },
+
+  // 프록시 관계
+  { source: "iran", target: "hezbollah", type: "proxy", label: "무기/자금" },
+  { source: "iran", target: "houthi", type: "proxy", label: "미사일/드론 기술" },
+  { source: "iran", target: "iraq_militia", type: "proxy", label: "IRGC 지휘" },
+  { source: "hezbollah", target: "israel", type: "attack", label: "로켓 공격" },
+  { source: "houthi", target: "israel", type: "attack", label: "탄도미사일" },
+
+  // 동맹/기지
+  { source: "us", target: "qatar", type: "base", label: "Al Udeid 기지" },
+  { source: "us", target: "bahrain", type: "base", label: "5함대" },
+  { source: "us", target: "uae", type: "base", label: "군사 자산" },
+  { source: "us", target: "saudi", type: "base", label: "공군 기지" },
+  { source: "us", target: "jordan", type: "base", label: "물류 거점" },
+
+  // 호르무즈
+  { source: "iran", target: "hormuz", type: "blockade", label: "봉쇄 시도" },
+  { source: "hormuz", target: "korea", type: "dependency", label: "에너지 의존" },
+  { source: "hormuz", target: "china", type: "dependency", label: "석유 수입" },
+  { source: "hormuz", target: "japan", type: "dependency", label: "석유 80%+" },
+  { source: "qatar", target: "korea", type: "supply", label: "헬륨 60-70%" },
+
+  // 외교
+  { source: "russia", target: "iran", type: "support", label: "군사/외교 협력" },
+  { source: "china", target: "iran", type: "trade", label: "석유 수입" },
+];
+
+const colorMap = {
+  attacker: "#f85149",
+  defender: "#d29922",
+  proxy: "#db6d28",
+  ally: "#58a6ff",
+  affected: "#6e7681",
+  chokepoint: "#bc8cff",
+};
+
+const linkColorMap = {
+  attack: "#f85149",
+  alliance: "#3fb950",
+  proxy: "#db6d28",
+  base: "#58a6ff",
+  blockade: "#bc8cff",
+  dependency: "#6e7681",
+  supply: "#d29922",
+  support: "#db6d28",
+  trade: "#6e7681",
+};
+
+const width = window.innerWidth - 380;
+const height = window.innerHeight;
+
+const svg = d3.select("#graph").append("svg")
+  .attr("width", width).attr("height", height);
+
+// Arrow markers
+const defs = svg.append("defs");
+Object.entries(linkColorMap).forEach(([type, color]) => {
+  defs.append("marker")
+    .attr("id", `arrow-${type}`)
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 25).attr("refY", 0)
+    .attr("markerWidth", 6).attr("markerHeight", 6)
+    .attr("orient", "auto")
+    .append("path")
+    .attr("d", "M0,-5L10,0L0,5")
+    .attr("fill", color);
+});
+
+const simulation = d3.forceSimulation(nodes)
+  .force("link", d3.forceLink(links).id(d => d.id).distance(140))
+  .force("charge", d3.forceManyBody().strength(-800))
+  .force("center", d3.forceCenter(width / 2, height / 2))
+  .force("collision", d3.forceCollide().radius(d => d.r + 10));
+
+const link = svg.append("g").selectAll("line")
+  .data(links).join("line")
+  .attr("stroke", d => linkColorMap[d.type] || "#30363d")
+  .attr("stroke-width", d => d.type === "attack" ? 2.5 : 1.5)
+  .attr("stroke-dasharray", d => d.type === "dependency" ? "5,5" : null)
+  .attr("marker-end", d => `url(#arrow-${d.type})`)
+  .attr("opacity", 0.6);
+
+const linkLabel = svg.append("g").selectAll("text")
+  .data(links).join("text")
+  .text(d => d.label)
+  .attr("font-size", 9)
+  .attr("fill", "#6e7681")
+  .attr("text-anchor", "middle")
+  .attr("opacity", 0.7);
+
+const node = svg.append("g").selectAll("g")
+  .data(nodes).join("g")
+  .call(d3.drag()
+    .on("start", (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+    .on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; })
+    .on("end", (e, d) => { if (!e.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; })
+  );
+
+node.append("circle")
+  .attr("r", d => d.r)
+  .attr("fill", d => colorMap[d.group])
+  .attr("stroke", d => colorMap[d.group])
+  .attr("stroke-width", 2)
+  .attr("fill-opacity", 0.15)
+  .attr("cursor", "pointer");
+
+node.append("text")
+  .text(d => d.label)
+  .attr("text-anchor", "middle")
+  .attr("dy", d => d.r + 14)
+  .attr("font-size", 11)
+  .attr("fill", "#e6edf3")
+  .attr("font-weight", "bold");
+
+// Click handler
+node.on("click", (e, d) => {
+  const roleColor = colorMap[d.group];
+  document.getElementById("node-detail").innerHTML = `
+    <div class="node-info">
+      <div class="flag">${d.label.split(" ")[0]}</div>
+      <div class="name">${d.label.split(" ").slice(1).join(" ")}</div>
+      <div class="role" style="background:${roleColor}22;color:${roleColor};border:1px solid ${roleColor}">${d.role}</div>
+      <div class="detail">${d.detail}</div>
+    </div>`;
+});
+
+// Hover tooltip
+const tooltip = document.getElementById("tooltip");
+node.on("mouseover", (e, d) => {
+  tooltip.style.opacity = 1;
+  tooltip.innerHTML = `<strong>${d.label}</strong><br>${d.role}`;
+  tooltip.style.left = (e.pageX + 12) + "px";
+  tooltip.style.top = (e.pageY - 20) + "px";
+}).on("mouseout", () => { tooltip.style.opacity = 0; });
+
+simulation.on("tick", () => {
+  link.attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+      .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+  linkLabel.attr("x", d => (d.source.x + d.target.x) / 2)
+           .attr("y", d => (d.source.y + d.target.y) / 2);
+  node.attr("transform", d => `translate(${d.x},${d.y})`);
+});
+</script>
+</body>
+</html>
