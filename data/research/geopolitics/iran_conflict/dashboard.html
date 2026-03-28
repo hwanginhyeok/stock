@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이란 전쟁 지정학 대시보드</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+:root { --bg: #0d1117; --card: #161b22; --border: #30363d; --white: #e6edf3; --dim: #8b949e; --red: #f85149; --orange: #db6d28; --yellow: #d29922; --green: #3fb950; --blue: #58a6ff; --cyan: #56d4dd; --purple: #bc8cff; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--white); font-family: -apple-system, 'Noto Sans KR', sans-serif; }
+
+/* Nav */
+nav { position: sticky; top: 0; z-index: 100; background: var(--card); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; height: 48px; gap: 4px; }
+nav .logo { font-size: 14px; font-weight: bold; color: var(--red); margin-right: 16px; white-space: nowrap; }
+nav .tab { padding: 8px 16px; font-size: 13px; color: var(--dim); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+nav .tab:hover { color: var(--white); }
+nav .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
+
+/* Sections */
+.section { display: none; padding: 24px; max-width: 1400px; margin: 0 auto; }
+.section.active { display: block; }
+
+/* Cards */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.card h3 { font-size: 14px; color: var(--blue); margin-bottom: 12px; }
+.card h4 { font-size: 12px; color: var(--dim); margin: 12px 0 6px; }
+
+/* Stats row */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+.stat-card .value { font-size: 28px; font-weight: bold; }
+.stat-card .label { font-size: 11px; color: var(--dim); margin-top: 4px; }
+.stat-card .change { font-size: 12px; margin-top: 2px; }
+
+/* Timeline */
+.tl { position: relative; margin-left: 20px; padding-left: 24px; border-left: 2px solid var(--border); }
+.tl-item { position: relative; margin-bottom: 16px; }
+.tl-item::before { content: ''; position: absolute; left: -29px; top: 6px; width: 10px; height: 10px; border-radius: 50%; }
+.tl-item.critical::before { background: var(--red); }
+.tl-item.major::before { background: var(--orange); }
+.tl-item.normal::before { background: var(--dim); }
+.tl-date { font-size: 11px; color: var(--blue); font-weight: bold; }
+.tl-text { font-size: 13px; color: var(--white); margin-top: 2px; line-height: 1.5; }
+.tl-detail { font-size: 11px; color: var(--dim); margin-top: 2px; }
+.tl-phase { font-size: 12px; color: var(--purple); font-weight: bold; margin: 20px 0 8px; background: #bc8cff15; padding: 6px 12px; border-radius: 6px; display: inline-block; }
+
+/* Country cards */
+.countries { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+.country { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; transition: border-color 0.15s; }
+.country:hover { border-color: var(--blue); }
+.country .flag { font-size: 24px; }
+.country .name { font-size: 15px; font-weight: bold; margin: 4px 0; }
+.country .role-tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-bottom: 8px; }
+.country .info { font-size: 12px; color: var(--dim); line-height: 1.6; }
+.country .info strong { color: var(--white); }
+
+/* Proxy tree */
+.proxy-hub { text-align: center; margin: 20px 0; }
+.proxy-hub .hub { display: inline-block; background: var(--yellow); color: var(--bg); padding: 12px 24px; border-radius: 12px; font-weight: bold; font-size: 16px; }
+.proxy-spokes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 16px; }
+.proxy-card { border-left: 3px solid var(--orange); }
+.proxy-card .status { display: flex; gap: 12px; margin-top: 8px; }
+.proxy-card .status-item { font-size: 11px; }
+.proxy-card .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+
+/* Scenario table */
+.scenario { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.scenario-card { padding: 16px; border-radius: 10px; }
+.scenario-card .prob { font-size: 24px; font-weight: bold; }
+.scenario-card .title { font-size: 14px; font-weight: bold; margin: 4px 0; }
+.scenario-card .desc { font-size: 12px; color: var(--dim); line-height: 1.5; }
+.scenario-card .action { font-size: 12px; margin-top: 8px; padding: 8px; border-radius: 6px; }
+
+/* Sector table */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 8px 12px; color: var(--dim); border-bottom: 1px solid var(--border); font-weight: normal; font-size: 11px; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.long { color: var(--green); }
+.short { color: var(--red); }
+.caution { color: var(--yellow); }
+
+/* Nuclear */
+.enrichment-bar { height: 24px; border-radius: 4px; position: relative; margin: 8px 0; }
+.enrichment-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+.enrichment-label { position: absolute; right: 8px; top: 4px; font-size: 11px; font-weight: bold; }
+
+/* Graph container */
+#graph-container { height: 500px; position: relative; border-radius: 12px; overflow: hidden; }
+#graph-container svg { width: 100%; height: 100%; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .countries { grid-template-columns: 1fr; }
+  nav { overflow-x: auto; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">🔴 이란 전쟁 대시보드</div>
+  <div class="tab active" data-tab="overview">개요</div>
+  <div class="tab" data-tab="map">연관관계</div>
+  <div class="tab" data-tab="timeline">타임라인</div>
+  <div class="tab" data-tab="economy">투자 시나리오</div>
+  <div class="tab" data-tab="proxy">프록시</div>
+  <div class="tab" data-tab="nuclear">핵 프로그램</div>
+  <div class="updated">갱신: 2026-03-28</div>
+</nav>
+
+<!-- ===== 개요 ===== -->
+<div class="section active" id="overview">
+  <div class="stats">
+    <div class="stat-card">
+      <div class="value" style="color:var(--red)">Day 28</div>
+      <div class="label">전쟁 경과일 (2/28~)</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" style="color:var(--orange)">~$120</div>
+      <div class="label">Brent 유가 (bbl)</div>
+      <div class="change" style="color:var(--red)">전쟁 전 $75 대비 +60%</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" style="color:var(--yellow)">-1,000만</div>
+      <div class="label">호르무즈 석유 차질 (bpd)</div>
+      <div class="change" style="color:var(--dim)">세계 공급의 ~10%</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" style="color:var(--red)">-12.06%</div>
+      <div class="label">코스피 최대 낙폭 (3/4)</div>
+      <div class="change" style="color:var(--dim)">역대 최대</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" style="color:var(--cyan)">$5,200+</div>
+      <div class="label">금 가격 (oz)</div>
+      <div class="change" style="color:var(--green)">안전자산 수요 폭증</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" style="color:var(--purple)">4/6</div>
+      <div class="label">에너지 공격 유예 만료</div>
+      <div class="change" style="color:var(--red)">D-9</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>현재 상황 요약</h3>
+    <p style="font-size:13px;line-height:1.8;color:var(--dim)">
+      2월 28일 미국+이스라엘이 이란을 선제 공습하면서 전쟁이 시작됐다. 하메네이 최고지도자가 사망했고, 이란은 미사일 500+발과 드론 2,000+기로 반격 중이다. 호르무즈 해협이 부분 봉쇄되면서 석유 공급이 일 1,000만 배럴 차질을 빚고 있고, 유가는 $120 근처까지 올랐다.
+      <br><br>
+      <strong style="color:var(--red)">핵심 변수</strong>: 4월 6일 에너지 시설 공격 유예 만료. 재개 시 유가 $150 시나리오. 3월 28일 후티가 이스라엘에 탄도미사일을 발사하면서 전선이 예멘까지 확대됐다.
+    </p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="card">
+      <h3>교전 구도</h3>
+      <p style="font-size:13px;line-height:1.8;color:var(--dim)">
+        <strong style="color:var(--red)">공격측</strong>: 🇺🇸 미국 (Epic Fury) + 🇮🇱 이스라엘 (Roaring Lion)<br>
+        <strong style="color:var(--yellow)">방어측</strong>: 🇮🇷 이란 + 프록시 네트워크<br>
+        <strong style="color:var(--orange)">프록시</strong>: 🇱🇧 헤즈볼라 + 🇾🇪 후티 + 🇮🇶 시아파 민병대<br>
+        <strong style="color:var(--blue)">피격국</strong>: 🇶🇦 카타르 + 🇧🇭 바레인 + 🇦🇪 UAE + 🇸🇦 사우디
+      </p>
+    </div>
+    <div class="card">
+      <h3>한국 영향</h3>
+      <p style="font-size:13px;line-height:1.8;color:var(--dim)">
+        <strong style="color:var(--red)">에너지</strong>: 수입비 연 150조원, 유가 급등 직격<br>
+        <strong style="color:var(--yellow)">반도체</strong>: 카타르 헬륨 60-70% 의존 → 수급 차질<br>
+        <strong style="color:var(--red)">수출</strong>: 자동차 -18.6%, 철강 -15%, 에너지화학 -10.8%<br>
+        <strong style="color:var(--orange)">최악</strong>: 유가 $150 시 성장률 -0.8%p, 물가 +2.9%p
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 연관관계 ===== -->
+<div class="section" id="map">
+  <div class="card">
+    <h3>나라별 연관관계 네트워크</h3>
+    <div style="font-size:11px;color:var(--dim);margin-bottom:8px">노드 드래그 가능 | 클릭 시 하단에 상세</div>
+    <div id="graph-container"></div>
+    <div id="click-info" style="margin-top:12px;font-size:13px;color:var(--dim)">노드를 클릭하세요</div>
+  </div>
+
+  <h3 style="font-size:14px;color:var(--blue);margin:16px 0 12px">국가별 상세</h3>
+  <div class="countries">
+    <div class="country"><div class="flag">🇺🇸</div><div class="name">미국</div><div class="role-tag" style="background:var(--red);color:white">공격측 주도</div><div class="info">Operation Epic Fury. 이란 선제 공습 주도. 걸프 5개국에 기지 배치. <strong>에너지 시설 공격 유예 4/6 만료</strong>.</div></div>
+    <div class="country"><div class="flag">🇮🇱</div><div class="name">이스라엘</div><div class="role-tag" style="background:var(--red);color:white">공격측</div><div class="info">Operation Roaring Lion. 핵시설 타격. 헤즈볼라+후티 동시 교전 중.</div></div>
+    <div class="country"><div class="flag">🇮🇷</div><div class="name">이란</div><div class="role-tag" style="background:var(--yellow);color:var(--bg)">방어측</div><div class="info">미사일 500+, 드론 2,000+ 발사. 호르무즈 봉쇄 시도. 하메네이 사망 → 후계 선출. <strong>중국 선박 차단(3/27)</strong>.</div></div>
+    <div class="country"><div class="flag">🇶🇦</div><div class="name">카타르</div><div class="role-tag" style="background:var(--blue);color:white">동맹 (피격)</div><div class="info">Al Udeid 미 공군기지. <strong>한국 헬륨 60-70% 수입처</strong>. 이란 미사일 피격. LNG 수출 차질.</div></div>
+    <div class="country"><div class="flag">🇸🇦</div><div class="name">사우디아라비아</div><div class="role-tag" style="background:var(--blue);color:white">동맹 (피격)</div><div class="info">석유 최대 수출국. <strong>3/27 미 공군기지 피격, 미군 부상</strong>. 이란-사우디 프록시전 역사.</div></div>
+    <div class="country"><div class="flag">🇰🇷</div><div class="name">한국</div><div class="role-tag" style="background:var(--dim);color:white">간접 영향</div><div class="info">유가 급등 → 에너지 수입비 150조. 카타르 헬륨 차질 → <strong>반도체 생산 위협</strong>. 코스피 -12.06%. 자동차 수출 -18.6%.</div></div>
+    <div class="country"><div class="flag">🇨🇳</div><div class="name">중국</div><div class="role-tag" style="background:var(--dim);color:white">간접 영향</div><div class="info">이란 석유 수입국. <strong>3/27 호르무즈에서 선박 2척 차단됨</strong>. 외교 중재 시도.</div></div>
+    <div class="country"><div class="flag">🌊</div><div class="name">호르무즈 해협</div><div class="role-tag" style="background:var(--purple);color:white">전략 병목</div><div class="info">일 2,000만 배럴 (세계 20%). <strong>봉쇄로 -1,000만 bpd 차질</strong>. 이란 통행료 부과 시도.</div></div>
+  </div>
+</div>
+
+<!-- ===== 타임라인 ===== -->
+<div class="section" id="timeline">
+  <div class="card">
+    <h3>전쟁 타임라인</h3>
+
+    <div class="tl-phase">Phase 0: 역사적 배경 (1979~2024)</div>
+    <div class="tl">
+      <div class="tl-item normal"><div class="tl-date">1979</div><div class="tl-text">이란 이슬람 혁명</div><div class="tl-detail">팔레비 왕정 붕괴, 호메이니 집권. 미국-이란 관계 단절의 시작</div></div>
+      <div class="tl-item normal"><div class="tl-date">1980-88</div><div class="tl-text">이란-이라크 전쟁 (8년)</div><div class="tl-detail">사우디가 이라크 지원 → 이란-사우디 적대 고착</div></div>
+      <div class="tl-item major"><div class="tl-date">2010</div><div class="tl-text">Stuxnet 사이버 공격</div><div class="tl-detail">미국+이스라엘, 이란 원심분리기 1,000기 파괴</div></div>
+      <div class="tl-item normal"><div class="tl-date">2015</div><div class="tl-text">JCPOA 핵 합의</div><div class="tl-detail">핵 활동 제한 ↔ 제재 해제</div></div>
+      <div class="tl-item critical"><div class="tl-date">2018</div><div class="tl-text">트럼프, JCPOA 탈퇴</div><div class="tl-detail">최대 압박 제재. 이란 우라늄 재축적 시작</div></div>
+      <div class="tl-item major"><div class="tl-date">2024.4</div><div class="tl-text">이란→이스라엘 최초 직접 미사일 공격</div><div class="tl-detail">프록시 전쟁 → 직접 충돌 전환</div></div>
+    </div>
+
+    <div class="tl-phase">Phase 1: 전쟁 발발 (2026.2.28)</div>
+    <div class="tl">
+      <div class="tl-item critical"><div class="tl-date">2/28</div><div class="tl-text">미국+이스라엘, 이란 선제 공습. 하메네이 사망</div><div class="tl-detail">Operation Epic Fury + Roaring Lion</div></div>
+      <div class="tl-item critical"><div class="tl-date">2/28</div><div class="tl-text">이란, 미사일+드론 반격 개시</div><div class="tl-detail">이스라엘 + 걸프 미군 기지 동시 공격</div></div>
+    </div>
+
+    <div class="tl-phase">Phase 2: 전면 확전 (3월 초~중)</div>
+    <div class="tl">
+      <div class="tl-item major"><div class="tl-date">3/5</div><div class="tl-text">이란 미사일 500+, 드론 2,000+ 발사</div><div class="tl-detail">이스라엘 40%, 미군 기지 60%</div></div>
+      <div class="tl-item normal"><div class="tl-date">3/8</div><div class="tl-text">모흐타바 하메네이 최고지도자 선출</div></div>
+      <div class="tl-item critical"><div class="tl-date">3/12</div><div class="tl-text">호르무즈 봉쇄 → 석유 -1,000만 bpd</div><div class="tl-detail">세계 공급의 ~10% 차질</div></div>
+      <div class="tl-item major"><div class="tl-date">3/15</div><div class="tl-text">이스파한/시라즈/테헤란 대규모 공습</div><div class="tl-detail">핵시설 + 군사시설 집중 타격</div></div>
+    </div>
+
+    <div class="tl-phase">Phase 3: 교착 + 확산 (현재)</div>
+    <div class="tl">
+      <div class="tl-item normal"><div class="tl-date">3/26</div><div class="tl-text">에너지 공격 유예 연장 (→4/6)</div></div>
+      <div class="tl-item major"><div class="tl-date">3/27</div><div class="tl-text">사우디 미 공군기지 피격, 미군 부상</div></div>
+      <div class="tl-item major"><div class="tl-date">3/27</div><div class="tl-text">이란, 중국 선박 2척 호르무즈 통과 차단</div><div class="tl-detail">중립국 선박까지 차단 → 중국 반발</div></div>
+      <div class="tl-item critical"><div class="tl-date">3/28</div><div class="tl-text">후티, 이스라엘 향 탄도미사일 발사</div><div class="tl-detail">예멘 전선 공식 가담</div></div>
+    </div>
+
+    <div class="tl-phase" style="background:var(--red)22;color:var(--red)">다음 추적</div>
+    <div class="tl">
+      <div class="tl-item critical"><div class="tl-date">4/6</div><div class="tl-text">에너지 시설 공격 유예 만료</div><div class="tl-detail">유가 향방 결정. 재개 시 $150, 휴전 시 $90</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 투자 시나리오 ===== -->
+<div class="section" id="economy">
+  <div class="stats">
+    <div class="stat-card" style="border-color:var(--yellow)"><div class="value" style="color:var(--yellow)">$80~90</div><div class="label">시나리오 A: 협상 타결</div></div>
+    <div class="stat-card" style="border-color:var(--orange)"><div class="value" style="color:var(--orange)">$120~130</div><div class="label">시나리오 B: 장기 교착 (현재)</div></div>
+    <div class="stat-card" style="border-color:var(--red)"><div class="value" style="color:var(--red)">$150+</div><div class="label">시나리오 C: 전면 확전</div></div>
+    <div class="stat-card" style="border-color:var(--red)"><div class="value" style="color:var(--red)">$180+</div><div class="label">시나리오 D: 지상군 투입</div></div>
+  </div>
+
+  <div class="card">
+    <h3>4/6 유예 만료 시나리오</h3>
+    <div class="scenario">
+      <div class="scenario-card" style="background:var(--blue)15;border:1px solid var(--blue)">
+        <div class="prob" style="color:var(--blue)">40%</div>
+        <div class="title" style="color:var(--blue)">유예 재연장</div>
+        <div class="desc">유가 $110~120 유지, 불확실성 지속, 소폭 안도 랠리</div>
+        <div class="action" style="background:var(--blue)15">행동: 현 포지션 유지, 방산/에너지 비중 유지</div>
+      </div>
+      <div class="scenario-card" style="background:var(--red)15;border:1px solid var(--red)">
+        <div class="prob" style="color:var(--red)">35%</div>
+        <div class="title" style="color:var(--red)">에너지 공격 재개</div>
+        <div class="desc">유가 $140~150 급등, 글로벌 패닉, 코스피 -5~10%</div>
+        <div class="action" style="background:var(--red)15">행동: XLE 확대, GLD 추가, IT/반도체 축소</div>
+      </div>
+      <div class="scenario-card" style="background:var(--green)15;border:1px solid var(--green)">
+        <div class="prob" style="color:var(--green)">25%</div>
+        <div class="title" style="color:var(--green)">휴전 협상 돌입</div>
+        <div class="desc">유가 $90~100 급락, 강한 반등 랠리, 낙폭과대주 회복</div>
+        <div class="action" style="background:var(--green)15">행동: 에너지/방산 차익실현 → 반도체/IT 반등 매수</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>전쟁 진행 중 — 섹터별 매매 전략</h3>
+    <table>
+      <tr><th>섹터</th><th>방향</th><th>근거</th><th>대표 종목/ETF</th></tr>
+      <tr><td>방산</td><td class="long">🟢 Long</td><td>무기 소모전 → K-방산 수주 증가</td><td>한화에어로, LIG넥스원 / ITA</td></tr>
+      <tr><td>정유/에너지</td><td class="long">🟢 Long</td><td>유가 $120+ → 정제 마진 확대</td><td>S-Oil / XLE, Exxon</td></tr>
+      <tr><td>금</td><td class="long">🟢 Long</td><td>안전자산 + 인플레 헤지</td><td>GLD, IAU</td></tr>
+      <tr><td>해운</td><td class="long">🟢 Long</td><td>호르무즈 우회 → 운임 급등</td><td>HMM, 팬오션</td></tr>
+      <tr><td>반도체</td><td class="caution">🟡 Caution</td><td>카타르 헬륨 차질 + 투자심리 위축</td><td>삼성전자, SK하이닉스</td></tr>
+      <tr><td>자동차</td><td class="caution">🟡 Caution</td><td>수출 -18.6%, 유가 비용 증가</td><td>현대차, 기아</td></tr>
+      <tr><td>항공</td><td class="short">🔴 Short</td><td>유류비 급등 + 중동 노선 중단</td><td>대한항공</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===== 프록시 ===== -->
+<div class="section" id="proxy">
+  <div class="card">
+    <h3>저항의 축 (Axis of Resistance) — 허브-앤-스포크 구조</h3>
+    <div class="proxy-hub"><div class="hub">🇮🇷 IRGC 쿠드스군 — 연 $10~15억 지원</div></div>
+    <div class="proxy-spokes">
+      <div class="card proxy-card">
+        <h3>🇱🇧 헤즈볼라</h3>
+        <div style="font-size:12px;color:var(--dim);line-height:1.6">로켓 150,000+ 발 | 전투원 30,000~50,000 | 연 <strong style="color:var(--white)">$7억</strong> 지원<br>정밀유도무기 자체 생산. 이란과 가장 깊은 통합.</div>
+        <div class="status">
+          <div class="status-item"><span class="status-dot" style="background:var(--yellow)"></span>전투력: 약화됨</div>
+          <div class="status-item"><span class="status-dot" style="background:var(--red)"></span>통제: 통신 단절</div>
+        </div>
+      </div>
+      <div class="card proxy-card">
+        <h3>🇾🇪 후티 (안사르 알라)</h3>
+        <div style="font-size:12px;color:var(--dim);line-height:1.6">탄도미사일 + 대함미사일 + 드론 | 연 <strong style="color:var(--white)">$1~2억</strong> 지원<br><strong style="color:var(--red)">3/28 이스라엘 향 탄도미사일 발사 — 공식 참전</strong></div>
+        <div class="status">
+          <div class="status-item"><span class="status-dot" style="background:var(--green)"></span>전투력: 건재</div>
+          <div class="status-item"><span class="status-dot" style="background:var(--red)"></span>독자행동: 높음</div>
+        </div>
+      </div>
+      <div class="card proxy-card">
+        <h3>🇮🇶 시아파 민병대 (PMF)</h3>
+        <div style="font-size:12px;color:var(--dim);line-height:1.6">이라크 내 10만+ 전투원 | IRGC 직접 지휘<br>이라크 내 미군 기지 로켓/드론 반복 공격</div>
+        <div class="status">
+          <div class="status-item"><span class="status-dot" style="background:var(--green)"></span>전투력: 건재</div>
+          <div class="status-item"><span class="status-dot" style="background:var(--yellow)"></span>통제: 부분</div>
+        </div>
+      </div>
+      <div class="card proxy-card">
+        <h3>🇵🇸 하마스</h3>
+        <div style="font-size:12px;color:var(--dim);line-height:1.6">2023.10.7 이후 대폭 약화. 가자 전쟁으로 조직 와해 수준.<br>저항의 축에서 사실상 탈락. 상징적 존재.</div>
+        <div class="status">
+          <div class="status-item"><span class="status-dot" style="background:var(--red)"></span>전투력: 소진</div>
+          <div class="status-item"><span class="status-dot" style="background:var(--red)"></span>통제: 단절</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:var(--red)">
+    <h3 style="color:var(--red)">핵심 발견: 통제의 상실</h3>
+    <p style="font-size:13px;color:var(--dim);line-height:1.8">
+      이스라엘의 이란 통신 인프라 타격으로 IRGC가 프록시들과 <strong style="color:var(--white)">암호화 통신을 잃었다</strong>.
+      <strong style="color:var(--red)">31명의 지역 IRGC 사령관이 사실상 독자적으로 작전 중</strong>.
+      이란이 "전쟁을 멈추라"고 해도 프록시들이 따를지 불확실 — 이건 휴전 협상의 가장 큰 장애물.
+    </p>
+  </div>
+</div>
+
+<!-- ===== 핵 프로그램 ===== -->
+<div class="section" id="nuclear">
+  <div class="stats">
+    <div class="stat-card" style="border-color:var(--red)">
+      <div class="value" style="color:var(--red)">60%</div>
+      <div class="label">현재 농축 수준</div>
+      <div class="change" style="color:var(--dim)">무기급 90%까지 단거리</div>
+    </div>
+    <div class="stat-card" style="border-color:var(--orange)">
+      <div class="value" style="color:var(--orange)">400+ kg</div>
+      <div class="label">60% 우라늄 보유량</div>
+      <div class="change" style="color:var(--dim)">핵무기 9개 분량</div>
+    </div>
+    <div class="stat-card" style="border-color:var(--red)">
+      <div class="value" style="color:var(--red)">2~3일</div>
+      <div class="label">무기급 돌파 시간</div>
+      <div class="change" style="color:var(--dim)">포르도 기준</div>
+    </div>
+    <div class="stat-card" style="border-color:var(--yellow)">
+      <div class="value" style="color:var(--yellow)">수개월~년</div>
+      <div class="label">무기화 소요 시간</div>
+      <div class="change" style="color:var(--dim)">탄두 설계/소형화/운반체</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>농축 수준 비교</h3>
+    <div style="margin:12px 0">
+      <div style="font-size:11px;color:var(--dim);margin-bottom:4px">JCPOA 허용 (3.67%)</div>
+      <div class="enrichment-bar" style="background:var(--border)"><div class="enrichment-fill" style="width:4%;background:var(--green)"><div class="enrichment-label" style="color:var(--green);left:8px">3.67%</div></div></div>
+      <div style="font-size:11px;color:var(--dim);margin-bottom:4px;margin-top:8px">현재 이란 (60%)</div>
+      <div class="enrichment-bar" style="background:var(--border)"><div class="enrichment-fill" style="width:67%;background:var(--orange)"><div class="enrichment-label" style="color:var(--white)">60%</div></div></div>
+      <div style="font-size:11px;color:var(--dim);margin-bottom:4px;margin-top:8px">무기급 (90%)</div>
+      <div class="enrichment-bar" style="background:var(--border)"><div class="enrichment-fill" style="width:100%;background:var(--red)"><div class="enrichment-label" style="color:var(--white)">90%</div></div></div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:var(--purple)">
+    <h3 style="color:var(--purple)">제1원칙 분석</h3>
+    <h4>통념</h4>
+    <p style="font-size:13px;color:var(--dim)">"2026 공습으로 이란 핵 프로그램이 파괴되었다"</p>
+    <h4>근본 진실</h4>
+    <ul style="font-size:12px;color:var(--dim);line-height:1.8;padding-left:16px">
+      <li>포르도는 산 속 80m 지하. 미국 최강 관통폭탄(GBU-57)도 관통 보장 안 됨</li>
+      <li>핵 지식과 인력은 폭격으로 파괴되지 않는다. 원심분리기는 다시 만들 수 있다</li>
+      <li>60% 농축 기술 보유 + 무기급 돌파 2~3일</li>
+      <li>IAEA 사찰 중단 → 비밀 시설 확인 불가</li>
+    </ul>
+    <h4>Gap</h4>
+    <p style="font-size:13px;color:var(--yellow)">공습이 시설은 파괴하지만, 핵 능력 자체는 제거 못한다. 오히려 "핵무기를 실제로 만들어야 한다"는 내부 합의를 강화할 수 있다.</p>
+    <h4>투자 관점</h4>
+    <p style="font-size:13px;color:var(--dim)">단기: 핵 위협 감소 → 리스크 프리미엄 축소. 장기: 중동 핵확산 도미노 → 방산/핵안보 테마 장기 유효.</p>
+  </div>
+</div>
+
+<script>
+// Tab navigation
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'map' && !window._graphRendered) renderGraph();
+  });
+});
+
+// D3 Graph (lazy render)
+function renderGraph() {
+  window._graphRendered = true;
+  const nodes = [
+    { id:"us",label:"🇺🇸 미국",group:"attacker",r:28,detail:"Operation Epic Fury. 에너지 공격 유예 4/6 만료." },
+    { id:"israel",label:"🇮🇱 이스라엘",group:"attacker",r:22,detail:"Operation Roaring Lion. 핵시설 타격." },
+    { id:"iran",label:"🇮🇷 이란",group:"defender",r:28,detail:"미사일 500+, 드론 2,000+. 호르무즈 봉쇄." },
+    { id:"hezbollah",label:"🇱🇧 헤즈볼라",group:"proxy",r:16 },
+    { id:"houthi",label:"🇾🇪 후티",group:"proxy",r:16 },
+    { id:"iraq",label:"🇮🇶 민병대",group:"proxy",r:14 },
+    { id:"qatar",label:"🇶🇦 카타르",group:"ally",r:18 },
+    { id:"saudi",label:"🇸🇦 사우디",group:"ally",r:20 },
+    { id:"uae",label:"🇦🇪 UAE",group:"ally",r:16 },
+    { id:"korea",label:"🇰🇷 한국",group:"affected",r:20 },
+    { id:"china",label:"🇨🇳 중국",group:"affected",r:20 },
+    { id:"hormuz",label:"🌊 호르무즈",group:"chokepoint",r:22 },
+  ];
+  const links = [
+    {source:"us",target:"iran",type:"attack"},{source:"israel",target:"iran",type:"attack"},
+    {source:"us",target:"israel",type:"alliance"},{source:"iran",target:"israel",type:"attack"},
+    {source:"iran",target:"qatar",type:"attack"},{source:"iran",target:"saudi",type:"attack"},
+    {source:"iran",target:"uae",type:"attack"},{source:"iran",target:"hezbollah",type:"proxy"},
+    {source:"iran",target:"houthi",type:"proxy"},{source:"iran",target:"iraq",type:"proxy"},
+    {source:"hezbollah",target:"israel",type:"attack"},{source:"houthi",target:"israel",type:"attack"},
+    {source:"us",target:"qatar",type:"base"},{source:"us",target:"saudi",type:"base"},
+    {source:"iran",target:"hormuz",type:"blockade"},{source:"hormuz",target:"korea",type:"dep"},
+    {source:"hormuz",target:"china",type:"dep"},{source:"qatar",target:"korea",type:"supply"},
+  ];
+  const colors = {attacker:"#f85149",defender:"#d29922",proxy:"#db6d28",ally:"#58a6ff",affected:"#6e7681",chokepoint:"#bc8cff"};
+  const lc = {attack:"#f85149",alliance:"#3fb950",proxy:"#db6d28",base:"#58a6ff",blockade:"#bc8cff",dep:"#6e7681",supply:"#d29922"};
+
+  const c = document.getElementById('graph-container');
+  const w = c.clientWidth, h = c.clientHeight;
+  const svg = d3.select(c).append("svg").attr("width",w).attr("height",h);
+
+  const sim = d3.forceSimulation(nodes)
+    .force("link",d3.forceLink(links).id(d=>d.id).distance(120))
+    .force("charge",d3.forceManyBody().strength(-600))
+    .force("center",d3.forceCenter(w/2,h/2))
+    .force("collision",d3.forceCollide().radius(d=>d.r+8));
+
+  const link = svg.append("g").selectAll("line").data(links).join("line")
+    .attr("stroke",d=>lc[d.type]||"#30363d").attr("stroke-width",d=>d.type==="attack"?2:1.5)
+    .attr("stroke-dasharray",d=>d.type==="dep"?"4,4":null).attr("opacity",0.5);
+
+  const node = svg.append("g").selectAll("g").data(nodes).join("g")
+    .call(d3.drag().on("start",(e,d)=>{if(!e.active)sim.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y})
+    .on("drag",(e,d)=>{d.fx=e.x;d.fy=e.y}).on("end",(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null}));
+
+  node.append("circle").attr("r",d=>d.r).attr("fill",d=>colors[d.group]).attr("fill-opacity",0.15)
+    .attr("stroke",d=>colors[d.group]).attr("stroke-width",2).attr("cursor","pointer");
+  node.append("text").text(d=>d.label).attr("text-anchor","middle").attr("dy",d=>d.r+12)
+    .attr("font-size",10).attr("fill","#e6edf3").attr("font-weight","bold");
+
+  node.on("click",(e,d)=>{
+    document.getElementById("click-info").innerHTML=`<strong>${d.label}</strong>: ${d.detail||""}`;
+  });
+
+  sim.on("tick",()=>{
+    link.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+    node.attr("transform",d=>`translate(${d.x},${d.y})`);
+  });
+}
+</script>
+</body>
+</html>
