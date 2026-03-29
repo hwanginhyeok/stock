@@ -604,7 +604,7 @@ data/research/stocks/tesla/
 
 | # | 분야 | 작업 | 완료일 | 비고 |
 |---|------|------|--------|------|
-| 4-10 | 아티클 | 012 의식을 우주로 확장한다는 것 | 2026-03-29 | X Notes 게시 완료, published/ 이동 완료 |
+| 4-10 | 아티클 | 012 의식을 우주로 확장한다는 것 | 2026-03-29 | X Notes 게시 완료, 네이버 게시 완료, published/ 이동 완료 |
 | 1-28 | 테스트 | 뉴스 수집기 단위 테스트 17건 | 2026-03-26 | TickerExtractor 9건 + NewsPipeline 6건 + BreakingDetection 2건 |
 | 1-27 | 코드 | RSS 수집기 안정성 보강 — 실패 소스 추적 | 2026-03-26 | failed_sources 속성, PipelineResult 연동, 테스트 7건 |
 | 1-26 | 수정 | 모닝 이메일 Graceful Degradation | 2026-03-26 | 부분 실패 허용, [일부 누락] 접두사, 템플릿 누락 배너, 테스트 7건 |
