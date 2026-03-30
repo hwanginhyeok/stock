@@ -8,10 +8,15 @@
 set -euo pipefail
 
 SCHEDULE="${1:-morning}"
-PROJECT_DIR="/home/gint_pcd/projects/주식부자프로젝트"
+PROJECT_DIR="/home/window11/stock"
 VENV_DIR="$PROJECT_DIR/.venv-wsl"
 LOG_DIR="$PROJECT_DIR/logs"
-PYTHON="$VENV_DIR/bin/python"
+# venv 없으면 시스템 python3 폴백
+if [ -x "$VENV_DIR/bin/python" ]; then
+    PYTHON="$VENV_DIR/bin/python"
+else
+    PYTHON="$(which python3)"
+fi
 
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/briefing_$(date +%Y%m%d)_${SCHEDULE}.log"
