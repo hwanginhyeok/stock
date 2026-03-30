@@ -10,8 +10,6 @@
 
 | # | 분야 | 작업 | 담당 | 진행 상황 | 다음 할 일 |
 |---|------|------|------|-----------|------------|
-| 4-3 | 아티클 | 블록체인 생태계 #1: 비트코인 편 | 사용자 + AI | Phase 1 완료 (역사 raw 노트, 테제 확정) | 아웃라인 → 롱폼 초안 |
-| 4-4 | 아티클 | 블록체인 생태계 #2: 이더리움 편 | 사용자 + AI | Phase 1 완료 (역사 raw 노트, 테제 확정) | 아웃라인 → 롱폼 초안 |
 | 4-5 | 아티클 | 팔란티어 심층분석 시리즈 (6편) | 사용자 + AI | 전 편 초안 완료 + 도입편 시각화 3개 완료 + 게시 스케줄 확정 (PUBLISH_SCHEDULE.md) | 도입편 최종 퇴고 → 3/11 X 게시 |
 | 4-6 | 아티클 | 블록체인 생태계 #3: BMNR — ETH 트레저리 편 | 사용자 + AI | Phase 1 완료 (심층 리서치 완료) | 테제 확정 → 아웃라인 → 롱폼 초안 |
 | 4-7 | 아티클 | 블록체인 생태계 #4: CRCL — USDC 디지털달러 편 | 사용자 + AI | Phase 1 완료 (심층 리서치 완료) | 테제 확정 → 아웃라인 → 롱폼 초안 |
@@ -36,11 +34,11 @@
 - [x] `drafts/thesis.md` — 테제 확정
 
 #### Phase 2: 검증 / Phase 3: 아웃라인 / Phase 4: 초안
-- [ ] `verified/claims.md` — 핵심 주장 검증
-- [ ] `drafts/outline.md` — 아웃라인
-- [ ] `drafts/x_article_v1.md` — X 롱폼 초안
+- [x] `research/sources.md` — 핵심 팩트 & 출처 정리 (야간작업 완료)
+- [x] `drafts/outline_v1.md` — 아웃라인 완료 (야간작업)
+- [x] `drafts/v1_draft.md` — X 롱폼 초안 완료 (야간작업)
 
-**관련 파일**: `data/research/articles/003_bitcoin-history/`, `data/articles/002_BTC_블록체인-생태계-비트코인편/`
+**관련 파일**: `data/articles/002_BTC_블록체인-생태계-비트코인편/`
 
 ---
 
@@ -55,11 +53,11 @@
 - [x] `drafts/thesis.md` — 테제 확정
 
 #### Phase 2: 검증 / Phase 3: 아웃라인 / Phase 4: 초안
-- [ ] `verified/claims.md` — 핵심 주장 검증
-- [ ] `drafts/outline.md` — 아웃라인
-- [ ] `drafts/x_article_v1.md` — X 롱폼 초안
+- [x] `research/sources.md` — 핵심 팩트 & 출처 정리 (야간작업 완료)
+- [x] `drafts/outline_v1.md` — 아웃라인 완료 (야간작업)
+- [x] `drafts/v1_draft.md` — X 롱폼 초안 완료 (야간작업)
 
-**관련 파일**: `data/research/articles/004_ethereum-history/`, `data/articles/003_ETH_블록체인-생태계-이더리움편/`
+**관련 파일**: `data/articles/003_ETH_블록체인-생태계-이더리움편/`
 
 ---
 
@@ -604,6 +602,8 @@ data/research/stocks/tesla/
 
 | # | 분야 | 작업 | 완료일 | 비고 |
 |---|------|------|--------|------|
+| 4-4 | 아티클 | 블록체인 생태계 #2: 이더리움 편 — v1 초안 | 2026-03-30 | v1 초안 완료 (야간작업). sources.md + outline_v1.md + v1_draft.md |
+| 4-3 | 아티클 | 블록체인 생태계 #1: 비트코인 편 — v1 초안 | 2026-03-30 | v1 초안 완료 (야간작업). sources.md + outline_v1.md + v1_draft.md |
 | 4-10 | 아티클 | 012 의식을 우주로 확장한다는 것 | 2026-03-29 | X Notes 게시 완료, 네이버 게시 완료, published/ 이동 완료 |
 | 1-28 | 테스트 | 뉴스 수집기 단위 테스트 17건 | 2026-03-26 | TickerExtractor 9건 + NewsPipeline 6건 + BreakingDetection 2건 |
 | 1-27 | 코드 | RSS 수집기 안정성 보강 — 실패 소스 추적 | 2026-03-26 | failed_sources 속성, PipelineResult 연동, 테스트 7건 |
