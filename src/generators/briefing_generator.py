@@ -233,10 +233,54 @@ def _group_facts_by_type(
     return grouped
 
 
+def _build_standup_section(regime_result: Any) -> str:
+    """Investment Standup 섹션 마크다운을 생성한다.
+
+    Args:
+        regime_result: RegimeResult 인스턴스 (타입 임포트 순환 방지를 위해 Any).
+
+    Returns:
+        스탠드업 섹션 마크다운 문자열.
+    """
+    regime = regime_result.regime
+    confidence_pct = int(regime_result.confidence * 100)
+    drivers = regime_result.drivers
+    sizing = regime_result.sizing
+
+    regime_label = {
+        "RISK_ON": "RISK_ON ✅",
+        "NEUTRAL": "NEUTRAL ⚖️",
+        "RISK_OFF": "RISK_OFF 🔴",
+    }.get(regime, regime)
+
+    lines = [
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"📊 오늘의 레짐: {regime_label} (신뢰도 {confidence_pct}%)",
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        "",
+        "오늘 집중할 것:",
+    ]
+
+    for i, driver in enumerate(drivers[:3], 1):
+        lines.append(f"{i}. {driver}")
+
+    if sizing:
+        lines.append("")
+        lines.append("포지션 사이징 가이드 (최종 결정은 사용자):")
+        sizing_parts = [f"• {ticker}: {int(ratio * 100)}%" for ticker, ratio in sizing.items()]
+        lines.append("  " + " | ".join(sizing_parts))
+
+    lines.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    lines.append("")
+
+    return "\n".join(lines)
+
+
 def generate_briefing(
     schedule: str,
     hours: int = 12,
     fetch_market: bool = True,
+    regime_result: Any = None,
 ) -> str:
     """Generate a market briefing.
 
@@ -244,6 +288,8 @@ def generate_briefing(
         schedule: 'morning' or 'evening'.
         hours: Lookback window for facts.
         fetch_market: Whether to fetch live market data via yfinance.
+        regime_result: RegimeResult from MarketRegimeEngine. 제공 시 스탠드업
+            섹션이 브리핑 맨 앞에 삽입된다. None이면 생략.
 
     Returns:
         Formatted briefing text.
@@ -313,7 +359,14 @@ def generate_briefing(
         lstrip_blocks=True,
     )
     template = env.get_template(f"{schedule}.j2")
-    return template.render(**context)
+    briefing_text = template.render(**context)
+
+    # 스탠드업 섹션: regime_result가 있으면 브리핑 맨 앞에 삽입
+    if regime_result is not None:
+        standup = _build_standup_section(regime_result)
+        briefing_text = standup + briefing_text
+
+    return briefing_text
 
 
 def save_briefing(text: str, schedule: str) -> Path:
@@ -340,6 +393,7 @@ def generate_naver_html(
     schedule: str,
     hours: int = 12,
     fetch_market: bool = True,
+    regime_result: Any = None,
 ) -> str:
     """Generate briefing as Naver blog-ready HTML.
 
@@ -350,6 +404,8 @@ def generate_naver_html(
         schedule: 'morning' or 'evening'.
         hours: Lookback window for facts.
         fetch_market: Whether to fetch live market data.
+        regime_result: RegimeResult from MarketRegimeEngine. 제공 시 스탠드업
+            섹션이 HTML 맨 앞에 삽입된다.
 
     Returns:
         Complete HTML string.
@@ -529,7 +585,22 @@ def generate_naver_html(
 
     lines.append("</div>")
 
-    return "\n".join(lines)
+    html = "\n".join(lines)
+
+    # 스탠드업 섹션: regime_result가 있으면 HTML 맨 앞에 삽입
+    if regime_result is not None:
+        standup_md = _build_standup_section(regime_result)
+        # 간단한 pre 태그로 감싸서 HTML에 삽입
+        standup_html = (
+            '<div style="background:#f0f7ff; border-left:4px solid #2563eb; '
+            'padding:16px 20px; margin-bottom:20px; font-family:monospace; '
+            'white-space:pre-wrap; font-size:14px; line-height:1.6;">'
+            + standup_md.replace("<", "&lt;").replace(">", "&gt;")
+            + "</div>"
+        )
+        html = standup_html + html
+
+    return html
 
 
 def save_naver_html(html: str, schedule: str) -> Path:

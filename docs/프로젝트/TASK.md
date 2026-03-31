@@ -541,7 +541,6 @@ data/research/stocks/tesla/
 
 | # | 분야 | 작업 | 중요도 | 담당 | 발행일 | 상태 | 비고 |
 |---|------|------|--------|------|--------|------|------|
-| 2-12 | 코드 | 두 축 연결 체계 — Market Regime Engine + Investment Standup | P2 | AI | 2026-03-30 | 요청 | office-hours 설계 완료(APPROVED). src/analyzers/regime.py + config/regime_sizing.yaml + briefing_generator.py 수정. 디자인: window11-master-design-20260330-153217.md |
 | 1-23 | 시스템 | 크립토 생태계 기업 모니터링 이메일 섹션 추가 | P2 | AI | 2026-03-01 | 예정 | COIN/HOOD/BMNR/SQ/BLK/MSTR 주가+뉴스, Circle 뉴스 추적. 상세 → task/1-23.md |
 | 1-24 | 시스템 | 시황 브리핑 cron 자동화 (오전 6시 + 저녁 6시) | P2 | AI | 2026-03-22 | 요청 | run_briefing.sh 경로 수정 + cron 등록. 텔레그램 봇 연결은 PM이 담당. 야간작업 예정 |
 
@@ -603,6 +602,7 @@ data/research/stocks/tesla/
 
 | # | 분야 | 작업 | 완료일 | 비고 |
 |---|------|------|--------|------|
+| 2-12 | 코드 | 두 축 연결 체계 — Market Regime Engine + Investment Standup | 2026-03-31 | regime.py + config/regime_sizing.yaml + briefing/signal_builder 수정 + 테스트 34건. FRED/FX fallback 정상 |
 | 4-4 | 아티클 | 블록체인 생태계 #2: 이더리움 편 — v1 초안 | 2026-03-30 | v1 초안 완료 (야간작업). sources.md + outline_v1.md + v1_draft.md |
 | 4-3 | 아티클 | 블록체인 생태계 #1: 비트코인 편 — v1 초안 | 2026-03-30 | v1 초안 완료 (야간작업). sources.md + outline_v1.md + v1_draft.md |
 | 4-10 | 아티클 | 012 의식을 우주로 확장한다는 것 | 2026-03-29 | X Notes 게시 완료, 네이버 게시 완료, published/ 이동 완료 |

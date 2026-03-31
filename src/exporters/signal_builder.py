@@ -113,6 +113,7 @@ def build_signal_sheet(
     sigma_data: list[dict[str, Any]],
     *,
     market: str = "us",
+    investment_stance: dict[str, Any] | None = None,
 ) -> None:
     """Build the Integrated_Signal sheet with 3 sections.
 
@@ -130,6 +131,8 @@ def build_signal_sheet(
             rsi, rsi_state, macd_signal, supertrend_dir, adx, adx_trend, tech_score
         sigma_data: List of sigma analysis dicts from analyze_ticker().
         market: "us" or "kr" — controls section titles and data formatting.
+        investment_stance: Dict from MarketRegimeEngine.compute() with keys
+            regime, confidence, drivers, sizing. None이면 생략.
     """
     is_kr = market == "kr"
     ws = wb.create_sheet(title="Integrated_Signal")
@@ -157,7 +160,7 @@ def build_signal_sheet(
     row = 4
 
     # ===== Section 1: Market Trend & Sentiment =====
-    row = _build_market_section(ws, row, market_data, is_kr=is_kr)
+    row = _build_market_section(ws, row, market_data, is_kr=is_kr, investment_stance=investment_stance)
     row += 2
 
     # ===== Section 2: Stock Trend & Technical =====
@@ -183,6 +186,7 @@ def _build_market_section(
     market_data: dict[str, Any],
     *,
     is_kr: bool = False,
+    investment_stance: dict[str, Any] | None = None,
 ) -> int:
     """Build Section 1: market indices + sentiment indicators + diagnosis.
 
@@ -191,6 +195,7 @@ def _build_market_section(
         start_row: Starting row.
         market_data: Market data dict.
         is_kr: If True, use KR-specific section title and skip US-only indicators.
+        investment_stance: Dict from MarketRegimeEngine.compute(). None이면 생략.
 
     Returns:
         Next available row.
@@ -364,7 +369,7 @@ def _build_market_section(
     exposure = market_data.get("exposure")
     if exposure:
         row += 1
-        row = _build_exposure_dashboard(ws, row, exposure)
+        row = _build_exposure_dashboard(ws, row, exposure, investment_stance=investment_stance)
 
     return row
 
@@ -408,16 +413,20 @@ def _build_exposure_dashboard(
     ws: Any,
     start_row: int,
     exposure: dict[str, Any],
+    *,
+    investment_stance: dict[str, Any] | None = None,
 ) -> int:
     """Build Portfolio Exposure sub-section within Section 1.
 
     Displays the composite regime score, 4 component breakdowns,
     and recommended Net/Gross/Long/Short allocation.
+    investment_stance가 제공되면 "Investment Stance" 행을 맨 위에 추가한다.
 
     Args:
         ws: Worksheet.
         start_row: Starting row.
         exposure: Dict from compute_regime_composite().
+        investment_stance: Dict from MarketRegimeEngine.compute() — 선택.
 
     Returns:
         Next available row.
@@ -427,7 +436,40 @@ def _build_exposure_dashboard(
     # Sub-section header
     row = write_section_header(ws, row, "Portfolio Exposure", cols=10)
 
-    # Regime label + Composite Score
+    # Investment Stance (MarketRegimeEngine — FRED/FX/기술적/뉴스 기반)
+    if investment_stance:
+        stance_regime = investment_stance.get("regime", "N/A")
+        stance_confidence = int(investment_stance.get("confidence", 0) * 100)
+        sizing = investment_stance.get("sizing", {})
+
+        stance_color = GREEN if stance_regime == "RISK_ON" else (
+            RED if stance_regime == "RISK_OFF" else ORANGE
+        )
+        sizing_str = " | ".join(
+            f"{t}: {int(r * 100)}%" for t, r in sizing.items()
+        )
+
+        ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=5)
+        style_cell(
+            ws, row, 1,
+            f"Investment Stance: {stance_regime} (신뢰도 {stance_confidence}%)",
+            font=Font(bold=True, size=12, color=stance_color),
+        )
+        for c in range(2, 6):
+            ws.cell(row=row, column=c).border = THIN_BORDER
+
+        ws.merge_cells(start_row=row, start_column=6, end_row=row, end_column=10)
+        style_cell(
+            ws, row, 6,
+            sizing_str if sizing_str else "—",
+            font=Font(bold=False, size=10, color=stance_color),
+            alignment=Alignment(horizontal="right"),
+        )
+        for c in range(7, 11):
+            ws.cell(row=row, column=c).border = THIN_BORDER
+        row += 1
+
+    # Market Regime label + Composite Score
     composite = exposure.get("composite_score", 0)
     regime_label = exposure.get("regime_label", "N/A")
     regime_en = exposure.get("regime_label_en", "N/A")
@@ -441,7 +483,7 @@ def _build_exposure_dashboard(
 
     ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=5)
     style_cell(ws, row, 1,
-               f"Regime: {regime_label} ({regime_en})",
+               f"Market Regime: {regime_label} ({regime_en})",
                font=Font(bold=True, size=12, color=regime_color))
     for c in range(2, 6):
         ws.cell(row=row, column=c).border = THIN_BORDER

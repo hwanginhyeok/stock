@@ -7,6 +7,7 @@ Usage::
     python scripts/generate_briefing.py --schedule evening
     python scripts/generate_briefing.py --schedule morning --no-market  # skip yfinance
     python scripts/generate_briefing.py --schedule morning --save       # save to file
+    python scripts/generate_briefing.py --schedule morning --no-regime  # regime 섹션 생략
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ from pathlib import Path
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT))
 
+from src.analyzers.regime import MarketRegimeEngine  # noqa: E402
 from src.core.database import init_db  # noqa: E402
 from src.generators.briefing_generator import (  # noqa: E402
     generate_briefing,
@@ -58,6 +60,11 @@ def main() -> None:
         action="store_true",
         help="Generate Naver blog HTML (인라인 CSS, 복붙용)",
     )
+    parser.add_argument(
+        "--no-regime",
+        action="store_true",
+        help="Investment Standup 섹션 생략 (빠른 실행)",
+    )
 
     args = parser.parse_args()
 
@@ -67,12 +74,30 @@ def main() -> None:
         print(f"Error: database init failed — {e}", file=sys.stderr)
         sys.exit(1)
 
+    # MarketRegimeEngine 실행 (실패 시 None — 브리핑은 정상 진행)
+    regime_result = None
+    if not args.no_regime:
+        try:
+            print("[regime] Computing market regime...", file=sys.stderr)
+            regime_result = MarketRegimeEngine().compute()
+            if regime_result:
+                print(
+                    f"[regime] {regime_result.regime} "
+                    f"(confidence {int(regime_result.confidence * 100)}%)",
+                    file=sys.stderr,
+                )
+            else:
+                print("[regime] Failed — standup section skipped", file=sys.stderr)
+        except Exception as e:
+            print(f"[regime] Error: {e} — continuing without standup", file=sys.stderr)
+
     try:
         if args.naver:
             html = generate_naver_html(
                 schedule=args.schedule,
                 hours=args.hours,
                 fetch_market=not args.no_market,
+                regime_result=regime_result,
             )
             path = save_naver_html(html, args.schedule)
             print(f"Naver HTML saved → {path}")
@@ -83,6 +108,7 @@ def main() -> None:
             schedule=args.schedule,
             hours=args.hours,
             fetch_market=not args.no_market,
+            regime_result=regime_result,
         )
         print(text)
 

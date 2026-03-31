@@ -53,6 +53,7 @@ from src.analyzers.market_sentiment import (
     compute_trend_strength,
     market_diagnosis,
 )
+from src.analyzers.regime import MarketRegimeEngine
 from src.analyzers.technical import TechnicalAnalyzer, _bbands
 from src.analyzers.trend import classify_stock_pattern
 from src.core.config import PROJECT_ROOT
@@ -923,6 +924,25 @@ def _run_us_pipeline(args: argparse.Namespace) -> None:
           f"Short: {exposure['short_allocation']:.1f}%")
     print(f"  Breadth: {exposure['breadth_pct']:.1f}% above 200 DMA\n")
 
+    # Investment Stance (MarketRegimeEngine — FRED/FX/기술적/뉴스 기반)
+    investment_stance: dict[str, Any] | None = None
+    try:
+        print("[3.6] Computing investment stance (FRED/FX/기술적/뉴스)...")
+        regime_result = MarketRegimeEngine().compute()
+        if regime_result:
+            investment_stance = {
+                "regime": regime_result.regime,
+                "confidence": regime_result.confidence,
+                "drivers": regime_result.drivers,
+                "sizing": regime_result.sizing,
+            }
+            print(f"  Investment Stance: {regime_result.regime} "
+                  f"(신뢰도 {int(regime_result.confidence * 100)}%)\n")
+        else:
+            print("  Investment Stance: 계산 실패 — 생략\n")
+    except Exception as _e:
+        print(f"  Investment Stance: 오류({_e}) — 생략\n")
+
     # ===== Step 4: Sigma Analysis (parallel) =====
     sigma_results: list[dict[str, Any]] = []
     if not args.skip_sigma:
@@ -961,7 +981,8 @@ def _run_us_pipeline(args: argparse.Namespace) -> None:
         print("[4/6] Sigma analysis skipped (--skip-sigma)\n")
 
     # ===== Step 5: Build Excel =====
-    _build_and_save(args, "us", market_data, stock_data_list, sigma_results)
+    _build_and_save(args, "us", market_data, stock_data_list, sigma_results,
+                    investment_stance=investment_stance)
 
 
 def _run_kr_pipeline(args: argparse.Namespace) -> None:
@@ -1162,7 +1183,8 @@ def _run_kr_pipeline(args: argparse.Namespace) -> None:
         print("[4/6] Sigma analysis skipped (--skip-sigma)\n")
 
     # ===== Step 5: Build Excel =====
-    _build_and_save(args, "kr", market_data, stock_data_list, sigma_results)
+    _build_and_save(args, "kr", market_data, stock_data_list, sigma_results,
+                    investment_stance=None)
 
 
 def _build_and_save(
@@ -1171,6 +1193,7 @@ def _build_and_save(
     market_data: dict[str, Any],
     stock_data_list: list[dict[str, Any]],
     sigma_results: list[dict[str, Any]],
+    investment_stance: dict[str, Any] | None = None,
 ) -> None:
     """Build Excel workbook and save to disk.
 
@@ -1180,6 +1203,7 @@ def _build_and_save(
         market_data: Market-level data dict.
         stock_data_list: List of stock data dicts (may contain internal fields).
         sigma_results: List of sigma analysis dicts.
+        investment_stance: MarketRegimeEngine 결과 (RISK_ON/NEUTRAL/RISK_OFF). None이면 생략.
     """
     print("[5/6] Building Excel workbook...")
 
@@ -1193,7 +1217,8 @@ def _build_and_save(
     if "Sheet" in wb.sheetnames:
         del wb["Sheet"]
 
-    build_signal_sheet(wb, market_data, clean_stock_data, sigma_results, market=market)
+    build_signal_sheet(wb, market_data, clean_stock_data, sigma_results, market=market,
+                       investment_stance=investment_stance)
     print("  [OK] Integrated_Signal sheet built")
 
     # ===== Step 6: Save =====

@@ -1,0 +1,28 @@
+# Market Regime Engine — 가중치, 임계치, 포지션 사이징 설정
+# 초기값. 2주 관찰 후 조정 권장.
+
+weights:
+  technical: 0.40       # RSI + MACD + ADX + Supertrend (watchlist 종목 평균)
+  fred_liquidity: 0.25  # FRED net_liquidity WoW 변화 방향 (walcl - tga - rrp)
+  fx: 0.20              # DXY 5일(1주) 모멘텀
+  news_sentiment: 0.15  # DB news_items.sentiment_score 최근 24h 평균
+
+thresholds:
+  risk_on: 0.3   # 합산 점수 > 0.3 → RISK_ON
+  risk_off: -0.3 # 합산 점수 < -0.3 → RISK_OFF
+  # 나머지 → NEUTRAL
+
+# 레짐별 목표 비율 (가이드 — 최종 결정은 사용자)
+positions:
+  RISK_ON:
+    TSLA: 0.25
+    BTC: 0.15
+    ETH: 0.10
+  NEUTRAL:
+    TSLA: 0.15
+    BTC: 0.10
+    ETH: 0.07
+  RISK_OFF:
+    TSLA: 0.08
+    BTC: 0.05
+    ETH: 0.03
