@@ -25,6 +25,7 @@ from src.storage.ontology_repository import (
     OntologyLinkRepository,
     ThesisRepository,
 )
+from src.storage.geo_issue_repository import GeoIssueRepository
 from src.storage.story_repository import NewsStoryLinkRepository, StoryThreadRepository
 from src.storage.trends_repository import TrendsRepository
 
@@ -48,4 +49,5 @@ __all__ = [
     "MarketReactionRepository",
     "ThesisRepository",
     "NewsFactRepository",
+    "GeoIssueRepository",
 ]
