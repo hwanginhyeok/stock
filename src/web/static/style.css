@@ -13,7 +13,7 @@ body { background: var(--bg); color: var(--white); font-family: 'Pretendard', -a
 .ticker-label { background: var(--red); color: white; font-size: 10px; font-weight: 700; padding: 4px 10px; letter-spacing: 1px; flex-shrink: 0; animation: pulse-label 2s ease-in-out infinite; }
 @keyframes pulse-label { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
 .ticker-track { flex: 1; overflow: hidden; position: relative; }
-.ticker-text { display: inline-block; white-space: nowrap; font-size: 12px; color: var(--dim); animation: scroll-ticker 60s linear infinite; padding-left: 100%; }
+.ticker-text { display: inline-block; white-space: nowrap; font-size: 12px; color: var(--dim); animation: scroll-ticker 120s linear infinite; padding-left: 100%; }
 .ticker-text .news-item { margin-right: 48px; }
 .ticker-text .news-src { color: var(--blue); font-weight: 600; margin-right: 6px; }
 .ticker-text .news-high { color: var(--red); }
