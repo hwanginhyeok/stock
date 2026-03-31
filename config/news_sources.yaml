@@ -111,6 +111,64 @@ us:
     language: "en"
     enabled: true
 
+# --- 지정학/매크로 특화 소스 ---
+geopolitics:
+  - name: "Reuters World"
+    type: "rss"
+    url: "https://www.reutersagency.com/feed/?taxonomy=best-sectors&post_type=best"
+    category: "지정학"
+    language: "en"
+    enabled: true
+
+  - name: "Al Jazeera"
+    type: "rss"
+    url: "https://www.aljazeera.com/xml/rss/all.xml"
+    category: "지정학"
+    language: "en"
+    enabled: true
+
+  - name: "BBC World"
+    type: "rss"
+    url: "https://feeds.bbci.co.uk/news/world/rss.xml"
+    category: "지정학"
+    language: "en"
+    enabled: true
+
+  - name: "AP News"
+    type: "rss"
+    url: "https://rsshub.app/apnews/topics/world-news"
+    category: "지정학"
+    language: "en"
+    enabled: true
+
+  - name: "CoinDesk"
+    type: "rss"
+    url: "https://www.coindesk.com/arc/outboundfeeds/rss/"
+    category: "크립토"
+    language: "en"
+    enabled: true
+
+  - name: "The Block"
+    type: "rss"
+    url: "https://www.theblock.co/rss.xml"
+    category: "크립토"
+    language: "en"
+    enabled: true
+
+  - name: "연합뉴스 국제"
+    type: "rss"
+    url: "https://www.yna.co.kr/rss/international.xml"
+    category: "지정학"
+    language: "ko"
+    enabled: true
+
+  - name: "SemiAnalysis"
+    type: "rss"
+    url: "https://www.semianalysis.com/feed"
+    category: "반도체"
+    language: "en"
+    enabled: true
+
 # --- 테슬라/머스크 특화 소스 ---
 tesla:
   - name: "Teslarati"

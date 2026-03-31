@@ -292,9 +292,17 @@ async function loadNewsTicker() {
       return;
     }
 
+    const ISSUE_COLORS = {
+      '이란 전쟁': '#f85149', '비트코인 지정학': '#d29922', 'IMEC 회랑': '#bc8cff',
+      '트럼프 관세전쟁 2.0': '#db6d28', 'AI/반도체 패권전쟁': '#3fb950',
+    };
+
     const items = news.map(n => {
       const cls = n.importance === 'high' ? 'news-high' : '';
-      return `<span class="news-item ${cls}"><span class="news-src">[${n.source}]</span>${n.title}</span>`;
+      const tag = n.top_issue
+        ? `<span class="news-tag" style="background:${ISSUE_COLORS[n.top_issue] || '#8b949e'}22;color:${ISSUE_COLORS[n.top_issue] || '#8b949e'};border:1px solid ${ISSUE_COLORS[n.top_issue] || '#8b949e'}44;padding:1px 6px;border-radius:3px;font-size:10px;margin-right:6px;">${n.top_issue}</span>`
+        : '';
+      return `<span class="news-item ${cls}">${tag}<span class="news-src">[${n.source}]</span>${n.title}</span>`;
     }).join('<span class="news-dot">•</span>');
 
     // 두 번 반복 (끊김 없는 스크롤)

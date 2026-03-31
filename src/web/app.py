@@ -233,22 +233,26 @@ def get_entity_briefing(entity_id: str) -> dict:
 
 
 @app.get("/api/news/latest")
-def get_latest_news(limit: int = 20) -> list[dict]:
-    """최신 뉴스를 반환한다 (티커용)."""
+def get_latest_news(limit: int = 30) -> list[dict]:
+    """최신 뉴스를 반환한다 (티커용). 이슈 분류 포함."""
+    from src.collectors.news.classifier import classify_news
     from src.storage import NewsRepository
 
     repo = NewsRepository()
     items = repo.get_latest(limit=limit)
-    return [
-        {
+    results = []
+    for item in items:
+        classified = classify_news(item.title, item.content or item.summary or "")
+        results.append({
             "title": item.title,
             "source": item.source,
             "market": item.market,
             "importance": item.importance,
             "published_at": str(item.published_at or item.created_at),
-        }
-        for item in items
-    ]
+            "issues": classified.issues,
+            "top_issue": classified.top_issue,
+        })
+    return results
 
 
 # Static files (마지막에 마운트 — catch-all)
