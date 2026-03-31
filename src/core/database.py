@@ -386,17 +386,14 @@ class OntologyLinkDB(Base):
     confidence: Mapped[float] = mapped_column(Float, default=1.0)
     evidence: Mapped[str] = mapped_column(Text, default="")
     source_urls: Mapped[str] = mapped_column(Text, default="[]")
+    geo_issue_id: Mapped[str] = mapped_column(String(36), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
     __table_args__ = (
         Index("ix_ont_link_type", "link_type"),
         Index("ix_ont_link_source", "source_type", "source_id"),
         Index("ix_ont_link_target", "target_type", "target_id"),
-        Index(
-            "ix_ont_link_unique",
-            "link_type", "source_type", "source_id", "target_type", "target_id",
-            unique=True,
-        ),
+        Index("ix_ont_link_geo_issue", "geo_issue_id"),
     )
 
 

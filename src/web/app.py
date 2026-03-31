@@ -78,19 +78,13 @@ def get_issue_graph(issue_id: str) -> dict:
         if event:
             events.append(event)
 
-    # 2. 이슈에 속한 엔티티 ID 집합 (이 이슈에 해당하는 것만 표시)
+    # 2. 이슈에 속한 엔티티 ID 집합
     issue_entity_ids: set[str] = set(issue.entity_ids or [])
 
-    # 3. 이슈 엔티티 사이의 링크만 가져오기
-    all_links = []
-    for eid in issue_entity_ids:
-        links_from = link_repo.get_many(
-            filters={"source_type": "entity", "source_id": eid}, limit=200,
-        )
-        for lk in links_from:
-            # target도 이 이슈의 엔티티인 경우에만 포함
-            if lk.target_type == "entity" and lk.target_id in issue_entity_ids:
-                all_links.append(lk)
+    # 3. 이 이슈에 태그된 링크만 가져오기 (geo_issue_id 필터)
+    all_links = link_repo.get_many(
+        filters={"geo_issue_id": issue_id}, limit=500,
+    )
 
     # 이벤트에 연결된 링크도 수집
     for event in events:

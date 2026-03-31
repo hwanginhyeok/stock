@@ -450,6 +450,7 @@ class OntologyLink(BaseEntity, TimestampMixin):
     confidence: float = 1.0
     evidence: str = ""
     source_urls: list[str] = Field(default_factory=list)
+    geo_issue_id: str = ""
 
 
 class GeoIssue(BaseEntity, TimestampMixin):
