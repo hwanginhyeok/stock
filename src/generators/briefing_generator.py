@@ -509,6 +509,7 @@ def generate_naver_html(
     }
 
     lines: list[str] = []
+    lines.append('<meta charset="utf-8">')
     lines.append(f'<div style="{S["wrap"]}">')
 
     # Title
