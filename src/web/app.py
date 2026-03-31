@@ -78,18 +78,19 @@ def get_issue_graph(issue_id: str) -> dict:
         if event:
             events.append(event)
 
-    # 2. 모든 entity-entity 링크 가져오기 (GeoInvest 핵심)
-    # 이슈의 모든 엔티티 관계를 보여줘야 하므로 entity-entity 링크를 전부 가져옴
-    all_ee_links = link_repo.get_many(
-        filters={"source_type": "entity", "target_type": "entity"}, limit=500,
-    )
-    all_links = list(all_ee_links)
+    # 2. 이슈에 속한 엔티티 ID 집합 (이 이슈에 해당하는 것만 표시)
+    issue_entity_ids: set[str] = set(issue.entity_ids or [])
 
-    # 엔티티 ID 수집
-    entity_ids: set[str] = set()
-    for lk in all_links:
-        entity_ids.add(lk.source_id)
-        entity_ids.add(lk.target_id)
+    # 3. 이슈 엔티티 사이의 링크만 가져오기
+    all_links = []
+    for eid in issue_entity_ids:
+        links_from = link_repo.get_many(
+            filters={"source_type": "entity", "source_id": eid}, limit=200,
+        )
+        for lk in links_from:
+            # target도 이 이슈의 엔티티인 경우에만 포함
+            if lk.target_type == "entity" and lk.target_id in issue_entity_ids:
+                all_links.append(lk)
 
     # 이벤트에 연결된 링크도 수집
     for event in events:
@@ -101,14 +102,10 @@ def get_issue_graph(issue_id: str) -> dict:
         )
         for lk in links_from + links_to:
             all_links.append(lk)
-            if lk.source_type == "entity":
-                entity_ids.add(lk.source_id)
-            if lk.target_type == "entity":
-                entity_ids.add(lk.target_id)
 
-    # 3. 엔티티 배치 조회
+    # 4. 엔티티 배치 조회
     entities = []
-    for eid in entity_ids:
+    for eid in issue_entity_ids:
         entity = entity_repo.get_by_id(eid)
         if entity:
             entities.append(entity)

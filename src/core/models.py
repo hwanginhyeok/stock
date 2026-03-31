@@ -460,6 +460,7 @@ class GeoIssue(BaseEntity, TimestampMixin):
     severity: Severity = Severity.MODERATE
     status: GeoIssueStatus = GeoIssueStatus.ACTIVE
     event_ids: list[str] = Field(default_factory=list)
+    entity_ids: list[str] = Field(default_factory=list)
 
 
 class MarketReaction(BaseEntity, TimestampMixin):

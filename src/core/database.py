@@ -411,6 +411,7 @@ class GeoIssueDB(Base):
     severity: Mapped[str] = mapped_column(String(20), default="moderate")
     status: Mapped[str] = mapped_column(String(20), default="active")
     event_ids: Mapped[str] = mapped_column(Text, default="[]")
+    entity_ids: Mapped[str] = mapped_column(Text, default="[]")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
     __table_args__ = (
@@ -643,7 +644,7 @@ _JSON_FIELDS = frozenset({
     # StoryThread uses related_tickers (already listed above)
     "properties", "aliases",  # OntologyEntity
     "source_urls",  # OntologyLink
-    "event_ids",  # GeoIssue
+    "event_ids", "entity_ids",  # GeoIssue
     "entities", "tickers", "numbers",  # NewsFact
     "fundamental_truths", "related_fact_ids",  # FirstPrincipleAnalysis
 })
