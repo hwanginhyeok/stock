@@ -235,5 +235,24 @@ def get_entity_briefing(entity_id: str) -> dict:
     }
 
 
+@app.get("/api/news/latest")
+def get_latest_news(limit: int = 20) -> list[dict]:
+    """최신 뉴스를 반환한다 (티커용)."""
+    from src.storage import NewsRepository
+
+    repo = NewsRepository()
+    items = repo.get_latest(limit=limit)
+    return [
+        {
+            "title": item.title,
+            "source": item.source,
+            "market": item.market,
+            "importance": item.importance,
+            "published_at": str(item.published_at or item.created_at),
+        }
+        for item in items
+    ]
+
+
 # Static files (마지막에 마운트 — catch-all)
 app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")

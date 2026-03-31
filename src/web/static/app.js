@@ -277,4 +277,46 @@ function renderBriefing(data) {
 // Init
 // ============================================================
 
-document.addEventListener('DOMContentLoaded', loadIssues);
+// ============================================================
+// News Ticker
+// ============================================================
+
+async function loadNewsTicker() {
+  try {
+    const res = await fetch('/api/news/latest?limit=30');
+    const news = await res.json();
+    const track = document.getElementById('ticker-track');
+
+    if (news.length === 0) {
+      track.innerHTML = '<span class="ticker-text">뉴스가 없습니다</span>';
+      return;
+    }
+
+    const items = news.map(n => {
+      const cls = n.importance === 'high' ? 'news-high' : '';
+      return `<span class="news-item ${cls}"><span class="news-src">[${n.source}]</span>${n.title}</span>`;
+    }).join('<span class="news-dot">•</span>');
+
+    // 두 번 반복 (끊김 없는 스크롤)
+    track.innerHTML = `<span class="ticker-text">${items}<span class="news-dot">•</span>${items}</span>`;
+
+    // 뉴스 수에 따라 스크롤 속도 조정
+    const text = track.querySelector('.ticker-text');
+    const duration = Math.max(30, news.length * 3);
+    text.style.animationDuration = `${duration}s`;
+  } catch (e) {
+    console.error('뉴스 티커 로딩 실패:', e);
+  }
+}
+
+// 5분마다 뉴스 갱신
+setInterval(loadNewsTicker, 5 * 60 * 1000);
+
+// ============================================================
+// Init
+// ============================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadIssues();
+  loadNewsTicker();
+});
