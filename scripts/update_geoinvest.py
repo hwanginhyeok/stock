@@ -48,6 +48,30 @@ ISSUE_KEYWORDS = {
         "반도체 제재", "chips act", "칩스법", "H100", "H200",
         "ascend", "CoWoS", "HBM",
     ],
+    "러시아-우크라이나 전쟁": [
+        "russia", "러시아", "ukraine", "우크라이나", "nato", "나토",
+        "zelensky", "젤렌스키", "putin", "푸틴", "crimea", "크림",
+        "donbas", "돈바스",
+    ],
+    "대만 해협 위기": [
+        "taiwan strait", "대만 해협", "taiwan china", "대만 중국",
+        "cross-strait", "양안", "PLA taiwan", "대만 군사",
+    ],
+    "유럽 정치 위기": [
+        "france politics", "프랑스 정치", "germany coalition", "독일 연립",
+        "le pen", "르펜", "macron", "마크롱", "scholz", "숄츠",
+        "EU crisis", "유럽 위기", "populism europe",
+    ],
+    "글로벌 AI 규제 경쟁": [
+        "AI regulation", "AI 규제", "EU AI Act", "AI법",
+        "openai regulation", "AI safety", "AI 안전",
+        "deepfake law", "AI governance",
+    ],
+    "일본 금리 전환 (BOJ)": [
+        "BOJ", "bank of japan", "일본은행", "일본 금리",
+        "yen carry", "엔 캐리", "japanese yen", "엔화",
+        "japan rate", "ueda", "우에다",
+    ],
 }
 
 

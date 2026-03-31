@@ -61,6 +61,35 @@ ISSUE_RULES: dict[str, list[tuple[str, float]]] = {
         ("sk hynix", 1.5), ("sk하이닉스", 1.5),
         ("삼성전자 파운드리", 1.5), ("samsung foundry", 1.5),
     ],
+    "러시아-우크라이나 전쟁": [
+        ("russia", 3.0), ("러시아", 3.0), ("ukraine", 3.0), ("우크라이나", 3.0),
+        ("nato", 2.0), ("나토", 2.0), ("zelensky", 2.0), ("젤렌스키", 2.0),
+        ("putin", 2.0), ("푸틴", 2.0), ("crimea", 2.0), ("donbas", 2.0),
+        ("black sea", 1.5), ("흑해", 1.5),
+    ],
+    "대만 해협 위기": [
+        ("taiwan strait", 3.0), ("대만 해협", 3.0), ("cross-strait", 3.0),
+        ("양안", 3.0), ("taiwan china", 2.5), ("대만 중국", 2.5),
+        ("pla taiwan", 2.5), ("대만 군사", 2.5),
+        ("tsmc risk", 2.0), ("silicon shield", 2.0),
+    ],
+    "유럽 정치 위기": [
+        ("france politi", 2.5), ("프랑스 정치", 2.5),
+        ("germany coalition", 2.5), ("독일 연립", 2.5),
+        ("le pen", 2.5), ("르펜", 2.5), ("macron", 2.0), ("마크롱", 2.0),
+        ("eu crisis", 2.0), ("유럽 위기", 2.0),
+        ("populism europe", 2.0), ("유럽 포퓰리즘", 2.0),
+    ],
+    "글로벌 AI 규제 경쟁": [
+        ("ai regulation", 3.0), ("ai 규제", 3.0), ("eu ai act", 3.0), ("ai법", 3.0),
+        ("ai safety", 2.0), ("ai 안전", 2.0), ("ai governance", 2.0),
+        ("openai regul", 2.0), ("deepfake", 1.5),
+    ],
+    "일본 금리 전환 (BOJ)": [
+        ("boj", 3.0), ("bank of japan", 3.0), ("일본은행", 3.0), ("일본 금리", 3.0),
+        ("yen carry", 3.0), ("엔 캐리", 3.0), ("japanese yen", 2.0), ("엔화", 2.0),
+        ("ueda", 2.5), ("우에다", 2.5), ("japan rate", 2.0),
+    ],
 }
 
 # 분류 임계값
