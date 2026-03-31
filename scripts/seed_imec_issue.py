@@ -125,7 +125,7 @@ def seed() -> None:
         ("China", "Belt and Road Initiative", LinkType.ALLY, "일대일로 주도국"),
         ("IMEC Corridor", "Belt and Road Initiative", LinkType.HOSTILE, "글로벌 인프라 패권 경쟁"),
         # 이란 전쟁 영향
-        ("Iran", "IMEC Corridor", LinkType.IMPACTS, "전쟁으로 중동 경유지 불안정화"),
+        ("Iran", "IMEC Corridor", LinkType.HOSTILE, "이란 전쟁으로 IMEC 경유지(사우디, UAE, 이스라엘) 불안정화. IMEC 방해자."),
         ("Strait of Hormuz", "IMEC Corridor", LinkType.IMPACTS, "호르무즈 봉쇄로 해상 물류 차질"),
         # 기존 루트 대체
         ("IMEC Corridor", "Suez Canal", LinkType.HOSTILE, "수에즈 우회 대안 루트"),
