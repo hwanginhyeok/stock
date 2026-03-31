@@ -63,7 +63,7 @@ def get_issue_graph(issue_id: str) -> dict:
     배치 쿼리로 N+1 방지: issue → events → links → entities 순.
     """
     issue_repo = GeoIssueRepository()
-    issue = issue_repo.get(issue_id)
+    issue = issue_repo.get_by_id(issue_id)
     if not issue:
         raise HTTPException(status_code=404, detail=f"Issue {issue_id} not found")
 
@@ -74,14 +74,24 @@ def get_issue_graph(issue_id: str) -> dict:
     # 1. 이슈에 속한 이벤트 조회
     events = []
     for eid in issue.event_ids:
-        event = event_repo.get(eid)
+        event = event_repo.get_by_id(eid)
         if event:
             events.append(event)
 
-    # 2. 이벤트에 연결된 링크 수집 + 엔티티 ID 수집
-    all_links = []
-    entity_ids: set[str] = set()
+    # 2. 모든 entity-entity 링크 가져오기 (GeoInvest 핵심)
+    # 이슈의 모든 엔티티 관계를 보여줘야 하므로 entity-entity 링크를 전부 가져옴
+    all_ee_links = link_repo.get_many(
+        filters={"source_type": "entity", "target_type": "entity"}, limit=500,
+    )
+    all_links = list(all_ee_links)
 
+    # 엔티티 ID 수집
+    entity_ids: set[str] = set()
+    for lk in all_links:
+        entity_ids.add(lk.source_id)
+        entity_ids.add(lk.target_id)
+
+    # 이벤트에 연결된 링크도 수집
     for event in events:
         links_from = link_repo.get_many(
             filters={"source_type": "event", "source_id": event.id}, limit=200,
@@ -96,20 +106,10 @@ def get_issue_graph(issue_id: str) -> dict:
             if lk.target_type == "entity":
                 entity_ids.add(lk.target_id)
 
-    # 엔티티-엔티티 링크도 가져오기 (GeoInvest 핵심)
-    for eid in list(entity_ids):
-        ee_links = link_repo.get_many(
-            filters={"source_type": "entity", "source_id": eid}, limit=100,
-        )
-        for lk in ee_links:
-            if lk.target_type == "entity":
-                entity_ids.add(lk.target_id)
-                all_links.append(lk)
-
     # 3. 엔티티 배치 조회
     entities = []
     for eid in entity_ids:
-        entity = entity_repo.get(eid)
+        entity = entity_repo.get_by_id(eid)
         if entity:
             entities.append(entity)
 
@@ -172,7 +172,7 @@ def get_issue_graph(issue_id: str) -> dict:
 def get_entity_briefing(entity_id: str) -> dict:
     """엔티티의 브리핑 데이터를 반환한다."""
     entity_repo = OntologyEntityRepository()
-    entity = entity_repo.get(entity_id)
+    entity = entity_repo.get_by_id(entity_id)
     if not entity:
         raise HTTPException(status_code=404, detail=f"Entity {entity_id} not found")
 
@@ -197,7 +197,7 @@ def get_entity_briefing(entity_id: str) -> dict:
 
     entity_names = {}
     for eid in all_entity_ids:
-        e = entity_repo.get(eid)
+        e = entity_repo.get_by_id(eid)
         if e:
             entity_names[eid] = e.name
 
