@@ -31,10 +31,22 @@ ISSUE_KEYWORDS = {
     "비트코인 지정학": [
         "bitcoin", "비트코인", "crypto", "크립토", "가상자산", "stablecoin",
         "스테이블코인", "SEC crypto", "ETF 비트코인", "CBDC", "디지털화폐",
+        "USDT", "USDC", "tether", "테더",
     ],
     "IMEC 회랑": [
         "IMEC", "인도 중동 유럽", "경제 회랑", "일대일로", "belt and road",
         "BRI", "하이파", "피레우스", "suez", "수에즈",
+    ],
+    "트럼프 관세전쟁 2.0": [
+        "tariff", "관세", "trade war", "무역전쟁", "301조", "section 301",
+        "상호관세", "reciprocal", "USTR", "무역대표", "관세 위헌",
+        "section 122", "무역 협정",
+    ],
+    "AI/반도체 패권전쟁": [
+        "AI chip", "AI칩", "export control", "수출통제", "nvidia",
+        "엔비디아", "TSMC", "huawei", "화웨이", "ASML",
+        "반도체 제재", "chips act", "칩스법", "H100", "H200",
+        "ascend", "CoWoS", "HBM",
     ],
 }
 

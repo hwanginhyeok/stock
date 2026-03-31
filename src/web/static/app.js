@@ -302,7 +302,7 @@ async function loadNewsTicker() {
 
     // 뉴스 수에 따라 스크롤 속도 조정
     const text = track.querySelector('.ticker-text');
-    const duration = Math.max(60, news.length * 5);
+    const duration = Math.max(120, news.length * 8);
     text.style.animationDuration = `${duration}s`;
   } catch (e) {
     console.error('뉴스 티커 로딩 실패:', e);
