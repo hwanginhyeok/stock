@@ -333,6 +333,7 @@ class OntologyEntityDB(Base):
     ticker: Mapped[str] = mapped_column(String(20), default="")
     market: Mapped[str] = mapped_column(String(10), default="korea")
     properties: Mapped[str] = mapped_column(Text, default="{}")
+    aliases: Mapped[str] = mapped_column(Text, default="[]")
     status: Mapped[str] = mapped_column(String(20), default="active")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
@@ -384,6 +385,7 @@ class OntologyLinkDB(Base):
     target_id: Mapped[str] = mapped_column(String(36))
     confidence: Mapped[float] = mapped_column(Float, default=1.0)
     evidence: Mapped[str] = mapped_column(Text, default="")
+    source_urls: Mapped[str] = mapped_column(Text, default="[]")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
     __table_args__ = (
@@ -395,6 +397,25 @@ class OntologyLinkDB(Base):
             "link_type", "source_type", "source_id", "target_type", "target_id",
             unique=True,
         ),
+    )
+
+
+class GeoIssueDB(Base):
+    """ORM model for geopolitical issues."""
+
+    __tablename__ = "geo_issues"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    title: Mapped[str] = mapped_column(String(500))
+    description: Mapped[str] = mapped_column(Text, default="")
+    severity: Mapped[str] = mapped_column(String(20), default="moderate")
+    status: Mapped[str] = mapped_column(String(20), default="active")
+    event_ids: Mapped[str] = mapped_column(Text, default="[]")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_geo_issue_status", "status"),
+        Index("ix_geo_issue_severity", "severity"),
     )
 
 
@@ -620,7 +641,9 @@ _JSON_FIELDS = frozenset({
     "hashtags", "media_paths", "sections", "risk_factors", "swot",
     "data_sources", "components", "details",
     # StoryThread uses related_tickers (already listed above)
-    "properties",  # OntologyEntity
+    "properties", "aliases",  # OntologyEntity
+    "source_urls",  # OntologyLink
+    "event_ids",  # GeoIssue
     "entities", "tickers", "numbers",  # NewsFact
     "fundamental_truths", "related_fact_ids",  # FirstPrincipleAnalysis
 })
@@ -635,6 +658,7 @@ def _get_orm_map() -> dict[type, type[Base]]:
         from src.core.models import (
             Article,
             CommunitySentiment,
+            GeoIssue,
             MarketReaction,
             MarketSnapshot,
             FirstPrincipleAnalysis,
@@ -670,6 +694,7 @@ def _get_orm_map() -> dict[type, type[Base]]:
             OntologyEntity: OntologyEntityDB,
             OntologyEvent: OntologyEventDB,
             OntologyLink: OntologyLinkDB,
+            GeoIssue: GeoIssueDB,
             MarketReaction: MarketReactionDB,
             Thesis: ThesisDB,
             NewsFact: NewsFactDB,

@@ -112,6 +112,8 @@ class EntityType(StrEnum):
     INSTITUTION = "institution"
     SECTOR = "sector"
     COUNTRY = "country"
+    PROXY = "proxy"
+    COMMODITY = "commodity"
 
 
 class EventType(StrEnum):
@@ -124,6 +126,9 @@ class EventType(StrEnum):
     REGULATION = "regulation"
     MACRO = "macro"
     DEAL = "deal"
+    MILITARY = "military"
+    DIPLOMATIC = "diplomatic"
+    SANCTIONS = "sanctions"
 
 
 class Severity(StrEnum):
@@ -141,6 +146,7 @@ class EventStatus(StrEnum):
     DEVELOPING = "developing"
     RESOLVED = "resolved"
     STALE = "stale"
+    ESCALATING = "escalating"
 
 
 class LinkType(StrEnum):
@@ -152,6 +158,20 @@ class LinkType(StrEnum):
     IMPACTS = "impacts"
     REACTS_TO = "reacts_to"
     SUPPORTS = "supports"
+    ALLY = "ally"
+    HOSTILE = "hostile"
+    PROXY = "proxy"
+    TRADE = "trade"
+    SUPPLY = "supply"
+    SANCTIONS = "sanctions"
+
+
+class GeoIssueStatus(StrEnum):
+    """Geopolitical issue lifecycle status."""
+
+    ACTIVE = "active"
+    MONITORING = "monitoring"
+    RESOLVED = "resolved"
 
 
 class ThesisStatus(StrEnum):
@@ -401,6 +421,7 @@ class OntologyEntity(BaseEntity, TimestampMixin):
     ticker: str = ""
     market: Market = Market.KOREA
     properties: dict[str, Any] = Field(default_factory=dict)
+    aliases: list[str] = Field(default_factory=list)
     status: str = "active"
 
 
@@ -428,6 +449,17 @@ class OntologyLink(BaseEntity, TimestampMixin):
     target_id: str
     confidence: float = 1.0
     evidence: str = ""
+    source_urls: list[str] = Field(default_factory=list)
+
+
+class GeoIssue(BaseEntity, TimestampMixin):
+    """A geopolitical issue that groups related events and entities."""
+
+    title: str
+    description: str = ""
+    severity: Severity = Severity.MODERATE
+    status: GeoIssueStatus = GeoIssueStatus.ACTIVE
+    event_ids: list[str] = Field(default_factory=list)
 
 
 class MarketReaction(BaseEntity, TimestampMixin):
