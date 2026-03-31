@@ -13,10 +13,14 @@
 - [x] 와이어프레임 확정 (3칸럼 + 하단 투자영향 스트립)
 - [x] 데이터 모델 설계 (Entity/Event/Link/GeoIssue)
 - [x] 아키텍처 결정 (FastAPI + D3.js + 기존 온톨로지 확장)
+- [x] Step 1 벤치마크 완료 — Approach C (하이브리드) 확정
+  - 뉴스 입력: Entity F1=0.478, Rel F1=0.450
+  - Gold 입력: Entity F1=0.647, Rel F1=0.561
+  - 프롬프트 자체는 OK, 뉴스 정보밀도가 병목
 
-## 사용자가 해줘야 하는 것
+## 현재 진행: Step 2 본 구현
 
-### Step 1: throwaway 벤치마크 실행 (이번 주)
+### Step 1: throwaway 벤치마크 ✅ 완료
 
 > 핵심: 기존 코드를 건드리지 않고, 독립 스크립트로 AI 추출 품질을 먼저 검증
 
