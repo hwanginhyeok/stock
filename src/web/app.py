@@ -39,11 +39,49 @@ def index() -> FileResponse:
 
 @app.get("/api/issues")
 def list_issues() -> list[dict]:
-    """활성 GeoIssue 목록을 반환한다."""
+    """활성 GeoIssue 목록을 랭킹 순으로 반환한다."""
+    from src.collectors.news.classifier import ISSUE_RULES
+    from src.collectors.news.issue_ranker import (
+        compute_rankings, count_news_by_issue, get_previous_ranks,
+        save_daily_ranking,
+    )
+
     repo = GeoIssueRepository()
     issues = repo.get_active()
-    return [
+
+    # 이슈별 키워드로 뉴스 카운트
+    issue_keywords = {
+        title: [kw for kw, _ in rules[:10]]
+        for title, rules in ISSUE_RULES.items()
+    }
+    news_counts = count_news_by_issue(issue_keywords)
+    prev_ranks = get_previous_ranks()
+
+    # 랭킹 계산
+    issue_dicts = [
         {
+            "id": issue.id,
+            "title": issue.title,
+            "severity": issue.severity,
+            "event_count": len(issue.event_ids),
+            "last_event_at": str(issue.created_at),
+        }
+        for issue in issues
+    ]
+    rankings = compute_rankings(issue_dicts, news_counts)
+    save_daily_ranking(rankings)
+
+    # 랭킹 순으로 이슈 반환
+    rank_map = {r.issue_id: r for r in rankings}
+    result = []
+    for r in rankings:
+        issue = next((i for i in issues if i.id == r.issue_id), None)
+        if not issue:
+            continue
+        prev = prev_ranks.get(r.title)
+        rank_change = (prev - r.rank) if prev else 0  # 양수 = 상승
+
+        result.append({
             "id": issue.id,
             "title": issue.title,
             "description": issue.description,
@@ -51,9 +89,27 @@ def list_issues() -> list[dict]:
             "status": issue.status,
             "event_count": len(issue.event_ids),
             "created_at": str(issue.created_at),
-        }
-        for issue in issues
-    ]
+            "rank": r.rank,
+            "score": r.score,
+            "news_24h": r.news_24h,
+            "trend": r.trend,
+            "rank_change": rank_change,
+        })
+
+    # 랭킹에 안 잡힌 이슈 (키워드 미등록)
+    ranked_ids = {r.issue_id for r in rankings}
+    for issue in issues:
+        if issue.id not in ranked_ids:
+            result.append({
+                "id": issue.id, "title": issue.title,
+                "description": issue.description, "severity": issue.severity,
+                "status": issue.status, "event_count": len(issue.event_ids),
+                "created_at": str(issue.created_at),
+                "rank": len(result) + 1, "score": 0, "news_24h": 0,
+                "trend": "→", "rank_change": 0,
+            })
+
+    return result
 
 
 @app.get("/api/issues/{issue_id}/graph")

@@ -30,6 +30,12 @@ nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
 .issue-tab { padding: 6px 16px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid var(--border); color: var(--dim); white-space: nowrap; transition: all 0.15s; }
 .issue-tab:hover { color: var(--white); border-color: var(--dim); }
 .issue-tab.active { background: var(--red); color: white; border-color: var(--red); }
+.rank-num { font-weight: 700; margin-right: 4px; font-size: 11px; opacity: 0.7; }
+.trend-arrow { margin-left: 4px; font-size: 11px; }
+.trend-up { color: var(--red); }
+.trend-down { color: var(--green); }
+.trend-flat { color: var(--dim); }
+.rank-change { font-size: 9px; margin-left: 2px; font-weight: 600; }
 .severity-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 .severity-dot.critical { background: var(--red); }
 .severity-dot.major { background: var(--orange); }

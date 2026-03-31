@@ -34,8 +34,12 @@ async function loadIssues() {
 
     tabs.innerHTML = issues.map(issue => {
       const sevClass = issue.severity || 'moderate';
+      const rank = issue.rank || '';
+      const trend = issue.trend || '';
+      const trendCls = trend === '↑' ? 'trend-up' : trend === '↓' ? 'trend-down' : 'trend-flat';
+      const changeStr = issue.rank_change > 0 ? `+${issue.rank_change}` : issue.rank_change < 0 ? `${issue.rank_change}` : '';
       return `<div class="issue-tab" data-id="${issue.id}" onclick="selectIssue('${issue.id}', this)">
-        <span class="severity-dot ${sevClass}"></span>${issue.title}
+        <span class="rank-num">${rank}</span><span class="severity-dot ${sevClass}"></span>${issue.title}<span class="trend-arrow ${trendCls}">${trend}</span>${changeStr ? `<span class="rank-change ${trendCls}">${changeStr}</span>` : ''}
       </div>`;
     }).join('');
 
