@@ -83,6 +83,18 @@ class RSSNewsCollector(BaseNewsCollector):
             all_items.extend(items)
             time.sleep(self._settings.request_delay_sec)
 
+        # Geopolitics sources (tagged as US market)
+        for source in self._news_config.geopolitics:
+            if not source.enabled:
+                continue
+            items = self._fetch_source(source, Market.US)
+            if items:
+                self._success_sources.append(source.name)
+            else:
+                self._failed_sources.append(source.name)
+            all_items.extend(items)
+            time.sleep(self._settings.request_delay_sec)
+
         # Deduplicate against each other
         all_items = self._deduplicator.deduplicate(all_items)
 
@@ -137,6 +149,21 @@ class RSSNewsCollector(BaseNewsCollector):
         """
         all_items: list[NewsItem] = []
         for source in self._news_config.tesla:
+            if not source.enabled:
+                continue
+            items = self._fetch_source(source, Market.US)
+            all_items.extend(items)
+            time.sleep(self._settings.request_delay_sec)
+        return self._deduplicator.deduplicate(all_items)
+
+    def collect_geopolitics(self) -> list[NewsItem]:
+        """Collect news from geopolitics-specific RSS sources.
+
+        Returns:
+            Deduplicated list of NewsItem from geopolitics sources.
+        """
+        all_items: list[NewsItem] = []
+        for source in self._news_config.geopolitics:
             if not source.enabled:
                 continue
             items = self._fetch_source(source, Market.US)

@@ -175,6 +175,7 @@ class NewsSourcesConfig(BaseModel):
     korea: list[NewsSource] = Field(default_factory=list)
     us: list[NewsSource] = Field(default_factory=list)
     tesla: list[NewsSource] = Field(default_factory=list)
+    geopolitics: list[NewsSource] = Field(default_factory=list)
     collection: CollectionSettings = Field(default_factory=CollectionSettings)
 
 

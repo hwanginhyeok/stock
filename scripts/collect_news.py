@@ -26,9 +26,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Collect news from RSS sources")
     parser.add_argument(
         "--market",
-        choices=["kr", "us", "tesla", "all"],
+        choices=["kr", "us", "tesla", "geopolitics", "all"],
         required=True,
-        help="Target market: kr, us, tesla, or all",
+        help="Target market: kr, us, tesla, geopolitics, or all",
     )
     args = parser.parse_args()
 
@@ -45,6 +45,13 @@ def main() -> None:
             print(f"[{now}] TESLA: {len(stored)} articles stored")
         else:
             print(f"[{now}] TESLA: 0 articles (no new items)")
+    elif args.market == "geopolitics":
+        items = collector.collect_geopolitics()
+        if items:
+            stored = collector._repo.create_many(items)
+            print(f"[{now}] GEOPOLITICS: {len(stored)} articles stored")
+        else:
+            print(f"[{now}] GEOPOLITICS: 0 articles (no new items)")
     elif args.market == "kr":
         items = collector.collect_by_market(Market.KOREA)
         if items:
