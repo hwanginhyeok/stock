@@ -19,7 +19,7 @@
 ### STEP 1 — 환경 확인
 
 ```bash
-cd /home/gint_pcd/projects/주식부자프로젝트
+cd /home/window11/stock
 source .venv-wsl/bin/activate
 
 # .env 확인 (API 키들)

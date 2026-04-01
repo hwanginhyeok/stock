@@ -31,7 +31,7 @@
 ### STEP 1 — 데이터 수집 상태 확인
 
 ```bash
-cd /home/gint_pcd/projects/주식부자프로젝트
+cd /home/window11/stock
 source .venv-wsl/bin/activate
 ```
 

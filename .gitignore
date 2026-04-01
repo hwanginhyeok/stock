@@ -68,3 +68,9 @@ htmlcov/
 .gstack/
 data/briefings/NotoSansCJK.ttc
 data/briefings/*.html
+
+# 야간작업 임시 파일
+tonight_prompt.txt
+tonight_prompt_done.txt
+tonight_prompt_backup_*.txt
+tonight_briefing.md

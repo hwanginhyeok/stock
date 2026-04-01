@@ -50,7 +50,7 @@ data/articles/published/ → 게시 대기/완료 폴더 목록
 ### 4단계: 시각화 생성
 
 ```bash
-cd /home/gint_pcd/projects/주식부자프로젝트
+cd /home/window11/stock
 source .venv-wsl/bin/activate && python docs/프로젝트/generate_schedule_visual.py
 ```
 

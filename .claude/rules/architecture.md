@@ -10,9 +10,13 @@
 - `src/generators/` - 콘텐츠 생성 (article, summary, insight, image, hashtag)
 - `src/publishers/` - SNS 게시 (instagram, x, formatter, media)
 - `src/storage/` - DB CRUD, 테이블 정의
+- `src/exporters/` - Excel 리포트 빌더 (시그널, 대시보드, 섹터 등)
+- `src/backtesting/` - 백테스팅 엔진 (전략, 메트릭, 리포트)
+- `src/services/` - 독립 서비스 (뉴스 타임라인 등)
+- `src/web/` - 웹 서버 (브리핑 페이지 등)
 - `src/workflows/` - 오케스트레이션 (morning, closing, weekly, breaking, research)
 - `templates/` - Jinja2 템플릿 (articles, sns, prompts)
-- `data/` - 데이터 (raw, processed, cache, db) - git ignored
+- `data/` - 데이터 (raw, processed, cache, db, articles, briefings, facts, timelines, research) - git ignored
 - `logs/` - 로그 파일 - git ignored
 - `tests/` - 테스트
 - `scripts/` - 유틸리티 스크립트

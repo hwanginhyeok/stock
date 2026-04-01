@@ -29,7 +29,7 @@ HV20 폴백은 정상 동작이다 — 경고 표시하되 분석은 유효.
 ### STEP 2 — 분석 실행
 
 ```bash
-cd /home/gint_pcd/projects/주식부자프로젝트
+cd /home/window11/stock
 source .venv-wsl/bin/activate
 
 # 단일 종목

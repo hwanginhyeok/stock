@@ -29,7 +29,7 @@
 ### 2단계: HTML 변환
 
 ```bash
-cd /home/gint_pcd/projects/주식부자프로젝트
+cd /home/window11/stock
 source .venv-wsl/bin/activate && python scripts/generate_naver_html.py <v2_마크다운_파일_경로>
 ```
 

@@ -66,7 +66,7 @@ S_PLAN     = "#484f58"  # 회색 — 기획 예정
 ### 4단계: 시각화 재생성 (선택)
 
 ```bash
-cd /home/gint_pcd/projects/주식부자프로젝트
+cd /home/window11/stock
 source .venv-wsl/bin/activate && python docs/프로젝트/generate_schedule_visual.py
 ```
 
