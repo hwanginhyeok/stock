@@ -22,29 +22,53 @@
   <div class="updated" id="updated-at"></div>
 </nav>
 
-<div class="issue-tabs" id="issue-tabs">
-  <div class="issue-tab" style="color:var(--dim);">이슈를 불러오는 중...</div>
-</div>
-
 <div class="main">
-  <!-- Left: Entity list -->
+  <!-- Left: Issue list + Entity list -->
   <div class="left-panel">
-    <div class="panel-title">엔티티 목록</div>
-    <div id="entity-list">
-      <div class="empty-state">이슈를 선택하세요</div>
+    <input type="text" class="search-box" id="search-box" placeholder="이슈·엔티티 검색...">
+
+    <div class="panel-section">
+      <div class="panel-title">이슈 순위</div>
+      <div id="issue-list">
+        <div class="empty-state">로딩 중...</div>
+      </div>
+    </div>
+
+    <div class="panel-divider"></div>
+
+    <div class="panel-section">
+      <div class="panel-title">엔티티 목록</div>
+      <div id="entity-list">
+        <div class="empty-state">이슈를 선택하세요</div>
+      </div>
     </div>
   </div>
 
-  <!-- Center: D3 Graph -->
-  <div class="center-panel" id="graph-container">
-    <div class="empty-state" id="graph-empty">이슈를 선택하면 관계도가 표시됩니다</div>
-    <svg id="graph-svg" style="display:none;"></svg>
-    <div class="graph-legend" style="display:none;" id="graph-legend">
-      <div class="legend-item"><div class="legend-line" style="background:var(--blue);"></div> 동맹</div>
-      <div class="legend-item"><div class="legend-line" style="background:var(--red);height:3px;"></div> 적대</div>
-      <div class="legend-item"><div class="legend-line" style="background:var(--orange);border-top:1px dashed var(--orange);background:none;"></div> 프록시</div>
-      <div class="legend-item"><div class="legend-line" style="background:var(--yellow);border-top:1px dashed var(--yellow);background:none;"></div> 무역</div>
-      <div class="legend-item"><div class="legend-line" style="background:var(--green);border-top:1px dashed var(--green);background:none;"></div> 보급</div>
+  <!-- Center: Graph / Timeline toggle -->
+  <div class="center-panel" id="center-panel">
+    <div class="view-toggle">
+      <button class="toggle-btn active" id="btn-graph" onclick="switchView('graph')">관계도</button>
+      <button class="toggle-btn" id="btn-timeline" onclick="switchView('timeline')">타임라인</button>
+    </div>
+
+    <!-- Graph view -->
+    <div id="graph-container" class="view-container active">
+      <div class="empty-state" id="graph-empty">이슈를 선택하면 관계도가 표시됩니다</div>
+      <svg id="graph-svg" style="display:none;"></svg>
+      <div class="graph-legend" style="display:none;" id="graph-legend">
+        <div class="legend-item"><div class="legend-line" style="background:var(--blue);"></div> 동맹</div>
+        <div class="legend-item"><div class="legend-line" style="background:var(--red);height:3px;"></div> 적대</div>
+        <div class="legend-item"><div class="legend-line" style="background:var(--orange);border-top:1px dashed var(--orange);background:none;"></div> 프록시</div>
+        <div class="legend-item"><div class="legend-line" style="background:var(--yellow);border-top:1px dashed var(--yellow);background:none;"></div> 무역</div>
+        <div class="legend-item"><div class="legend-line" style="background:var(--green);border-top:1px dashed var(--green);background:none;"></div> 보급</div>
+      </div>
+    </div>
+
+    <!-- Timeline view -->
+    <div id="timeline-container" class="view-container" style="display:none;">
+      <div class="timeline-scroll" id="timeline-scroll">
+        <div class="empty-state">이슈를 선택하면 타임라인이 표시됩니다</div>
+      </div>
     </div>
   </div>
 

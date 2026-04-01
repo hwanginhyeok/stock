@@ -282,6 +282,48 @@ def get_entity_briefing(entity_id: str) -> dict:
     }
 
 
+@app.get("/api/issues/{issue_id}/timeline")
+def get_issue_timeline(issue_id: str) -> list[dict]:
+    """GeoIssue의 이벤트를 시간순으로 반환한다."""
+    issue_repo = GeoIssueRepository()
+    issue = issue_repo.get_by_id(issue_id)
+    if not issue:
+        raise HTTPException(status_code=404, detail=f"Issue {issue_id} not found")
+
+    event_repo = OntologyEventRepository()
+    events = []
+    for eid in issue.event_ids:
+        event = event_repo.get_by_id(eid)
+        if event:
+            # 카테고리 추론 (제목 prefix)
+            title = event.title
+            if title.startswith("외교"):
+                category = "diplomatic"
+                title = title.replace("외교 | ", "")
+            elif title.startswith("군사"):
+                category = "military"
+                title = title.replace("군사 | ", "")
+            elif title.startswith("법적"):
+                category = "legal"
+                title = title.replace("법적 | ", "")
+            else:
+                category = "event"
+
+            events.append({
+                "id": event.id,
+                "title": title,
+                "summary": event.summary,
+                "category": category,
+                "severity": event.severity,
+                "event_type": event.event_type,
+                "started_at": str(event.started_at),
+                "status": event.status,
+            })
+
+    events.sort(key=lambda e: e["started_at"])
+    return events
+
+
 @app.get("/api/news/latest")
 def get_latest_news(limit: int = 30) -> list[dict]:
     """최신 뉴스를 반환한다 (티커용). 이슈 분류 포함."""

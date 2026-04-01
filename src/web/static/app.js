@@ -1,11 +1,10 @@
-/* GeoInvest — D3.js force-directed graph + interactions */
+/* GeoInvest — C 레이아웃: 좌측 이슈+엔티티 / 가운데 그래프·타임라인 / 우측 브리핑 */
 
 const COLOR_MAP = {
   country: '#58a6ff', proxy: '#f85149', commodity: '#d29922',
   company: '#3fb950', asset: '#bc8cff', institution: '#56d4dd',
   person: '#db6d28', event: '#8b949e',
 };
-
 const LINK_COLORS = {
   ally: '#58a6ff', hostile: '#f85149', proxy: '#db6d28',
   trade: '#d29922', supply: '#3fb950', attack: '#f85149',
@@ -13,91 +12,99 @@ const LINK_COLORS = {
   mentions: '#8b949e', triggers: '#8b949e', involves: '#8b949e',
   reacts_to: '#8b949e', supports: '#3fb950', sanctions: '#f85149',
 };
+const CATEGORY_ICONS = { diplomatic: '🕊️', military: '⚔️', legal: '⚖️', event: '📌' };
+const CATEGORY_LABELS = { diplomatic: '외교', military: '군사', legal: '법적', event: '기타' };
 
 let currentIssueId = null;
+let currentView = 'graph';
 let simulation = null;
+let allIssues = [];
 
 // ============================================================
-// Issue tabs
+// Issue list (left panel)
 // ============================================================
 
 async function loadIssues() {
   try {
     const res = await fetch('/api/issues');
-    const issues = await res.json();
-    const tabs = document.getElementById('issue-tabs');
-
-    if (issues.length === 0) {
-      tabs.innerHTML = '<div class="issue-tab" style="color:var(--dim);">등록된 이슈가 없습니다</div>';
-      return;
-    }
-
-    tabs.innerHTML = issues.map(issue => {
-      const sevClass = issue.severity || 'moderate';
-      const rank = issue.rank || '';
-      const trend = issue.trend || '';
-      const trendCls = trend === '↑' ? 'trend-up' : trend === '↓' ? 'trend-down' : 'trend-flat';
-      const changeStr = issue.rank_change > 0 ? `+${issue.rank_change}` : issue.rank_change < 0 ? `${issue.rank_change}` : '';
-      return `<div class="issue-tab" data-id="${issue.id}" onclick="selectIssue('${issue.id}', this)">
-        <span class="rank-num">${rank}</span><span class="severity-dot ${sevClass}"></span>${issue.title}<span class="trend-arrow ${trendCls}">${trend}</span>${changeStr ? `<span class="rank-change ${trendCls}">${changeStr}</span>` : ''}
-      </div>`;
-    }).join('');
-
-    // 첫 번째 이슈 자동 선택
-    const firstTab = tabs.querySelector('.issue-tab');
-    if (firstTab) {
-      firstTab.click();
-    }
-  } catch (e) {
-    console.error('이슈 로딩 실패:', e);
-  }
+    allIssues = await res.json();
+    renderIssueList(allIssues);
+    if (allIssues.length > 0) selectIssue(allIssues[0].id);
+  } catch (e) { console.error('이슈 로딩 실패:', e); }
 }
 
-async function selectIssue(issueId, tabEl) {
-  // 탭 활성화
-  document.querySelectorAll('.issue-tab').forEach(t => t.classList.remove('active'));
-  if (tabEl) tabEl.classList.add('active');
+function renderIssueList(issues) {
+  const container = document.getElementById('issue-list');
+  container.innerHTML = issues.map(issue => {
+    const sevClass = issue.severity || 'moderate';
+    const trend = issue.trend || '→';
+    const trendCls = trend === '↑' ? 'trend-up' : trend === '↓' ? 'trend-down' : 'trend-flat';
+    return `<div class="issue-item${issue.id === currentIssueId ? ' selected' : ''}" data-id="${issue.id}" onclick="selectIssue('${issue.id}')">
+      <span class="issue-rank">${issue.rank}</span>
+      <span class="severity-dot ${sevClass}"></span>
+      <div class="issue-info">
+        <div class="issue-name">${issue.title}</div>
+        <div class="issue-meta">${issue.news_24h || 0}건 뉴스 · ${issue.event_count} events</div>
+      </div>
+      <span class="issue-trend ${trendCls}">${trend}</span>
+    </div>`;
+  }).join('');
+}
 
+async function selectIssue(issueId) {
   currentIssueId = issueId;
-
-  // 그래프 로딩
+  // 이슈 리스트 하이라이트
+  document.querySelectorAll('.issue-item').forEach(el => {
+    el.classList.toggle('selected', el.dataset.id === issueId);
+  });
+  // 그래프 + 타임라인 로드
   try {
-    const res = await fetch(`/api/issues/${issueId}/graph`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    renderEntityList(data.nodes);
-    renderGraph(data.nodes, data.edges);
+    const [graphRes, timelineRes] = await Promise.all([
+      fetch(`/api/issues/${issueId}/graph`),
+      fetch(`/api/issues/${issueId}/timeline`),
+    ]);
+    const graphData = await graphRes.json();
+    const timelineData = await timelineRes.json();
+    renderEntityList(graphData.nodes);
+    renderGraph(graphData.nodes, graphData.edges);
+    renderTimeline(timelineData);
     document.getElementById('updated-at').textContent = `갱신: ${new Date().toLocaleString('ko-KR')}`;
-  } catch (e) {
-    console.error('그래프 로딩 실패:', e);
-  }
+  } catch (e) { console.error('데이터 로딩 실패:', e); }
 }
 
 // ============================================================
-// Entity list (left panel)
+// View toggle
+// ============================================================
+
+function switchView(view) {
+  currentView = view;
+  document.getElementById('btn-graph').classList.toggle('active', view === 'graph');
+  document.getElementById('btn-timeline').classList.toggle('active', view === 'timeline');
+  document.getElementById('graph-container').style.display = view === 'graph' ? '' : 'none';
+  document.getElementById('timeline-container').style.display = view === 'timeline' ? '' : 'none';
+}
+
+// ============================================================
+// Entity list
 // ============================================================
 
 function renderEntityList(nodes) {
   const container = document.getElementById('entity-list');
   const entities = nodes.filter(n => n.type === 'entity');
-
-  // 타입별 그룹핑
-  const groups = {};
   const typeLabels = {
     country: '국가', proxy: '프록시/비국가', commodity: '원자재',
     company: '기업', asset: '전략자산', institution: '기관', person: '인물',
   };
-
+  const groups = {};
   entities.forEach(e => {
     const t = e.entity_type || 'country';
     if (!groups[t]) groups[t] = [];
     groups[t].push(e);
   });
-
   let html = '';
   for (const [type, items] of Object.entries(groups)) {
     html += `<div class="entity-group">
-      <div class="entity-group-title">${typeLabels[type] || type}</div>
+      <div class="entity-group-title">${typeLabels[type] || type} (${items.length})</div>
       ${items.map(e => `
         <div class="entity-item" data-id="${e.id}" onclick="selectEntity('${e.id}', this)">
           <span class="entity-dot ${type}"></span>${e.name}
@@ -105,12 +112,31 @@ function renderEntityList(nodes) {
       `).join('')}
     </div>`;
   }
-
   container.innerHTML = html || '<div class="empty-state">엔티티 없음</div>';
 }
 
 // ============================================================
-// D3.js Graph (center panel)
+// Search
+// ============================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+  const searchBox = document.getElementById('search-box');
+  searchBox.addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase();
+    // 이슈 필터
+    document.querySelectorAll('.issue-item').forEach(el => {
+      const name = el.querySelector('.issue-name').textContent.toLowerCase();
+      el.style.display = name.includes(q) ? '' : 'none';
+    });
+    // 엔티티 필터
+    document.querySelectorAll('.entity-item').forEach(el => {
+      el.style.display = el.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+});
+
+// ============================================================
+// D3.js Graph
 // ============================================================
 
 function renderGraph(nodes, edges) {
@@ -122,13 +148,11 @@ function renderGraph(nodes, edges) {
 
   const container = document.getElementById('graph-container');
   const width = container.clientWidth;
-  const height = container.clientHeight;
+  const height = container.clientHeight - 40;
   svg.attr('viewBox', `0 0 ${width} ${height}`);
 
-  // 시뮬레이션 중지
   if (simulation) simulation.stop();
 
-  // 노드 크기 계산 (연결 수 기반)
   const linkCount = {};
   edges.forEach(e => {
     linkCount[e.source] = (linkCount[e.source] || 0) + 1;
@@ -136,89 +160,99 @@ function renderGraph(nodes, edges) {
   });
   nodes.forEach(n => { n.radius = Math.max(8, Math.min(25, 6 + (linkCount[n.id] || 0) * 2)); });
 
-  // 시뮬레이션
   simulation = d3.forceSimulation(nodes)
     .force('link', d3.forceLink(edges).id(d => d.id).distance(100))
     .force('charge', d3.forceManyBody().strength(-300))
     .force('center', d3.forceCenter(width / 2, height / 2))
     .force('collision', d3.forceCollide().radius(d => d.radius + 5));
 
-  // Zoom
   const g = svg.append('g');
   svg.call(d3.zoom().scaleExtent([0.3, 3]).on('zoom', e => g.attr('transform', e.transform)));
 
-  // Links
-  const link = g.selectAll('.link-line')
-    .data(edges)
-    .join('line')
+  const link = g.selectAll('.link-line').data(edges).join('line')
     .attr('class', d => `link-line ${d.link_type}`)
     .attr('stroke', d => LINK_COLORS[d.link_type] || '#8b949e')
-    .attr('stroke-width', d => d.link_type === 'hostile' || d.link_type === 'blockade' ? 2.5 : 1.5);
+    .attr('stroke-width', d => ['hostile','blockade'].includes(d.link_type) ? 2.5 : 1.5);
 
-  // Nodes
-  const node = g.selectAll('.node-group')
-    .data(nodes)
-    .join('g')
-    .attr('class', 'node-group')
+  const node = g.selectAll('.node-group').data(nodes).join('g').attr('class', 'node-group')
     .call(d3.drag()
       .on('start', (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
       .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
       .on('end', (e, d) => { if (!e.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; })
     );
 
-  node.append('circle')
-    .attr('class', 'node-circle')
+  node.append('circle').attr('class', 'node-circle')
     .attr('r', d => d.radius)
-    .attr('fill', d => {
-      const t = d.type === 'entity' ? d.entity_type : 'event';
-      return COLOR_MAP[t] || '#8b949e';
-    })
+    .attr('fill', d => COLOR_MAP[d.type === 'entity' ? d.entity_type : 'event'] || '#8b949e')
     .attr('fill-opacity', 0.8)
-    .attr('stroke', d => {
-      const t = d.type === 'entity' ? d.entity_type : 'event';
-      return COLOR_MAP[t] || '#8b949e';
-    })
+    .attr('stroke', d => COLOR_MAP[d.type === 'entity' ? d.entity_type : 'event'] || '#8b949e')
     .attr('stroke-width', 2)
-    .on('click', (e, d) => {
-      if (d.type === 'entity') selectEntity(d.id);
-    });
+    .on('click', (e, d) => { if (d.type === 'entity') selectEntity(d.id); });
 
-  node.append('text')
-    .attr('class', 'node-label')
-    .attr('dy', d => d.radius + 14)
-    .text(d => d.name);
+  node.append('text').attr('class', 'node-label').attr('dy', d => d.radius + 14).text(d => d.name);
 
-  // Tick
   simulation.on('tick', () => {
-    link
-      .attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+    link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
       .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
     node.attr('transform', d => `translate(${d.x},${d.y})`);
   });
 }
 
 // ============================================================
-// Briefing (right panel)
+// Timeline
+// ============================================================
+
+function renderTimeline(events) {
+  const container = document.getElementById('timeline-scroll');
+  if (!events || events.length === 0) {
+    container.innerHTML = '<div class="empty-state">이벤트 없음</div>';
+    return;
+  }
+
+  let html = `<div class="tl-legend">
+    <div class="tl-legend-item"><div class="tl-legend-dot" style="background:var(--blue);"></div> 외교</div>
+    <div class="tl-legend-item"><div class="tl-legend-dot" style="background:var(--red);"></div> 군사</div>
+    <div class="tl-legend-item"><div class="tl-legend-dot" style="background:var(--purple);"></div> 법적</div>
+    <div class="tl-legend-item"><div class="tl-legend-dot" style="background:var(--dim);"></div> 기타</div>
+  </div>`;
+
+  html += '<div class="timeline-line">';
+  events.forEach(ev => {
+    const date = ev.started_at ? new Date(ev.started_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', year: 'numeric' }) : '?';
+    const cat = ev.category || 'event';
+    const icon = CATEGORY_ICONS[cat] || '📌';
+    const label = CATEGORY_LABELS[cat] || '기타';
+    const sevColor = ev.severity === 'critical' ? 'var(--red)' : 'var(--yellow)';
+
+    html += `<div class="tl-item ${cat}">
+      <div class="tl-date ${cat}">
+        <span class="tl-severity" style="background:${sevColor};"></span>
+        ${date}
+        <span class="tl-category ${cat}">${icon} ${label}</span>
+      </div>
+      <div class="tl-title">${ev.title}</div>
+      ${ev.summary ? `<div class="tl-summary">${ev.summary}</div>` : ''}
+    </div>`;
+  });
+  html += '</div>';
+
+  container.innerHTML = html;
+}
+
+// ============================================================
+// Briefing
 // ============================================================
 
 async function selectEntity(entityId, listEl) {
-  // 리스트 하이라이트
   document.querySelectorAll('.entity-item').forEach(e => e.classList.remove('selected'));
-  if (listEl) {
-    listEl.classList.add('selected');
-  } else {
-    const el = document.querySelector(`.entity-item[data-id="${entityId}"]`);
-    if (el) el.classList.add('selected');
-  }
+  if (listEl) { listEl.classList.add('selected'); }
+  else { const el = document.querySelector(`.entity-item[data-id="${entityId}"]`); if (el) el.classList.add('selected'); }
 
   try {
     const res = await fetch(`/api/entities/${entityId}/briefing`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    renderBriefing(data);
-  } catch (e) {
-    console.error('브리핑 로딩 실패:', e);
-  }
+    if (!res.ok) return;
+    renderBriefing(await res.json());
+  } catch (e) { console.error('브리핑 로딩 실패:', e); }
 }
 
 function renderBriefing(data) {
@@ -226,33 +260,24 @@ function renderBriefing(data) {
   const entity = data.entity;
   const rels = data.relationships;
 
-  let html = `
-    <div class="briefing-header">
-      <div>
-        <div class="briefing-title">${entity.name}</div>
-        <div class="briefing-subtitle">${entity.entity_type}${entity.ticker ? ' · ' + entity.ticker : ''}</div>
-      </div>
-    </div>
-  `;
+  let html = `<div class="briefing-header"><div>
+    <div class="briefing-title">${entity.name}</div>
+    <div class="briefing-subtitle">${entity.entity_type}${entity.ticker ? ' · ' + entity.ticker : ''}</div>
+  </div></div>`;
 
-  // Aliases
   if (entity.aliases && entity.aliases.length > 0) {
-    html += `<div class="briefing-section">
-      <h3>별칭</h3>
-      <div style="font-size:12px;color:var(--dim);">${entity.aliases.join(', ')}</div>
-    </div>`;
+    html += `<div class="briefing-section"><h3>별칭</h3><div style="font-size:11px;color:var(--dim);">${entity.aliases.join(', ')}</div></div>`;
   }
 
-  // Structured properties (objectives/achievements/strategy/failures)
+  // Structured properties
   if (entity.properties) {
     const p = entity.properties;
     const sections = [
-      { key: 'objectives', title: '🎯 목표 (Objectives)', color: 'var(--blue)' },
-      { key: 'strategy', title: '⚡ 전략 (How)', color: 'var(--cyan)' },
+      { key: 'objectives', title: '🎯 목표', color: 'var(--blue)' },
+      { key: 'strategy', title: '⚡ 전략', color: 'var(--cyan)' },
       { key: 'achievements', title: '✅ 달성', color: 'var(--green)' },
       { key: 'failures', title: '❌ 미달성', color: 'var(--red)' },
     ];
-
     for (const { key, title, color } of sections) {
       const items = p[key];
       if (items && items.length > 0) {
@@ -261,18 +286,17 @@ function renderBriefing(data) {
         html += `</ul></div>`;
       }
     }
-
-    // 나머지 일반 속성
-    const skipKeys = new Set(['objectives', 'strategy', 'achievements', 'failures']);
+    // 한줄평
+    if (p['한줄평']) {
+      html += `<div class="briefing-section"><h3>한줄평</h3><div style="font-size:11px;color:var(--yellow);font-style:italic;padding:6px 0;">"${p['한줄평']}"</div></div>`;
+    }
+    // 나머지 속성
+    const skipKeys = new Set(['objectives', 'strategy', 'achievements', 'failures', '한줄평']);
     const otherProps = Object.entries(p).filter(([k]) => !skipKeys.has(k));
     if (otherProps.length > 0) {
       html += `<div class="briefing-section"><h3>상세</h3><ul>`;
       for (const [k, v] of otherProps) {
-        if (Array.isArray(v)) {
-          html += `<li><strong>${k}:</strong> ${v.join(', ')}</li>`;
-        } else {
-          html += `<li><strong>${k}:</strong> ${v}</li>`;
-        }
+        html += `<li><strong>${k}:</strong> ${Array.isArray(v) ? v.join(', ') : v}</li>`;
       }
       html += `</ul></div>`;
     }
@@ -282,30 +306,19 @@ function renderBriefing(data) {
   if (rels.length > 0) {
     const outgoing = rels.filter(r => r.direction === 'outgoing');
     const incoming = rels.filter(r => r.direction === 'incoming');
-
     if (outgoing.length > 0) {
-      html += `<div class="briefing-section"><h3>관계 (발신)</h3><ul>`;
-      outgoing.forEach(r => {
-        html += `<li><span class="rel-tag ${r.link_type}">${r.link_type}</span> → ${r.target}${r.evidence ? ' — ' + r.evidence : ''}</li>`;
-      });
+      html += `<div class="briefing-section"><h3>관계 →</h3><ul>`;
+      outgoing.forEach(r => { html += `<li><span class="rel-tag ${r.link_type}">${r.link_type}</span> → ${r.target}${r.evidence ? ' — ' + r.evidence : ''}</li>`; });
       html += `</ul></div>`;
     }
-
     if (incoming.length > 0) {
-      html += `<div class="briefing-section"><h3>관계 (수신)</h3><ul>`;
-      incoming.forEach(r => {
-        html += `<li>${r.source} → <span class="rel-tag ${r.link_type}">${r.link_type}</span>${r.evidence ? ' — ' + r.evidence : ''}</li>`;
-      });
+      html += `<div class="briefing-section"><h3>관계 ←</h3><ul>`;
+      incoming.forEach(r => { html += `<li>${r.source} → <span class="rel-tag ${r.link_type}">${r.link_type}</span>${r.evidence ? ' — ' + r.evidence : ''}</li>`; });
       html += `</ul></div>`;
     }
   }
-
   container.innerHTML = html;
 }
-
-// ============================================================
-// Init
-// ============================================================
 
 // ============================================================
 // News Ticker
@@ -316,38 +329,28 @@ async function loadNewsTicker() {
     const res = await fetch('/api/news/latest?limit=30');
     const news = await res.json();
     const track = document.getElementById('ticker-track');
-
-    if (news.length === 0) {
-      track.innerHTML = '<span class="ticker-text">뉴스가 없습니다</span>';
-      return;
-    }
+    if (news.length === 0) { track.innerHTML = '<span class="ticker-text">뉴스가 없습니다</span>'; return; }
 
     const ISSUE_COLORS = {
       '이란 전쟁': '#f85149', '비트코인 지정학': '#d29922', 'IMEC 회랑': '#bc8cff',
       '트럼프 관세전쟁 2.0': '#db6d28', 'AI/반도체 패권전쟁': '#3fb950',
+      '러시아-우크라이나 전쟁': '#f85149', '대만 해협 위기': '#58a6ff',
+      '유럽 정치 위기': '#bc8cff', '글로벌 AI 규제 경쟁': '#56d4dd',
+      '일본 금리 전환 (BOJ)': '#d29922',
     };
-
     const items = news.map(n => {
-      const cls = n.importance === 'high' ? 'news-high' : '';
       const tag = n.top_issue
-        ? `<span class="news-tag" style="background:${ISSUE_COLORS[n.top_issue] || '#8b949e'}22;color:${ISSUE_COLORS[n.top_issue] || '#8b949e'};border:1px solid ${ISSUE_COLORS[n.top_issue] || '#8b949e'}44;padding:1px 6px;border-radius:3px;font-size:10px;margin-right:6px;">${n.top_issue}</span>`
+        ? `<span style="background:${ISSUE_COLORS[n.top_issue] || '#8b949e'}22;color:${ISSUE_COLORS[n.top_issue] || '#8b949e'};border:1px solid ${ISSUE_COLORS[n.top_issue] || '#8b949e'}44;padding:1px 5px;border-radius:3px;font-size:9px;margin-right:5px;">${n.top_issue}</span>`
         : '';
-      return `<span class="news-item ${cls}">${tag}<span class="news-src">[${n.source}]</span>${n.title}</span>`;
-    }).join('<span class="news-dot">•</span>');
+      return `<span class="news-item">${tag}<span class="news-src">[${n.source}]</span>${n.title}</span>`;
+    }).join('<span class="news-dot">·</span>');
 
-    // 두 번 반복 (끊김 없는 스크롤)
-    track.innerHTML = `<span class="ticker-text">${items}<span class="news-dot">•</span>${items}</span>`;
-
-    // 뉴스 수에 따라 스크롤 속도 조정
+    track.innerHTML = `<span class="ticker-text">${items}<span class="news-dot">·</span>${items}</span>`;
     const text = track.querySelector('.ticker-text');
-    const duration = Math.max(120, news.length * 8);
-    text.style.animationDuration = `${duration}s`;
-  } catch (e) {
-    console.error('뉴스 티커 로딩 실패:', e);
-  }
+    text.style.animationDuration = `${Math.max(120, news.length * 8)}s`;
+  } catch (e) { console.error('뉴스 티커 실패:', e); }
 }
 
-// 5분마다 뉴스 갱신
 setInterval(loadNewsTicker, 5 * 60 * 1000);
 
 // ============================================================
