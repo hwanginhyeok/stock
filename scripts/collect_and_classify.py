@@ -23,6 +23,60 @@ def _now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
 
+def _auto_create_issue(issue_data: dict, trend: dict) -> None:
+    """감지된 트렌드에서 GeoIssue를 자동 생성한다."""
+    from src.core.models import (
+        GeoIssue, GeoIssueStatus, OntologyEntity, EntityType, Severity, Market,
+    )
+    from src.storage import GeoIssueRepository, OntologyEntityRepository
+
+    e_repo = OntologyEntityRepository()
+    i_repo = GeoIssueRepository()
+
+    title = issue_data.get("title", trend["top_keyword"])
+
+    # 중복 체크
+    existing = i_repo.get_many(filters={"title": title}, limit=1)
+    if existing:
+        print(f"      SKIP: '{title}' 이미 존재")
+        return
+
+    # 엔티티 생성
+    entity_ids = []
+    for ent in issue_data.get("entities", []):
+        name = ent.get("name", "")
+        if not name:
+            continue
+        e = e_repo.find_by_name(name)
+        if not e:
+            etype = ent.get("entity_type", "country")
+            e = OntologyEntity(
+                name=name, entity_type=etype, market=Market.US,
+                aliases=ent.get("aliases", []),
+            )
+            e_repo.create(e)
+        entity_ids.append(e.id)
+
+    # 이슈 생성
+    sev_map = {"critical": Severity.CRITICAL, "major": Severity.MAJOR, "moderate": Severity.MODERATE}
+    sev = sev_map.get(issue_data.get("severity", "moderate"), Severity.MODERATE)
+
+    issue = GeoIssue(
+        title=title,
+        description=issue_data.get("description", ""),
+        severity=sev,
+        status=GeoIssueStatus.ACTIVE,
+        entity_ids=entity_ids,
+    )
+    i_repo.create(issue)
+    print(f"      ✅ 자동 생성: '{title}' ({len(entity_ids)}개 엔티티)")
+
+    # 분류기에 키워드 추가 (런타임에만, 파일 수정 안 함)
+    from src.collectors.news.classifier import ISSUE_RULES
+    new_keywords = [(kw, 2.0) for kw in issue_data.get("keywords", trend["keywords"][:5])]
+    ISSUE_RULES[title] = new_keywords
+
+
 def main() -> None:
     print(f"\n[{_now()}] === 뉴스 수집 + 분류 시작 ===")
 
@@ -77,7 +131,30 @@ def main() -> None:
     else:
         print("  관련 뉴스 없음")
 
-    # 3. 소스 점수 갱신
+    # 3. 새 핫 토픽 자동 감지
+    unclassified = [n for n, c in zip(news_dicts, classified) if not c.issues]
+    if len(unclassified) >= 5:
+        from src.collectors.news.trend_detector import (
+            detect_emerging_topics, create_issue_from_trend,
+            get_already_detected, save_detected,
+        )
+        already = get_already_detected()
+        trends = detect_emerging_topics(unclassified)
+        new_trends = [t for t in trends if t["top_keyword"] not in already]
+
+        if new_trends:
+            print(f"\n  🔥 새 핫 토픽 감지: {len(new_trends)}개")
+            for t in new_trends:
+                print(f"    [{t['count']}건] {t['top_keyword']} — {t['keywords'][:3]}")
+                # Claude로 이슈 자동 생성 (1회 호출)
+                issue_data = create_issue_from_trend(t, unclassified)
+                if issue_data:
+                    _auto_create_issue(issue_data, t)
+            save_detected(new_trends)
+        else:
+            print("  새 핫 토픽 없음")
+
+    # 4. 소스 점수 갱신
     scores = update_source_scores(classified)
     top_sources = sorted(scores.values(), key=lambda s: s.score, reverse=True)[:5]
     if top_sources:
