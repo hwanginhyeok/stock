@@ -243,13 +243,39 @@ function renderBriefing(data) {
     </div>`;
   }
 
-  // Properties
-  if (entity.properties && Object.keys(entity.properties).length > 0) {
-    html += `<div class="briefing-section"><h3>상세</h3><ul>`;
-    for (const [k, v] of Object.entries(entity.properties)) {
-      html += `<li><strong>${k}:</strong> ${v}</li>`;
+  // Structured properties (objectives/achievements/strategy/failures)
+  if (entity.properties) {
+    const p = entity.properties;
+    const sections = [
+      { key: 'objectives', title: '🎯 목표 (Objectives)', color: 'var(--blue)' },
+      { key: 'strategy', title: '⚡ 전략 (How)', color: 'var(--cyan)' },
+      { key: 'achievements', title: '✅ 달성', color: 'var(--green)' },
+      { key: 'failures', title: '❌ 미달성', color: 'var(--red)' },
+    ];
+
+    for (const { key, title, color } of sections) {
+      const items = p[key];
+      if (items && items.length > 0) {
+        html += `<div class="briefing-section"><h3 style="color:${color}">${title}</h3><ul>`;
+        items.forEach(item => { html += `<li>${item}</li>`; });
+        html += `</ul></div>`;
+      }
     }
-    html += `</ul></div>`;
+
+    // 나머지 일반 속성
+    const skipKeys = new Set(['objectives', 'strategy', 'achievements', 'failures']);
+    const otherProps = Object.entries(p).filter(([k]) => !skipKeys.has(k));
+    if (otherProps.length > 0) {
+      html += `<div class="briefing-section"><h3>상세</h3><ul>`;
+      for (const [k, v] of otherProps) {
+        if (Array.isArray(v)) {
+          html += `<li><strong>${k}:</strong> ${v.join(', ')}</li>`;
+        } else {
+          html += `<li><strong>${k}:</strong> ${v}</li>`;
+        }
+      }
+      html += `</ul></div>`;
+    }
   }
 
   // Relationships
