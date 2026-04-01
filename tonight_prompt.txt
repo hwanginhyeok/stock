@@ -1,0 +1,38 @@
+# 야간작업 — GeoInvest 프로퍼티 보강 + 검증
+
+## 1. 나머지 이슈 엔티티 프로퍼티 보강 (objectives/strategy/achievements/failures)
+
+아래 이슈들의 핵심 엔티티에 objectives/strategy/achievements/failures를 채워넣기.
+이란 전쟁은 이미 완료됨 (US, Iran, Israel, Hezbollah, Houthis, South Korea).
+
+### 보강 대상:
+- 비트코인 지정학: Bitcoin, US SEC, China, MicroStrategy, Tether, Circle
+- IMEC 회랑: India, IMEC Corridor, China (BRI 관점), Israel (IMEC 관점)
+- 트럼프 관세전쟁 2.0: United States (관세 관점), China (보복 관점), South Korea (피해 관점), EU
+- AI/반도체 패권전쟁: Nvidia, TSMC, Huawei, US Commerce Dept, Samsung Electronics
+- 러시아-우크라이나: Russia, Ukraine, NATO
+- 대만 해협: China (대만 관점), Taiwan, TSMC (리스크 관점)
+- 유럽 정치 위기: France, Germany, Russia (하이브리드전 관점)
+- 글로벌 AI 규제: EU AI Act, OpenAI, China (AI 규제 관점)
+- 일본 금리 전환: Bank of Japan, Japanese Yen
+
+### 패턴 (이란 전쟁 참고):
+```python
+{
+    'objectives': ['목표1', '목표2'],
+    'strategy': ['전략1', '전략2'],
+    'achievements': ['달성1', '달성2'],
+    'failures': ['미달성1', '미달성2'],
+    '역할': '...',
+}
+```
+
+## 2. RSS 소스 동작 확인
+
+지정학 특화 소스(Reuters, Al Jazeera, BBC, CoinDesk, AP News)가 실제로 수집되는지 확인.
+실패하는 소스는 URL 수정 또는 대체 소스로 교체.
+
+## 3. 랭킹 히스토리 저장 검증
+
+data/cache/issue_rankings.json이 잘 쌓이는지 확인.
+API에서 rank_change(전날 대비 변동)가 정상 작동하는지 확인.
