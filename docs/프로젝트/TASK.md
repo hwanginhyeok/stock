@@ -605,6 +605,7 @@ data/research/stocks/tesla/
 
 | # | 분야 | 작업 | 완료일 | 비고 |
 |---|------|------|--------|------|
+| 2-13 | 코드 | naver HTML 한글 깨짐 수정 + briefing_server.py 정식화 | 2026-04-01 | fragment→full document wrapper 서버. `scripts/briefing_server.py` 생성. `python3 scripts/briefing_server.py` → localhost:8765 |
 | 2-12 | 코드 | 두 축 연결 체계 — Market Regime Engine + Investment Standup | 2026-03-31 | regime.py + config/regime_sizing.yaml + briefing/signal_builder 수정 + 테스트 34건. FRED/FX fallback 정상 |
 | 4-4 | 아티클 | 블록체인 생태계 #2: 이더리움 편 — v1 초안 | 2026-03-30 | v1 초안 완료 (야간작업). sources.md + outline_v1.md + v1_draft.md |
 | 4-3 | 아티클 | 블록체인 생태계 #1: 비트코인 편 — v1 초안 | 2026-03-30 | v1 초안 완료 (야간작업). sources.md + outline_v1.md + v1_draft.md |
