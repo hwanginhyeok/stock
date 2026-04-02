@@ -4,6 +4,9 @@
 이란 전쟁 엔티티에 이미 채워진 objectives/strategy/achievements/failures 패턴을
 나머지 9개 이슈의 핵심 엔티티에도 동일하게 적용한다.
 
+실행 이력:
+    2026-04-02: 전체 9개 이슈 24개 엔티티 보강 완료
+
 Usage:
     python scripts/update_geoinvest_entity_props.py [이슈번호]
     python scripts/update_geoinvest_entity_props.py          # 전체 실행
