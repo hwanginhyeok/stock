@@ -544,7 +544,7 @@ data/research/stocks/tesla/
 
 | # | 분야 | 작업 | 중요도 | 담당 | 발행일 | 상태 | 비고 |
 |---|------|------|--------|------|--------|------|------|
-| 1-23 | 시스템 | 크립토 생태계 기업 모니터링 이메일 섹션 추가 | P2 | AI | 2026-03-01 | 예정 | COIN/HOOD/BMNR/SQ/BLK/MSTR 주가+뉴스, Circle 뉴스 추적. 상세 → task/1-23.md |
+| 1-23 | 시스템 | 크립토 생태계 기업 모니터링 이메일 섹션 추가 | P2 | AI | 2026-03-01 | **완료** | Section 6 추가 (COIN/HOOD/MSTR/SQ/BLK/BMNR). Circle 비상장 제외. dry-run 검증 필요 |
 | 1-24 | 시스템 | 시황 브리핑 cron 자동화 (오전 6시 + 저녁 6시) | P2 | AI | 2026-03-22 | 요청 | run_briefing.sh 경로 수정 + cron 등록. 텔레그램 봇 연결은 PM이 담당. 야간작업 예정 |
 
 
@@ -605,6 +605,7 @@ data/research/stocks/tesla/
 
 | # | 분야 | 작업 | 완료일 | 비고 |
 |---|------|------|--------|------|
+| 1-23 | 시스템 | 크립토 생태계 기업 모니터링 이메일 Section 6 | 2026-04-03 | COIN/HOOD/MSTR/SQ/BLK/BMNR 주가+수익률. Circle 비상장 제외. `collect_ecosystem()` + 템플릿 Section 6 |
 | 2-13 | 코드 | naver HTML 한글 깨짐 수정 + briefing_server.py 정식화 | 2026-04-01 | fragment→full document wrapper 서버. `scripts/briefing_server.py` 생성. `python3 scripts/briefing_server.py` → localhost:8765 |
 | 2-12 | 코드 | 두 축 연결 체계 — Market Regime Engine + Investment Standup | 2026-03-31 | regime.py + config/regime_sizing.yaml + briefing/signal_builder 수정 + 테스트 34건. FRED/FX fallback 정상 |
 | 4-4 | 아티클 | 블록체인 생태계 #2: 이더리움 편 — v1 초안 | 2026-03-30 | v1 초안 완료 (야간작업). sources.md + outline_v1.md + v1_draft.md |
