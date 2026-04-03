@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-"""GeoInvest 자동 업데이트 — 뉴스 수집 + 키워드 매칭 (AI 호출 없음).
+"""GeoInvest 자동 업데이트 — 뉴스 수집 → Ollama 로컬 LLM 추출 → DB 저장.
 
 cron으로 10분마다 실행:
     */10 * * * * cd ~/stock && python3 scripts/update_geoinvest.py --skip-collect >> logs/geoinvest_update.log 2>&1
 
-뉴스 수집 포함 (15분 cron에서 이미 돌고 있으므로 보통 --skip-collect 사용):
-    python scripts/update_geoinvest.py
-
-엔티티/관계 추출은 Claude Code 세션에서 직접 수행 (API 비용 0원).
-이 스크립트는 뉴스 수집 + 이슈별 관련 뉴스 필터링 + 요약만 담당.
+수동 실행:
+    python3 scripts/update_geoinvest.py
+    python3 scripts/update_geoinvest.py --skip-collect   # 뉴스 수집 건너뛰기
+    python3 scripts/update_geoinvest.py --dry-run        # 추출만 하고 DB 저장 안 함
 """
 
 from __future__ import annotations
@@ -19,11 +18,33 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
+
+import requests as http_requests
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT))
 
-# 이슈별 키워드 (뉴스 필터링용)
+# ── Ollama 설정 ──────────────────────────────────────────────────────────────
+OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_MODEL = "gemma3:4b"
+OLLAMA_TIMEOUT = 120  # 초 (RTX 2060 6GB 기준)
+
+EXTRACTION_PROMPT = """You are a geopolitical analyst. Extract entities and relationships from these news articles about '{issue}'.
+
+{articles}
+
+Respond ONLY with valid JSON (no markdown, no explanation):
+{{
+  "entities": [
+    {{"name": "...", "entity_type": "country|person|institution|asset|company|proxy|commodity"}}
+  ],
+  "relationships": [
+    {{"source": "...", "target": "...", "relation_type": "mentions|triggers|involves|impacts|reacts_to|supports|ally|hostile|proxy|trade|supply|sanctions", "evidence": "one sentence"}}
+  ]
+}}"""
+
+# ── 이슈별 키워드 ────────────────────────────────────────────────────────────
 ISSUE_KEYWORDS = {
     "이란 전쟁": [
         "iran", "이란", "호르무즈", "hormuz", "hezbollah", "헤즈볼라",
@@ -75,6 +96,8 @@ ISSUE_KEYWORDS = {
     ],
 }
 
+
+# ── 뉴스 수집 ────────────────────────────────────────────────────────────────
 
 def collect_news() -> None:
     """뉴스 수집 실행."""
@@ -129,46 +152,150 @@ def find_relevant_news(issue_name: str) -> list[dict]:
         ]
 
 
-def _save_pending_news(issue_name: str, news: list[dict]) -> Path:
-    """관련 뉴스를 JSON으로 저장 — Claude Code 세션에서 분석용."""
-    pending_dir = _PROJECT_ROOT / "data" / "geoinvest" / "pending"
-    pending_dir.mkdir(parents=True, exist_ok=True)
+# ── Ollama 로컬 LLM 추출 ────────────────────────────────────────────────────
 
-    ts = datetime.now().strftime("%Y%m%d_%H%M")
-    slug = issue_name.replace(" ", "_").replace("/", "_")
-    path = pending_dir / f"{ts}_{slug}.json"
+def _call_ollama(prompt: str) -> str | None:
+    """Ollama API 호출. 실패 시 None 반환."""
+    try:
+        resp = http_requests.post(
+            OLLAMA_URL,
+            json={"model": OLLAMA_MODEL, "prompt": prompt, "stream": False},
+            timeout=OLLAMA_TIMEOUT,
+        )
+        resp.raise_for_status()
+        return resp.json().get("response", "")
+    except Exception as e:
+        print(f"    Ollama 호출 실패: {e}")
+        return None
 
-    payload = {
-        "issue": issue_name,
-        "collected_at": _now(),
-        "news_count": len(news),
-        "articles": [
-            {
-                "title": n["title"],
-                "source": n["source"],
-                "published_at": n["published_at"],
-                "summary": (n.get("summary") or n.get("content", ""))[:500],
-            }
-            for n in news
-        ],
+
+def _parse_json(text: str) -> dict[str, Any]:
+    """LLM 응답에서 JSON을 파싱한다. 마크다운 코드블록도 처리."""
+    if not text:
+        return {}
+    # ```json ... ``` 블록 추출
+    if "```" in text:
+        start = text.find("```")
+        # json 태그 건너뛰기
+        first_newline = text.find("\n", start)
+        end = text.find("```", first_newline)
+        if end > first_newline:
+            text = text[first_newline:end].strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        # 부분 JSON이라도 시도
+        for i in range(len(text), 0, -1):
+            try:
+                return json.loads(text[:i])
+            except json.JSONDecodeError:
+                continue
+        return {}
+
+
+def extract_entities(issue_name: str, news: list[dict]) -> dict[str, Any]:
+    """Ollama로 뉴스에서 엔티티/관계를 추출한다."""
+    articles_text = "\n---\n".join(
+        f"Title: {item['title']}\nDate: {item['published_at']}"
+        for item in news[:5]  # RTX 2060 6GB — 5개로 제한 (타임아웃 방지)
+    )
+
+    prompt = EXTRACTION_PROMPT.format(issue=issue_name, articles=articles_text)
+    raw = _call_ollama(prompt)
+    if not raw:
+        return {}
+
+    result = _parse_json(raw)
+    return result
+
+
+def _save_extraction(entities: list[dict], relationships: list[dict]) -> int:
+    """추출 결과를 DB에 저장한다. 중복 체크 포함. 새 관계 수 반환."""
+    from src.core.models import Market, OntologyEntity, OntologyLink
+    from src.storage import OntologyEntityRepository, OntologyLinkRepository
+
+    e_repo = OntologyEntityRepository()
+    l_repo = OntologyLinkRepository()
+
+    # 엔티티 저장 (dedup by name)
+    entity_id_map: dict[str, str] = {}
+    for ent_data in entities:
+        name = ent_data.get("name", "")
+        if not name:
+            continue
+        existing = e_repo.find_by_name(name)
+        if existing:
+            entity_id_map[name.lower()] = existing.id
+            continue
+
+        entity = OntologyEntity(
+            name=name,
+            entity_type=ent_data.get("entity_type", "country"),
+            market=Market.US,
+            aliases=ent_data.get("aliases", []),
+        )
+        e_repo.create(entity)
+        entity_id_map[name.lower()] = entity.id
+
+    # 관계 저장 (dedup)
+    new_links = 0
+    allowed_types = {
+        "mentions", "triggers", "involves", "impacts", "reacts_to",
+        "supports", "ally", "hostile", "proxy", "trade", "supply", "sanctions",
     }
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    return path
+    for rel_data in relationships:
+        src_name = rel_data.get("source", "").lower()
+        tgt_name = rel_data.get("target", "").lower()
+        src_id = entity_id_map.get(src_name)
+        tgt_id = entity_id_map.get(tgt_name)
+        if not src_id or not tgt_id:
+            continue
 
+        link_type = rel_data.get("relation_type", "impacts")
+        if link_type not in allowed_types:
+            link_type = "impacts"  # 허용되지 않는 타입 → fallback
+
+        existing = l_repo.get_many(filters={
+            "source_type": "entity", "source_id": src_id,
+            "target_type": "entity", "target_id": tgt_id,
+            "link_type": link_type,
+        }, limit=1)
+        if existing:
+            continue
+
+        link = OntologyLink(
+            link_type=link_type,
+            source_type="entity", source_id=src_id,
+            target_type="entity", target_id=tgt_id,
+            confidence=rel_data.get("confidence", 0.6),
+            evidence=rel_data.get("evidence", ""),
+        )
+        try:
+            l_repo.create(link)
+            new_links += 1
+        except Exception:
+            pass  # 중복 unique constraint
+
+    return new_links
+
+
+# ── 유틸 ─────────────────────────────────────────────────────────────────────
 
 def _now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
 
+# ── 메인 ─────────────────────────────────────────────────────────────────────
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="GeoInvest 자동 업데이트 (뉴스 수집만)")
+    parser = argparse.ArgumentParser(description="GeoInvest 자동 업데이트 (Ollama 로컬 LLM)")
     parser.add_argument("--skip-collect", action="store_true", help="뉴스 수집 건너뛰기")
+    parser.add_argument("--dry-run", action="store_true", help="추출만 하고 DB 저장 안 함")
     parser.add_argument("--issue", type=str, default=None, help="특정 이슈만 업데이트")
-    parser.add_argument("--verbose", action="store_true", help="뉴스 제목 출력")
     args = parser.parse_args()
 
     print(f"\n{'='*50}")
-    print(f"GeoInvest 뉴스 수집 — {_now()}")
+    print(f"GeoInvest 업데이트 — {_now()} (Ollama {OLLAMA_MODEL})")
     print(f"{'='*50}")
 
     # 1. 뉴스 수집
@@ -179,30 +306,42 @@ def main() -> None:
     from src.core.database import init_db
     init_db()
 
-    # 3. 이슈별 관련 뉴스 필터링 + pending 저장
+    # 3. Ollama 접속 확인
+    try:
+        r = http_requests.get("http://localhost:11434/api/tags", timeout=3)
+        r.raise_for_status()
+    except Exception:
+        print("  ✗ Ollama 미실행 — ollama serve 필요")
+        sys.exit(1)
+
+    # 4. 이슈별 업데이트
     issues = [args.issue] if args.issue else list(ISSUE_KEYWORDS.keys())
-    total_news = 0
-    saved_files = 0
+    total_entities = 0
+    total_links = 0
 
     for issue_name in issues:
         news = find_relevant_news(issue_name)
-        count = len(news)
-        total_news += count
-
         if not news:
             continue
 
-        # 새 뉴스가 있으면 pending에 저장
-        path = _save_pending_news(issue_name, news)
-        saved_files += 1
-        print(f"  {issue_name}: {count}개 뉴스 → {path.name}")
+        print(f"\n  {issue_name}: {len(news)}개 뉴스 → Ollama 추출 중...")
+        result = extract_entities(issue_name, news)
+        entities = result.get("entities", [])
+        rels = result.get("relationships", [])
+        print(f"    추출: {len(entities)}개 엔티티, {len(rels)}개 관계")
 
-        if args.verbose:
-            for n in news[:5]:
-                print(f"    - {n['title'][:80]}")
+        if args.dry_run:
+            print(f"    [DRY-RUN] {[e.get('name') for e in entities[:8]]}")
+            continue
 
-    print(f"\n[{_now()}] 완료 — {total_news}개 뉴스, {saved_files}개 이슈 저장")
-    print("  → 엔티티/관계 추출은 Claude Code 세션에서 수행")
+        if entities or rels:
+            new_links = _save_extraction(entities, rels)
+            total_entities += len(entities)
+            total_links += new_links
+            if new_links:
+                print(f"    → {new_links}개 새 관계 저장")
+
+    print(f"\n[{_now()}] 완료 — 엔티티 {total_entities}개 처리, 새 관계 {total_links}개 저장")
 
 
 if __name__ == "__main__":
