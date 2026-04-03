@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""GeoInvest 자동 업데이트 — 뉴스 수집 → AI 추출 → DB 저장.
+"""GeoInvest 자동 업데이트 — 뉴스 수집 + 키워드 매칭 (AI 호출 없음).
 
-cron으로 1시간마다 실행:
-    0 * * * * cd ~/stock && python3 scripts/update_geoinvest.py >> logs/geoinvest_update.log 2>&1
+cron으로 10분마다 실행:
+    */10 * * * * cd ~/stock && python3 scripts/update_geoinvest.py --skip-collect >> logs/geoinvest_update.log 2>&1
 
-수동 실행:
+뉴스 수집 포함 (15분 cron에서 이미 돌고 있으므로 보통 --skip-collect 사용):
     python scripts/update_geoinvest.py
-    python scripts/update_geoinvest.py --skip-collect   # 뉴스 수집 건너뛰기
-    python scripts/update_geoinvest.py --dry-run        # 추출만 하고 DB 저장 안 함
+
+엔티티/관계 추출은 Claude Code 세션에서 직접 수행 (API 비용 0원).
+이 스크립트는 뉴스 수집 + 이슈별 관련 뉴스 필터링 + 요약만 담당.
 """
 
 from __future__ import annotations
@@ -86,7 +87,6 @@ def collect_news() -> None:
                 cwd=str(_PROJECT_ROOT),
             )
             if result.returncode == 0:
-                # 수집 건수 추출
                 lines = result.stdout.strip().split("\n")
                 print(f"  [{market}] 수집 완료 ({len(lines)} lines output)")
             else:
@@ -129,110 +129,31 @@ def find_relevant_news(issue_name: str) -> list[dict]:
         ]
 
 
-def extract_and_update(issue_name: str, news: list[dict], dry_run: bool = False) -> None:
-    """뉴스에서 AI 추출 후 DB에 저장한다 (하이브리드 모드 — 로그로 검수 가능)."""
-    from src.core.claude_client import ClaudeClient
-    from src.core.models import ClaudeTask
+def _save_pending_news(issue_name: str, news: list[dict]) -> Path:
+    """관련 뉴스를 JSON으로 저장 — Claude Code 세션에서 분석용."""
+    pending_dir = _PROJECT_ROOT / "data" / "geoinvest" / "pending"
+    pending_dir.mkdir(parents=True, exist_ok=True)
 
-    # 벤치마크에서 검증된 프롬프트 재사용
-    from scripts.benchmark_geoinvest import EXTRACTION_SYSTEM_PROMPT, _parse_json_response
+    ts = datetime.now().strftime("%Y%m%d_%H%M")
+    slug = issue_name.replace(" ", "_").replace("/", "_")
+    path = pending_dir / f"{ts}_{slug}.json"
 
-    articles_text = "\n\n---\n\n".join(
-        f"Title: {item['title']}\nDate: {item['published_at']}\n"
-        f"Content: {(item.get('content') or item.get('summary', ''))[:3000]}"
-        for item in news[:15]
-    )
-
-    user_message = f"""Analyze these news articles related to '{issue_name}' and extract geopolitical entities and relationships.
-
-{articles_text}
-
-Extract all entities and relationships. Output as JSON."""
-
-    client = ClaudeClient()
-    response = client.generate(
-        task=ClaudeTask.DEEP_ANALYSIS,
-        user_message=user_message,
-        system_prompt=EXTRACTION_SYSTEM_PROMPT,
-    )
-
-    result = _parse_json_response(response.content)
-    entities = result.get("entities", [])
-    rels = result.get("relationships", [])
-
-    print(f"    추출 결과: {len(entities)}개 엔티티, {len(rels)}개 관계")
-
-    if dry_run:
-        print("    [DRY-RUN] DB 저장 건너뜀")
-        print(f"    엔티티: {[e.get('name') for e in entities[:10]]}")
-        return
-
-    # DB에 새 엔티티/관계 저장 (기존 ontology_io.py의 cmd_apply 로직 활용)
-    _save_extraction(entities, rels)
-
-
-def _save_extraction(entities: list[dict], relationships: list[dict]) -> None:
-    """추출 결과를 DB에 저장한다. 중복 체크 포함."""
-    from src.core.models import OntologyEntity, OntologyLink, Market
-    from src.storage import OntologyEntityRepository, OntologyLinkRepository
-
-    e_repo = OntologyEntityRepository()
-    l_repo = OntologyLinkRepository()
-
-    # 엔티티 저장 (dedup by name)
-    entity_id_map = {}
-    for ent_data in entities:
-        name = ent_data.get("name", "")
-        if not name:
-            continue
-        existing = e_repo.find_by_name(name)
-        if existing:
-            entity_id_map[name.lower()] = existing.id
-            continue
-
-        entity = OntologyEntity(
-            name=name,
-            entity_type=ent_data.get("entity_type", "country"),
-            market=Market.US,
-            aliases=ent_data.get("aliases", []),
-        )
-        e_repo.create(entity)
-        entity_id_map[name.lower()] = entity.id
-
-    # 관계 저장 (dedup)
-    new_links = 0
-    for rel_data in relationships:
-        src_name = rel_data.get("source_name", "").lower()
-        tgt_name = rel_data.get("target_name", "").lower()
-        src_id = entity_id_map.get(src_name)
-        tgt_id = entity_id_map.get(tgt_name)
-        if not src_id or not tgt_id:
-            continue
-
-        link_type = rel_data.get("relation_type", "impacts")
-        existing = l_repo.get_many(filters={
-            "source_type": "entity", "source_id": src_id,
-            "target_type": "entity", "target_id": tgt_id,
-            "link_type": link_type,
-        }, limit=1)
-        if existing:
-            continue
-
-        link = OntologyLink(
-            link_type=link_type,
-            source_type="entity", source_id=src_id,
-            target_type="entity", target_id=tgt_id,
-            confidence=rel_data.get("confidence", 0.7),
-            evidence=rel_data.get("evidence", ""),
-        )
-        try:
-            l_repo.create(link)
-            new_links += 1
-        except Exception:
-            pass  # 중복 unique constraint
-
-    if new_links > 0:
-        print(f"    → {new_links}개 새 관계 저장")
+    payload = {
+        "issue": issue_name,
+        "collected_at": _now(),
+        "news_count": len(news),
+        "articles": [
+            {
+                "title": n["title"],
+                "source": n["source"],
+                "published_at": n["published_at"],
+                "summary": (n.get("summary") or n.get("content", ""))[:500],
+            }
+            for n in news
+        ],
+    }
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return path
 
 
 def _now() -> str:
@@ -240,14 +161,14 @@ def _now() -> str:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="GeoInvest 자동 업데이트")
+    parser = argparse.ArgumentParser(description="GeoInvest 자동 업데이트 (뉴스 수집만)")
     parser.add_argument("--skip-collect", action="store_true", help="뉴스 수집 건너뛰기")
-    parser.add_argument("--dry-run", action="store_true", help="추출만 하고 DB 저장 안 함")
     parser.add_argument("--issue", type=str, default=None, help="특정 이슈만 업데이트")
+    parser.add_argument("--verbose", action="store_true", help="뉴스 제목 출력")
     args = parser.parse_args()
 
     print(f"\n{'='*50}")
-    print(f"GeoInvest 자동 업데이트 — {_now()}")
+    print(f"GeoInvest 뉴스 수집 — {_now()}")
     print(f"{'='*50}")
 
     # 1. 뉴스 수집
@@ -258,23 +179,30 @@ def main() -> None:
     from src.core.database import init_db
     init_db()
 
-    # 3. 이슈별 업데이트
+    # 3. 이슈별 관련 뉴스 필터링 + pending 저장
     issues = [args.issue] if args.issue else list(ISSUE_KEYWORDS.keys())
+    total_news = 0
+    saved_files = 0
+
     for issue_name in issues:
-        print(f"\n[{_now()}] 이슈 업데이트: {issue_name}")
         news = find_relevant_news(issue_name)
-        print(f"  관련 뉴스: {len(news)}개")
+        count = len(news)
+        total_news += count
 
         if not news:
-            print("  → 관련 뉴스 없음. 스킵.")
             continue
 
-        try:
-            extract_and_update(issue_name, news, dry_run=args.dry_run)
-        except Exception as e:
-            print(f"  → 추출 에러: {e}")
+        # 새 뉴스가 있으면 pending에 저장
+        path = _save_pending_news(issue_name, news)
+        saved_files += 1
+        print(f"  {issue_name}: {count}개 뉴스 → {path.name}")
 
-    print(f"\n[{_now()}] 업데이트 완료.")
+        if args.verbose:
+            for n in news[:5]:
+                print(f"    - {n['title'][:80]}")
+
+    print(f"\n[{_now()}] 완료 — {total_news}개 뉴스, {saved_files}개 이슈 저장")
+    print("  → 엔티티/관계 추출은 Claude Code 세션에서 수행")
 
 
 if __name__ == "__main__":
