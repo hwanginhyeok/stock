@@ -180,6 +180,23 @@ def main() -> None:
     else:
         print("[2.5] 크립토 생략 (--no-crypto)")
 
+    # ── Step 2.6: 크립토 생태계 기업 수집 ────────────────────────
+    ecosystem_data: dict = {}
+    if not args.no_crypto:
+        print("[2.6] 크립토 생태계 기업 수집 중 (COIN/HOOD/MSTR/SQ/BLK/BMNR)...")
+        try:
+            if crypto_collector is None:
+                crypto_collector = CryptoCollector()
+            ecosystem_data = crypto_collector.collect_ecosystem()
+            ok_count = sum(1 for v in ecosystem_data.values() if "error" not in v)
+            print(f"  OK  {ok_count}/{len(ecosystem_data)}개 기업 수집 완료")
+        except Exception as e:
+            logger.error("ecosystem_collection_failed", error=str(e))
+            print(f"  ✗ 생태계 기업 수집 실패: {e}")
+            failed_sections.append("Ecosystem")
+    else:
+        print("[2.6] 생태계 기업 생략 (--no-crypto)")
+
     # ── Step 2.7: 차트 생성 ────────────────────────────────────
     charts: dict = {}
     if not args.no_charts:
@@ -214,6 +231,7 @@ def main() -> None:
         html = publisher._render_html(
             fred_data, fx_data, datetime.now(),
             charts=charts, crypto_data=crypto_data or None,
+            ecosystem_data=ecosystem_data or None,
         )
         preview_path = OUTPUT_DIR / "email_preview.html"
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -252,6 +270,7 @@ def main() -> None:
         excel_path=excel_path,
         charts=charts if charts else None,
         crypto_data=crypto_data if crypto_data else None,
+        ecosystem_data=ecosystem_data if ecosystem_data else None,
         failed_sections=failed_sections,
     )
 

@@ -460,6 +460,48 @@
   </tr>
   {% endif %}
 
+  <!-- ── Section 6: 크립토 생태계 기업 ──────────────────────────── -->
+  {% if ecosystem %}
+  <tr>
+    <td style="background:linear-gradient(145deg,#0c1322,#0e1628);padding:20px 32px 24px;">
+      <div style="font-size:13px;font-weight:600;color:#94a3b8;letter-spacing:0.5px;margin-bottom:12px;">
+        § 6 &nbsp; CRYPTO ECOSYSTEM COMPANIES
+      </div>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+        <tr style="border-bottom:1px solid #1e293b;">
+          <td style="font-size:10px;color:#64748b;padding:4px 6px;font-weight:600;">TICKER</td>
+          <td align="right" style="font-size:10px;color:#64748b;padding:4px 6px;font-weight:600;">PRICE</td>
+          <td align="right" style="font-size:10px;color:#64748b;padding:4px 6px;font-weight:600;">1D</td>
+          <td align="right" style="font-size:10px;color:#64748b;padding:4px 6px;font-weight:600;">1W</td>
+          <td align="right" style="font-size:10px;color:#64748b;padding:4px 6px;font-weight:600;">1M</td>
+          <td align="right" style="font-size:10px;color:#64748b;padding:4px 6px;font-weight:600;">3M</td>
+        </tr>
+        {%- set eco_names = {"COIN":"Coinbase","HOOD":"Robinhood","MSTR":"MicroStrategy","SQ":"Block","BLK":"BlackRock","BMNR":"BitBrother"} -%}
+        {%- for ticker in ["COIN","HOOD","MSTR","SQ","BLK","BMNR"] -%}
+        {%- set d = ecosystem.get(ticker, {}) -%}
+        {%- if d and "error" not in d -%}
+        <tr style="border-bottom:1px solid #111827;">
+          <td style="font-size:11px;color:#e2e8f0;padding:6px;font-weight:600;">
+            {{ ticker }} <span style="font-size:9px;color:#64748b;font-weight:400;">{{ eco_names[ticker] }}</span>
+          </td>
+          <td align="right" style="font-size:11px;color:#e2e8f0;padding:6px;">${{ "%.2f"|format(d.price) }}</td>
+          {%- for pct_key in ["pct_1d","pct_1w","pct_1m","pct_3m"] -%}
+          {%- set val = d.get(pct_key) -%}
+          <td align="right" style="font-size:11px;padding:6px;
+            {%- if val is not none and val > 0 %}color:#34d399;{% elif val is not none and val < 0 %}color:#f87171;{% else %}color:#64748b;{% endif -%}
+          ">{{ "%.1f"|format(val) if val is not none else "—" }}%</td>
+          {%- endfor -%}
+        </tr>
+        {%- endif -%}
+        {%- endfor -%}
+      </table>
+      <div style="margin-top:8px;font-size:9px;color:#475569;">
+        Circle (CRCL)은 비상장 기업으로 주가 데이터 제외
+      </div>
+    </td>
+  </tr>
+  {% endif %}
+
   <!-- ── Footer ──────────────────────────────────────────────── -->
   <tr>
     <td style="background:#0a0f1a;border-radius:0 0 12px 12px;padding:16px 32px;

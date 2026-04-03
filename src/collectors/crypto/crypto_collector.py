@@ -58,6 +58,16 @@ CRYPTO_TICKERS: dict[str, str] = {
     "ETH": "ETH-USD",
 }
 
+# 크립토 생태계 기업 (1-23)
+ECOSYSTEM_TICKERS: dict[str, str] = {
+    "COIN": "COIN",     # Coinbase — 미국 최대 거래소
+    "HOOD": "HOOD",     # Robinhood — 리테일 크립토 진입점
+    "MSTR": "MSTR",     # MicroStrategy — BTC 트레저리 프록시
+    "SQ":   "SQ",       # Block (Square) — BTC 결제 + Cash App
+    "BLK":  "BLK",      # BlackRock — IBIT ETF 운용
+    "BMNR": "BMNR",     # Bit Brother — 블록체인 인프라
+}
+
 # DeFiLlama chain names as they appear in the API response
 _L2_CHAINS = ["Base", "Arbitrum", "Optimism", "zkSync Era"]
 
@@ -283,6 +293,28 @@ class CryptoCollector:
             btc_dominance=btc_dominance,
             fear_greed_value=fear_greed.get("value") if fear_greed else None,
         )
+        return result
+
+    def collect_ecosystem(self) -> dict[str, dict[str, Any]]:
+        """Fetch price data for crypto ecosystem companies.
+
+        Collects 1d/1w/1m/3m/1y returns for COIN, HOOD, MSTR, SQ, BLK, BMNR.
+        Circle (CRCL) is excluded — private company, no public price data.
+
+        Returns:
+            Dict mapping ticker → {price, pct_1d/1w/1m/3m/1y, date} or {error: str}.
+        """
+        logger.info("ecosystem_collect_start", tickers=list(ECOSYSTEM_TICKERS.keys()))
+        result: dict[str, dict[str, Any]] = {}
+        ok_count = 0
+
+        for symbol, ticker_sym in ECOSYSTEM_TICKERS.items():
+            entry = _build_price_entry(symbol, ticker_sym)
+            result[symbol] = entry
+            if "error" not in entry:
+                ok_count += 1
+
+        logger.info("ecosystem_collect_done", ok=ok_count, total=len(ECOSYSTEM_TICKERS))
         return result
 
     def collect_series(self, period: str = "1y") -> dict[str, pd.Series]:
