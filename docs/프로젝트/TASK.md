@@ -545,9 +545,11 @@ data/research/stocks/tesla/
 
 | # | 분야 | 작업 | 중요도 | 담당 | 발행일 | 상태 | 비고 |
 |---|------|------|--------|------|--------|------|------|
-| 1-23 | 시스템 | 크립토 생태계 기업 모니터링 이메일 섹션 추가 | P2 | AI | 2026-03-01 | **완료** | Section 6 추가 (COIN/HOOD/MSTR/SQ/BLK/BMNR). Circle 비상장 제외. dry-run 검증 필요 |
-| 1-24 | 시스템 | 시황 브리핑 cron 자동화 (오전 6시 + 저녁 6시) | P2 | AI | 2026-03-22 | 요청 | run_briefing.sh 경로 수정 + cron 등록. 텔레그램 봇 연결은 PM이 담당. 야간작업 예정 |
-
+| 1-32 | 시스템 | DB 기반 자동 뉴스 브리핑 글쓰기 — 수집된 뉴스+엔티티로 시황 요약 콘텐츠 자동 생성 | P2 | AI + 사용자 | 2026-04-04 | 예정 | Ollama로 뉴스 요약 → 이슈별 시황 글 자동 생성 → X/블로그 게시 연동 |
+| 1-33 | 시스템 | 뉴스 전달 시스템 — 이슈별 핵심 뉴스 자동 큐레이션 + 발송 | P2 | AI + 사용자 | 2026-04-04 | 예정 | 이메일/텔레그램으로 이슈별 Top 뉴스 + 번역 + 한줄 해석 전달 |
+| 1-34 | 시스템 | 엔티티 추출 프롬프트 개선 — 뉴스소스/가격범위 필터, entity_type 정확도 향상 | P2 | AI | 2026-04-04 | 예정 | gemma3:4b 한계 → 프롬프트 튜닝 또는 GPU 업그레이드 후 8B+ 전환 |
+| 1-23 | 시스템 | 크립토 생태계 기업 모니터링 이메일 섹션 추가 | P2 | AI | 2026-03-01 | **완료** | Section 6 추가. dry-run 검증 필요 |
+| 1-24 | 시스템 | 시황 브리핑 cron 자동화 (오전 6시 + 저녁 6시) | P2 | AI | 2026-03-22 | 요청 | run_briefing.sh 경로 수정 + cron 등록 |
 
 ### ── P2 선행 작업 대기 ──
 
@@ -607,6 +609,9 @@ data/research/stocks/tesla/
 | # | 분야 | 작업 | 완료일 | 비고 |
 |---|------|------|--------|------|
 | 1-31 | 시스템 | InvestOS US/KR 주식 탭 + 엔티티 추출 + 리뷰 파이프라인 | 2026-04-04 | GEO/US/KR 3탭, 재무/기술/시황 분류, Ollama 추출 cron, 엔티티 리뷰(타입교정368+병합55+중복159), 뉴스 한국어 번역, API 캐시(43초→0.01초) |
+| 1-35 | 시스템 | GeoInvest + 핫 토픽 감지 Ollama 전환 (Claude API 완전 제거) | 2026-04-04 | update_geoinvest.py + trend_detector.py → Ollama gemma3:4b. API 비용 0원 |
+| 1-36 | 시스템 | 뉴스 티커 한국어 번역 + 속도 조절 | 2026-04-04 | Ollama 일괄 번역 + 10분 캐시, 애니메이션 2.5배 감속 |
+| 1-37 | 시스템 | 타임라인 최신순 정렬 + entity_type 유효성 검사 | 2026-04-04 | reverse=True, 허용 범위 밖 타입 → institution fallback |
 | 1-23 | 시스템 | 크립토 생태계 기업 모니터링 이메일 Section 6 | 2026-04-03 | COIN/HOOD/MSTR/SQ/BLK/BMNR 주가+수익률. Circle 비상장 제외. `collect_ecosystem()` + 템플릿 Section 6 |
 | 2-13 | 코드 | naver HTML 한글 깨짐 수정 + briefing_server.py 정식화 | 2026-04-01 | fragment→full document wrapper 서버. `scripts/briefing_server.py` 생성. `python3 scripts/briefing_server.py` → localhost:8765 |
 | 2-12 | 코드 | 두 축 연결 체계 — Market Regime Engine + Investment Standup | 2026-03-31 | regime.py + config/regime_sizing.yaml + briefing/signal_builder 수정 + 테스트 34건. FRED/FX fallback 정상 |
