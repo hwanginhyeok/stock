@@ -131,7 +131,7 @@ def generate_post(category: str, news_data: list[dict]) -> tuple[str, list[dict]
         news_text += f"\n[{item['issue']}] ({atype_label})\n"
         for n in item["news"][:3]:
             news_text += f"  - {n['title']} ({n['source']})\n"
-            if n.get("url") and len(top_news) < 5:
+            if n.get("url") and len(top_news) < 1:
                 top_news.append({"title": n["title"], "url": n["url"], "issue": item["issue"]})
 
     prompt = PROMPT_TEMPLATE.format(
@@ -168,10 +168,8 @@ def send_telegram(text: str, category: str, top_news: list[dict] | None = None) 
     links_section = ""
     if top_news:
         links_section = f"\n\n📎 참고 뉴스 링크:\n"
-        for i, n in enumerate(top_news[:5], 1):
-            # 제목 50자 이내로
-            title = n["title"][:50] + ("..." if len(n["title"]) > 50 else "")
-            links_section += f"{i}. {title}\n{n['url']}\n"
+        n = top_news[0]
+        links_section += f"{n['url']}\n"
 
     message = header + text + footer + links_section
 
