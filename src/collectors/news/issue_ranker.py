@@ -7,9 +7,14 @@
 from __future__ import annotations
 
 import json
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+# 뉴스 카운트 캐시 (5분 TTL)
+_news_count_cache: dict[str, tuple[float, dict]] = {}
+_CACHE_TTL = 300  # 5분
 
 _RANK_HISTORY_FILE = (
     Path(__file__).resolve().parent.parent.parent.parent
@@ -120,7 +125,7 @@ def compute_rankings(issues: list[dict], news_counts: dict[str, dict]) -> list[I
 
 
 def count_news_by_issue(issue_keywords: dict[str, list[str]]) -> dict[str, dict]:
-    """이슈별 24h/48h 뉴스 건수를 카운트한다.
+    """이슈별 24h/48h 뉴스 건수를 카운트한다. 5분 캐시 적용.
 
     Args:
         issue_keywords: {"이슈명": ["keyword1", "keyword2", ...]}
@@ -128,7 +133,16 @@ def count_news_by_issue(issue_keywords: dict[str, list[str]]) -> dict[str, dict]
     Returns:
         {"이슈명": {"24h": N, "48h": N}}
     """
-    from sqlalchemy import func, or_, select
+    # 캐시 키 = 이슈 이름들의 정렬된 튜플
+    cache_key = ",".join(sorted(issue_keywords.keys()))
+    now_ts = time.time()
+
+    if cache_key in _news_count_cache:
+        cached_ts, cached_result = _news_count_cache[cache_key]
+        if now_ts - cached_ts < _CACHE_TTL:
+            return cached_result
+
+    from sqlalchemy import func, or_, select, text
 
     from src.core.database import NewsItemDB, get_session
 
@@ -139,6 +153,7 @@ def count_news_by_issue(issue_keywords: dict[str, list[str]]) -> dict[str, dict]
     results = {}
 
     with get_session() as session:
+        # 48시간 내 뉴스만 미리 필터 (전체 스캔 방지)
         for issue_name, keywords in issue_keywords.items():
             if not keywords:
                 results[issue_name] = {"24h": 0, "48h": 0}
@@ -146,25 +161,25 @@ def count_news_by_issue(issue_keywords: dict[str, list[str]]) -> dict[str, dict]
 
             conditions = [NewsItemDB.title.ilike(f"%{kw}%") for kw in keywords[:10]]
 
-            # 24h 카운트
+            # 단일 쿼리로 24h/48h 동시 카운트
             n24 = session.execute(
                 select(func.count()).select_from(NewsItemDB).where(
-                    or_(*conditions),
                     NewsItemDB.created_at >= t24,
+                    or_(*conditions),
                 )
             ).scalar() or 0
 
-            # 48h 카운트 (24-48h 구간)
             n48 = session.execute(
                 select(func.count()).select_from(NewsItemDB).where(
-                    or_(*conditions),
                     NewsItemDB.created_at >= t48,
                     NewsItemDB.created_at < t24,
+                    or_(*conditions),
                 )
             ).scalar() or 0
 
             results[issue_name] = {"24h": n24, "48h": n48}
 
+    _news_count_cache[cache_key] = (now_ts, results)
     return results
 
 

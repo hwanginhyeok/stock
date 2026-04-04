@@ -9,7 +9,7 @@
 body { background: var(--bg); color: var(--white); font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; font-size: 13px; }
 
 /* News Ticker */
-.news-ticker { background: #0f1923; border-bottom: 1px solid var(--border); display: flex; align-items: center; height: 32px; overflow: hidden; }
+.news-ticker { background: #0f1923; border-bottom: 1px solid var(--border); display: flex; align-items: center; height: 32px; overflow: hidden; position: relative; z-index: 50; }
 .ticker-label { background: var(--red); color: white; font-size: 10px; font-weight: 700; padding: 4px 10px; letter-spacing: 1px; flex-shrink: 0; animation: pulse-label 2s ease-in-out infinite; }
 @keyframes pulse-label { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
 .ticker-track { flex: 1; overflow: hidden; position: relative; }

@@ -22,7 +22,7 @@ let simulation = null;
 let allIssues = [];
 
 const ANALYSIS_LABELS = {
-  fundamental: '📊 재무', technical: '📈 기술', market: '🌐 시황',
+  fundamental: 'FUNDAMENTAL', technical: 'TECHNICAL', market: 'MARKET',
 };
 const ANALYSIS_COLORS = {
   fundamental: 'var(--green)', technical: 'var(--purple)', market: 'var(--orange)',
@@ -110,7 +110,21 @@ async function selectIssue(issueId) {
     const graphData = await graphRes.json();
     const timelineData = await timelineRes.json();
     renderEntityList(graphData.nodes);
-    renderGraph(graphData.nodes, graphData.edges);
+    if (graphData.nodes.length > 0) {
+      renderGraph(graphData.nodes, graphData.edges);
+    } else {
+      // 빈 그래프 — 이슈 설명 표시
+      const issue = allIssues.find(i => i.id === issueId);
+      const svg = document.getElementById('graph-svg');
+      svg.style.display = 'none';
+      document.getElementById('graph-legend').style.display = 'none';
+      document.getElementById('graph-empty').style.display = 'block';
+      document.getElementById('graph-empty').innerHTML = `<div style="text-align:center;padding:40px;">
+        <div style="font-size:18px;font-weight:700;margin-bottom:8px;">${issue ? issue.title : ''}</div>
+        <div style="color:var(--dim);font-size:12px;">${issue ? issue.description : ''}</div>
+        <div style="color:var(--dim);font-size:11px;margin-top:16px;">뉴스 ${issue ? issue.news_24h : 0}건 수집 중 — 엔티티 추출 대기</div>
+      </div>`;
+    }
     renderTimeline(timelineData);
     document.getElementById('updated-at').textContent = `갱신: ${new Date().toLocaleString('ko-KR')}`;
   } catch (e) { console.error('데이터 로딩 실패:', e); }
@@ -402,6 +416,12 @@ setInterval(loadNewsTicker, 5 * 60 * 1000);
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
+  // 탭 클릭 이벤트 바인딩
+  document.querySelectorAll('.nav-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      switchCategory(btn.dataset.category);
+    });
+  });
   loadIssues();
   loadNewsTicker();
 });

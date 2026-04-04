@@ -335,11 +335,39 @@ def get_issue_timeline(issue_id: str) -> list[dict]:
     return events
 
 
+import time as _time
+
+# 번역 캐시 (제목 → 번역, 10분 TTL)
+_translation_cache: dict[str, tuple[float, str]] = {}
+_TRANS_CACHE_TTL = 600
+
+
 def _translate_titles_ko(titles: list[str]) -> list[str]:
-    """Ollama로 영어 뉴스 제목을 한국어로 일괄 번역한다."""
+    """Ollama로 영어 뉴스 제목을 한국어로 일괄 번역한다. 캐시 적용."""
+    import re
+
     import requests as _req
 
-    numbered = "\n".join(f"{i+1}. {t}" for i, t in enumerate(titles))
+    now = _time.time()
+
+    # 캐시에 있는 것과 없는 것 분리
+    to_translate = []
+    to_translate_idx = []
+    result = list(titles)
+
+    for i, t in enumerate(titles):
+        if t in _translation_cache:
+            cached_ts, cached_val = _translation_cache[t]
+            if now - cached_ts < _TRANS_CACHE_TTL:
+                result[i] = cached_val
+                continue
+        to_translate.append(t)
+        to_translate_idx.append(i)
+
+    if not to_translate:
+        return result
+
+    numbered = "\n".join(f"{i+1}. {t}" for i, t in enumerate(to_translate))
     prompt = f"""Translate these news headlines to Korean. Keep it concise (news headline style).
 Return ONLY numbered lines, no explanation.
 
@@ -355,16 +383,15 @@ Return ONLY numbered lines, no explanation.
         lines = [ln.strip() for ln in text.strip().split("\n") if ln.strip()]
         translated = []
         for ln in lines:
-            # "1. 번역문" 형식 파싱
-            import re
             m = re.match(r"^\d+[\.\)]\s*(.+)", ln)
             translated.append(m.group(1) if m else ln)
-        # 개수 불일치 시 원문 반환
-        if len(translated) == len(titles):
-            return translated
+        if len(translated) == len(to_translate):
+            for idx, orig, trans in zip(to_translate_idx, to_translate, translated):
+                result[idx] = trans
+                _translation_cache[orig] = (now, trans)
     except Exception:
         pass
-    return titles
+    return result
 
 
 @app.get("/api/news/latest")
