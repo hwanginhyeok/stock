@@ -23,7 +23,8 @@
 | 4-14 | 아티클 | 일론머스크 생태계 상상콘텐츠 (웹 룰렛) | 사용자 | 요구사항 문서 완료 (`task/4-14_elon_ecosystem_roulette.md`) → 별도 프로젝트에서 구현 중 | 웹앱 구현 → 호스팅 → X 공유 |
 | 4-19 | 아티클 | 029 GEOPO: 세계에서 가장 좁은 곳의 전쟁 — 호르무즈, 이란, IMEC | 사용자 + AI | v1 초안 완료 (280줄, 시각화 3점 계획) | 퇴고 → v2 → 시각화 → 게시 |
 | 3-1 | 분석 | 지표 장단점·맹점 분석 + 해석 체계 고도화 | 사용자 + AI | Q6 완료, 해석 원칙 8개 정립 | Tech Score 역발상 편향 개선/해석 방향 논의 |
-| 1-30 | 시스템 | GeoInvest — 세상 이슈 관계도 통합 플랫폼 | 사용자 + AI | Step 2 구현 완료 + 9개 이슈 24개 엔티티 프로퍼티 보강 완료 (4/2 야간작업) | **[사용자] 웹 UI에서 엔티티 브리핑 확인** |
+| 1-30 | 시스템 | InvestOS — 투자 인텔리전스 통합 플랫폼 | 사용자 + AI | GEO/US/KR 3탭 완성. 엔티티 추출+리뷰 파이프라인 구축. 뉴스 한국어 번역. API 캐시 적용 (4/4) | 엔티티 품질 개선 (프롬프트 튜닝), 주식 이벤트/타임라인 데이터 축적 |
+| 1-31 | 시스템 | StockInvest — US/KR 주식 뉴스 엔티티 추출 | AI | 16개 이슈 × Ollama 추출 + cron 매시 실행. 엔티티 리뷰 매일 04시 자동 (4/4) | 추출 프롬프트 개선, 가격/뉴스소스 필터 추가 |
 
 ### 4-3 블록체인 생태계 #1: 비트코인 편
 
@@ -605,6 +606,7 @@ data/research/stocks/tesla/
 
 | # | 분야 | 작업 | 완료일 | 비고 |
 |---|------|------|--------|------|
+| 1-31 | 시스템 | InvestOS US/KR 주식 탭 + 엔티티 추출 + 리뷰 파이프라인 | 2026-04-04 | GEO/US/KR 3탭, 재무/기술/시황 분류, Ollama 추출 cron, 엔티티 리뷰(타입교정368+병합55+중복159), 뉴스 한국어 번역, API 캐시(43초→0.01초) |
 | 1-23 | 시스템 | 크립토 생태계 기업 모니터링 이메일 Section 6 | 2026-04-03 | COIN/HOOD/MSTR/SQ/BLK/BMNR 주가+수익률. Circle 비상장 제외. `collect_ecosystem()` + 템플릿 Section 6 |
 | 2-13 | 코드 | naver HTML 한글 깨짐 수정 + briefing_server.py 정식화 | 2026-04-01 | fragment→full document wrapper 서버. `scripts/briefing_server.py` 생성. `python3 scripts/briefing_server.py` → localhost:8765 |
 | 2-12 | 코드 | 두 축 연결 체계 — Market Regime Engine + Investment Standup | 2026-03-31 | regime.py + config/regime_sizing.yaml + briefing/signal_builder 수정 + 테스트 34건. FRED/FX fallback 정상 |
