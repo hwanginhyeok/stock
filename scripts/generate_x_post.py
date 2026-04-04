@@ -84,7 +84,7 @@ def get_top_news_by_category(category: str, limit: int = 15) -> list[dict]:
                     "analysis_type": getattr(issue, "analysis_type", ""),
                     "severity": issue.severity,
                     "news": [
-                        {"title": r.title, "source": r.source}
+                        {"title": r.title, "source": r.source, "url": r.url or ""}
                         for r in rows
                     ],
                 })
@@ -120,16 +120,19 @@ PROMPT_TEMPLATE = """당신은 한국인 투자자를 위한 시황 분석가입
 포스트만 출력하세요 (설명 불필요):"""
 
 
-def generate_post(category: str, news_data: list[dict]) -> str:
-    """Ollama로 X 포스트를 생성한다."""
+def generate_post(category: str, news_data: list[dict]) -> tuple[str, list[dict]]:
+    """Ollama로 X 포스트를 생성한다. (포스트, 참고뉴스) 반환."""
     # 뉴스 데이터를 텍스트로 변환
     news_text = ""
+    top_news: list[dict] = []  # URL 있는 주요 뉴스
     for item in news_data:
         atype = item.get("analysis_type", "")
         atype_label = {"fundamental": "재무", "technical": "기술", "market": "시황"}.get(atype, "")
         news_text += f"\n[{item['issue']}] ({atype_label})\n"
         for n in item["news"][:3]:
             news_text += f"  - {n['title']} ({n['source']})\n"
+            if n.get("url") and len(top_news) < 5:
+                top_news.append({"title": n["title"], "url": n["url"], "issue": item["issue"]})
 
     prompt = PROMPT_TEMPLATE.format(
         category_name=CATEGORY_NAMES.get(category, category),
@@ -143,23 +146,34 @@ def generate_post(category: str, news_data: list[dict]) -> str:
             timeout=120,
         )
         resp.raise_for_status()
-        return resp.json().get("response", "").strip()
+        post = resp.json().get("response", "").strip()
+        return post, top_news
     except Exception as e:
-        return f"[Ollama 에러: {e}]"
+        return f"[Ollama 에러: {e}]", top_news
 
 
 # ── 텔레그램 전송 ────────────────────────────────────────────────────────────
 
-def send_telegram(text: str, category: str) -> bool:
-    """텔레그램으로 포스트를 전송한다."""
+def send_telegram(text: str, category: str, top_news: list[dict] | None = None) -> bool:
+    """텔레그램으로 포스트 + 참고 링크를 전송한다."""
     if not TG_TOKEN or not TG_CHAT_ID:
         print("  ⚠ 텔레그램 토큰/챗ID 없음")
         return False
 
-    header = f"📝 X 포스트 초안 [{CATEGORY_NAMES.get(category, category)}]\n{'─' * 30}\n\n"
-    footer = f"\n\n{'─' * 30}\n✅ 복사해서 X에 붙여넣기하세요"
+    cat_name = CATEGORY_NAMES.get(category, category)
+    header = f"📝 X 포스트 초안 [{cat_name}]\n{'─' * 30}\n\n"
+    footer = f"\n\n{'─' * 30}\n✅ 위 내용 복사 → X 붙여넣기"
 
-    message = header + text + footer
+    # 참고 뉴스 링크
+    links_section = ""
+    if top_news:
+        links_section = f"\n\n📎 참고 뉴스 링크:\n"
+        for i, n in enumerate(top_news[:5], 1):
+            # 제목 50자 이내로
+            title = n["title"][:50] + ("..." if len(n["title"]) > 50 else "")
+            links_section += f"{i}. {title}\n{n['url']}\n"
+
+    message = header + text + footer + links_section
 
     # 4096자 제한
     if len(message) > 4000:
@@ -210,15 +224,17 @@ def main() -> None:
         total_news = sum(len(item["news"]) for item in news_data)
         print(f"    {len(news_data)}개 이슈, {total_news}개 뉴스 → Ollama 생성 중...")
 
-        post = generate_post(category, news_data)
+        post, top_news = generate_post(category, news_data)
         print(f"\n{'─'*40}")
         print(post)
+        if top_news:
+            print(f"\n📎 참고 링크 {len(top_news)}개")
         print(f"{'─'*40}")
 
         if args.dry_run:
             print("    [DRY-RUN] 텔레그램 전송 안 함")
         else:
-            ok = send_telegram(post, category)
+            ok = send_telegram(post, category, top_news)
             print(f"    텔레그램: {'✅ 전송 완료' if ok else '❌ 실패'}")
 
     print(f"\n완료")
