@@ -142,13 +142,12 @@ def create_issue_from_trend(
 ) -> dict | None:
     """감지된 트렌드에서 GeoIssue를 자동 생성한다.
 
-    Claude 1회 호출로 이슈 이름, 설명, 엔티티를 추출.
+    Ollama 로컬 LLM으로 이슈 이름, 설명, 엔티티를 추출 (API 비용 0원).
 
     Returns:
         생성된 이슈 정보 또는 None.
     """
-    from src.core.claude_client import ClaudeClient
-    from src.core.models import ClaudeTask
+    import requests as _req
 
     # 관련 뉴스 제목들
     sample = "\n".join(f"- {t}" for t in trend["sample_titles"][:10])
@@ -158,7 +157,7 @@ def create_issue_from_trend(
 
 {sample}
 
-Create a geopolitical/market issue entry. Output ONLY valid JSON:
+Create a geopolitical/market issue entry. Output ONLY valid JSON (no markdown, no explanation):
 {{
   "title": "<Korean issue name, max 20 chars>",
   "description": "<Korean 1-2 sentence description>",
@@ -170,23 +169,25 @@ Create a geopolitical/market issue entry. Output ONLY valid JSON:
 }}"""
 
     try:
-        client = ClaudeClient()
-        response = client.generate(
-            task=ClaudeTask.SUMMARY,  # 저렴한 모델 사용
-            user_message=prompt,
-            system_prompt="You create concise geopolitical issue definitions. Output only JSON.",
+        resp = _req.post(
+            "http://localhost:11434/api/generate",
+            json={"model": "gemma3:4b", "prompt": prompt, "stream": False},
+            timeout=60,
         )
+        resp.raise_for_status()
+        content = resp.json().get("response", "").strip()
 
-        # JSON 파싱
-        content = response.content.strip()
-        if content.startswith("```"):
-            lines = content.split("\n")
-            lines = [l for l in lines if not l.strip().startswith("```")]
-            content = "\n".join(lines)
+        # 마크다운 코드블록 제거
+        if "```" in content:
+            start = content.find("```")
+            first_nl = content.find("\n", start)
+            end = content.find("```", first_nl)
+            if end > first_nl:
+                content = content[first_nl:end].strip()
 
         return json.loads(content)
     except Exception as e:
-        print(f"    Claude 호출 실패: {e}")
+        print(f"    Ollama 호출 실패: {e}")
         return None
 
 
