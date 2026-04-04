@@ -23,6 +23,10 @@ body { background: var(--bg); color: var(--white); font-family: 'Pretendard', -a
 /* Nav */
 nav { position: sticky; top: 32px; z-index: 100; background: var(--card); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; height: 44px; }
 nav .logo { font-size: 15px; font-weight: bold; color: var(--blue); margin-right: 16px; }
+nav .nav-tabs { display: flex; gap: 2px; }
+nav .nav-tab { background: transparent; border: none; color: var(--dim); font-size: 12px; padding: 6px 14px; cursor: pointer; border-radius: 6px; font-family: inherit; transition: all 0.15s; }
+nav .nav-tab:hover { background: var(--border); color: var(--white); }
+nav .nav-tab.active { background: var(--blue); color: #fff; font-weight: 600; }
 nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
 
 /* 3-column layout */
@@ -55,6 +59,10 @@ nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
 .severity-dot.critical { background: var(--red); }
 .severity-dot.major { background: var(--orange); }
 .severity-dot.moderate { background: var(--yellow); }
+
+/* Analysis group title (stock tabs) */
+.analysis-group-title { font-size: 10px; font-weight: 700; padding: 6px 10px 4px; text-transform: uppercase; letter-spacing: 0.5px; border-top: 1px solid var(--border); margin-top: 6px; }
+.analysis-group-title:first-child { border-top: none; margin-top: 0; }
 
 /* Entity list */
 .entity-group { margin-bottom: 10px; }

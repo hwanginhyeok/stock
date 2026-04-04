@@ -454,12 +454,14 @@ class OntologyLink(BaseEntity, TimestampMixin):
 
 
 class GeoIssue(BaseEntity, TimestampMixin):
-    """A geopolitical issue that groups related events and entities."""
+    """A geopolitical/stock issue that groups related events and entities."""
 
     title: str
     description: str = ""
     severity: Severity = Severity.MODERATE
     status: GeoIssueStatus = GeoIssueStatus.ACTIVE
+    category: str = "geo"  # geo, stock_us, stock_kr
+    analysis_type: str = ""  # fundamental, technical, market (주식 전용)
     event_ids: list[str] = Field(default_factory=list)
     entity_ids: list[str] = Field(default_factory=list)
 

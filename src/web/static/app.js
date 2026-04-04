@@ -17,8 +17,30 @@ const CATEGORY_LABELS = { diplomatic: '외교', military: '군사', legal: '법�
 
 let currentIssueId = null;
 let currentView = 'graph';
+let currentCategory = 'geo';
 let simulation = null;
 let allIssues = [];
+
+const ANALYSIS_LABELS = {
+  fundamental: '📊 재무', technical: '📈 기술', market: '🌐 시황',
+};
+const ANALYSIS_COLORS = {
+  fundamental: 'var(--green)', technical: 'var(--purple)', market: 'var(--orange)',
+};
+
+// ============================================================
+// Category tabs
+// ============================================================
+
+function switchCategory(category) {
+  currentCategory = category;
+  document.querySelectorAll('.nav-tab').forEach(el => {
+    el.classList.toggle('active', el.dataset.category === category);
+  });
+  currentIssueId = null;
+  document.getElementById('briefing-content').innerHTML = '<div class="empty-state">노드를 클릭하면 브리핑이 표시됩니다</div>';
+  loadIssues();
+}
 
 // ============================================================
 // Issue list (left panel)
@@ -26,7 +48,7 @@ let allIssues = [];
 
 async function loadIssues() {
   try {
-    const res = await fetch('/api/issues');
+    const res = await fetch(`/api/issues?category=${currentCategory}`);
     allIssues = await res.json();
     renderIssueList(allIssues);
     if (allIssues.length > 0) selectIssue(allIssues[0].id);
@@ -35,20 +57,42 @@ async function loadIssues() {
 
 function renderIssueList(issues) {
   const container = document.getElementById('issue-list');
-  container.innerHTML = issues.map(issue => {
-    const sevClass = issue.severity || 'moderate';
-    const trend = issue.trend || '→';
-    const trendCls = trend === '↑' ? 'trend-up' : trend === '↓' ? 'trend-down' : 'trend-flat';
-    return `<div class="issue-item${issue.id === currentIssueId ? ' selected' : ''}" data-id="${issue.id}" onclick="selectIssue('${issue.id}')">
-      <span class="issue-rank">${issue.rank}</span>
-      <span class="severity-dot ${sevClass}"></span>
-      <div class="issue-info">
-        <div class="issue-name">${issue.title}</div>
-        <div class="issue-meta">${issue.news_24h || 0}건 뉴스 · ${issue.event_count} events</div>
-      </div>
-      <span class="issue-trend ${trendCls}">${trend}</span>
-    </div>`;
-  }).join('');
+
+  // 주식 탭: 분석유형별 그룹핑
+  if (currentCategory !== 'geo' && issues.some(i => i.analysis_type)) {
+    const groups = { market: [], fundamental: [], technical: [] };
+    issues.forEach(i => {
+      const t = i.analysis_type || 'market';
+      if (groups[t]) groups[t].push(i);
+    });
+    let html = '';
+    for (const [type, items] of Object.entries(groups)) {
+      if (items.length === 0) continue;
+      const label = ANALYSIS_LABELS[type] || type;
+      const color = ANALYSIS_COLORS[type] || 'var(--dim)';
+      html += `<div class="analysis-group-title" style="color:${color}">${label}</div>`;
+      html += items.map(issue => renderIssueItem(issue)).join('');
+    }
+    container.innerHTML = html;
+    return;
+  }
+
+  container.innerHTML = issues.map(issue => renderIssueItem(issue)).join('');
+}
+
+function renderIssueItem(issue) {
+  const sevClass = issue.severity || 'moderate';
+  const trend = issue.trend || '→';
+  const trendCls = trend === '↑' ? 'trend-up' : trend === '↓' ? 'trend-down' : 'trend-flat';
+  return `<div class="issue-item${issue.id === currentIssueId ? ' selected' : ''}" data-id="${issue.id}" onclick="selectIssue('${issue.id}')">
+    <span class="issue-rank">${issue.rank}</span>
+    <span class="severity-dot ${sevClass}"></span>
+    <div class="issue-info">
+      <div class="issue-name">${issue.title}</div>
+      <div class="issue-meta">${issue.news_24h || 0}건 뉴스 · ${issue.event_count} events</div>
+    </div>
+    <span class="issue-trend ${trendCls}">${trend}</span>
+  </div>`;
 }
 
 async function selectIssue(issueId) {

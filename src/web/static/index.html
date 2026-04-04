@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GeoInvest — 세상 이슈 관계도</title>
+<title>InvestOS — 투자 인텔리전스</title>
 <link rel="stylesheet" href="/static/style.css">
 <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
@@ -18,7 +18,12 @@
 </div>
 
 <nav>
-  <div class="logo">GeoInvest</div>
+  <div class="logo">InvestOS</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-category="geo" onclick="switchCategory('geo')">🌍 지정학</button>
+    <button class="nav-tab" data-category="stock_us" onclick="switchCategory('stock_us')">🇺🇸 US</button>
+    <button class="nav-tab" data-category="stock_kr" onclick="switchCategory('stock_kr')">🇰🇷 KR</button>
+  </div>
   <div class="updated" id="updated-at"></div>
 </nav>
 

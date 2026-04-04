@@ -407,6 +407,8 @@ class GeoIssueDB(Base):
     description: Mapped[str] = mapped_column(Text, default="")
     severity: Mapped[str] = mapped_column(String(20), default="moderate")
     status: Mapped[str] = mapped_column(String(20), default="active")
+    category: Mapped[str] = mapped_column(String(20), default="geo")
+    analysis_type: Mapped[str] = mapped_column(String(20), default="")
     event_ids: Mapped[str] = mapped_column(Text, default="[]")
     entity_ids: Mapped[str] = mapped_column(Text, default="[]")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
@@ -414,6 +416,7 @@ class GeoIssueDB(Base):
     __table_args__ = (
         Index("ix_geo_issue_status", "status"),
         Index("ix_geo_issue_severity", "severity"),
+        Index("ix_geo_issue_category", "category"),
     )
 
 
