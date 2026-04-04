@@ -197,7 +197,9 @@ def extract_entities(issue_name: str, news: list[dict]) -> dict[str, Any]:
     """Ollama로 뉴스에서 엔티티/관계를 추출한다."""
     articles_text = "\n---\n".join(
         f"Title: {item['title']}\nDate: {item['published_at']}"
-        for item in news[:5]  # RTX 2060 6GB — 5개로 제한 (타임아웃 방지)
+        + (f"\nSummary: {item['summary'][:200]}" if item.get("summary") else "")
+        + (f"\nContent: {item['content'][:300]}" if item.get("content") else "")
+        for item in news[:10]  # 10개로 확대 (summary/content 포함)
     )
 
     prompt = EXTRACTION_PROMPT.format(issue=issue_name, articles=articles_text)
@@ -211,7 +213,7 @@ def extract_entities(issue_name: str, news: list[dict]) -> dict[str, Any]:
 
 def _save_extraction(entities: list[dict], relationships: list[dict]) -> int:
     """추출 결과를 DB에 저장한다. 중복 체크 포함. 새 관계 수 반환."""
-    from src.core.models import Market, OntologyEntity, OntologyLink
+    from src.core.models import EntityType, Market, OntologyEntity, OntologyLink
     from src.storage import OntologyEntityRepository, OntologyLinkRepository
 
     e_repo = OntologyEntityRepository()
@@ -228,9 +230,16 @@ def _save_extraction(entities: list[dict], relationships: list[dict]) -> int:
             entity_id_map[name.lower()] = existing.id
             continue
 
+        # Ollama가 허용 범위 밖의 entity_type 반환 시 기본값 처리
+        raw_type = ent_data.get("entity_type", "country")
+        valid_types = {e.value for e in EntityType}
+        if raw_type not in valid_types:
+            print(f"  ⚠ 잘못된 entity_type '{raw_type}' → 'institution' 대체 ({name})")
+            raw_type = "institution"
+
         entity = OntologyEntity(
             name=name,
-            entity_type=ent_data.get("entity_type", "country"),
+            entity_type=raw_type,
             market=Market.US,
             aliases=ent_data.get("aliases", []),
         )

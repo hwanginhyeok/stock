@@ -320,23 +320,67 @@ def get_issue_timeline(issue_id: str) -> list[dict]:
                 "status": event.status,
             })
 
-    events.sort(key=lambda e: e["started_at"])
+    events.sort(key=lambda e: e["started_at"], reverse=True)
     return events
+
+
+def _translate_titles_ko(titles: list[str]) -> list[str]:
+    """Ollama로 영어 뉴스 제목을 한국어로 일괄 번역한다."""
+    import requests as _req
+
+    numbered = "\n".join(f"{i+1}. {t}" for i, t in enumerate(titles))
+    prompt = f"""Translate these news headlines to Korean. Keep it concise (news headline style).
+Return ONLY numbered lines, no explanation.
+
+{numbered}"""
+
+    try:
+        resp = _req.post(
+            "http://localhost:11434/api/generate",
+            json={"model": "gemma3:4b", "prompt": prompt, "stream": False},
+            timeout=30,
+        )
+        text = resp.json().get("response", "")
+        lines = [ln.strip() for ln in text.strip().split("\n") if ln.strip()]
+        translated = []
+        for ln in lines:
+            # "1. 번역문" 형식 파싱
+            import re
+            m = re.match(r"^\d+[\.\)]\s*(.+)", ln)
+            translated.append(m.group(1) if m else ln)
+        # 개수 불일치 시 원문 반환
+        if len(translated) == len(titles):
+            return translated
+    except Exception:
+        pass
+    return titles
 
 
 @app.get("/api/news/latest")
 def get_latest_news(limit: int = 30) -> list[dict]:
-    """최신 뉴스를 반환한다 (티커용). 이슈 분류 포함."""
+    """최신 뉴스를 반환한다 (티커용). 이슈 분류 + 한국어 번역 포함."""
     from src.collectors.news.classifier import classify_news
     from src.storage import NewsRepository
 
     repo = NewsRepository()
     items = repo.get_latest(limit=limit)
+
+    # 영어 제목만 모아서 일괄 번역
+    en_indices = []
+    en_titles = []
+    for i, item in enumerate(items):
+        if item.market != "kr" and any(c.isascii() and c.isalpha() for c in item.title[:20]):
+            en_indices.append(i)
+            en_titles.append(item.title)
+
+    translated = _translate_titles_ko(en_titles) if en_titles else []
+    title_map = dict(zip(en_indices, translated)) if translated else {}
+
     results = []
-    for item in items:
+    for i, item in enumerate(items):
         classified = classify_news(item.title, item.content or item.summary or "")
         results.append({
-            "title": item.title,
+            "title": title_map.get(i, item.title),
             "source": item.source,
             "market": item.market,
             "importance": item.importance,

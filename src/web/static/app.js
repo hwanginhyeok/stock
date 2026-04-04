@@ -347,7 +347,7 @@ async function loadNewsTicker() {
 
     track.innerHTML = `<span class="ticker-text">${items}<span class="news-dot">·</span>${items}</span>`;
     const text = track.querySelector('.ticker-text');
-    text.style.animationDuration = `${Math.max(120, news.length * 8)}s`;
+    text.style.animationDuration = `${Math.max(300, news.length * 20)}s`;
   } catch (e) { console.error('뉴스 티커 실패:', e); }
 }
 
