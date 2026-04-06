@@ -58,6 +58,17 @@
 
     <!-- Graph view -->
     <div id="graph-container" class="view-container active">
+      <div class="graph-toolbar" id="graph-toolbar" style="display:none;">
+        <label>엔티티 수:
+          <select id="graph-top-filter" onchange="reloadGraph()">
+            <option value="10" selected>Top 10</option>
+            <option value="20">Top 20</option>
+            <option value="50">Top 50</option>
+            <option value="0">전체</option>
+          </select>
+        </label>
+        <span id="graph-count-label" class="graph-count"></span>
+      </div>
       <div class="empty-state" id="graph-empty">이슈를 선택하면 관계도가 표시됩니다</div>
       <svg id="graph-svg" style="display:none;"></svg>
       <div class="graph-legend" style="display:none;" id="graph-legend">

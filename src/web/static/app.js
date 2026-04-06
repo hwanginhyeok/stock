@@ -12,8 +12,18 @@ const LINK_COLORS = {
   mentions: '#8b949e', triggers: '#8b949e', involves: '#8b949e',
   reacts_to: '#8b949e', supports: '#3fb950', sanctions: '#f85149',
 };
-const CATEGORY_ICONS = { diplomatic: '🕊️', military: '⚔️', legal: '⚖️', event: '📌' };
-const CATEGORY_LABELS = { diplomatic: '외교', military: '군사', legal: '법적', event: '기타' };
+const CATEGORY_ICONS = {
+  diplomatic: '🕊️', military: '⚔️', legal: '⚖️', event: '📌',
+  sanctions: '🚫', energy: '⚡', trade: '📦', territorial: '🗺️',
+  earnings: '💰', analyst: '📊', product: '🚀', regulatory: '📋',
+  sector: '🏭', deal: '🤝', macro: '🌐', war: '💥', policy: '📜',
+};
+const CATEGORY_LABELS = {
+  diplomatic: '외교', military: '군사', legal: '법적', event: '기타',
+  sanctions: '제재', energy: '에너지', trade: '무역', territorial: '영토',
+  earnings: '실적', analyst: '애널리스트', product: '제품', regulatory: '규제',
+  sector: '섹터', deal: '딜', macro: '매크로', war: '전쟁', policy: '정책',
+};
 
 let currentIssueId = null;
 let currentView = 'graph';
@@ -103,13 +113,21 @@ async function selectIssue(issueId) {
   });
   // 그래프 + 타임라인 로드
   try {
+    const topFilter = document.getElementById('graph-top-filter').value || '10';
     const [graphRes, timelineRes] = await Promise.all([
-      fetch(`/api/issues/${issueId}/graph`),
+      fetch(`/api/issues/${issueId}/graph?top=${topFilter}`),
       fetch(`/api/issues/${issueId}/timeline`),
     ]);
     const graphData = await graphRes.json();
     const timelineData = await timelineRes.json();
     renderEntityList(graphData.nodes);
+    // 필터 정보 표시
+    const toolbar = document.getElementById('graph-toolbar');
+    const countLabel = document.getElementById('graph-count-label');
+    if (graphData.total_entities) {
+      toolbar.style.display = 'flex';
+      countLabel.textContent = `${graphData.filtered}/${graphData.total_entities}개 표시`;
+    }
     if (graphData.nodes.length > 0) {
       renderGraph(graphData.nodes, graphData.edges);
     } else {
@@ -410,6 +428,11 @@ async function loadNewsTicker() {
 }
 
 setInterval(loadNewsTicker, 5 * 60 * 1000);
+
+// Top N 필터 변경 시 그래프만 다시 로드
+function reloadGraph() {
+  if (currentIssueId) selectIssue(currentIssueId);
+}
 
 // ============================================================
 // Init

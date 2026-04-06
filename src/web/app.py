@@ -124,8 +124,11 @@ def list_issues(category: str = "geo") -> list[dict]:
 
 
 @app.get("/api/issues/{issue_id}/graph")
-def get_issue_graph(issue_id: str) -> dict:
+def get_issue_graph(issue_id: str, top: int = 0) -> dict:
     """GeoIssue의 관계도 그래프 데이터 (nodes + edges)를 반환한다.
+
+    Args:
+        top: 0이면 전체, N이면 관계 수(degree) 상위 N개 엔티티만 반환.
 
     배치 쿼리로 N+1 방지: issue → events → links → entities 순.
     """
@@ -197,6 +200,23 @@ def get_issue_graph(issue_id: str) -> dict:
         })
         node_ids.add(event.id)
 
+    # Top N 필터: degree 기준 상위 엔티티만 남기기
+    if top > 0:
+        from collections import Counter
+        degree: Counter[str] = Counter()
+        for lk in all_links:
+            degree[lk.source_id] += 1
+            degree[lk.target_id] += 1
+        # 엔티티만 필터 (이벤트는 유지)
+        entity_ids_ranked = [
+            eid for eid, _ in degree.most_common()
+            if eid in issue_entity_ids
+        ][:top]
+        top_set = set(entity_ids_ranked)
+        # 엔티티 노드 필터
+        nodes = [n for n in nodes if n["type"] == "event" or n["id"] in top_set]
+        node_ids = {n["id"] for n in nodes}
+
     # 링크 중복 제거
     seen_edges = set()
     edges = []
@@ -223,6 +243,8 @@ def get_issue_graph(issue_id: str) -> dict:
         },
         "nodes": nodes,
         "edges": edges,
+        "total_entities": len(issue_entity_ids),
+        "filtered": top if top > 0 else len(issue_entity_ids),
     }
 
 
