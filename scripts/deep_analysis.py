@@ -50,6 +50,9 @@ ANALYSIS_PROMPT = """## Issue: {issue_title} ({category})
 ### Recent news (last {hours}h):
 {news_block}
 
+### Existing story threads for this issue:
+{story_threads_block}
+
 ### Current entities for this issue:
 {entity_block}
 
@@ -63,7 +66,8 @@ Analyze and respond with ONLY valid JSON (no markdown):
       "summary": "무슨 일이 벌어지고 있는가 + 왜 중요한가 + 다음에 볼 것 (한국어, 2~3문장)",
       "event_type": "{event_types}",
       "severity": "critical|major|moderate|minor",
-      "article_count": <int, how many articles this event covers>
+      "article_count": <int, how many articles this event covers>,
+      "story_thread": "스토리 스레드 키 (snake_case, 예: iran_hormuz_blockade)"
     }}
   ],
   "entity_feedback": {{
@@ -77,7 +81,8 @@ Rules:
 - If no meaningful news, return empty events array
 - Merge similar headlines into one event
 - Entity feedback: only flag obvious errors, don't over-correct
-- All text in Korean"""
+- All text in Korean
+- story_thread: reuse an existing thread key if this event continues that story. Create a new key only for genuinely new storylines. Use snake_case, concise (e.g. iran_hormuz_blockade, tesla_fsd_delay)"""
 
 
 # ── 유틸 ─────────────────────────────────────────────────────────────────────
@@ -164,6 +169,26 @@ def get_issue_entities(issue_id: str) -> list[dict]:
     return entities
 
 
+def get_existing_story_threads(issue_id: str) -> list[str]:
+    """이슈에 연결된 기존 이벤트의 story_thread 목록."""
+    from src.storage import GeoIssueRepository, OntologyEventRepository
+
+    issue_repo = GeoIssueRepository()
+    event_repo = OntologyEventRepository()
+
+    issue = issue_repo.get_by_id(issue_id)
+    if not issue or not issue.event_ids:
+        return []
+
+    threads: set[str] = set()
+    for eid in issue.event_ids:
+        event = event_repo.get_by_id(eid)
+        if event and event.story_thread:
+            threads.add(event.story_thread)
+
+    return sorted(threads)
+
+
 # ── Ollama 호출 ──────────────────────────────────────────────────────────────
 
 def _call_ollama(prompt: str) -> str | None:
@@ -194,6 +219,7 @@ def analyze_issue(
         return None
 
     entities = get_issue_entities(issue.id)
+    story_threads = get_existing_story_threads(issue.id)
 
     news_block = "\n".join(
         f"- [{n['source']}] {n['title']}" for n in news[:20]
@@ -201,6 +227,7 @@ def analyze_issue(
     entity_block = ", ".join(
         f"{e['name']}({e['type']})" for e in entities[:20]
     ) or "(없음)"
+    story_threads_block = ", ".join(story_threads) if story_threads else "(없음 — 새로 만들어주세요)"
 
     # 카테고리별 event_type 선택지
     cat = getattr(issue, "category", "geo")
@@ -216,6 +243,7 @@ def analyze_issue(
         news_block=news_block,
         entity_block=entity_block,
         event_types=event_types,
+        story_threads_block=story_threads_block,
     )
 
     raw = _call_ollama(prompt)
@@ -272,6 +300,7 @@ def save_events(issue: Any, events_data: list[dict]) -> int:
             severity=severity,
             market=market,
             article_count=ev_data.get("article_count", 1),
+            story_thread=ev_data.get("story_thread", ""),
         )
 
         event_repo.create(event)

@@ -360,6 +360,7 @@ class OntologyEventDB(Base):
     last_article_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
     status: Mapped[str] = mapped_column(String(20), default="developing")
     article_count: Mapped[int] = mapped_column(Integer, default=0)
+    story_thread: Mapped[str] = mapped_column(String(200), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
     __table_args__ = (
@@ -369,6 +370,7 @@ class OntologyEventDB(Base):
         Index("ix_ont_event_status", "status"),
         Index("ix_ont_event_started", "started_at"),
         Index("ix_ont_event_last_article", "last_article_at"),
+        Index("ix_ont_event_story_thread", "story_thread"),
     )
 
 

@@ -450,6 +450,7 @@ class OntologyEvent(BaseEntity, TimestampMixin):
     last_article_at: datetime = Field(default_factory=_utcnow)
     status: EventStatus = EventStatus.DEVELOPING
     article_count: int = 0
+    story_thread: str = ""  # 같은 스토리라인 묶기 (예: "이란_호르무즈_봉쇄")
 
 
 class OntologyLink(BaseEntity, TimestampMixin):
