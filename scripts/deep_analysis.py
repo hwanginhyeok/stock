@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""심층 뉴스 분석 — 하루 2회 (브리핑 전) Claude Sonnet으로 실행.
+"""심층 뉴스 분석 — 하루 2회 (브리핑 전) Ollama 로컬 LLM으로 실행.
 
 12시간치 뉴스를 이슈별로 묶어서:
   1. 이벤트 생성 (무슨 일이 벌어지고 있는가)
   2. 엔티티 피드백 (잘못된 엔티티 교정/삭제 제안)
 
 cron:
-    30 5 * * *  cd ~/stock && python3 scripts/deep_analysis.py >> logs/deep_analysis.log 2>&1
-    30 17 * * * cd ~/stock && python3 scripts/deep_analysis.py >> logs/deep_analysis.log 2>&1
+    30 20 * * * cd ~/stock && python3 scripts/deep_analysis.py >> logs/deep_analysis.log 2>&1
+    30 8 * * *  cd ~/stock && python3 scripts/deep_analysis.py >> logs/deep_analysis.log 2>&1
 
 수동:
     python3 scripts/deep_analysis.py
@@ -25,8 +25,15 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+import requests as http_requests
+
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT))
+
+# ── Ollama 설정 ──────────────────────────────────────────────────────────────
+OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_MODEL = "gemma3:4b"
+OLLAMA_TIMEOUT = 180  # 심층분석은 길어질 수 있음
 
 
 # ── 프롬프트 ────────────────────────────────────────────────────────────────
@@ -157,17 +164,31 @@ def get_issue_entities(issue_id: str) -> list[dict]:
     return entities
 
 
+# ── Ollama 호출 ──────────────────────────────────────────────────────────────
+
+def _call_ollama(prompt: str) -> str | None:
+    """Ollama API 호출."""
+    try:
+        resp = http_requests.post(
+            OLLAMA_URL,
+            json={"model": OLLAMA_MODEL, "prompt": prompt, "stream": False},
+            timeout=OLLAMA_TIMEOUT,
+        )
+        resp.raise_for_status()
+        return resp.json().get("response", "")
+    except Exception as e:
+        print(f"    Ollama 호출 실패: {e}")
+        return None
+
+
 # ── 분석 실행 ────────────────────────────────────────────────────────────────
 
 def analyze_issue(
-    client: Any,
     issue: Any,
     keywords: list[str],
     hours: int,
 ) -> dict[str, Any] | None:
-    """이슈 하나에 대해 Claude 심층분석 실행."""
-    from src.core.models import ClaudeTask
-
+    """이슈 하나에 대해 Ollama 심층분석 실행."""
     news = get_recent_news(issue.title, keywords, hours)
     if not news:
         return None
@@ -175,13 +196,13 @@ def analyze_issue(
     entities = get_issue_entities(issue.id)
 
     news_block = "\n".join(
-        f"- [{n['source']}] {n['title']}" for n in news[:30]
+        f"- [{n['source']}] {n['title']}" for n in news[:20]
     )
     entity_block = ", ".join(
-        f"{e['name']}({e['type']})" for e in entities[:30]
+        f"{e['name']}({e['type']})" for e in entities[:20]
     ) or "(없음)"
 
-    prompt = ANALYSIS_PROMPT.format(
+    prompt = SYSTEM_PROMPT + "\n\n" + ANALYSIS_PROMPT.format(
         issue_title=issue.title,
         category=getattr(issue, "category", ""),
         hours=hours,
@@ -189,18 +210,14 @@ def analyze_issue(
         entity_block=entity_block,
     )
 
-    response = client.generate(
-        ClaudeTask.GENERAL,
-        prompt,
-        system_prompt=SYSTEM_PROMPT,
-    )
+    raw = _call_ollama(prompt)
+    if not raw:
+        return None
 
-    result = _parse_json(response.content)
+    result = _parse_json(raw)
     result["_meta"] = {
         "news_count": len(news),
         "entity_count": len(entities),
-        "input_tokens": response.input_tokens,
-        "output_tokens": response.output_tokens,
     }
     return result
 
@@ -319,7 +336,7 @@ def main() -> None:
     args = parser.parse_args()
 
     print(f"\n{'='*60}")
-    print(f"심층 뉴스 분석 — {_now()} (Claude Sonnet)")
+    print(f"심층 뉴스 분석 — {_now()} (Ollama {OLLAMA_MODEL})")
     print(f"범위: 최근 {args.hours}시간 | {'DRY-RUN' if args.dry_run else 'LIVE'}")
     print(f"{'='*60}")
 
@@ -327,8 +344,13 @@ def main() -> None:
     from src.core.database import init_db
     init_db()
 
-    from src.core.claude_client import ClaudeClient
-    client = ClaudeClient()
+    # Ollama 접속 확인
+    try:
+        r = http_requests.get("http://localhost:11434/api/tags", timeout=3)
+        r.raise_for_status()
+    except Exception:
+        print("  ✗ Ollama 미실행 — ollama serve 필요")
+        sys.exit(1)
 
     from src.storage import GeoIssueRepository
     issue_repo = GeoIssueRepository()
@@ -341,14 +363,13 @@ def main() -> None:
     total_events = 0
     total_deleted = 0
     total_retyped = 0
-    total_tokens = {"input": 0, "output": 0}
 
     for issue in all_issues:
         keywords = all_keywords.get(issue.title, [])
         if not keywords:
             continue
 
-        result = analyze_issue(client, issue, keywords, args.hours)
+        result = analyze_issue(issue, keywords, args.hours)
         if not result:
             print(f"\n  {issue.title}: 뉴스 없음 — 스킵")
             continue
@@ -359,7 +380,6 @@ def main() -> None:
 
         print(f"\n  {issue.title} ({getattr(issue, 'category', '')})")
         print(f"    뉴스: {meta.get('news_count', 0)}건 → 이벤트: {len(events)}개")
-        print(f"    토큰: in={meta.get('input_tokens', 0)}, out={meta.get('output_tokens', 0)}")
 
         for ev in events:
             sev = ev.get("severity", "?")
@@ -384,17 +404,11 @@ def main() -> None:
                 total_deleted += stats["deleted"]
                 total_retyped += stats["retyped"]
 
-        total_tokens["input"] += meta.get("input_tokens", 0)
-        total_tokens["output"] += meta.get("output_tokens", 0)
-
     # 요약
     print(f"\n{'='*60}")
     print(f"완료 — {_now()}")
     print(f"  이벤트: {total_events}개 생성")
     print(f"  엔티티: {total_deleted}개 삭제, {total_retyped}개 타입 교정")
-    print(f"  토큰: input={total_tokens['input']:,}, output={total_tokens['output']:,}")
-    cost = (total_tokens["input"] * 3 + total_tokens["output"] * 15) / 1_000_000
-    print(f"  예상 비용: ~${cost:.4f}")
     print(f"{'='*60}")
 
 
