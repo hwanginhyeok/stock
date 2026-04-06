@@ -282,6 +282,10 @@ class RSSNewsCollector(BaseNewsCollector):
         if not title:
             return None
 
+        # title 끝의 " - Source Name" 접미사 제거
+        # Google News RSS: "헤드라인 - CNBC", "헤드라인 - marketplace.org"
+        title = re.sub(r"\s+[-–—]\s+[A-Za-z가-힣][A-Za-z가-힣0-9\s.·]+$", "", title).strip()
+
         # Extract content / summary — use best available text
         content = ""
         if hasattr(entry, "content") and entry.content:

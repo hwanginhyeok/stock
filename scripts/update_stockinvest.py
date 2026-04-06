@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -28,6 +29,30 @@ sys.path.insert(0, str(_PROJECT_ROOT))
 OLLAMA_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = "gemma3:4b"
 OLLAMA_TIMEOUT = 120
+
+# 엔티티 노이즈 필터 — 도메인, 무의미 단어, 숫자만 있�� 값
+_DOMAIN_RE = re.compile(
+    r"^[\w.-]+\.(com|org|net|io|gov|edu|co\.kr|co\.jp|co\.uk|info|biz|me|ai|kr|jp|az)$",
+    re.IGNORECASE,
+)
+_NOISE_NAMES = {
+    "metadata", "capabilities", "endpoints", "operational details",
+    "war", "conflict", "news", "report", "article", "source",
+    "the post", "the report",
+}
+
+def _is_noise_entity(name: str) -> bool:
+    """도메인, 숫자, 노이즈 단���를 걸러낸다."""
+    if not name or len(name) < 2:
+        return True
+    if _DOMAIN_RE.match(name):
+        return True
+    if name.lower().strip() in _NOISE_NAMES:
+        return True
+    cleaned = re.sub(r"[\d$€₩¥%,.~\-–—주년월일개건조억만천]", "", name).strip()
+    if not cleaned:
+        return True
+    return False
 
 EXTRACTION_PROMPT = """You are a financial analyst. Extract entities and relationships from these news articles about '{issue}'.
 
@@ -153,14 +178,18 @@ def _save_extraction(
     l_repo = OntologyLinkRepository()
     issue_repo = GeoIssueRepository()
 
-    # 엔티티 저장
+    # 엔티티 저장 (노이즈 필터 적용)
     entity_id_map: dict[str, str] = {}
     new_entity_ids: list[str] = []
     valid_types = {e.value for e in EntityType}
+    filtered_count = 0
 
     for ent_data in entities:
         name = ent_data.get("name", "")
         if not name:
+            continue
+        if _is_noise_entity(name):
+            filtered_count += 1
             continue
         existing = e_repo.find_by_name(name)
         if existing:
@@ -238,6 +267,9 @@ def _save_extraction(
             new_links += 1
         except Exception:
             pass
+
+    if filtered_count:
+        print(f"    ⚡ 노이즈 필터: {filtered_count}개 엔티티 제외")
 
     return new_links
 

@@ -4,6 +4,7 @@
 실행:
     python3 scripts/review_entities.py
     python3 scripts/review_entities.py --dry-run     # 변경 없이 리포트만
+    python3 scripts/review_entities.py --phase noise  # 도메인/노이즈 삭제만
     python3 scripts/review_entities.py --phase type   # 타입 교정만
     python3 scripts/review_entities.py --phase merge   # 병합만
     python3 scripts/review_entities.py --phase dedup   # 관계 중복 제거만
@@ -65,6 +66,71 @@ def _parse_json(text: str) -> Any:
             except json.JSONDecodeError:
                 continue
         return {}
+
+
+# ============================================================
+# Phase 0: 도메인/노이즈 엔티티 삭제
+# ============================================================
+
+_DOMAIN_RE = re.compile(
+    r"^[\w.-]+\.(com|org|net|io|gov|edu|co\.kr|co\.jp|co\.uk|info|biz|me|ai|kr|jp|az)$",
+    re.IGNORECASE,
+)
+_NOISE_NAMES = {
+    "metadata", "capabilities", "endpoints", "operational details",
+    "war", "conflict", "news", "report", "article", "source",
+    "the post", "the report",
+}
+
+
+def _is_noise_entity(name: str) -> bool:
+    """도메인, 숫자, 노이즈 단어를 걸러낸다."""
+    if not name or len(name) < 2:
+        return True
+    if _DOMAIN_RE.match(name):
+        return True
+    if name.lower().strip() in _NOISE_NAMES:
+        return True
+    cleaned = re.sub(r"[\d$€₩¥%,.~\-–��주년월일개건조억만천]", "", name).strip()
+    if not cleaned:
+        return True
+    return False
+
+
+def phase_noise_cleanup(dry_run: bool = False) -> dict:
+    """도메인, 숫���, 노이즈 단어 엔티티를 삭제한다."""
+    from src.storage import OntologyEntityRepository, OntologyLinkRepository
+
+    e_repo = OntologyEntityRepository()
+    l_repo = OntologyLinkRepository()
+
+    all_entities = e_repo.get_many(limit=3000)
+    print(f"\n{'='*60}")
+    print(f"Phase 0: 도메인/노이��� 엔티티 삭제 — {len(all_entities)}개 검토")
+    print(f"{'='*60}")
+
+    noise_entities = [e for e in all_entities if _is_noise_entity(e.name)]
+    removed = []
+
+    for entity in noise_entities:
+        removed.append({"id": entity.id, "name": entity.name, "type": entity.entity_type})
+        if not dry_run:
+            # 연결된 관계 먼저 삭제
+            links_from = l_repo.get_many(filters={"source_id": entity.id}, limit=500)
+            links_to = l_repo.get_many(filters={"target_id": entity.id}, limit=500)
+            for lk in links_from + links_to:
+                l_repo.delete(lk.id)
+            e_repo.delete(entity.id)
+
+    if removed:
+        print(f"  삭제 대상 (상위 20개):")
+        for r in removed[:20]:
+            print(f"    {r['name']:40s} ({r['type']})")
+        if len(removed) > 20:
+            print(f"    ... 외 {len(removed) - 20}개")
+
+    print(f"\n  결과: {len(removed)}개 노이��� 엔티티 삭제")
+    return {"total": len(all_entities), "removed": len(removed), "removed_list": removed}
 
 
 # ============================================================
@@ -412,6 +478,7 @@ def generate_report(results: dict, dry_run: bool) -> str:
 
 | 항목 | 결과 |
 |------|------|
+| Phase 0: 노이즈 삭제 | {results['noise']['total']}개 검토 → {results['noise']['removed']}개 삭제 |
 | Phase 1: 타입 교정 | {results['type']['reviewed']}개 검토 → {results['type']['corrected']}개 교정 |
 | Phase 2: 별칭 병합 | {results['merge']['candidates']}개 후보 → {results['merge']['merged']}개 병합 |
 | Phase 3: 관계 중복 제거 | {results['dedup']['total']}개 중 {results['dedup']['duplicates_removed']}개 제거 |
@@ -471,15 +538,18 @@ def main() -> None:
     from src.core.database import init_db
     init_db()
 
-    phases = args.phase.split(",") if args.phase else ["type", "merge", "dedup", "cross"]
+    phases = args.phase.split(",") if args.phase else ["noise", "type", "merge", "dedup", "cross"]
 
     results = {
+        "noise": {"total": 0, "removed": 0, "removed_list": []},
         "type": {"reviewed": 0, "corrected": 0, "corrections": []},
         "merge": {"candidates": 0, "merged": 0, "log": []},
         "dedup": {"total": 0, "duplicates_removed": 0},
         "cross": {"shared_entities": 0, "issue_updates": 0},
     }
 
+    if "noise" in phases:
+        results["noise"] = phase_noise_cleanup(dry_run=args.dry_run)
     if "type" in phases:
         results["type"] = phase_type_correction(dry_run=args.dry_run)
     if "merge" in phases:
