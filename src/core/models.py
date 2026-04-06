@@ -117,18 +117,31 @@ class EntityType(StrEnum):
 
 
 class EventType(StrEnum):
-    """Ontology event type."""
+    """Ontology event type.
 
-    WAR = "war"
-    POLICY = "policy"
-    EARNINGS = "earnings"
-    PRODUCT = "product"
-    REGULATION = "regulation"
+    Geo: diplomatic, military, sanctions, energy, trade, territorial, war, policy
+    Stock: earnings, analyst, product, regulatory, macro, deal, sector
+    """
+
+    # 공통
     MACRO = "macro"
     DEAL = "deal"
+    POLICY = "policy"
+    # Geo 전용
+    WAR = "war"
     MILITARY = "military"
     DIPLOMATIC = "diplomatic"
     SANCTIONS = "sanctions"
+    ENERGY = "energy"
+    TRADE = "trade"
+    TERRITORIAL = "territorial"
+    # Stock 전용
+    EARNINGS = "earnings"
+    ANALYST = "analyst"
+    PRODUCT = "product"
+    REGULATORY = "regulatory"
+    SECTOR = "sector"
+    REGULATION = "regulation"  # 하위호환
 
 
 class Severity(StrEnum):

@@ -61,7 +61,7 @@ Analyze and respond with ONLY valid JSON (no markdown):
     {{
       "title": "이벤트 제목 (한국어, 20자 이내)",
       "summary": "무슨 일이 벌어지고 있는가 + 왜 중요한가 + 다음에 볼 것 (한국어, 2~3문장)",
-      "event_type": "war|policy|earnings|product|regulation|macro|deal|military",
+      "event_type": "{event_types}",
       "severity": "critical|major|moderate|minor",
       "article_count": <int, how many articles this event covers>
     }}
@@ -202,12 +202,20 @@ def analyze_issue(
         f"{e['name']}({e['type']})" for e in entities[:20]
     ) or "(없음)"
 
+    # 카테고리별 event_type 선택지
+    cat = getattr(issue, "category", "geo")
+    if "stock" in cat:
+        event_types = "earnings|analyst|product|regulatory|macro|deal|sector"
+    else:
+        event_types = "diplomatic|military|sanctions|energy|trade|territorial|war|policy|macro"
+
     prompt = SYSTEM_PROMPT + "\n\n" + ANALYSIS_PROMPT.format(
         issue_title=issue.title,
-        category=getattr(issue, "category", ""),
+        category=cat,
         hours=hours,
         news_block=news_block,
         entity_block=entity_block,
+        event_types=event_types,
     )
 
     raw = _call_ollama(prompt)
@@ -232,7 +240,11 @@ def save_events(issue: Any, events_data: list[dict]) -> int:
     event_repo = OntologyEventRepository()
     issue_repo = GeoIssueRepository()
 
-    valid_event_types = {"war", "policy", "earnings", "product", "regulation", "macro", "deal", "military"}
+    valid_event_types = {
+        "war", "policy", "earnings", "product", "regulation", "macro", "deal",
+        "military", "diplomatic", "sanctions", "energy", "trade", "territorial",
+        "analyst", "regulatory", "sector",
+    }
     valid_severities = {"critical", "major", "moderate", "minor"}
 
     new_event_ids = []
