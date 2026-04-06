@@ -249,17 +249,18 @@ def save_events(issue: Any, events_data: list[dict]) -> int:
         if severity not in valid_severities:
             severity = "moderate"
 
+        # market: stock_kr→korea, stock_us→us, geo→us
+        cat = getattr(issue, "category", "geo")
+        market = "korea" if "kr" in cat else "us"
+
         event = OntologyEvent(
             title=title,
             summary=ev_data.get("summary", ""),
             event_type=event_type,
             severity=severity,
-            market=getattr(issue, "category", "geo").replace("stock_", "") or "us",
+            market=market,
             article_count=ev_data.get("article_count", 1),
         )
-        # market 보정
-        if event.market not in ("us", "korea"):
-            event.market = "us" if "us" in getattr(issue, "category", "") else "korea"
 
         event_repo.create(event)
         new_event_ids.append(event.id)
