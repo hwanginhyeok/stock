@@ -175,3 +175,15 @@ nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
   border-radius: 4px; padding: 2px 6px; font-size: 12px;
 }
 .graph-count { color: var(--dim); font-size: 11px; }
+
+/* 타임라인 스레드 그룹 */
+.tl-header { font-size: 13px; color: var(--dim); padding: 8px 0 12px; font-weight: 600; }
+.tl-thread { margin-bottom: 20px; }
+.tl-thread-title {
+  font-size: 13px; font-weight: 700; color: var(--white); text-transform: capitalize;
+  padding: 6px 10px; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; margin-bottom: 8px;
+}
+.tl-thread-count {
+  font-size: 11px; font-weight: 400; color: var(--dim); margin-left: 6px;
+}

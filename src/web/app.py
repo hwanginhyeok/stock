@@ -316,8 +316,8 @@ def get_entity_briefing(entity_id: str) -> dict:
 
 
 @app.get("/api/issues/{issue_id}/timeline")
-def get_issue_timeline(issue_id: str) -> list[dict]:
-    """GeoIssue의 이벤트를 시간순으로 반환한다."""
+def get_issue_timeline(issue_id: str) -> dict:
+    """GeoIssue의 이벤트를 story_thread별로 그룹핑하여 반환한다."""
     issue_repo = GeoIssueRepository()
     issue = issue_repo.get_by_id(issue_id)
     if not issue:
@@ -328,33 +328,36 @@ def get_issue_timeline(issue_id: str) -> list[dict]:
     for eid in issue.event_ids:
         event = event_repo.get_by_id(eid)
         if event:
-            # 카테고리 추론 (제목 prefix)
-            title = event.title
-            if title.startswith("외교"):
-                category = "diplomatic"
-                title = title.replace("외교 | ", "")
-            elif title.startswith("군사"):
-                category = "military"
-                title = title.replace("군사 | ", "")
-            elif title.startswith("법적"):
-                category = "legal"
-                title = title.replace("법적 | ", "")
-            else:
-                category = "event"
-
             events.append({
                 "id": event.id,
-                "title": title,
+                "title": event.title,
                 "summary": event.summary,
-                "category": category,
+                "category": event.event_type,
                 "severity": event.severity,
                 "event_type": event.event_type,
                 "started_at": str(event.started_at),
                 "status": event.status,
+                "story_thread": getattr(event, "story_thread", "") or "",
             })
 
     events.sort(key=lambda e: e["started_at"], reverse=True)
-    return events
+
+    # story_thread별 그룹핑
+    threads: dict[str, list] = {}
+    ungrouped = []
+    for ev in events:
+        thread = ev["story_thread"]
+        if thread:
+            threads.setdefault(thread, []).append(ev)
+        else:
+            ungrouped.append(ev)
+
+    return {
+        "events": events,
+        "threads": threads,
+        "ungrouped": ungrouped,
+        "total": len(events),
+    }
 
 
 import time as _time

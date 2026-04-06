@@ -278,39 +278,67 @@ function renderGraph(nodes, edges) {
 // Timeline
 // ============================================================
 
-function renderTimeline(events) {
+function renderTimeline(data) {
   const container = document.getElementById('timeline-scroll');
-  if (!events || events.length === 0) {
+  // 하위호환: 배열이면 기존 포맷, 객체면 새 포맷
+  const threads = data.threads || {};
+  const ungrouped = data.ungrouped || (Array.isArray(data) ? data : []);
+  const total = data.total || ungrouped.length;
+
+  if (total === 0) {
     container.innerHTML = '<div class="empty-state">이벤트 없음</div>';
     return;
   }
 
-  let html = `<div class="tl-legend">
-    <div class="tl-legend-item"><div class="tl-legend-dot" style="background:var(--blue);"></div> 외교</div>
-    <div class="tl-legend-item"><div class="tl-legend-dot" style="background:var(--red);"></div> 군사</div>
-    <div class="tl-legend-item"><div class="tl-legend-dot" style="background:var(--purple);"></div> 법적</div>
-    <div class="tl-legend-item"><div class="tl-legend-dot" style="background:var(--dim);"></div> 기타</div>
-  </div>`;
+  const SEV_COLORS = {
+    critical: 'var(--red)', major: 'var(--orange)',
+    moderate: 'var(--blue)', minor: 'var(--dim)',
+  };
 
-  html += '<div class="timeline-line">';
-  events.forEach(ev => {
-    const date = ev.started_at ? new Date(ev.started_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', year: 'numeric' }) : '?';
-    const cat = ev.category || 'event';
+  function renderEvent(ev) {
+    const date = ev.started_at ? new Date(ev.started_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : '?';
+    const cat = ev.event_type || ev.category || 'macro';
     const icon = CATEGORY_ICONS[cat] || '📌';
-    const label = CATEGORY_LABELS[cat] || '기타';
-    const sevColor = ev.severity === 'critical' ? 'var(--red)' : 'var(--yellow)';
-
-    html += `<div class="tl-item ${cat}">
-      <div class="tl-date ${cat}">
+    const label = CATEGORY_LABELS[cat] || cat;
+    const sevColor = SEV_COLORS[ev.severity] || 'var(--dim)';
+    return `<div class="tl-item">
+      <div class="tl-date">
         <span class="tl-severity" style="background:${sevColor};"></span>
         ${date}
-        <span class="tl-category ${cat}">${icon} ${label}</span>
+        <span class="tl-category">${icon} ${label}</span>
       </div>
       <div class="tl-title">${ev.title}</div>
       ${ev.summary ? `<div class="tl-summary">${ev.summary}</div>` : ''}
     </div>`;
+  }
+
+  let html = `<div class="tl-header">이벤트 ${total}개</div>`;
+
+  // story_thread별 그룹 렌더링
+  const threadKeys = Object.keys(threads).sort((a, b) => {
+    const aFirst = threads[a][0]?.started_at || '';
+    const bFirst = threads[b][0]?.started_at || '';
+    return bFirst.localeCompare(aFirst);
   });
-  html += '</div>';
+
+  for (const key of threadKeys) {
+    const evts = threads[key];
+    const threadLabel = key.replace(/_/g, ' ');
+    html += `<div class="tl-thread">
+      <div class="tl-thread-title">${threadLabel} <span class="tl-thread-count">${evts.length}</span></div>
+      <div class="timeline-line">`;
+    evts.forEach(ev => { html += renderEvent(ev); });
+    html += `</div></div>`;
+  }
+
+  // 미분류 이벤트
+  if (ungrouped.length > 0) {
+    html += `<div class="tl-thread">
+      <div class="tl-thread-title">기타 <span class="tl-thread-count">${ungrouped.length}</span></div>
+      <div class="timeline-line">`;
+    ungrouped.forEach(ev => { html += renderEvent(ev); });
+    html += `</div></div>`;
+  }
 
   container.innerHTML = html;
 }
