@@ -1,4 +1,4 @@
-# 야간작업 브리핑 — 2026-04-08
+# 야간작업 브리핑 — 2026-04-08 (검증 완료)
 
 ## 완료 (6/7)
 
@@ -37,8 +37,23 @@
 
 없음
 
-## 코드 리뷰 포인트
+## 검증 결과 (3단계)
 
-- **entity_filters.py**: 금액 정규식이 multi-currency(€, £)까지 커버하는지 확인
-- **관계도 depth**: seed_entity_ids가 비어있을 때 전체 이슈 엔티티로 폴백 — 의도대로인지 확인
-- **Stock 추출 프롬프트**: Ollama(gemma3:4b)가 properties JSON을 안정적으로 반환하는지 실제 테스트 필요
+### 1) pytest: 508 passed, 0 failed
+
+### 2) QA 테스트
+- 뉴스 티커: GEO/US 카테고리 표시 정상. KR은 24h 뉴스 부족으로 빈 상태 (데이터 이슈)
+- 관계 브리핑: "U.S. — 영향×2, 적대×2, 촉발×2" 형태 정상 동작
+- 깊이 드롭다운: UI에 "1차/2차/3차" 표시 확인
+- **QA 중 버그 발견 → 1171f14에서 수정**: 카테고리 분류 기본값 geo→stock_us
+
+### 3) 코드리뷰: CRITICAL 4건 → 13d6b9c에서 전부 수정
+- C1+C2: depth/top 입력 검증 (NameError 방지)
+- C3: all_links 중복 제거 (degree 계산 왜곡 방지)
+- C4: 빈 except → ValueError/KeyError 좁힘
+
+### 미수정 INFORMATIONAL (향후 개선)
+- I4: €/£ multi-currency 패턴 미커버
+- I5: _DOMAIN_RE가 "Amazon.com" 등 기업명을 잡을 수 있음
+- I6: cutoff 엣지케이스 (전원 degree 동일 시)
+- I7: Ollama properties 반환 안정성 실 테스트 필요
