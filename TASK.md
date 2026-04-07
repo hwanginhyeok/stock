@@ -5,8 +5,8 @@
 ## 요약
 
 - Current: 5개
-- Prepared: 16개 (P1: 5, P2: 5, P3: 7)
-- Finished: 10개 (4월) + [53개 아카이브](TASK_ARCHIVE/2026-03.md)
+- Prepared: 17개 (P1: 5, P2: 6, P3: 7)
+- Finished: 16개 (4월) + [53개 아카이브](TASK_ARCHIVE/2026-03.md)
 
 ## 번호 체계
 
