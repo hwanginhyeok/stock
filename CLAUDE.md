@@ -104,16 +104,21 @@
 ## 자동화 현황
 
 ### 시황 브리핑
-- **실행 주체**: `x-bot` systemd 사용자 서비스 (`~/.config/systemd/user/x-bot.service`)
-- **스케줄**: 매일 오전 6시 / 오후 6시 (KST)
-- **경로**: `~/x-bot/bot.py` → `~/stock/scripts/generate_briefing.py` 호출
-- cron의 `run_briefing.sh` 항목은 x-bot 이전 전의 잔재 (중복)
+- **SSOT**: `projects.yaml` → `x-bot` 항목 참조
+- x-bot systemd 서비스가 오전 6시 / 오후 6시 (KST) 텔레그램 브리핑 전송
+- cron `run_briefing.sh`가 모닝/이브닝 브리핑 파일 생성 (x-bot과 별개)
 
 ### cron (주식부자 관련)
 | 시간 | 스크립트 | 비고 |
 |------|----------|------|
-| 매 15분 | `scripts/collect_and_classify.py` | 뉴스 수집 + 분류 |
-| 매 정각 | `scripts/update_geoinvest.py` | 지정학 이슈 갱신 |
+| 매 정각 | `scripts/collect_and_classify.py` | 뉴스 수집 + 분류 |
+| 매 정각+10분 | `scripts/update_geoinvest.py` | 지정학 엔티티 추출 (Ollama) |
+| 매 정각 | `scripts/update_stockinvest.py` | 주식 엔티티 추출 (Ollama) |
+| 05:30 KST | `scripts/deep_analysis.py` | 심층분석 → 이벤트 생성 + 엔티티 피드백 |
+| 06:00 KST | `scripts/run_briefing.sh morning` | 모닝 브리핑 |
+| 17:30 KST | `scripts/deep_analysis.py` | 심층분석 → 이벤트 생성 + 엔티티 피드백 |
+| 18:00 KST | `scripts/run_briefing.sh evening` | 이브닝 브리핑 |
+| 04:00 KST | `scripts/review_entities.py` | 엔티티 리뷰/정제 (Phase 0~4) |
 
 ### 모닝 이메일
 - `scripts/send_morning_email.py` — 수동 실행 (cron 미등록)
