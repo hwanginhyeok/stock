@@ -406,20 +406,16 @@ function renderBriefing(data) {
     }
   }
 
-  // Relationships
+  // Relationships — 중요도 순 요약
   if (rels.length > 0) {
-    const outgoing = rels.filter(r => r.direction === 'outgoing');
-    const incoming = rels.filter(r => r.direction === 'incoming');
-    if (outgoing.length > 0) {
-      html += `<div class="briefing-section"><h3>관계 →</h3><ul>`;
-      outgoing.forEach(r => { html += `<li><span class="rel-tag ${r.link_type}">${r.link_type}</span> → ${r.target}${r.evidence ? ' — ' + r.evidence : ''}</li>`; });
-      html += `</ul></div>`;
-    }
-    if (incoming.length > 0) {
-      html += `<div class="briefing-section"><h3>관계 ←</h3><ul>`;
-      incoming.forEach(r => { html += `<li>${r.source} → <span class="rel-tag ${r.link_type}">${r.link_type}</span>${r.evidence ? ' — ' + r.evidence : ''}</li>`; });
-      html += `</ul></div>`;
-    }
+    html += `<div class="briefing-section"><h3>주요 관계 (${rels.length})</h3><ul>`;
+    rels.forEach(r => {
+      const tags = r.types.map(t =>
+        `<span class="rel-tag ${t.type}">${t.label}${t.count > 1 ? ' ×' + t.count : ''}</span>`
+      ).join(' ');
+      html += `<li style="margin-bottom:6px;"><strong>${r.name}</strong> ${tags}</li>`;
+    });
+    html += `</ul></div>`;
   }
   container.innerHTML = html;
 }

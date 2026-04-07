@@ -281,25 +281,53 @@ def get_entity_briefing(entity_id: str) -> dict:
         if e:
             entity_names[eid] = e.name
 
-    # 관계 목록 구성
+    # 관계 목록 구성 — 중요도 소팅 + 그룹핑
+    LINK_LABELS = {
+        "hostile": "적대", "ally": "동맹", "sanctions": "제재",
+        "trade": "무역", "supply": "보급", "proxy": "대리전",
+        "attack": "공격", "blockade": "봉쇄", "base": "기지",
+        "supports": "지원", "impacts": "영향", "involves": "관련",
+        "reacts_to": "반응", "triggers": "촉발", "mentions": "언급",
+    }
+    # 상대 엔티티별 관계 집계
+    from collections import defaultdict
+    rel_summary: dict[str, dict] = {}  # name → {types: [...], count, max_confidence}
+    for lk in links_from + links_to:
+        if lk.source_type != "entity" or lk.target_type != "entity":
+            continue
+        other_id = lk.target_id if lk.source_id == entity.id else lk.source_id
+        other_name = entity_names.get(other_id)
+        if not other_name:
+            continue
+        if other_name not in rel_summary:
+            rel_summary[other_name] = {"types": [], "count": 0, "max_conf": 0.0}
+        rel_summary[other_name]["types"].append(lk.link_type)
+        rel_summary[other_name]["count"] += 1
+        rel_summary[other_name]["max_conf"] = max(
+            rel_summary[other_name]["max_conf"], lk.confidence,
+        )
+
+    # 중요도 순 정렬 (빈도 * 신뢰도)
+    sorted_rels = sorted(
+        rel_summary.items(),
+        key=lambda x: x[1]["count"] * x[1]["max_conf"],
+        reverse=True,
+    )
+
     relationships = []
-    for lk in links_from:
-        target_name = entity_names.get(lk.target_id, lk.target_id)
+    for name, info in sorted_rels[:20]:  # 상위 20개만
+        # 관계 타입별 카운트
+        from collections import Counter
+        type_counts = Counter(info["types"])
+        type_labels = [
+            {"type": t, "label": LINK_LABELS.get(t, t), "count": c}
+            for t, c in type_counts.most_common(3)
+        ]
         relationships.append({
-            "direction": "outgoing",
-            "target": target_name,
-            "link_type": lk.link_type,
-            "confidence": lk.confidence,
-            "evidence": lk.evidence,
-        })
-    for lk in links_to:
-        source_name = entity_names.get(lk.source_id, lk.source_id)
-        relationships.append({
-            "direction": "incoming",
-            "source": source_name,
-            "link_type": lk.link_type,
-            "confidence": lk.confidence,
-            "evidence": lk.evidence,
+            "name": name,
+            "types": type_labels,
+            "total_count": info["count"],
+            "confidence": round(info["max_conf"], 2),
         })
 
     return {
