@@ -264,8 +264,8 @@ def _save_extraction(
             )
             l_repo.create(link)
             new_links += 1
-        except Exception:
-            pass
+        except (ValueError, KeyError):
+            pass  # validation 실패 또는 중복
 
     if filtered_count:
         print(f"    ⚡ 노이즈 필터: {filtered_count}개 엔티티 제외")

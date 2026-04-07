@@ -295,7 +295,7 @@ def _save_extraction(entities: list[dict], relationships: list[dict]) -> int:
             )
             l_repo.create(link)
             new_links += 1
-        except Exception:
+        except (ValueError, KeyError):
             pass  # validation 실패 또는 중복
 
     if filtered_count:

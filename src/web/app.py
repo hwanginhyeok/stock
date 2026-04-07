@@ -125,6 +125,9 @@ def list_issues(category: str = "geo") -> list[dict]:
 
 @app.get("/api/issues/{issue_id}/graph")
 def get_issue_graph(issue_id: str, top: int = 0, depth: int = 2) -> dict:
+    # C2: 입력 검증
+    top = max(0, min(top, 200))
+    depth = max(1, min(depth, 3))
     """GeoIssue의 관계도 그래프 데이터 (nodes + edges)를 반환한다.
 
     Args:
@@ -152,12 +155,15 @@ def get_issue_graph(issue_id: str, top: int = 0, depth: int = 2) -> dict:
     # 2. 이슈에 속한 엔티티 ID 집합
     issue_entity_ids: set[str] = set(issue.entity_ids or [])
 
-    # 3. 이 이슈에 태그된 링크만 가져오기 (geo_issue_id 필터)
-    all_links = link_repo.get_many(
-        filters={"geo_issue_id": issue_id}, limit=500,
-    )
+    # 3. 이 이슈에 태그된 링크만 가져오기 (geo_issue_id 필터) + 중복 제거
+    seen_link_ids: set[str] = set()
+    all_links = []
+    for lk in link_repo.get_many(filters={"geo_issue_id": issue_id}, limit=500):
+        if lk.id not in seen_link_ids:
+            seen_link_ids.add(lk.id)
+            all_links.append(lk)
 
-    # 이벤트에 연결된 링크도 수집
+    # 이벤트에 연결된 링크도 수집 (중복 제거)
     for event in events:
         links_from = link_repo.get_many(
             filters={"source_type": "event", "source_id": event.id}, limit=200,
@@ -166,7 +172,9 @@ def get_issue_graph(issue_id: str, top: int = 0, depth: int = 2) -> dict:
             filters={"target_type": "event", "target_id": event.id}, limit=200,
         )
         for lk in links_from + links_to:
-            all_links.append(lk)
+            if lk.id not in seen_link_ids:
+                seen_link_ids.add(lk.id)
+                all_links.append(lk)
 
     # 4. 엔티티 배치 조회
     entities = []
@@ -511,7 +519,7 @@ Return ONLY numbered lines, no explanation.
 
 
 @app.get("/api/news/latest")
-def get_latest_news(limit: int = 6, per_category: int = 2) -> list[dict]:
+def get_latest_news(per_category: int = 2) -> list[dict]:
     """카테고리별 핫뉴스를 반환한다 (티커용).
 
     GEO/US/KR 각 카테고리에서 importance 높은 순 + 최신순으로 선별.
