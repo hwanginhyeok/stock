@@ -114,8 +114,9 @@ async function selectIssue(issueId) {
   // 그래프 + 타임라인 로드
   try {
     const topFilter = document.getElementById('graph-top-filter').value || '10';
+    const depthFilter = document.getElementById('graph-depth-filter').value || '2';
     const [graphRes, timelineRes] = await Promise.all([
-      fetch(`/api/issues/${issueId}/graph?top=${topFilter}`),
+      fetch(`/api/issues/${issueId}/graph?top=${topFilter}&depth=${depthFilter}`),
       fetch(`/api/issues/${issueId}/timeline`),
     ]);
     const graphData = await graphRes.json();

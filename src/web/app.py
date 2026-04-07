@@ -124,11 +124,12 @@ def list_issues(category: str = "geo") -> list[dict]:
 
 
 @app.get("/api/issues/{issue_id}/graph")
-def get_issue_graph(issue_id: str, top: int = 0) -> dict:
+def get_issue_graph(issue_id: str, top: int = 0, depth: int = 2) -> dict:
     """GeoIssue의 관계도 그래프 데이터 (nodes + edges)를 반환한다.
 
     Args:
         top: 0이면 전체, N이면 관계 수(degree) 상위 N개 엔티티만 반환.
+        depth: 관계 깊이 (1=직접 연결만, 2=2차까지, 3=3차까지). 기본 2.
 
     배치 쿼리로 N+1 방지: issue → events → links → entities 순.
     """
@@ -217,6 +218,67 @@ def get_issue_graph(issue_id: str, top: int = 0) -> dict:
         nodes = [n for n in nodes if n["type"] == "event" or n["id"] in top_set]
         node_ids = {n["id"] for n in nodes}
 
+    # depth 기반 필터: entity→entity 직접 링크에서 BFS로 깊이 제한
+    if depth > 0 and depth < 10:
+        from collections import Counter, defaultdict, deque
+
+        # entity→entity 인접 그래프 구축
+        adj: dict[str, set[str]] = defaultdict(set)
+        for lk in all_links:
+            if lk.source_type == "entity" and lk.target_type == "entity":
+                adj[lk.source_id].add(lk.target_id)
+                adj[lk.target_id].add(lk.source_id)
+
+        # 이벤트와 직접 연결된 엔티티를 시드(depth=1)로 사용
+        event_ids = {e.id for e in events}
+        seed_entity_ids: set[str] = set()
+        for lk in all_links:
+            if lk.source_id in event_ids and lk.target_type == "entity":
+                seed_entity_ids.add(lk.target_id)
+            if lk.target_id in event_ids and lk.source_type == "entity":
+                seed_entity_ids.add(lk.source_id)
+        if not seed_entity_ids:
+            seed_entity_ids = issue_entity_ids  # 시드 없으면 전체 사용
+
+        # BFS로 depth 이내 엔티티만 남기기
+        reachable: set[str] = set()
+        queue: deque[tuple[str, int]] = deque(
+            (eid, 1) for eid in seed_entity_ids if eid in node_ids
+        )
+        while queue:
+            eid, d = queue.popleft()
+            if eid in reachable:
+                continue
+            reachable.add(eid)
+            if d < depth:
+                for neighbor in adj.get(eid, []):
+                    if neighbor not in reachable and neighbor in node_ids:
+                        queue.append((neighbor, d + 1))
+
+        # 이벤트는 유지, 엔티티는 reachable만
+        nodes = [n for n in nodes if n["type"] == "event" or n["id"] in reachable]
+        node_ids = {n["id"] for n in nodes}
+
+    # degree 하위 30% pruning (노드가 10개 이상일 때만)
+    if len([n for n in nodes if n["type"] == "entity"]) > 10:
+        from collections import Counter
+        degree_count: Counter[str] = Counter()
+        for lk in all_links:
+            if lk.source_id in node_ids and lk.target_id in node_ids:
+                degree_count[lk.source_id] += 1
+                degree_count[lk.target_id] += 1
+        entity_nodes = [n for n in nodes if n["type"] == "entity"]
+        if entity_nodes:
+            degrees = sorted(degree_count.get(n["id"], 0) for n in entity_nodes)
+            cutoff = degrees[max(0, len(degrees) * 30 // 100)]  # 하위 30% 경계
+            prune_ids = {
+                n["id"] for n in entity_nodes
+                if degree_count.get(n["id"], 0) <= cutoff
+                and n["id"] not in (seed_entity_ids if depth > 0 else set())
+            }
+            nodes = [n for n in nodes if n["id"] not in prune_ids]
+            node_ids = {n["id"] for n in nodes}
+
     # 링크 중복 제거
     seen_edges = set()
     edges = []
@@ -244,7 +306,8 @@ def get_issue_graph(issue_id: str, top: int = 0) -> dict:
         "nodes": nodes,
         "edges": edges,
         "total_entities": len(issue_entity_ids),
-        "filtered": top if top > 0 else len(issue_entity_ids),
+        "filtered": len([n for n in nodes if n["type"] == "entity"]),
+        "depth": depth,
     }
 
 

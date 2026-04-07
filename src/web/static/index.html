@@ -67,6 +67,13 @@
             <option value="0">전체</option>
           </select>
         </label>
+        <label style="margin-left:10px;">깊이:
+          <select id="graph-depth-filter" onchange="reloadGraph()">
+            <option value="1">1차</option>
+            <option value="2" selected>2차</option>
+            <option value="3">3차</option>
+          </select>
+        </label>
         <span id="graph-count-label" class="graph-count"></span>
       </div>
       <div class="empty-state" id="graph-empty">이슈를 선택하면 관계도가 표시됩니다</div>
