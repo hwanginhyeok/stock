@@ -2,6 +2,9 @@
 
 > 한국/미국 주식 시장 분석 + AI 콘텐츠 생성 + SNS 자동 게시 플랫폼
 
+## Tasks
+- [CURRENT_TASK.md](CURRENT_TASK.md) | [PREPARED_TASK.md](PREPARED_TASK.md) | [FINISHED_TASK.md](FINISHED_TASK.md)
+
 ---
 
 ## 투자 철학 & 프로젝트 방향성
@@ -41,7 +44,7 @@
 
 새 세션이 시작되면 코딩에 들어가기 전에 반드시 아래 순서를 따른다:
 
-1. **TASK.md 확인** — `docs/프로젝트/TASK.md`에서 현재 상태 점검, 지연 항목 보고
+1. **TASK.md 확인** — `CURRENT_TASK.md`에서 현재 상태 점검, 블로커 보고
 2. **데일리 미팅** — 진행 상황, 블로커, 이슈를 사용자와 공유
 3. **방향성 논의** — 오늘 작업할 항목의 우선순위와 접근 방식을 사용자와 합의
 4. **합의 후 착수** — 사용자가 동의한 작업만 진행
@@ -54,9 +57,9 @@
 
 ## TASK 관리
 
-- **통합 관리**: `docs/프로젝트/TASK.md` 단일 파일에서 전체 TASK + TODO 관리
+- **인덱스**: `TASK.md` (루트) → Current / Prepared / Finished 3파일 분리
 - **번호 체계**: `{분야코드}-{순번}` — 1=시스템, 2=코드, 3=분석, 4=아티클, 5=리서치
-- **상태**: `예정` → `요청` → `진행` → `완료`
+- **아카이브**: 완료 후 월 단위로 `TASK_ARCHIVE/YYYY-MM.md` 이동
 - **갱신 규칙**: 상세 내용은 `.claude/rules/workflow.md` 참조
 - **상세 로그**: 설계 결정이 포함된 작업은 `docs/프로젝트/task/{ID}.md`에 기록
 
