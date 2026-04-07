@@ -136,19 +136,71 @@ def detect_emerging_topics(
     return clusters[:MAX_AUTO_ISSUES]
 
 
+def _strip_code_block(text: str) -> str:
+    """마크다운 코드블록(```json ... ```)을 제거한다."""
+    if "```" in text:
+        start = text.find("```")
+        first_nl = text.find("\n", start)
+        end = text.find("```", first_nl)
+        if end > first_nl:
+            return text[first_nl:end].strip()
+    return text.strip()
+
+
+def _call_gemini(prompt: str) -> str | None:
+    """Gemini CLI를 headless 모드로 호출한다."""
+    import subprocess
+
+    try:
+        result = subprocess.run(
+            ["gemini", "-p", prompt],
+            capture_output=True,
+            text=True,
+            timeout=90,
+        )
+        if result.returncode != 0:
+            print(f"    Gemini 종료 코드 {result.returncode}: {result.stderr[:100]}")
+            return None
+        return result.stdout.strip()
+    except FileNotFoundError:
+        print("    Gemini CLI 미설치")
+        return None
+    except subprocess.TimeoutExpired:
+        print("    Gemini 타임아웃 (90초)")
+        return None
+    except Exception as e:
+        print(f"    Gemini 호출 실패: {e}")
+        return None
+
+
+def _call_ollama(prompt: str) -> str | None:
+    """Ollama 로컬 LLM을 호출한다 (fallback)."""
+    import requests as _req
+
+    try:
+        resp = _req.post(
+            "http://localhost:11434/api/generate",
+            json={"model": "gemma3:4b", "prompt": prompt, "stream": False},
+            timeout=60,
+        )
+        resp.raise_for_status()
+        return resp.json().get("response", "").strip()
+    except Exception as e:
+        print(f"    Ollama 호출 실패: {e}")
+        return None
+
+
 def create_issue_from_trend(
     trend: dict,
     unclassified_news: list[dict],
 ) -> dict | None:
     """감지된 트렌드에서 GeoIssue를 자동 생성한다.
 
-    Ollama 로컬 LLM으로 이슈 이름, 설명, 엔티티를 추출 (API 비용 0원).
+    1차: Gemini CLI (gemini -p), 2차: Ollama (fallback).
 
     Returns:
         생성된 이슈 정보 또는 None.
     """
-    import requests as _req
-
     # 관련 뉴스 제목들
     sample = "\n".join(f"- {t}" for t in trend["sample_titles"][:10])
     keywords = ", ".join(trend["keywords"][:5])
@@ -168,26 +220,27 @@ Create a geopolitical/market issue entry. Output ONLY valid JSON (no markdown, n
   "keywords": ["<keyword for news matching>", ...]
 }}"""
 
+    # 1차: Gemini CLI
+    content = _call_gemini(prompt)
+    source = "Gemini"
+
+    # 2차: Ollama fallback
+    if not content:
+        print("    → Ollama fallback 시도")
+        content = _call_ollama(prompt)
+        source = "Ollama"
+
+    if not content:
+        return None
+
     try:
-        resp = _req.post(
-            "http://localhost:11434/api/generate",
-            json={"model": "gemma3:4b", "prompt": prompt, "stream": False},
-            timeout=60,
-        )
-        resp.raise_for_status()
-        content = resp.json().get("response", "").strip()
-
-        # 마크다운 코드블록 제거
-        if "```" in content:
-            start = content.find("```")
-            first_nl = content.find("\n", start)
-            end = content.find("```", first_nl)
-            if end > first_nl:
-                content = content[first_nl:end].strip()
-
-        return json.loads(content)
-    except Exception as e:
-        print(f"    Ollama 호출 실패: {e}")
+        content = _strip_code_block(content)
+        result = json.loads(content)
+        print(f"    ✓ 이슈 생성 ({source}): {result.get('title', '?')}")
+        return result
+    except (json.JSONDecodeError, ValueError) as e:
+        print(f"    JSON 파싱 실패 ({source}): {e}")
+        print(f"    원본: {content[:200]}")
         return None
 
 
