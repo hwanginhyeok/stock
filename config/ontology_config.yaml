@@ -247,6 +247,50 @@ entity_classification:
     - "닛케이"
     - "항셍"
 
+# --- Stock 엔티티 본질적 속성 스키마 ---
+# 엔티티 타입별로 Ollama가 추출해야 할 핵심 속성 정의
+# 온톨로지 원칙: "이 속성이 없으면 이 엔티티를 이해할 수 없다"
+stock_entity_properties:
+  company:
+    essential:     # 없으면 기업이 아님
+      - business_model    # 어떻게 돈을 버는가
+      - moat              # 경쟁우위 원천 (switching_costs/network_effects/intangible_assets/cost_advantage/efficient_scale)
+      - capital_allocation  # 자본 배분 방식
+    propria:       # 본질에서 도출되지만 본질 자체는 아님
+      - revenue_growth
+      - margin
+      - valuation
+  institution:
+    essential:
+      - policy_objective   # 정책 목표
+      - primary_tool       # 핵심 수단
+      - mandate            # 법적 권한
+    propria:
+      - current_rate
+      - balance_sheet_size
+  sector:
+    essential:
+      - growth_driver      # 성장 동인
+      - cyclicality        # cyclical/defensive/growth
+      - value_chain_position  # 가치사슬 내 위치
+    propria:
+      - pe_ratio
+      - market_cap
+  asset:
+    essential:
+      - measurement_target  # 무엇을 측정하는가
+      - signal_direction    # bullish/bearish/neutral
+      - threshold           # 주요 임계값
+    propria:
+      - current_value
+      - trend
+  person:
+    essential:
+      - role               # 현재 역할
+      - influence          # 무엇을 통제/결정하는가
+    propria:
+      - track_record
+
 # --- 제1원칙 분석 설정 ---
 first_principle_analysis:
   # 분석 대상 최소 조건

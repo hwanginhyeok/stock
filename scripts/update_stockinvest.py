@@ -37,16 +37,29 @@ EXTRACTION_PROMPT = """You are a financial analyst. Extract entities and relatio
 
 {articles}
 
+## Entity types & essential properties
+
+For each entity, include the "properties" object with essential attributes:
+
+- **company**: business_model (how they make money), moat (competitive advantage source), risk (key risk)
+- **institution**: policy_objective (what they aim to achieve), primary_tool (key tool/mechanism)
+- **sector**: growth_driver (what drives growth), cyclicality (cyclical/defensive/growth)
+- **person**: role (current position), influence (what they control/decide)
+- **asset/commodity**: measurement (what it tracks), signal (bullish/bearish/neutral)
+- **country**: economic_role (in this context)
+
 Entity types: company, person, asset, institution, sector, country, commodity
 Relationship types: competitor, supplier, investor, regulator, partner, impacts, mentions, triggers, reacts_to
+
+IMPORTANT: Do NOT extract dollar amounts, percentages, visa codes, or generic terms as entities.
 
 Respond ONLY with valid JSON (no markdown, no explanation):
 {{
   "entities": [
-    {{"name": "...", "entity_type": "company|person|asset|institution|sector|country|commodity"}}
+    {{"name": "...", "entity_type": "company|person|...", "properties": {{"business_model": "...", "moat": "..."}}}}
   ],
   "relationships": [
-    {{"source": "...", "target": "...", "relation_type": "competitor|supplier|investor|regulator|partner|impacts|mentions|triggers|reacts_to", "evidence": "one sentence"}}
+    {{"source": "...", "target": "...", "relation_type": "...", "evidence": "one sentence"}}
   ]
 }}"""
 
@@ -182,11 +195,14 @@ def _save_extraction(
             raw_type = "institution"
 
         try:
+            # Ollama가 반환한 본질적 속성 추출
+            props = ent_data.get("properties", {})
             entity = OntologyEntity(
                 name=name,
                 entity_type=raw_type,
                 market=Market.US,
                 aliases=ent_data.get("aliases", []),
+                properties=props if isinstance(props, dict) else {},
             )
             e_repo.create(entity)
             entity_id_map[name.lower()] = entity.id
