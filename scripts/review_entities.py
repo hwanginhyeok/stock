@@ -72,29 +72,8 @@ def _parse_json(text: str) -> Any:
 # Phase 0: 도메인/노이즈 엔티티 삭제
 # ============================================================
 
-_DOMAIN_RE = re.compile(
-    r"^[\w.-]+\.(com|org|net|io|gov|edu|co\.kr|co\.jp|co\.uk|info|biz|me|ai|kr|jp|az)$",
-    re.IGNORECASE,
-)
-_NOISE_NAMES = {
-    "metadata", "capabilities", "endpoints", "operational details",
-    "war", "conflict", "news", "report", "article", "source",
-    "the post", "the report",
-}
-
-
-def _is_noise_entity(name: str) -> bool:
-    """도메인, 숫자, 노이즈 단어를 걸러낸다."""
-    if not name or len(name) < 2:
-        return True
-    if _DOMAIN_RE.match(name):
-        return True
-    if name.lower().strip() in _NOISE_NAMES:
-        return True
-    cleaned = re.sub(r"[\d$€₩¥%,.~\-–��주년월일개건조억만천]", "", name).strip()
-    if not cleaned:
-        return True
-    return False
+# 엔티티 노이즈 필터 — 공통 모듈 사용
+from src.core.entity_filters import is_noise_entity as _is_noise_entity
 
 
 def phase_noise_cleanup(dry_run: bool = False) -> dict:

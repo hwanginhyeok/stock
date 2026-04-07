@@ -30,29 +30,8 @@ OLLAMA_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = "gemma3:4b"
 OLLAMA_TIMEOUT = 120
 
-# 엔티티 노이즈 필터 — 도메인, 무의미 단어, 숫자만 있�� 값
-_DOMAIN_RE = re.compile(
-    r"^[\w.-]+\.(com|org|net|io|gov|edu|co\.kr|co\.jp|co\.uk|info|biz|me|ai|kr|jp|az)$",
-    re.IGNORECASE,
-)
-_NOISE_NAMES = {
-    "metadata", "capabilities", "endpoints", "operational details",
-    "war", "conflict", "news", "report", "article", "source",
-    "the post", "the report",
-}
-
-def _is_noise_entity(name: str) -> bool:
-    """도메인, 숫자, 노이즈 단���를 걸러낸다."""
-    if not name or len(name) < 2:
-        return True
-    if _DOMAIN_RE.match(name):
-        return True
-    if name.lower().strip() in _NOISE_NAMES:
-        return True
-    cleaned = re.sub(r"[\d$€₩¥%,.~\-–—주년월일개건조억만천]", "", name).strip()
-    if not cleaned:
-        return True
-    return False
+# 엔티티 노이즈 필터 — 공통 모듈 사용
+from src.core.entity_filters import is_noise_entity as _is_noise_entity
 
 EXTRACTION_PROMPT = """You are a financial analyst. Extract entities and relationships from these news articles about '{issue}'.
 
@@ -202,15 +181,19 @@ def _save_extraction(
             print(f"  ⚠ entity_type '{raw_type}' → 'institution' ({name})")
             raw_type = "institution"
 
-        entity = OntologyEntity(
-            name=name,
-            entity_type=raw_type,
-            market=Market.US,
-            aliases=ent_data.get("aliases", []),
-        )
-        e_repo.create(entity)
-        entity_id_map[name.lower()] = entity.id
-        new_entity_ids.append(entity.id)
+        try:
+            entity = OntologyEntity(
+                name=name,
+                entity_type=raw_type,
+                market=Market.US,
+                aliases=ent_data.get("aliases", []),
+            )
+            e_repo.create(entity)
+            entity_id_map[name.lower()] = entity.id
+            new_entity_ids.append(entity.id)
+        except Exception as exc:
+            print(f"  ⚠ 엔티티 생성 실패 ({name}): {exc}")
+            continue
 
     # 이슈에 엔티티 연결
     if new_entity_ids and issue_id:
@@ -252,17 +235,17 @@ def _save_extraction(
         if rel_type not in valid_link_types:
             rel_type = "mentions"
 
-        link = OntologyLink(
-            link_type=rel_type,
-            source_type="entity",
-            source_id=src_id,
-            target_type="entity",
-            target_id=tgt_id,
-            confidence=0.8,
-            evidence=rel_data.get("evidence", ""),
-            geo_issue_id=issue_id,
-        )
         try:
+            link = OntologyLink(
+                link_type=rel_type,
+                source_type="entity",
+                source_id=src_id,
+                target_type="entity",
+                target_id=tgt_id,
+                confidence=0.8,
+                evidence=rel_data.get("evidence", ""),
+                geo_issue_id=issue_id,
+            )
             l_repo.create(link)
             new_links += 1
         except Exception:
