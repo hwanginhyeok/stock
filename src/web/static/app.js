@@ -430,28 +430,25 @@ function renderBriefing(data) {
 
 async function loadNewsTicker() {
   try {
-    const res = await fetch('/api/news/latest?limit=30');
+    const res = await fetch('/api/news/latest?per_category=2');
     const news = await res.json();
     const track = document.getElementById('ticker-track');
     if (news.length === 0) { track.innerHTML = '<span class="ticker-text">뉴스가 없습니다</span>'; return; }
 
-    const ISSUE_COLORS = {
-      '이란 전쟁': '#f85149', '비트코인 지정학': '#d29922', 'IMEC 회랑': '#bc8cff',
-      '트럼프 관세전쟁 2.0': '#db6d28', 'AI/반도체 패권전쟁': '#3fb950',
-      '러시아-우크라이나 전쟁': '#f85149', '대만 해협 위기': '#58a6ff',
-      '유럽 정치 위기': '#bc8cff', '글로벌 AI 규제 경쟁': '#56d4dd',
-      '일본 금리 전환 (BOJ)': '#d29922',
-    };
+    const CAT_LABELS = { geo: 'GEO', stock_us: 'US', stock_kr: 'KR' };
+    const CAT_COLORS = { geo: '#f85149', stock_us: '#58a6ff', stock_kr: '#3fb950' };
     const items = news.map(n => {
-      const tag = n.top_issue
-        ? `<span style="background:${ISSUE_COLORS[n.top_issue] || '#8b949e'}22;color:${ISSUE_COLORS[n.top_issue] || '#8b949e'};border:1px solid ${ISSUE_COLORS[n.top_issue] || '#8b949e'}44;padding:1px 5px;border-radius:3px;font-size:9px;margin-right:5px;">${n.top_issue}</span>`
+      const cat = n.category || 'geo';
+      const catTag = `<span style="background:${CAT_COLORS[cat]}22;color:${CAT_COLORS[cat]};border:1px solid ${CAT_COLORS[cat]}44;padding:1px 5px;border-radius:3px;font-size:9px;margin-right:4px;font-weight:600;">${CAT_LABELS[cat]}</span>`;
+      const issueTag = n.top_issue
+        ? `<span style="color:#8b949e;font-size:9px;margin-right:4px;">${n.top_issue}</span>`
         : '';
-      return `<span class="news-item">${tag}<span class="news-src">[${n.source}]</span>${n.title}</span>`;
+      return `<span class="news-item">${catTag}${issueTag}${n.title}</span>`;
     }).join('<span class="news-dot">·</span>');
 
     track.innerHTML = `<span class="ticker-text">${items}<span class="news-dot">·</span>${items}</span>`;
     const text = track.querySelector('.ticker-text');
-    text.style.animationDuration = `${Math.max(300, news.length * 20)}s`;
+    text.style.animationDuration = `${Math.max(60, news.length * 15)}s`;
   } catch (e) { console.error('뉴스 티커 실패:', e); }
 }
 

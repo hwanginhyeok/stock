@@ -420,37 +420,64 @@ Return ONLY numbered lines, no explanation.
 
 
 @app.get("/api/news/latest")
-def get_latest_news(limit: int = 30) -> list[dict]:
-    """최신 뉴스를 반환한다 (티커용). 이슈 분류 + 한국어 번역 포함."""
+def get_latest_news(limit: int = 6, per_category: int = 2) -> list[dict]:
+    """카테고리별 핫뉴스를 반환한다 (티커용).
+
+    GEO/US/KR 각 카테고리에서 importance 높은 순 + 최신순으로 선별.
+    """
     from src.collectors.news.classifier import classify_news
     from src.storage import NewsRepository
 
     repo = NewsRepository()
-    items = repo.get_latest(limit=limit)
+    # published_at 기준 최신 뉴스 (get_timeline은 published_at 정렬)
+    candidates = repo.get_timeline(hours=24, limit=200)
 
-    # 영어 제목만 모아서 일괄 번역
-    en_indices = []
-    en_titles = []
-    for i, item in enumerate(items):
-        if item.market != "kr" and any(c.isascii() and c.isalpha() for c in item.title[:20]):
-            en_indices.append(i)
-            en_titles.append(item.title)
-
-    translated = _translate_titles_ko(en_titles) if en_titles else []
-    title_map = dict(zip(en_indices, translated)) if translated else {}
-
-    results = []
-    for i, item in enumerate(items):
+    # 이슈 분류 후 카테고리별 그룹핑
+    categorized: dict[str, list] = {"geo": [], "stock_us": [], "stock_kr": []}
+    for item in candidates:
         classified = classify_news(item.title, item.content or item.summary or "")
-        results.append({
-            "title": title_map.get(i, item.title),
+        cat = "stock_kr" if item.market == "kr" else "geo"
+        # 이슈가 있으면 이슈 카테고리 사용
+        if classified.top_issue:
+            # geo 이슈인지 stock 이슈인지 판별
+            geo_keywords = {"전쟁", "지정학", "관세", "제재", "외교", "군사", "해협"}
+            if any(kw in classified.top_issue for kw in geo_keywords):
+                cat = "geo"
+            elif item.market == "kr":
+                cat = "stock_kr"
+            else:
+                cat = "stock_us"
+
+        entry = {
+            "title": item.title,
             "source": item.source,
             "market": item.market,
             "importance": item.importance,
             "published_at": str(item.published_at or item.created_at),
             "issues": classified.issues,
             "top_issue": classified.top_issue,
-        })
+            "category": cat,
+        }
+        if len(categorized.get(cat, [])) < per_category:
+            categorized.setdefault(cat, []).append(entry)
+
+        # 모든 카테고리가 per_category개씩 찼으면 조기 종료
+        if all(len(v) >= per_category for v in categorized.values()):
+            break
+
+    # 영어 제목 번역
+    results = []
+    for cat in ["geo", "stock_us", "stock_kr"]:
+        results.extend(categorized.get(cat, []))
+
+    en_items = [(i, r["title"]) for i, r in enumerate(results)
+                if r["market"] != "kr" and any(c.isascii() and c.isalpha() for c in r["title"][:20])]
+    if en_items:
+        translated = _translate_titles_ko([t for _, t in en_items])
+        if translated:
+            for (idx, _), tr in zip(en_items, translated):
+                results[idx]["title"] = tr
+
     return results
 
 
