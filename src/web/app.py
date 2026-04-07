@@ -524,20 +524,18 @@ def get_latest_news(limit: int = 6, per_category: int = 2) -> list[dict]:
     candidates = repo.get_timeline(hours=24, limit=200)
 
     # 이슈 분류 후 카테고리별 그룹핑
+    geo_keywords = {"전쟁", "지정학", "관세", "제재", "외교", "군사", "해협"}
     categorized: dict[str, list] = {"geo": [], "stock_us": [], "stock_kr": []}
+    processed = 0
     for item in candidates:
         classified = classify_news(item.title, item.content or item.summary or "")
-        cat = "stock_kr" if item.market == "kr" else "geo"
-        # 이슈가 있으면 이슈 카테고리 사용
-        if classified.top_issue:
-            # geo 이슈인지 stock 이슈인지 판별
-            geo_keywords = {"전쟁", "지정학", "관세", "제재", "외교", "군사", "해협"}
-            if any(kw in classified.top_issue for kw in geo_keywords):
-                cat = "geo"
-            elif item.market == "kr":
-                cat = "stock_kr"
-            else:
-                cat = "stock_us"
+        processed += 1
+
+        # 기본 분류: KR → stock_kr, 그 외 → stock_us
+        cat = "stock_kr" if item.market == "kr" else "stock_us"
+        # geo 이슈 키워드가 있으면 geo로 오버라이드
+        if classified.top_issue and any(kw in classified.top_issue for kw in geo_keywords):
+            cat = "geo"
 
         entry = {
             "title": item.title,
@@ -554,6 +552,9 @@ def get_latest_news(limit: int = 6, per_category: int = 2) -> list[dict]:
 
         # 모든 카테고리가 per_category개씩 찼으면 조기 종료
         if all(len(v) >= per_category for v in categorized.values()):
+            break
+        # 성능 보호: 최대 50개만 처리
+        if processed >= 50:
             break
 
     # 영어 제목 번역
