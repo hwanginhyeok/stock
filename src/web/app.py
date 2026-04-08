@@ -459,6 +459,95 @@ def get_issue_timeline(issue_id: str) -> dict:
     }
 
 
+@app.get("/api/events/{event_id}/detail")
+def get_event_detail(event_id: str) -> dict:
+    """이벤트 상세 + 관련 뉴스를 반환한다 (타임라인 클릭 시)."""
+    event_repo = OntologyEventRepository()
+    event = event_repo.get_by_id(event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail=f"Event {event_id} not found")
+
+    link_repo = OntologyLinkRepository()
+    entity_repo = OntologyEntityRepository()
+
+    # 이벤트에 연결된 뉴스 (1차: ontology_links, 2차: 키워드 검색)
+    from src.storage import NewsRepository
+    news_repo = NewsRepository()
+    news_items = []
+
+    # 1차: ontology_links news→event
+    news_links = link_repo.get_many(
+        filters={"target_type": "event", "target_id": event_id, "link_type": "triggers"},
+        limit=20,
+    )
+    for lk in news_links:
+        if lk.source_type == "news":
+            item = news_repo.get_by_id(lk.source_id)
+            if item:
+                news_items.append({
+                    "title": item.title,
+                    "source": item.source,
+                    "published_at": str(item.published_at or item.created_at),
+                    "summary": (item.summary or "")[:200],
+                })
+
+    # 2차: 링크 없으면 이벤트 제목 키워드로 뉴스 검색
+    if not news_items and event.title:
+        from sqlalchemy import or_, select
+        from src.core.database import NewsItemDB, get_session
+        # 제목에서 핵심 키워드 추출 (2글자 이상 단어)
+        import re
+        words = [w for w in re.split(r"[\s,·—\-]+", event.title) if len(w) >= 2][:3]
+        if words:
+            with get_session() as session:
+                conditions = [NewsItemDB.title.ilike(f"%{w}%") for w in words]
+                stmt = (
+                    select(NewsItemDB)
+                    .where(or_(*conditions))
+                    .order_by(NewsItemDB.published_at.desc())
+                    .limit(5)
+                )
+                rows = session.execute(stmt).scalars().all()
+                for r in rows:
+                    news_items.append({
+                        "title": r.title,
+                        "source": r.source,
+                        "published_at": str(r.published_at or r.created_at),
+                        "summary": (r.summary or "")[:200],
+                    })
+
+    # 이벤트에 연결된 엔티티 (ontology_links: event→entity involves)
+    entity_links = link_repo.get_many(
+        filters={"source_type": "event", "source_id": event_id},
+        limit=30,
+    )
+    related_entities = []
+    for lk in entity_links:
+        if lk.target_type == "entity":
+            ent = entity_repo.get_by_id(lk.target_id)
+            if ent:
+                related_entities.append({
+                    "name": ent.name,
+                    "entity_type": ent.entity_type,
+                    "link_type": lk.link_type,
+                })
+
+    return {
+        "event": {
+            "id": event.id,
+            "title": event.title,
+            "summary": event.summary,
+            "event_type": event.event_type,
+            "severity": event.severity,
+            "started_at": str(event.started_at),
+            "status": event.status,
+            "story_thread": getattr(event, "story_thread", "") or "",
+        },
+        "news": news_items,
+        "entities": related_entities,
+    }
+
+
 import time as _time
 
 # 번역 캐시 (제목 → 번역, 10분 TTL)

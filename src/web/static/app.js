@@ -302,14 +302,13 @@ function renderTimeline(data) {
     const icon = CATEGORY_ICONS[cat] || '📌';
     const label = CATEGORY_LABELS[cat] || cat;
     const sevColor = SEV_COLORS[ev.severity] || 'var(--dim)';
-    return `<div class="tl-item">
+    return `<div class="tl-item" style="cursor:pointer;" onclick="selectEvent('${ev.id}')">
       <div class="tl-date">
         <span class="tl-severity" style="background:${sevColor};"></span>
         ${date}
         <span class="tl-category">${icon} ${label}</span>
       </div>
       <div class="tl-title">${ev.title}</div>
-      ${ev.summary ? `<div class="tl-summary">${ev.summary}</div>` : ''}
     </div>`;
   }
 
@@ -345,7 +344,70 @@ function renderTimeline(data) {
 }
 
 // ============================================================
-// Briefing
+// Event Detail (타임라인 클릭)
+// ============================================================
+
+async function selectEvent(eventId) {
+  // 타임라인 아이템 하이라이트
+  document.querySelectorAll('.tl-item').forEach(el => el.style.borderLeft = 'none');
+  const items = document.querySelectorAll('.tl-item');
+  items.forEach(el => {
+    if (el.getAttribute('onclick')?.includes(eventId)) {
+      el.style.borderLeft = '3px solid var(--blue)';
+    }
+  });
+
+  try {
+    const res = await fetch(`/api/events/${eventId}/detail`);
+    if (!res.ok) return;
+    const data = await res.json();
+    renderEventBriefing(data);
+  } catch (e) { console.error('이벤트 상세 로딩 실패:', e); }
+}
+
+function renderEventBriefing(data) {
+  const container = document.getElementById('briefing-content');
+  const ev = data.event;
+  const SEV_KR = { critical: '긴급', major: '중요', moderate: '보통', minor: '경미' };
+  const sevLabel = SEV_KR[ev.severity] || ev.severity;
+  const date = ev.started_at ? new Date(ev.started_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) : '?';
+
+  let html = `<div class="briefing-header"><div>
+    <div class="briefing-title">${ev.title}</div>
+    <div class="briefing-subtitle">${date} · ${sevLabel} · ${ev.event_type}</div>
+  </div></div>`;
+
+  // 요약
+  if (ev.summary) {
+    html += `<div class="briefing-section"><h3>요약</h3><div style="font-size:12px;line-height:1.6;color:var(--fg);">${ev.summary}</div></div>`;
+  }
+
+  // 관련 엔티티
+  if (data.entities && data.entities.length > 0) {
+    html += `<div class="briefing-section"><h3>관련 엔티티 (${data.entities.length})</h3><ul>`;
+    data.entities.forEach(e => {
+      html += `<li><strong>${e.name}</strong> <span class="rel-tag ${e.entity_type}">${e.entity_type}</span> <span style="color:var(--dim);font-size:10px;">${e.link_type}</span></li>`;
+    });
+    html += `</ul></div>`;
+  }
+
+  // 관련 뉴스
+  if (data.news && data.news.length > 0) {
+    html += `<div class="briefing-section"><h3>관련 뉴스 (${data.news.length})</h3><ul>`;
+    data.news.forEach(n => {
+      const pubDate = n.published_at ? new Date(n.published_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : '';
+      html += `<li style="margin-bottom:6px;"><span style="color:var(--dim);font-size:10px;">${pubDate} [${n.source}]</span><br>${n.title}</li>`;
+    });
+    html += `</ul></div>`;
+  } else {
+    html += `<div class="briefing-section"><div style="color:var(--dim);font-size:11px;">연결된 뉴스 없음</div></div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+// ============================================================
+// Entity Briefing
 // ============================================================
 
 async function selectEntity(entityId, listEl) {
