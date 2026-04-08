@@ -628,8 +628,8 @@ def get_latest_news(per_category: int = 2) -> list[dict]:
         classified = classify_news(item.title, item.content or item.summary or "")
         processed += 1
 
-        # 기본 분류: KR → stock_kr, 그 외 → stock_us
-        cat = "stock_kr" if item.market == "kr" else "stock_us"
+        # 기본 분류: korea → stock_kr, 그 외 → stock_us
+        cat = "stock_kr" if item.market == "korea" else "stock_us"
         # geo 이슈 키워드가 있으면 geo로 오버라이드
         if classified.top_issue and any(kw in classified.top_issue for kw in geo_keywords):
             cat = "geo"
