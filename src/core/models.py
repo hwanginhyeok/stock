@@ -177,6 +177,9 @@ class LinkType(StrEnum):
     TRADE = "trade"
     SUPPLY = "supply"
     SANCTIONS = "sanctions"
+    BLOCKADE = "blockade"
+    ATTACK = "attack"
+    BASE = "base"
 
 
 class GeoIssueStatus(StrEnum):

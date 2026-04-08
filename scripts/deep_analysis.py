@@ -291,20 +291,23 @@ def save_events(issue: Any, events_data: list[dict]) -> int:
 
         # market: stock_kr→korea, stock_us→us, geo→us
         cat = getattr(issue, "category", "geo")
-        market = "korea" if "kr" in cat else "us"
+        market_map = {"stock_kr": "korea", "kr": "korea", "stock_us": "us", "us": "us"}
+        market = market_map.get(cat, "us")
 
-        event = OntologyEvent(
-            title=title,
-            summary=ev_data.get("summary", ""),
-            event_type=event_type,
-            severity=severity,
-            market=market,
-            article_count=ev_data.get("article_count", 1),
-            story_thread=ev_data.get("story_thread", ""),
-        )
-
-        event_repo.create(event)
-        new_event_ids.append(event.id)
+        try:
+            event = OntologyEvent(
+                title=title,
+                summary=ev_data.get("summary", ""),
+                event_type=event_type,
+                severity=severity,
+                market=market,
+                article_count=ev_data.get("article_count", 1),
+                story_thread=ev_data.get("story_thread", ""),
+            )
+            event_repo.create(event)
+            new_event_ids.append(event.id)
+        except Exception as exc:
+            print(f"  ⚠ 이벤트 생성 실패 ({title[:40]}): {exc}")
 
     # 이슈에 이벤트 연결
     if new_event_ids:

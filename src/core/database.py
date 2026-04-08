@@ -575,7 +575,24 @@ def get_engine() -> Engine:
     config = get_config()
     raw_url = config.database_url or config.database.url
     db_url = _resolve_db_url(raw_url)
-    engine = create_engine(db_url, echo=config.database.echo)
+    connect_args = {}
+    if "sqlite" in db_url:
+        connect_args["timeout"] = 30  # 동시 접근 시 30초 대기
+    engine = create_engine(
+        db_url,
+        echo=config.database.echo,
+        connect_args=connect_args,
+    )
+    # SQLite WAL 모드: 동시 읽기/쓰기 지원
+    if "sqlite" in db_url:
+        from sqlalchemy import event as sa_event
+
+        @sa_event.listens_for(engine, "connect")
+        def _set_sqlite_wal(dbapi_conn, _connection_record):
+            cursor = dbapi_conn.cursor()
+            cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.close()
+
     logger.info("database_engine_created", url=db_url)
     return engine
 
