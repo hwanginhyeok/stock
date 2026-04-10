@@ -1,41 +1,55 @@
 # 주식부자프로젝트
 
-> 한국/미국 주식 시장 분석 + AI 콘텐츠 생성 + SNS 자동 게시 플랫폼
+> **테슬라 투자 인텔리전스** — 리서치 + 트레이딩 + 콘텐츠
 
 ## Tasks
 - [CURRENT_TASK.md](CURRENT_TASK.md) | [PREPARED_TASK.md](PREPARED_TASK.md) | [FINISHED_TASK.md](FINISHED_TASK.md)
 
 ---
 
-## 투자 철학 & 프로젝트 방향성
+## 프로젝트 방향성
+
+### 핵심 집중: Tesla (TSLA)
+
+이 프로젝트는 **테슬라**에 대한 깊은 이해를 바탕으로:
+1. 체계적 리서치 (온톨로지, 역사, 제품, 거시)
+2. 데이터 기반 트레이딩 (기술적 지표, 옵션 흐름, 백테스트)
+3. 콘텐츠 생성 (아티클, 카드뉴스, 시각화)
+
+**왜 테슬라인가?**
+- 수직통합 에너지 기업 (자동차 ↔ 에너지 ↔ 로봇)
+- 일론 머스크의 리더십 실험실
+- AI/Autonomy 복합체 (FSD, Optimus, 휴먼 로봇)
+- 팬덤 커뮤니티 + 밈 문화 (다른 종목에 없는 특성)
 
 ### 두 축 분리 원칙
 
-이 프로젝트는 **두 가지 판단을 명확히 분리**한다. 이 둘을 섞으면 각각의 기준이 오염된다.
+투자 판단을 **두 가지 축으로 명확히 분리**한다.
 
 #### 축 1: 시장 흐름 읽기 — "언제 움직일까"
 > 넘치는 데이터를 가시화하고, 거기서 시장의 흐름을 읽고 대응한다.
 
 - **도구**: 유동성(FRED), FX, 섹터 ETF, 기술적 지표(RSI/ADX/MACD/Supertrend), 시장 레짐
-- **산출물**: 모닝 이메일, 시그널 리포트 Excel, 지표 해석 체계
+- **산출물**: 모닥 이메일, 시그널 리포트 Excel, 지표 해석 체계
 - **판단**: 지금 시장이 Risk-On인가 Risk-Off인가. 언제 포지션을 늘리고 줄일 것인가.
 
-#### 축 2: 종목 선별 — "무엇을 살까"
-> 종목 선별과 가치 판단은 독서와 배움을 통해 인사이트를 얻고, 그것을 토대로 결정한다.
+#### 축 2: 종목 분석 — "테슬라을 어떻게 볼까"
+> 테슬라에 대한 심층 이해를 통해 인사이트를 얻고, 그것을 토대로 결정한다.
 
-- **도구**: 펀더멘탈 리서치, 아티클 집필, 장기 테제 구축
-- **산출물**: 종목별 리서치 허브 (`data/research/stocks/`), X 아티클, 인스타 카드뉴스
-- **판단**: 이 기업/자산의 방향성이 맞는가. 10년 뒤에도 보유할 수 있는가.
+- **도구**: 펀더멘탈 리서치, 아티클 집필, 장기 테제 구축, 온톨로지 매핑
+- **산출물**: 테슬라 리서치 허브 (`data/research/stocks/tesla/`), X 아티클, 인스타 카드뉴스
+- **판단**: 이 기업의 방향성이 맞는가. 10년 뒤에도 보유할 수 있는가.
 
-### 현재 집중 종목/자산
+### 현재 집중 종목
+
 - **Tesla (TSLA)** — 수직통합 + 에너지 + 로봇 테제
-- **Bitcoin (BTC)** — 디지털 금, 희소성 테제
-- **Ethereum (ETH)** — 탈중앙화 플랫폼 테제
+- **보류 중**: Bitcoin (BTC), Ethereum (ETH), 지정학 이슈, 한국 주식
 
 ### 미완성 연결 고리 (향후 과제)
+
 두 축을 연결하는 **의사결정 체계**가 아직 없다:
-- 시장이 Risk-On → 선별된 종목에 언제, 얼마나 진입?
-- 시장이 Risk-Off → 익스포저를 어떻게 줄일 것인가?
+- 시장이 Risk-On → 테슬라에 언제, 얼마나 진입?
+- 시장이 Risk-Off → 포지션을 어떻게 줄일 것인가?
 - 이 체계가 갖춰지면 진정한 시스템 트레이딩 완성.
 
 ---
@@ -94,7 +108,7 @@
 | `.claude/skills/ontology-analysis.md` | 온톨로지 분석 + 제1원칙 사고 — 팩트→그래프→통념분해→Gap→기회 | "온톨로지 분석", "제1원칙 분석", 심층 뉴스 분석 시 |
 | `.claude/skills/article-shipping.md` | 아티클 마감 — WIP 제한 + 타임박스 + 게시 후 학습 루프 | 게시 대기 마무리 시 / 세션 시작 시 WIP 체크 |
 | `.claude/skills/publish-review.md` | 게시 리뷰 — 8차원 스코어카드 + 인터랙티브 수정 + SHIP/REVISE/HOLD 판정 | "리뷰해줘", "게시 리뷰", v1/v2 완료 후 |
-| `.claude/skills/morning-email.md` | 모닝 이메일 실행 (데이터 수집→검수→dry-run→발송) | "모닝 이메일", "이메일 보내줘" |
+| `.claude/skills/morning-email.md` | 모닥 이메일 실행 (데이터 수집→검수→dry-run→발송) | "모닥 이메일", "이메일 보내줘" |
 | `.claude/skills/sigma-analysis.md` | IV 시그마 분석 (장중/장외 분기, IV/HV20 폴백) | "시그마 분석", "IV 분석", 종목 변동성 확인 시 |
 | `.claude/skills/signal-report.md` | 시그널 리포트 + 대시보드 Excel 생성 + 이상치 검수 | "시그널 리포트", "대시보드", 주간 리포트 시 |
 
@@ -106,17 +120,17 @@
 ### 시황 브리핑
 - **SSOT**: `projects.yaml` → `x-bot` 항목 참조
 - x-bot systemd 서비스가 오전 6시 / 오후 6시 (KST) 텔레그램 브리핑 전송
-- cron `run_briefing.sh`가 모닝/이브닝 브리핑 파일 생성 (x-bot과 별개)
+- cron `run_briefing.sh`가 모닥/이브닝 브리핑 파일 생성 (x-bot과 별개)
 
 ### cron (주식부자 관련)
 | 시간 | 스크립트 | 비고 |
 |------|----------|------|
 | 매 정각 | `scripts/collect_and_classify.py` | 뉴스 수집 + 분류 |
-| 매 정각+10분 | `scripts/update_geoinvest.py` | 지정학 엔티티 추출 (Ollama) |
-| 매 정각 | `scripts/update_stockinvest.py` | 주식 엔티티 추출 (Ollama) |
-| 05:30 KST | `scripts/deep_analysis.py` | 심층분석 → 이벤트 생성 + 엔티티 피드백 |
-| 06:00 KST | `scripts/run_briefing.sh morning` | 모닝 브리핑 |
-| 17:30 KST | `scripts/deep_analysis.py` | 심층분석 → 이벤트 생성 + 엔티티 피드백 |
+| 매 정시+10분 | `scripts/update_geoinvest.py` | ⏸️ **보류** — 지정학 엔티티 추출 (Ollama) |
+| 매 정각 | `scripts/update_stockinvest.py` | 테슬라 엔티티 추출 (Ollama) |
+| 05:30 KST | `scripts/deep_analysis.py` | ⏸️ **보류** — 심층분석 → 이벤트 생성 + 엔티티 피드백 |
+| 06:00 KST | `scripts/run_briefing.sh morning` | 모닥 브리핑 |
+| 17:30 KST | `scripts/deep_analysis.py` | ⏸️ **보류** — 심층분석 → 이벤트 생성 + 엔티티 피드백 |
 | 18:00 KST | `scripts/run_briefing.sh evening` | 이브닝 브리핑 |
 | 04:00 KST | `scripts/review_entities.py` | 엔티티 리뷰/정제 (Phase 0~4) |
 
