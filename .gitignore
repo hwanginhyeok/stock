@@ -74,3 +74,6 @@ tonight_prompt.txt
 tonight_prompt_done.txt
 tonight_prompt_backup_*.txt
 tonight_briefing.md
+
+# Claude Code 로컬 설정
+.claude/settings.local.json
