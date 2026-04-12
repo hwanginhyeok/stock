@@ -30,7 +30,16 @@ def _fetch_ohlcv(symbol: str, period: str, interval: str) -> list[dict]:
         if now - cached_ts < _CACHE_TTL:
             return cached_data
 
-    df = yf.download(symbol, period=period, interval=interval, progress=False)
+    # 1h/4h는 period를 2y로 캡 (yfinance 제한)
+    actual_period = period
+    if interval in ("1h", "4h"):
+        period_days = {"1mo": 30, "3mo": 90, "6mo": 180, "1y": 365, "2y": 730, "5y": 1825, "max": 3650}
+        req_days = period_days.get(period, 180)
+        actual_period = "2y" if req_days > 730 else period
+
+    # 4h는 yfinance가 지원 안 함 → 1h로 받아서 resample
+    yf_interval = "1h" if interval == "4h" else interval
+    df = yf.download(symbol, period=actual_period, interval=yf_interval, progress=False)
     if df.empty:
         return []
 
@@ -38,11 +47,20 @@ def _fetch_ohlcv(symbol: str, period: str, interval: str) -> list[dict]:
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
 
+    # 4h resample
+    if interval == "4h":
+        df = df.resample("4h").agg({
+            "Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum",
+        }).dropna()
+
     records = []
     for idx, row in df.iterrows():
         ts = idx
         if hasattr(ts, "strftime"):
-            time_val = ts.strftime("%Y-%m-%d") if interval in ("1d", "1wk", "1mo") else int(ts.timestamp())
+            if interval in ("1h", "4h"):
+                time_val = int(ts.timestamp())
+            else:
+                time_val = ts.strftime("%Y-%m-%d")
         else:
             time_val = str(ts)
 
@@ -207,9 +225,10 @@ def _compute_indicators(records: list[dict]) -> dict:
 def get_ohlcv(
     symbol: str = "TSLA",
     period: str = Query("6mo", pattern="^(1mo|3mo|6mo|1y|2y|5y|max)$"),
-    interval: str = Query("1d", pattern="^(1d|1wk|1mo)$"),
+    interval: str = Query("1d", pattern="^(1h|4h|1d|1wk|1mo)$"),
 ) -> dict:
     """OHLCV 데이터 + 기술 지표를 반환한다."""
+    interval_labels = {"1h": "1시간", "4h": "4시간", "1d": "일봉", "1wk": "주봉", "1mo": "월봉"}
     records = _fetch_ohlcv(symbol, period, interval)
     indicators = _compute_indicators(records)
 
@@ -217,6 +236,7 @@ def get_ohlcv(
         "symbol": symbol,
         "period": period,
         "interval": interval,
+        "interval_label": interval_labels.get(interval, interval),
         "count": len(records),
         "ohlcv": records,
         "indicators": indicators,

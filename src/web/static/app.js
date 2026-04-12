@@ -167,7 +167,9 @@ let lwMacdSeries = null;
 let lwSignalSeries = null;
 let lwHistSeries = null;
 let currentChartPeriod = '6mo';
+let currentChartInterval = '1d';
 let allEventMarkers = [];
+let allChartData = null;
 
 function switchView(view) {
   currentView = view;
@@ -275,7 +277,33 @@ function initLightweightChart() {
   });
   // VPVR 토글
   document.getElementById('show-vpvr').addEventListener('change', (e) => {
-    lwVpvrSeries.forEach(s => s.applyOptions({ visible: e.target.checked }));
+    const canvas = document.getElementById('lw-main-chart').querySelector('.vpvr-canvas');
+    if (canvas) canvas.style.display = e.target.checked ? 'block' : 'none';
+    if (e.target.checked && lwCandleSeries && allChartData) {
+      renderVPVR(lwMainChart, lwCandleSeries, allChartData, document.getElementById('lw-main-chart'));
+    }
+  });
+
+  // interval 버튼
+  document.querySelectorAll('.interval-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.interval-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentChartInterval = btn.dataset.interval;
+      loadChartData(currentChartPeriod);
+    });
+  });
+
+  // visible range 변경 시 VPVR 업데이트 (debounce)
+  let vpvrDebounce;
+  lwMainChart.timeScale().subscribeVisibleTimeRangeChange(() => {
+    if (!document.getElementById('show-vpvr')?.checked) return;
+    clearTimeout(vpvrDebounce);
+    vpvrDebounce = setTimeout(() => {
+      if (lwCandleSeries && allChartData) {
+        renderVPVR(lwMainChart, lwCandleSeries, allChartData, mainEl);
+      }
+    }, 200);
   });
 
   // 마커 호버 툴팁
@@ -335,11 +363,15 @@ async function loadChartData(period) {
 
   try {
     const [ohlcvResp, eventsResp] = await Promise.all([
-      fetch(`/api/chart/ohlcv?symbol=TSLA&period=${period}`),
+      fetch(`/api/chart/ohlcv?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
       fetch(`/api/chart/events?symbol=TSLA&period=${period}&severity_min=${sevMin}`),
     ]);
     const ohlcvData = await ohlcvResp.json();
     const eventsData = await eventsResp.json();
+
+    // VPVR 계산용 + timeScale 설정
+    allChartData = ohlcvData.ohlcv;
+    lwMainChart.timeScale().applyOptions({ timeVisible: ['1h','4h'].includes(currentChartInterval) });
 
     // 캔들 + 볼륨
     lwCandleSeries.setData(ohlcvData.ohlcv);
@@ -390,28 +422,8 @@ async function loadChartData(period) {
       lwVwmaSeries.setData(vwmaData.series);
     }
 
-    // Volume Profile (VPVR) — 수평 히스토그램을 가격 라인으로 표현
-    lwVpvrSeries.forEach(s => { try { lwMainChart.removeSeries(s); } catch(e){} });
-    lwVpvrSeries = [];
-    const vpData = ohlcvData.indicators.volume_profile;
-    if (vpData?.length) {
-      const showVp = document.getElementById('show-vpvr')?.checked !== false;
-      // 가격대별 수평 라인 (priceLine)으로 표현 — 두께로 거래량 크기 표현
-      const maxPct = Math.max(...vpData.map(b => b.pct));
-      vpData.forEach(bin => {
-        if (bin.pct < 10) return; // 10% 미만은 생략
-        const opacity = Math.round((bin.pct / maxPct) * 200 + 55).toString(16).padStart(2, '0');
-        const color = bin.pct >= 80 ? `#f59e0b${opacity}` : `#58a6ff${opacity}`;
-        lwCandleSeries.createPriceLine({
-          price: bin.price,
-          color: color,
-          lineWidth: bin.pct >= 80 ? 2 : 1,
-          lineStyle: bin.pct >= 60 ? 0 : 2,
-          axisLabelVisible: bin.pct >= 60,
-          title: bin.pct >= 60 ? `VP ${bin.pct}%` : '',
-        });
-      });
-    }
+    // Volume Profile (VPVR) — Canvas 오버레이로 visible range 기반 렌더링
+    // (서버 volume_profile 무시, 클라이언트에서 실시간 계산)
 
     // RSI
     if (ohlcvData.indicators.rsi_series) {
@@ -447,6 +459,11 @@ async function loadChartData(period) {
     allEventMarkers = eventsData.markers;
     renderEventMarkers(document.getElementById('show-events')?.checked !== false);
     renderEventList(eventsData.markers);
+
+    // VPVR 초기 렌더링
+    if (document.getElementById('show-vpvr')?.checked) {
+      setTimeout(() => renderVPVR(lwMainChart, lwCandleSeries, allChartData, document.getElementById('lw-main-chart')), 100);
+    }
 
   } catch (err) {
     console.error('차트 데이터 로드 실패:', err);
@@ -501,6 +518,71 @@ function renderEventList(markers) {
       </div>
     </div>
   `).join('');
+}
+
+// ============================================================
+// Volume Profile (VPVR) — Visible Range 기반
+// ============================================================
+
+function computeVPVR(ohlcvData, fromTime, toTime, numBins = 30) {
+  const visible = ohlcvData.filter(d => d.time >= fromTime && d.time <= toTime);
+  if (!visible.length) return [];
+
+  const prices = visible.flatMap(d => [d.high, d.low]);
+  const minP = Math.min(...prices);
+  const maxP = Math.max(...prices);
+  const binSize = (maxP - minP) / numBins || 1;
+
+  const bins = new Array(numBins).fill(0);
+  visible.forEach(d => {
+    const mid = (d.high + d.low) / 2;
+    const idx = Math.min(Math.floor((mid - minP) / binSize), numBins - 1);
+    bins[idx] += d.volume;
+  });
+
+  const maxVol = Math.max(...bins);
+  return bins.map((vol, i) => ({
+    price: minP + (i + 0.5) * binSize,
+    volume: vol,
+    pct: maxVol > 0 ? vol / maxVol * 100 : 0,
+  }));
+}
+
+function renderVPVR(chart, series, ohlcvData, container) {
+  const old = container.querySelector('.vpvr-canvas');
+  if (old) old.remove();
+
+  const range = chart.timeScale().getVisibleRange();
+  if (!range) return;
+
+  const vpData = computeVPVR(ohlcvData, range.from, range.to);
+  if (!vpData.length) return;
+
+  const canvas = document.createElement('canvas');
+  canvas.className = 'vpvr-canvas';
+  canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5;';
+  canvas.width = container.clientWidth;
+  canvas.height = container.clientHeight;
+  container.style.position = 'relative';
+  container.appendChild(canvas);
+
+  const ctx = canvas.getContext('2d');
+  const maxBarWidth = canvas.width * 0.15;
+  const lastClose = ohlcvData[ohlcvData.length - 1]?.close || 0;
+
+  vpData.forEach(bin => {
+    const y = series.priceToCoordinate(bin.price);
+    if (y === null || y === undefined) return;
+
+    const barWidth = (bin.pct / 100) * maxBarWidth;
+    const barHeight = Math.max(2, canvas.height / vpData.length * 0.8);
+
+    if (bin.pct >= 95) ctx.fillStyle = '#f59e0b88';
+    else if (bin.price > lastClose) ctx.fillStyle = '#ef535044';
+    else ctx.fillStyle = '#26a69a44';
+
+    ctx.fillRect(canvas.width - barWidth - 60, y - barHeight / 2, barWidth, barHeight);
+  });
 }
 
 // ============================================================

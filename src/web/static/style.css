@@ -164,6 +164,10 @@ nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
 .chart-toggle { font-size: 11px; color: var(--dim); display: flex; align-items: center; gap: 4px; cursor: pointer; }
 .chart-toggle input { accent-color: var(--blue); }
 .chart-indicator-text { font-size: 11px; color: var(--dim); margin-left: auto; }
+.chart-interval-btns { display: flex; gap: 2px; }
+.interval-btn { background: transparent; border: 1px solid var(--border); color: var(--dim); font-size: 11px; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-family: inherit; font-weight: 600; }
+.interval-btn:hover { color: var(--white); border-color: var(--dim); }
+.interval-btn.active { background: var(--green); color: #fff; border-color: var(--green); }
 
 /* 차트 툴팁 */
 .chart-tooltip { position: absolute; display: none; background: #161b22; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--white); font-size: 12px; z-index: 100; pointer-events: none; max-width: 280px; line-height: 1.5; }
