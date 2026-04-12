@@ -487,148 +487,164 @@ def _detect_pivot_points(records: list[dict], window: int = 5) -> dict:
     return {"pivot_highs": pivot_highs, "pivot_lows": pivot_lows}
 
 
-def _find_best_trendline(records: list[dict], pivot_window: int = 30) -> dict | None:
-    """전체 역사에서 가장 많이 접촉하는 빗각 하나를 찾는다."""
+def _find_inbeom_trendlines(records: list[dict], pivot_window: int = 30) -> list[dict]:
+    """인범 스타일 빗각 (고고저/저저고) — 거래량 변곡점 기반."""
     if len(records) < pivot_window * 2 + 1:
-        return None
+        return []
 
     pivots = _detect_pivot_points(records, window=pivot_window)
     pivot_highs = pivots["pivot_highs"]
     pivot_lows = pivots["pivot_lows"]
+    if not pivot_highs or not pivot_lows:
+        return []
 
-    # ATR (평균 변동폭) → 접촉 판단 tolerance
     atr = sum(r["high"] - r["low"] for r in records) / len(records)
     tolerance = atr * 0.5
+    current_time = records[-1]["time"]
+    current_idx = len(records) - 1
 
-    candidates = []
+    # 거래량 필터: 주변 20봉 평균 대비 1.3배 이상
+    def _vol_filter(pvts: list[dict]) -> list[dict]:
+        out = []
+        for p in pvts:
+            i = p["index"]
+            ws, we = max(0, i - 10), min(len(records), i + 11)
+            avg_vol = sum(records[k]["volume"] for k in range(ws, we)) / max(we - ws, 1)
+            if avg_vol > 0 and records[i]["volume"] >= avg_vol * 1.3:
+                out.append(p)
+        return out if len(out) >= 2 else pvts
 
-    # 지지 후보: 피봇 로우 조합 (상위 10개만, 최근 우선)
-    lows = sorted(pivot_lows, key=lambda x: x["index"], reverse=True)[:10]
-    for i in range(len(lows)):
-        for j in range(i + 1, len(lows)):
-            p1, p2 = sorted([lows[i], lows[j]], key=lambda x: x["index"])
-            if p2["index"] - p1["index"] < 30:
-                continue
-            slope = (p2["price"] - p1["price"]) / (p2["index"] - p1["index"])
-            touches = [pl for pl in pivot_lows
-                       if abs(pl["price"] - (p1["price"] + slope * (pl["index"] - p1["index"]))) <= tolerance]
-            if len(touches) >= 2:
-                candidates.append({
-                    "start": {"time": p1["time"], "price": p1["price"], "index": p1["index"]},
-                    "end": {"time": p2["time"], "price": p2["price"], "index": p2["index"]},
-                    "slope": slope, "type": "support",
-                    "touch_count": len(touches), "touches": touches,
-                })
+    vol_highs = _vol_filter(pivot_highs)
+    vol_lows = _vol_filter(pivot_lows)
 
-    # 저항 후보: 피봇 하이 조합
-    highs = sorted(pivot_highs, key=lambda x: x["index"], reverse=True)[:10]
-    for i in range(len(highs)):
-        for j in range(i + 1, len(highs)):
-            p1, p2 = sorted([highs[i], highs[j]], key=lambda x: x["index"])
-            if p2["index"] - p1["index"] < 30:
-                continue
-            slope = (p2["price"] - p1["price"]) / (p2["index"] - p1["index"])
-            touches = [ph for ph in pivot_highs
-                       if abs(ph["price"] - (p1["price"] + slope * (ph["index"] - p1["index"]))) <= tolerance]
-            if len(touches) >= 2:
-                candidates.append({
-                    "start": {"time": p1["time"], "price": p1["price"], "index": p1["index"]},
-                    "end": {"time": p2["time"], "price": p2["price"], "index": p2["index"]},
-                    "slope": slope, "type": "resistance",
-                    "touch_count": len(touches), "touches": touches,
-                })
+    def _pick_pair(pts: list[dict], top_pct: float = 0.7, recent_frac: float = 1.0) -> tuple | None:
+        if len(pts) < 2:
+            return None
+        if recent_frac < 1.0:
+            cutoff = int(len(records) * (1 - recent_frac))
+            pts = [p for p in pts if p["index"] >= cutoff]
+        else:
+            prices = sorted(p["price"] for p in pts)
+            thr = prices[int(len(prices) * top_pct)] if top_pct < 1.0 else 0
+            pts = [p for p in pts if p["price"] >= thr]
+        if len(pts) < 2:
+            return None
+        recent = sorted(pts, key=lambda x: x["index"], reverse=True)
+        for i in range(len(recent)):
+            for j in range(i + 1, len(recent)):
+                if abs(recent[i]["index"] - recent[j]["index"]) >= 60:
+                    return tuple(sorted([recent[i], recent[j]], key=lambda x: x["index"]))
+        return tuple(sorted(recent[:2], key=lambda x: x["index"]))
 
-    if not candidates:
-        return None
+    result = []
 
-    return max(candidates, key=lambda x: (x["touch_count"], x["end"]["index"] - x["start"]["index"]))
+    # 고고저: 상위 30% 고점 2개 연결 → 하강 저항
+    pair = _pick_pair(vol_highs, top_pct=0.7)
+    if pair:
+        p1, p2 = pair
+        slope = (p2["price"] - p1["price"]) / (p2["index"] - p1["index"])
+        ext = p1["price"] + slope * (current_idx - p1["index"])
+        tc = sum(1 for ph in vol_highs if abs(ph["price"] - (p1["price"] + slope * (ph["index"] - p1["index"]))) <= tolerance)
+        result.append({
+            "pattern": "고고저", "type": "resistance",
+            "start": {"time": p1["time"], "price": p1["price"], "index": p1["index"]},
+            "end": {"time": p2["time"], "price": p2["price"], "index": p2["index"]},
+            "slope": slope, "touch_count": tc,
+            "extended": {"time": current_time, "price": ext},
+            "target_label": "미래 저점 타겟", "volume_confirmed": True,
+        })
+
+    # 저저고: 후반 60% 저점 2개 연결 → 상승 지지
+    pair = _pick_pair(vol_lows, top_pct=1.0, recent_frac=0.6)
+    if pair:
+        p1, p2 = pair
+        slope = (p2["price"] - p1["price"]) / (p2["index"] - p1["index"])
+        ext = p1["price"] + slope * (current_idx - p1["index"])
+        tc = sum(1 for pl in vol_lows if abs(pl["price"] - (p1["price"] + slope * (pl["index"] - p1["index"]))) <= tolerance)
+        result.append({
+            "pattern": "저저고", "type": "support",
+            "start": {"time": p1["time"], "price": p1["price"], "index": p1["index"]},
+            "end": {"time": p2["time"], "price": p2["price"], "index": p2["index"]},
+            "slope": slope, "touch_count": tc,
+            "extended": {"time": current_time, "price": ext},
+            "target_label": "미래 고점 타겟", "volume_confirmed": True,
+        })
+
+    return result
 
 
-def _compute_channel(records: list[dict], trendline: dict, pivot_window: int = 30) -> dict:
-    """핵심 빗각 하나로부터 평행 채널을 생성한다. 모든 선이 같은 기울기."""
+def _compute_inbeom_channel(records: list[dict], trendline: dict, pivot_window: int = 30) -> dict:
+    """인범 빗각 기반 평행 채널 — 빗각을 복사해서 반대편에 붙임."""
     start_idx = trendline["start"]["index"]
     start_price = trendline["start"]["price"]
     slope = trendline["slope"]
-    tl_type = trendline["type"]
+    pattern = trendline["pattern"]
     last_idx = len(records) - 1
 
     def line_at(idx: int) -> float:
         return start_price + slope * (idx - start_idx)
 
-    # 반대쪽 피봇과의 수직 거리 → 채널 폭
     pivots = _detect_pivot_points(records, window=pivot_window)
-    if tl_type == "support":
-        opposite_pivots = pivots["pivot_highs"]
+    # 고고저 → 아래 피봇 로우 거리, 저저고 → 위 피봇 하이 거리
+    if pattern == "고고저":
+        dists = [line_at(p["index"]) - p["price"] for p in pivots["pivot_lows"]
+                 if p["index"] >= start_idx and p["price"] < line_at(p["index"])]
     else:
-        opposite_pivots = pivots["pivot_lows"]
+        dists = [p["price"] - line_at(p["index"]) for p in pivots["pivot_highs"]
+                 if p["index"] >= start_idx and p["price"] > line_at(p["index"])]
 
-    distances = []
-    for p in opposite_pivots:
-        if p["index"] < start_idx:
-            continue
-        dist = abs(p["price"] - line_at(p["index"]))
-        if dist > 0:
-            distances.append(dist)
-
-    if distances:
-        distances.sort()
-        channel_width = distances[int(len(distances) * 0.75)]
+    if dists:
+        dists.sort()
+        ch_width = dists[min(int(len(dists) * 0.9), len(dists) - 1)]
     else:
-        channel_width = abs(line_at(last_idx) - records[last_idx]["close"]) * 2
+        ch_width = sum(r["high"] - r["low"] for r in records) / len(records) * 10
 
-    # 채널 방향: support면 위로 확장, resistance면 아래로 확장
-    offset = channel_width if tl_type == "support" else -channel_width
+    offset = -ch_width if pattern == "고고저" else ch_width
 
-    def make_line(extra: float) -> list[dict]:
+    def mk(extra: float) -> list[dict]:
         return [
             {"time": trendline["start"]["time"], "value": round(line_at(start_idx) + extra, 2)},
             {"time": trendline["end"]["time"], "value": round(line_at(trendline["end"]["index"]) + extra, 2)},
             {"time": records[last_idx]["time"], "value": round(line_at(last_idx) + extra, 2)},
         ]
 
-    primary_line = make_line(0)
-    opposite_line = make_line(offset)
-    center_line = make_line(offset / 2)
+    cur = records[last_idx]["close"]
+    lo = min(line_at(last_idx), line_at(last_idx) + offset)
+    hi = max(line_at(last_idx), line_at(last_idx) + offset)
+    thr = abs(ch_width) * 0.1
+    if cur > hi + thr: pos, lbl = "above_channel", "채널 상방 돌파"
+    elif cur < lo - thr: pos, lbl = "below_channel", "채널 하방 이탈"
+    elif cur >= hi - thr: pos, lbl = "near_resistance", "저항 근접"
+    elif cur <= lo + thr: pos, lbl = "near_support", "지지 근접"
+    elif cur > (lo + hi) / 2: pos, lbl = "upper_half", "채널 상부"
+    else: pos, lbl = "lower_half", "채널 하부"
 
-    # 현재 위치 판단
-    current_close = records[last_idx]["close"]
-    lower = min(line_at(last_idx), line_at(last_idx) + offset)
-    upper = max(line_at(last_idx), line_at(last_idx) + offset)
-    threshold = channel_width * 0.1
-
-    if current_close > upper:
-        position = "above_channel"
-    elif current_close < lower:
-        position = "below_channel"
-    elif current_close >= upper - threshold:
-        position = "near_resistance"
-    elif current_close <= lower + threshold:
-        position = "near_support"
-    elif current_close > (lower + upper) / 2:
-        position = "upper_half"
-    else:
-        position = "lower_half"
-
-    position_labels = {
-        "above_channel": "채널 상방 돌파", "below_channel": "채널 하방 이탈",
-        "near_resistance": "저항 근접", "near_support": "지지 근접",
-        "upper_half": "채널 상반부", "lower_half": "채널 하반부",
-    }
+    # VP 교차
+    atr = sum(r["high"] - r["low"] for r in records) / len(records)
+    pmin, pmax = min(r["low"] for r in records), max(r["high"] for r in records)
+    bsz = (pmax - pmin) / 30 if pmax > pmin else 1
+    vb: dict[int, float] = {}
+    for r in records:
+        bi = min(int(((r["high"] + r["low"]) / 2 - pmin) / bsz), 29)
+        vb[bi] = vb.get(bi, 0) + r["volume"]
+    top3 = sorted(vb.items(), key=lambda x: x[1], reverse=True)[:3]
+    vpp = [pmin + (b + 0.5) * bsz for b, _ in top3]
+    cur_prim = line_at(last_idx)
+    vpc = any(abs(cur_prim - v) <= atr * 0.5 for v in vpp)
+    vpc_p = round(min(vpp, key=lambda v: abs(cur_prim - v)), 2) if vpc else None
 
     return {
-        "primary": {
-            "type": tl_type, "slope": round(slope, 4),
-            "touch_count": trendline["touch_count"],
-            "line": primary_line,
-        },
-        "opposite": {"line": opposite_line},
-        "center": {"line": center_line},
-        "channel_width": round(channel_width, 2),
-        "position": position,
-        "position_label": position_labels.get(position, position),
-        "current_primary_price": round(line_at(last_idx), 2),
-        "current_opposite_price": round(line_at(last_idx) + offset, 2),
-        "current_center_price": round(line_at(last_idx) + offset / 2, 2),
+        "primary": {"type": trendline["type"], "pattern": pattern,
+                     "slope": round(slope, 4), "touch_count": trendline["touch_count"],
+                     "line": mk(0)},
+        "opposite": {"line": mk(offset)},
+        "center": {"line": mk(offset / 2)},
+        "channel_width": round(abs(ch_width), 2),
+        "position": pos, "position_label": lbl,
+        "current_primary_price": round(cur_prim, 2),
+        "current_opposite_price": round(cur_prim + offset, 2),
+        "current_center_price": round(cur_prim + offset / 2, 2),
+        "vp_confluence": vpc, "vp_confluence_price": vpc_p,
     }
 
 
@@ -639,27 +655,24 @@ def get_trendlines(
     interval: str = Query("1d", pattern="^(1h|4h|1d|1wk|1mo)$"),
     pivot_window: int = Query(30, ge=5, le=50),
 ) -> dict:
-    """핵심 빗각 + 평행 채널 — 항상 MAX 데이터 기반."""
+    """인범 스타일 빗각(고고저/저저고) + 평행 채널 — 항상 MAX 데이터 기반."""
     max_records = _fetch_ohlcv(symbol, "max", interval)
     if len(max_records) < 100:
-        return {"symbol": symbol, "channel": None, "trendline": None}
+        return {"symbol": symbol, "channels": [], "trendlines": []}
 
-    trendline = _find_best_trendline(max_records, pivot_window=pivot_window)
-    if not trendline:
-        return {"symbol": symbol, "channel": None, "trendline": None}
-
-    channel = _compute_channel(max_records, trendline, pivot_window=pivot_window)
+    trendlines = _find_inbeom_trendlines(max_records, pivot_window=pivot_window)
+    channels = [_compute_inbeom_channel(max_records, tl, pivot_window=pivot_window) for tl in trendlines]
 
     return {
         "symbol": symbol, "period": period, "interval": interval,
-        "trendline": {
-            "type": trendline["type"],
-            "slope": round(trendline["slope"], 4),
-            "touch_count": trendline["touch_count"],
-            "start": trendline["start"],
-            "end": trendline["end"],
-        },
-        "channel": channel,
+        "trendlines": [{
+            "pattern": tl["pattern"], "type": tl["type"],
+            "slope": round(tl["slope"], 4), "touch_count": tl["touch_count"],
+            "start": tl["start"], "end": tl["end"],
+            "extended": {"time": tl["extended"]["time"], "price": round(tl["extended"]["price"], 2)},
+            "volume_confirmed": tl["volume_confirmed"],
+        } for tl in trendlines],
+        "channels": channels,
     }
 
 
