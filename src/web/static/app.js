@@ -256,16 +256,42 @@ function initLightweightChart() {
     { chart: lwRsiChart, series: lwRsiSeries },
   ]);
 
-  // 타임스케일 동기화
+  // 타임스케일 동기화 (피드백 루프 방지)
+  let _isSyncingTimeScale = false;
   function syncTimeScale(source, targets) {
     source.timeScale().subscribeVisibleLogicalRangeChange((range) => {
-      if (!range) return;
+      if (!range || _isSyncingTimeScale) return;
+      _isSyncingTimeScale = true;
       targets.forEach(t => t.timeScale().setVisibleLogicalRange(range));
+      _isSyncingTimeScale = false;
     });
   }
   syncTimeScale(lwMainChart, [lwRsiChart, lwMacdChart]);
   syncTimeScale(lwRsiChart, [lwMainChart, lwMacdChart]);
   syncTimeScale(lwMacdChart, [lwMainChart, lwRsiChart]);
+
+  // SMA 시리즈 미리 생성 (한 번만, loadChartData에서 setData만 호출)
+  const smaStyles = {
+    '5':   { color: '#ef5350', lineWidth: 1, lineStyle: 0 },
+    '10':  { color: '#f59e0b', lineWidth: 1, lineStyle: 0 },
+    '20':  { color: '#3fb950', lineWidth: 1, lineStyle: 0 },
+    '50':  { color: '#58a6ff', lineWidth: 1.5, lineStyle: 0 },
+    '100': { color: '#a78bfa', lineWidth: 1.5, lineStyle: 0 },
+    '200': { color: '#e6edf3', lineWidth: 2, lineStyle: 0 },
+  };
+  for (const [len, style] of Object.entries(smaStyles)) {
+    lwSmaSeries[len] = lwMainChart.addLineSeries({
+      color: style.color, lineWidth: style.lineWidth, lineStyle: style.lineStyle,
+      lastValueVisible: false, priceLineVisible: false, crosshairMarkerVisible: false,
+      title: `MA${len}`,
+    });
+  }
+  // VWMA 시리즈 미리 생성
+  lwVwmaSeries = lwMainChart.addLineSeries({
+    color: '#ff6b6b', lineWidth: 2.5, lineStyle: 2,
+    lastValueVisible: true, priceLineVisible: false,
+    title: 'VWMA100',
+  });
 
   // SMA 토글
   document.getElementById('show-sma').addEventListener('change', (e) => {
@@ -373,6 +399,9 @@ async function loadChartData(period) {
     allChartData = ohlcvData.ohlcv;
     lwMainChart.timeScale().applyOptions({ timeVisible: ['1h','4h'].includes(currentChartInterval) });
 
+    // 동기화 리스너 비활성화 (setData 중 range 변경 방지)
+    _isSyncingTimeScale = true;
+
     // 캔들 + 볼륨
     lwCandleSeries.setData(ohlcvData.ohlcv);
     lwVolumeSeries.setData(ohlcvData.ohlcv.map(d => ({
@@ -381,45 +410,20 @@ async function loadChartData(period) {
       color: d.close >= d.open ? '#26a69a33' : '#ef535033',
     })));
 
-    // SMA 이평선 (5/10/20/50/100/200)
+    // SMA 이평선 — 기존 시리즈에 데이터만 업데이트 (시리즈 재생성 안 함)
     const smaData = ohlcvData.indicators.sma || {};
-    const smaStyles = {
-      '5':   { color: '#ef5350', lineWidth: 1, lineStyle: 0 },
-      '10':  { color: '#f59e0b', lineWidth: 1, lineStyle: 0 },
-      '20':  { color: '#3fb950', lineWidth: 1, lineStyle: 0 },
-      '50':  { color: '#58a6ff', lineWidth: 1.5, lineStyle: 0 },
-      '100': { color: '#a78bfa', lineWidth: 1.5, lineStyle: 0 },
-      '200': { color: '#e6edf3', lineWidth: 2, lineStyle: 0 },
-    };
-    // 기존 SMA 시리즈 제거 후 재생성
-    Object.values(lwSmaSeries).forEach(s => { try { lwMainChart.removeSeries(s); } catch(e){} });
-    lwSmaSeries = {};
-    const showSma = document.getElementById('show-sma')?.checked !== false;
-    for (const [len, style] of Object.entries(smaStyles)) {
-      if (!smaData[len]?.series?.length) continue;
-      const s = lwMainChart.addLineSeries({
-        color: style.color, lineWidth: style.lineWidth, lineStyle: style.lineStyle,
-        lastValueVisible: false, priceLineVisible: false, crosshairMarkerVisible: false,
-        visible: showSma,
-        title: `MA${len}`,
-      });
-      s.setData(smaData[len].series);
-      lwSmaSeries[len] = s;
+    for (const [len, series] of Object.entries(lwSmaSeries)) {
+      if (smaData[len]?.series?.length) {
+        series.setData(smaData[len].series);
+      } else {
+        series.setData([]);
+      }
     }
 
-    // VWMA 100 (거래량 가중 100일선) — 두꺼운 점선
-    if (lwVwmaSeries) { try { lwMainChart.removeSeries(lwVwmaSeries); } catch(e){} }
-    lwVwmaSeries = null;
+    // VWMA 100 — 기존 시리즈에 데이터만 업데이트
     const vwmaData = ohlcvData.indicators.vwma100;
-    if (vwmaData?.series?.length) {
-      const showVwma = document.getElementById('show-vwma')?.checked !== false;
-      lwVwmaSeries = lwMainChart.addLineSeries({
-        color: '#ff6b6b', lineWidth: 2.5, lineStyle: 2,
-        lastValueVisible: true, priceLineVisible: false,
-        visible: showVwma,
-        title: 'VWMA100',
-      });
-      lwVwmaSeries.setData(vwmaData.series);
+    if (lwVwmaSeries) {
+      lwVwmaSeries.setData(vwmaData?.series?.length ? vwmaData.series : []);
     }
 
     // Volume Profile (VPVR) — Canvas 오버레이로 visible range 기반 렌더링
@@ -460,10 +464,23 @@ async function loadChartData(period) {
     renderEventMarkers(document.getElementById('show-events')?.checked !== false);
     renderEventList(eventsData.markers);
 
-    // VPVR 초기 렌더링
-    if (document.getElementById('show-vpvr')?.checked) {
-      setTimeout(() => renderVPVR(lwMainChart, lwCandleSeries, allChartData, document.getElementById('lw-main-chart')), 100);
-    }
+    // fitContent: 2단계 지연 — chart 내부 렌더 완전 종료 후 range 설정
+    // _isSyncingTimeScale는 true 상태 유지 (setData 위에서 켰음)
+    setTimeout(() => {
+      lwMainChart.timeScale().fitContent();
+      setTimeout(() => {
+        const range = lwMainChart.timeScale().getVisibleLogicalRange();
+        if (range) {
+          lwRsiChart.timeScale().setVisibleLogicalRange(range);
+          lwMacdChart.timeScale().setVisibleLogicalRange(range);
+        }
+        _isSyncingTimeScale = false;
+        // VPVR 렌더링
+        if (document.getElementById('show-vpvr')?.checked) {
+          renderVPVR(lwMainChart, lwCandleSeries, allChartData, document.getElementById('lw-main-chart'));
+        }
+      }, 100);
+    }, 100);
 
   } catch (err) {
     console.error('차트 데이터 로드 실패:', err);
