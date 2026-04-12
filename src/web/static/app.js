@@ -464,34 +464,41 @@ async function loadChartData(period) {
       `;
     }
 
-    // 추세선(빗각) 렌더링
+    // 평행 채널 렌더링 (빗각 + 같은 기울기 평행선)
     lwTrendlineSeries.forEach(s => { try { lwMainChart.removeSeries(s); } catch(e){} });
     lwTrendlineSeries = [];
-    if (trendData.trendlines?.length) {
-      const trendColors = {
-        resistance: '#ef5350',
-        support: '#26a69a',
-        midline: '#f59e0b88',
-      };
-      trendData.trendlines.forEach(tl => {
-        const color = trendColors[tl.type] || '#8b949e';
-        const s = lwMainChart.addLineSeries({
-          color: color,
-          lineWidth: tl.type === 'midline' ? 1 : 2,
-          lineStyle: tl.type === 'midline' ? 2 : (tl.breakout ? 1 : 0),
-          lastValueVisible: true,
-          priceLineVisible: false,
-          crosshairMarkerVisible: false,
-          title: tl.label || tl.type,
-        });
-        // 시작점 → 끝점 → 현재 시점 연장
-        s.setData([
-          { time: tl.start.time, value: tl.start.price },
-          { time: tl.end.time, value: tl.end.price },
-          { time: tl.extended.time, value: tl.extended.price },
-        ]);
-        lwTrendlineSeries.push(s);
+    if (trendData.channel) {
+      const ch = trendData.channel;
+      const isPrimSupport = ch.primary.type === 'support';
+
+      // 핵심 빗각 (굵은 실선)
+      const primaryS = lwMainChart.addLineSeries({
+        color: isPrimSupport ? '#26a69a' : '#ef5350',
+        lineWidth: 2, lineStyle: 0,
+        lastValueVisible: true, priceLineVisible: false, crosshairMarkerVisible: false,
+        title: isPrimSupport ? '지지 빗각' : '저항 빗각',
       });
+      primaryS.setData(ch.primary.line);
+      lwTrendlineSeries.push(primaryS);
+
+      // 채널 반대편 (굵은 실선, 같은 기울기)
+      const oppositeS = lwMainChart.addLineSeries({
+        color: isPrimSupport ? '#ef5350' : '#26a69a',
+        lineWidth: 2, lineStyle: 0,
+        lastValueVisible: true, priceLineVisible: false, crosshairMarkerVisible: false,
+        title: isPrimSupport ? '채널 상단' : '채널 하단',
+      });
+      oppositeS.setData(ch.opposite.line);
+      lwTrendlineSeries.push(oppositeS);
+
+      // 채널 중심선 (얇은 점선)
+      const centerS = lwMainChart.addLineSeries({
+        color: '#f59e0b88', lineWidth: 1, lineStyle: 2,
+        lastValueVisible: false, priceLineVisible: false, crosshairMarkerVisible: false,
+        title: '',
+      });
+      centerS.setData(ch.center.line);
+      lwTrendlineSeries.push(centerS);
     }
 
     // 시그널 마커 (BUY/SELL) + 이벤트 마커 통합

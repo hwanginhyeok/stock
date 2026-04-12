@@ -487,86 +487,149 @@ def _detect_pivot_points(records: list[dict], window: int = 5) -> dict:
     return {"pivot_highs": pivot_highs, "pivot_lows": pivot_lows}
 
 
-def _compute_trendlines(records: list[dict], pivot_window: int = 30) -> list[dict]:
-    """장기 빗각(Long-term trendlines) — 전체 역사 데이터 기반. 최대 3개."""
+def _find_best_trendline(records: list[dict], pivot_window: int = 30) -> dict | None:
+    """전체 역사에서 가장 많이 접촉하는 빗각 하나를 찾는다."""
     if len(records) < pivot_window * 2 + 1:
-        return []
-
-    current_idx = len(records) - 1
-    current_time = records[current_idx]["time"]
-    current_close = records[current_idx]["close"]
-    trendlines = []
+        return None
 
     pivots = _detect_pivot_points(records, window=pivot_window)
+    pivot_highs = pivots["pivot_highs"]
+    pivot_lows = pivots["pivot_lows"]
 
-    def _find_pair(points: list[dict], min_gap: int = 60) -> tuple | None:
-        """최근 2개 피봇 선택 (간격 60봉 이상 보장)."""
-        recent = sorted(points, key=lambda x: x["index"], reverse=True)
-        for i in range(len(recent) - 1):
-            for j in range(i + 1, len(recent)):
-                if abs(recent[i]["index"] - recent[j]["index"]) >= min_gap:
-                    return tuple(sorted([recent[i], recent[j]], key=lambda x: x["index"]))
-        return tuple(sorted(recent[:2], key=lambda x: x["index"])) if len(recent) >= 2 else None
+    # ATR (평균 변동폭) → 접촉 판단 tolerance
+    atr = sum(r["high"] - r["low"] for r in records) / len(records)
+    tolerance = atr * 0.5
 
-    # 1. 장기 하강 저항선 — 상위 30% 고점에서 최근 2개
-    all_highs = pivots["pivot_highs"]
-    if len(all_highs) >= 2:
-        price_threshold = sorted([p["price"] for p in all_highs])[int(len(all_highs) * 0.7)]
-        filtered = [p for p in all_highs if p["price"] >= price_threshold]
-        if len(filtered) >= 2:
-            pair = _find_pair(filtered)
-            if pair:
-                p1, p2 = pair
-                slope = (p2["price"] - p1["price"]) / (p2["index"] - p1["index"]) if p2["index"] != p1["index"] else 0
-                ext_price = p1["price"] + slope * (current_idx - p1["index"])
-                trendlines.append({
-                    "type": "resistance", "timeframe": "major",
-                    "start": {"time": p1["time"], "price": round(p1["price"], 2)},
-                    "end": {"time": p2["time"], "price": round(p2["price"], 2)},
-                    "slope": round(slope, 4),
-                    "extended": {"time": current_time, "price": round(ext_price, 2)},
-                    "breakout": current_close > ext_price,
-                    "label": "하강 저항선",
+    candidates = []
+
+    # 지지 후보: 피봇 로우 조합 (상위 10개만, 최근 우선)
+    lows = sorted(pivot_lows, key=lambda x: x["index"], reverse=True)[:10]
+    for i in range(len(lows)):
+        for j in range(i + 1, len(lows)):
+            p1, p2 = sorted([lows[i], lows[j]], key=lambda x: x["index"])
+            if p2["index"] - p1["index"] < 30:
+                continue
+            slope = (p2["price"] - p1["price"]) / (p2["index"] - p1["index"])
+            touches = [pl for pl in pivot_lows
+                       if abs(pl["price"] - (p1["price"] + slope * (pl["index"] - p1["index"]))) <= tolerance]
+            if len(touches) >= 2:
+                candidates.append({
+                    "start": {"time": p1["time"], "price": p1["price"], "index": p1["index"]},
+                    "end": {"time": p2["time"], "price": p2["price"], "index": p2["index"]},
+                    "slope": slope, "type": "support",
+                    "touch_count": len(touches), "touches": touches,
                 })
 
-    # 2. 장기 상승 지지선 — 후반 60% 저점에서 최근 2개
-    all_lows = pivots["pivot_lows"]
-    cutoff_idx = int(len(records) * 0.4)
-    recent_lows = [p for p in all_lows if p["index"] >= cutoff_idx]
-    if len(recent_lows) >= 2:
-        pair = _find_pair(recent_lows)
-        if pair:
-            p1, p2 = pair
-            slope = (p2["price"] - p1["price"]) / (p2["index"] - p1["index"]) if p2["index"] != p1["index"] else 0
-            ext_price = p1["price"] + slope * (current_idx - p1["index"])
-            trendlines.append({
-                "type": "support", "timeframe": "major",
-                "start": {"time": p1["time"], "price": round(p1["price"], 2)},
-                "end": {"time": p2["time"], "price": round(p2["price"], 2)},
-                "slope": round(slope, 4),
-                "extended": {"time": current_time, "price": round(ext_price, 2)},
-                "breakout": current_close < ext_price,
-                "label": "상승 지지선",
-            })
+    # 저항 후보: 피봇 하이 조합
+    highs = sorted(pivot_highs, key=lambda x: x["index"], reverse=True)[:10]
+    for i in range(len(highs)):
+        for j in range(i + 1, len(highs)):
+            p1, p2 = sorted([highs[i], highs[j]], key=lambda x: x["index"])
+            if p2["index"] - p1["index"] < 30:
+                continue
+            slope = (p2["price"] - p1["price"]) / (p2["index"] - p1["index"])
+            touches = [ph for ph in pivot_highs
+                       if abs(ph["price"] - (p1["price"] + slope * (ph["index"] - p1["index"]))) <= tolerance]
+            if len(touches) >= 2:
+                candidates.append({
+                    "start": {"time": p1["time"], "price": p1["price"], "index": p1["index"]},
+                    "end": {"time": p2["time"], "price": p2["price"], "index": p2["index"]},
+                    "slope": slope, "type": "resistance",
+                    "touch_count": len(touches), "touches": touches,
+                })
 
-    # 3. 채널 중심선 — 저항선/지지선 모두 있을 때만
-    res = next((t for t in trendlines if t["type"] == "resistance"), None)
-    sup = next((t for t in trendlines if t["type"] == "support"), None)
-    if res and sup:
-        mid_start = (res["start"]["price"] + sup["start"]["price"]) / 2
-        mid_end = (res["end"]["price"] + sup["end"]["price"]) / 2
-        mid_ext = (res["extended"]["price"] + sup["extended"]["price"]) / 2
-        trendlines.append({
-            "type": "midline", "timeframe": "major",
-            "start": {"time": res["start"]["time"], "price": round(mid_start, 2)},
-            "end": {"time": res["end"]["time"], "price": round(mid_end, 2)},
-            "slope": round((res["slope"] + sup["slope"]) / 2, 4),
-            "extended": {"time": current_time, "price": round(mid_ext, 2)},
-            "breakout": False,
-            "label": "채널 중심선",
-        })
+    if not candidates:
+        return None
 
-    return trendlines[:3]
+    return max(candidates, key=lambda x: (x["touch_count"], x["end"]["index"] - x["start"]["index"]))
+
+
+def _compute_channel(records: list[dict], trendline: dict, pivot_window: int = 30) -> dict:
+    """핵심 빗각 하나로부터 평행 채널을 생성한다. 모든 선이 같은 기울기."""
+    start_idx = trendline["start"]["index"]
+    start_price = trendline["start"]["price"]
+    slope = trendline["slope"]
+    tl_type = trendline["type"]
+    last_idx = len(records) - 1
+
+    def line_at(idx: int) -> float:
+        return start_price + slope * (idx - start_idx)
+
+    # 반대쪽 피봇과의 수직 거리 → 채널 폭
+    pivots = _detect_pivot_points(records, window=pivot_window)
+    if tl_type == "support":
+        opposite_pivots = pivots["pivot_highs"]
+    else:
+        opposite_pivots = pivots["pivot_lows"]
+
+    distances = []
+    for p in opposite_pivots:
+        if p["index"] < start_idx:
+            continue
+        dist = abs(p["price"] - line_at(p["index"]))
+        if dist > 0:
+            distances.append(dist)
+
+    if distances:
+        distances.sort()
+        channel_width = distances[int(len(distances) * 0.75)]
+    else:
+        channel_width = abs(line_at(last_idx) - records[last_idx]["close"]) * 2
+
+    # 채널 방향: support면 위로 확장, resistance면 아래로 확장
+    offset = channel_width if tl_type == "support" else -channel_width
+
+    def make_line(extra: float) -> list[dict]:
+        return [
+            {"time": trendline["start"]["time"], "value": round(line_at(start_idx) + extra, 2)},
+            {"time": trendline["end"]["time"], "value": round(line_at(trendline["end"]["index"]) + extra, 2)},
+            {"time": records[last_idx]["time"], "value": round(line_at(last_idx) + extra, 2)},
+        ]
+
+    primary_line = make_line(0)
+    opposite_line = make_line(offset)
+    center_line = make_line(offset / 2)
+
+    # 현재 위치 판단
+    current_close = records[last_idx]["close"]
+    lower = min(line_at(last_idx), line_at(last_idx) + offset)
+    upper = max(line_at(last_idx), line_at(last_idx) + offset)
+    threshold = channel_width * 0.1
+
+    if current_close > upper:
+        position = "above_channel"
+    elif current_close < lower:
+        position = "below_channel"
+    elif current_close >= upper - threshold:
+        position = "near_resistance"
+    elif current_close <= lower + threshold:
+        position = "near_support"
+    elif current_close > (lower + upper) / 2:
+        position = "upper_half"
+    else:
+        position = "lower_half"
+
+    position_labels = {
+        "above_channel": "채널 상방 돌파", "below_channel": "채널 하방 이탈",
+        "near_resistance": "저항 근접", "near_support": "지지 근접",
+        "upper_half": "채널 상반부", "lower_half": "채널 하반부",
+    }
+
+    return {
+        "primary": {
+            "type": tl_type, "slope": round(slope, 4),
+            "touch_count": trendline["touch_count"],
+            "line": primary_line,
+        },
+        "opposite": {"line": opposite_line},
+        "center": {"line": center_line},
+        "channel_width": round(channel_width, 2),
+        "position": position,
+        "position_label": position_labels.get(position, position),
+        "current_primary_price": round(line_at(last_idx), 2),
+        "current_opposite_price": round(line_at(last_idx) + offset, 2),
+        "current_center_price": round(line_at(last_idx) + offset / 2, 2),
+    }
 
 
 @router.get("/trendlines")
@@ -576,37 +639,27 @@ def get_trendlines(
     interval: str = Query("1d", pattern="^(1h|4h|1d|1wk|1mo)$"),
     pivot_window: int = Query(30, ge=5, le=50),
 ) -> dict:
-    """장기 빗각 — 항상 MAX 데이터에서 피봇 계산."""
+    """핵심 빗각 + 평행 채널 — 항상 MAX 데이터 기반."""
     max_records = _fetch_ohlcv(symbol, "max", interval)
     if len(max_records) < 100:
-        return {"symbol": symbol, "trendlines": [], "pivot_highs": [], "pivot_lows": [], "total_lines": 0}
+        return {"symbol": symbol, "channel": None, "trendline": None}
 
-    pivots = _detect_pivot_points(max_records, window=pivot_window)
-    trendlines = _compute_trendlines(max_records, pivot_window=pivot_window)
+    trendline = _find_best_trendline(max_records, pivot_window=pivot_window)
+    if not trendline:
+        return {"symbol": symbol, "channel": None, "trendline": None}
 
-    # 표시용 피봇 필터 (요청 기간 내만)
-    period_days = {"3mo": 90, "6mo": 180, "1y": 365, "2y": 730, "5y": 1825, "max": 999999}
-    cutoff = period_days.get(period, 365)
-    if cutoff < 999999 and max_records:
-        last = max_records[-1]["time"]
-        if isinstance(last, int):
-            start_ts = last - cutoff * 86400
-            filt_h = [p for p in pivots["pivot_highs"] if p["time"] >= start_ts]
-            filt_l = [p for p in pivots["pivot_lows"] if p["time"] >= start_ts]
-        else:
-            start_ts = int(datetime.strptime(str(last), "%Y-%m-%d").timestamp()) - cutoff * 86400
-            filt_h = [p for p in pivots["pivot_highs"]
-                      if int(datetime.strptime(str(p["time"]), "%Y-%m-%d").timestamp()) >= start_ts]
-            filt_l = [p for p in pivots["pivot_lows"]
-                      if int(datetime.strptime(str(p["time"]), "%Y-%m-%d").timestamp()) >= start_ts]
-    else:
-        filt_h, filt_l = pivots["pivot_highs"], pivots["pivot_lows"]
+    channel = _compute_channel(max_records, trendline, pivot_window=pivot_window)
 
     return {
         "symbol": symbol, "period": period, "interval": interval,
-        "trendlines": trendlines,
-        "pivot_highs": filt_h, "pivot_lows": filt_l,
-        "total_lines": len(trendlines),
+        "trendline": {
+            "type": trendline["type"],
+            "slope": round(trendline["slope"], 4),
+            "touch_count": trendline["touch_count"],
+            "start": trendline["start"],
+            "end": trendline["end"],
+        },
+        "channel": channel,
     }
 
 
