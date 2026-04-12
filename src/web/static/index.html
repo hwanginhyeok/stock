@@ -54,6 +54,7 @@
     <div class="view-toggle">
       <button class="toggle-btn active" id="btn-graph" onclick="switchView('graph')">관계도</button>
       <button class="toggle-btn" id="btn-timeline" onclick="switchView('timeline')">타임라인</button>
+      <button class="toggle-btn" id="btn-chart" onclick="switchView('chart')">차트</button>
     </div>
 
     <!-- Graph view -->
@@ -93,6 +94,23 @@
         <div class="empty-state">이슈를 선택하면 타임라인이 표시됩니다</div>
       </div>
     </div>
+
+    <!-- Chart view (TradingView) -->
+    <div id="chart-container" class="view-container" style="display:none;">
+      <div class="chart-layout">
+        <!-- 메인 차트: Advanced Chart -->
+        <div class="chart-main" id="tv-chart-wrapper">
+          <div class="tradingview-widget-container" style="height:100%;width:100%;">
+            <div id="tradingview_advanced"></div>
+          </div>
+        </div>
+        <!-- 사이드: 기술적 분석 게이지 + 심볼 정보 -->
+        <div class="chart-sidebar">
+          <div class="chart-sidebar-section" id="tv-ta-wrapper"></div>
+          <div class="chart-sidebar-section" id="tv-info-wrapper"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Right: Briefing -->
@@ -103,6 +121,7 @@
   </div>
 </div>
 
+<script src="https://s3.tradingview.com/tv.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>

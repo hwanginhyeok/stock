@@ -153,12 +153,99 @@ async function selectIssue(issueId) {
 // View toggle
 // ============================================================
 
+let tvChartInitialized = false;
+
 function switchView(view) {
   currentView = view;
   document.getElementById('btn-graph').classList.toggle('active', view === 'graph');
   document.getElementById('btn-timeline').classList.toggle('active', view === 'timeline');
+  document.getElementById('btn-chart').classList.toggle('active', view === 'chart');
   document.getElementById('graph-container').style.display = view === 'graph' ? '' : 'none';
   document.getElementById('timeline-container').style.display = view === 'timeline' ? '' : 'none';
+  document.getElementById('chart-container').style.display = view === 'chart' ? '' : 'none';
+
+  if (view === 'chart' && !tvChartInitialized) {
+    initTradingViewWidgets();
+    tvChartInitialized = true;
+  }
+}
+
+function initTradingViewWidgets() {
+  // Advanced Chart — TSLA 기본, 다크모드, RSI+MACD 프리로드
+  const chartEl = document.getElementById('tradingview_advanced');
+  if (chartEl && typeof TradingView !== 'undefined') {
+    new TradingView.widget({
+      container_id: 'tradingview_advanced',
+      width: '100%',
+      height: '100%',
+      symbol: 'NASDAQ:TSLA',
+      interval: 'D',
+      timezone: 'Asia/Seoul',
+      theme: 'dark',
+      style: '1',
+      locale: 'ko',
+      toolbar_bg: '#161b22',
+      enable_publishing: false,
+      allow_symbol_change: true,
+      save_image: false,
+      studies: [
+        'RSI@tv-basicstudies',
+        'MACD@tv-basicstudies',
+      ],
+      hide_side_toolbar: false,
+      details: true,
+      calendar: false,
+    });
+  }
+
+  // Technical Analysis 게이지
+  const taEl = document.getElementById('tv-ta-wrapper');
+  if (taEl) {
+    const taScript = document.createElement('script');
+    taScript.type = 'text/javascript';
+    taScript.src = 'https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js';
+    taScript.async = true;
+    taScript.textContent = JSON.stringify({
+      interval: '1D',
+      width: '100%',
+      height: 320,
+      symbol: 'NASDAQ:TSLA',
+      showIntervalTabs: true,
+      locale: 'ko',
+      colorTheme: 'dark',
+      isTransparent: true,
+    });
+    const container = document.createElement('div');
+    container.className = 'tradingview-widget-container';
+    const inner = document.createElement('div');
+    inner.className = 'tradingview-widget-container__widget';
+    container.appendChild(inner);
+    container.appendChild(taScript);
+    taEl.appendChild(container);
+  }
+
+  // Symbol Info 위젯
+  const infoEl = document.getElementById('tv-info-wrapper');
+  if (infoEl) {
+    const infoScript = document.createElement('script');
+    infoScript.type = 'text/javascript';
+    infoScript.src = 'https://s3.tradingview.com/external-embedding/embed-widget-symbol-info.js';
+    infoScript.async = true;
+    infoScript.textContent = JSON.stringify({
+      symbol: 'NASDAQ:TSLA',
+      width: '100%',
+      locale: 'ko',
+      colorTheme: 'dark',
+      isTransparent: true,
+    });
+    const container = document.createElement('div');
+    container.className = 'tradingview-widget-container';
+    const inner = document.createElement('div');
+    inner.className = 'tradingview-widget-container__widget';
+    container.appendChild(inner);
+    container.appendChild(infoScript);
+    infoEl.appendChild(container);
+  }
 }
 
 // ============================================================

@@ -148,6 +148,13 @@ nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
 .rel-tag.impacts { background: rgba(139,148,158,0.2); color: var(--dim); }
 .rel-tag.sanctions { background: rgba(248,81,73,0.15); color: var(--red); }
 
+/* Chart view (TradingView) */
+.chart-layout { display: grid; grid-template-columns: 1fr 280px; height: 100%; gap: 0; }
+.chart-main { height: 100%; min-height: 400px; overflow: hidden; }
+.chart-sidebar { background: var(--card); border-left: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; }
+.chart-sidebar-section { flex-shrink: 0; }
+.chart-sidebar-section:first-child { border-bottom: 1px solid var(--border); }
+
 /* D3 graph */
 .node-circle { cursor: pointer; transition: r 0.15s; }
 .node-circle:hover { filter: brightness(1.3); }

@@ -4,9 +4,15 @@
 
 ## 요약
 
-- Current: 5개
-- Prepared: 17개 (P1: 5, P2: 6, P3: 7)
+- Current: 3개 (1-43 HIH 매핑, 1-30 InvestOS, 1-32 X 시황)
+- Prepared: 22개 (**활성 P1: 5 (1-44~1-48, 1-43 후속)**, 보류 P1: 10, P2: 6, P3: 7)
 - Finished: 16개 (4월) + [53개 아카이브](TASK_ARCHIVE/2026-03.md)
+
+## 현재 포커스 (2026-04-11~)
+
+**InvestOS 인프라 + 테슬라 entity 체계 집중.**
+HIH_2 업무(Notion DB + issue #번호 + 마일스톤 추적) 패턴을 참고해서 stock에 적용.
+아티클(4-x)은 전부 보류.
 
 ## 번호 체계
 
