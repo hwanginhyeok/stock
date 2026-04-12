@@ -468,20 +468,21 @@ async function loadChartData(period) {
     lwTrendlineSeries.forEach(s => { try { lwMainChart.removeSeries(s); } catch(e){} });
     lwTrendlineSeries = [];
     if (trendData.trendlines?.length) {
-      const trendStyles = {
-        resistance: { long: '#ef5350', medium: '#ef535088' },
-        support:    { long: '#26a69a', medium: '#26a69a88' },
+      const trendColors = {
+        resistance: '#ef5350',
+        support: '#26a69a',
+        midline: '#f59e0b88',
       };
       trendData.trendlines.forEach(tl => {
-        const color = trendStyles[tl.type]?.[tl.timeframe] || '#8b949e';
+        const color = trendColors[tl.type] || '#8b949e';
         const s = lwMainChart.addLineSeries({
           color: color,
-          lineWidth: tl.timeframe === 'long' ? 2 : 1,
-          lineStyle: tl.breakout ? 1 : 0,  // 돌파 시 점선
+          lineWidth: tl.type === 'midline' ? 1 : 2,
+          lineStyle: tl.type === 'midline' ? 2 : (tl.breakout ? 1 : 0),
           lastValueVisible: true,
           priceLineVisible: false,
           crosshairMarkerVisible: false,
-          title: `${tl.type === 'resistance' ? 'R' : 'S'}${tl.timeframe === 'long' ? 'L' : 'M'}`,
+          title: tl.label || tl.type,
         });
         // 시작점 → 끝점 → 현재 시점 연장
         s.setData([
