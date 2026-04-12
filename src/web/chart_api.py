@@ -221,24 +221,87 @@ def _compute_indicators(records: list[dict]) -> dict:
     return result
 
 
+# 확장 기간 매핑 (SMA200 등 지표 워밍업용)
+_EXTENDED_PERIOD = {
+    "1mo": "1y", "3mo": "1y", "6mo": "2y", "1y": "2y",
+    "2y": "5y", "5y": "max", "max": "max",
+}
+_PERIOD_DAYS = {
+    "1mo": 30, "3mo": 90, "6mo": 180, "1y": 365,
+    "2y": 730, "5y": 1825, "max": 999999,
+}
+
+
 @router.get("/ohlcv")
 def get_ohlcv(
     symbol: str = "TSLA",
     period: str = Query("6mo", pattern="^(1mo|3mo|6mo|1y|2y|5y|max)$"),
     interval: str = Query("1d", pattern="^(1h|4h|1d|1wk|1mo)$"),
 ) -> dict:
-    """OHLCV 데이터 + 기술 지표를 반환한다."""
+    """OHLCV 데이터 + 기술 지표를 반환한다.
+
+    지표 워밍업을 위해 요청 기간보다 더 긴 데이터를 fetch한 후,
+    지표 계산 → 요청 기간으로 트림하여 반환.
+    """
+    # 1. 확장 기간으로 데이터 fetch (SMA200 워밍업)
+    extended_period = _EXTENDED_PERIOD.get(period, period)
+    extended_records = _fetch_ohlcv(symbol, extended_period, interval)
+
+    # 2. 전체 데이터로 지표 계산
+    indicators = _compute_indicators(extended_records)
+
+    # 3. 요청 기간으로 트림
+    period_days = _PERIOD_DAYS.get(period, 999999)
+    if period_days < 999999 and extended_records:
+        last_time = extended_records[-1]["time"]
+        if isinstance(last_time, int):
+            start_ts = last_time - (period_days * 24 * 3600)
+            trimmed = [r for r in extended_records if r["time"] >= start_ts]
+        else:
+            start_ts = int(datetime.strptime(str(last_time), "%Y-%m-%d").timestamp()) - (period_days * 86400)
+            trimmed = [
+                r for r in extended_records
+                if int(datetime.strptime(str(r["time"]), "%Y-%m-%d").timestamp()) >= start_ts
+            ]
+        start_time = trimmed[0]["time"] if trimmed else None
+    else:
+        trimmed = extended_records
+        start_time = None
+
+    # 4. 지표 시리즈 트림
+    def _trim(series: list[dict]) -> list[dict]:
+        if not start_time or not series:
+            return series
+        if isinstance(start_time, int):
+            return [s for s in series if s["time"] >= start_time]
+        st = int(datetime.strptime(str(start_time), "%Y-%m-%d").timestamp())
+        return [
+            s for s in series
+            if (s["time"] if isinstance(s["time"], int)
+                else int(datetime.strptime(str(s["time"]), "%Y-%m-%d").timestamp())) >= st
+        ]
+
+    for key in ("rsi_series", "macd_series", "signal_series", "histogram_series"):
+        if key in indicators:
+            indicators[key] = _trim(indicators[key])
+
+    if "sma" in indicators:
+        for sma_key in indicators["sma"]:
+            if "series" in indicators["sma"][sma_key]:
+                indicators["sma"][sma_key]["series"] = _trim(indicators["sma"][sma_key]["series"])
+
+    if "vwma100" in indicators and indicators["vwma100"] and "series" in indicators["vwma100"]:
+        indicators["vwma100"]["series"] = _trim(indicators["vwma100"]["series"])
+
     interval_labels = {"1h": "1시간", "4h": "4시간", "1d": "일봉", "1wk": "주봉", "1mo": "월봉"}
-    records = _fetch_ohlcv(symbol, period, interval)
-    indicators = _compute_indicators(records)
 
     return {
         "symbol": symbol,
         "period": period,
         "interval": interval,
         "interval_label": interval_labels.get(interval, interval),
-        "count": len(records),
-        "ohlcv": records,
+        "count": len(trimmed),
+        "ohlcv": trimmed,
         "indicators": indicators,
     }
 
