@@ -202,11 +202,11 @@ function initLightweightChart() {
     },
     rightPriceScale: { borderColor: '#2a2d3a' },
     timeScale: { borderColor: '#2a2d3a', timeVisible: false },
-    handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: true },
+    handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: true },
     handleScale: {
-      mouseWheel: true, pinch: true,
-      axisPressedMouseMove: { time: true, price: true },  // X축·Y축 드래그 줌 독립 제어
-      axisDoubleClickReset: { time: true, price: true },  // 더블클릭으로 리셋
+      mouseWheel: false, pinch: true,  // 휠 줌을 커스텀 핸들러로 처리
+      axisPressedMouseMove: { time: true, price: true },
+      axisDoubleClickReset: { time: true, price: true },
     },
   };
 
@@ -277,30 +277,44 @@ function initLightweightChart() {
   syncTimeScale(lwRsiChart, [lwMainChart, lwMacdChart]);
   syncTimeScale(lwMacdChart, [lwMainChart, lwRsiChart]);
 
-  // XY축 자동 판단 줌: 마우스 위치가 Y축(우측)에 가까우면 Y줌, X축(하단)에 가까우면 X줌
+  // 커스텀 휠 줌: 마우스 위치로 X/Y 자동 판단
+  // lightweight-charts 기본 휠 줌은 꺼놨으므로 여기서 직접 처리
   mainEl.addEventListener('wheel', (e) => {
+    e.preventDefault();
     const rect = mainEl.getBoundingClientRect();
-    const relX = (e.clientX - rect.left) / rect.width;   // 0=왼쪽, 1=오른쪽
-    const relY = (e.clientY - rect.top) / rect.height;    // 0=위, 1=아래
+    const relX = (e.clientX - rect.left) / rect.width;
 
-    // 오른쪽 20% 영역 = Y축 줌
     if (relX > 0.8) {
-      e.preventDefault();
-      e.stopPropagation();
-      const priceScale = lwMainChart.priceScale('right');
-      const opts = priceScale.options();
-      if (opts.autoScale) priceScale.applyOptions({ autoScale: false });
+      // 우측 20% → Y축 줌
+      const ps = lwMainChart.priceScale('right');
+      const opts = ps.options();
+      if (opts.autoScale) ps.applyOptions({ autoScale: false });
       const curTop = opts.scaleMargins?.top || 0.1;
       const curBot = opts.scaleMargins?.bottom || 0.1;
-      const delta = e.deltaY > 0 ? 0.02 : -0.02;
-      priceScale.applyOptions({
+      const d = e.deltaY > 0 ? 0.03 : -0.03;
+      ps.applyOptions({
         scaleMargins: {
-          top: Math.max(0.01, Math.min(0.45, curTop + delta)),
-          bottom: Math.max(0.01, Math.min(0.45, curBot + delta)),
+          top: Math.max(0.01, Math.min(0.45, curTop + d)),
+          bottom: Math.max(0.01, Math.min(0.45, curBot + d)),
         },
       });
+    } else {
+      // 나머지 → X축 줌
+      const range = lwMainChart.timeScale().getVisibleLogicalRange();
+      if (!range) return;
+      const barCount = range.to - range.from;
+      const zoomFactor = e.deltaY > 0 ? 0.1 : -0.1;
+      const delta = barCount * zoomFactor;
+      const newFrom = range.from + delta / 2;
+      const newTo = range.to - delta / 2;
+      if (newTo - newFrom > 5) {
+        _isSyncingTimeScale = true;
+        lwMainChart.timeScale().setVisibleLogicalRange({ from: newFrom, to: newTo });
+        lwRsiChart.timeScale().setVisibleLogicalRange({ from: newFrom, to: newTo });
+        lwMacdChart.timeScale().setVisibleLogicalRange({ from: newFrom, to: newTo });
+        _isSyncingTimeScale = false;
+      }
     }
-    // 나머지 영역은 기본 X축 줌 (lightweight-charts 기본 동작)
   }, { passive: false });
 
   // SMA 시리즈 미리 생성 (한 번만, loadChartData에서 setData만 호출)
