@@ -388,12 +388,14 @@ async function loadChartData(period) {
   const sevMin = showAll ? 'moderate' : 'major';
 
   try {
-    const [ohlcvResp, eventsResp] = await Promise.all([
+    const [ohlcvResp, eventsResp, signalsResp] = await Promise.all([
       fetch(`/api/chart/ohlcv?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
       fetch(`/api/chart/events?symbol=TSLA&period=${period}&severity_min=${sevMin}`),
+      fetch(`/api/chart/signals?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
     ]);
     const ohlcvData = await ohlcvResp.json();
     const eventsData = await eventsResp.json();
+    const signalsData = await signalsResp.json();
 
     // VPVR 계산용 + timeScale 설정
     allChartData = ohlcvData.ohlcv;
@@ -459,10 +461,51 @@ async function loadChartData(period) {
       `;
     }
 
-    // 이벤트 마커
+    // 시그널 마커 (BUY/SELL) + 이벤트 마커 통합
+    const signalMarkers = (signalsData.signals || []).map(s => ({
+      time: s.time,
+      position: s.type.includes('BUY') ? 'belowBar' : 'aboveBar',
+      color: s.type.includes('BUY') ? '#26a69a' : '#ef5350',
+      shape: s.type === 'STRONG_BUY' ? 'arrowUp' : s.type.includes('BUY') ? 'arrowUp' : 'arrowDown',
+      text: s.type === 'STRONG_BUY' ? 'B+' : s.type === 'BUY' ? 'B' : 'S',
+      size: s.type === 'STRONG_BUY' ? 3 : 2,
+    }));
+    // 시그널은 항상 표시 (이벤트와 합치되 시그널 우선)
     allEventMarkers = eventsData.markers;
-    renderEventMarkers(document.getElementById('show-events')?.checked !== false);
+    const combinedMarkers = [...signalMarkers];
+    if (document.getElementById('show-events')?.checked !== false) {
+      // 이벤트 마커 추가 (시그널과 같은 날짜면 시그널 우선)
+      const signalDates = new Set(signalMarkers.map(m => m.time));
+      allEventMarkers.forEach(m => {
+        if (!signalDates.has(m.time)) {
+          combinedMarkers.push({
+            time: m.time,
+            position: m.position || 'aboveBar',
+            color: m.color,
+            shape: 'circle',
+            text: m.category_label?.charAt(0) || '·',
+            size: 1,
+          });
+        }
+      });
+    }
+    // 시간순 정렬 + 같은 날짜 중복 처리
+    const byDate = {};
+    combinedMarkers.forEach(m => {
+      if (!byDate[m.time] || m.size > byDate[m.time].size) byDate[m.time] = m;
+    });
+    const sortedMarkers = Object.values(byDate).sort((a, b) => a.time > b.time ? 1 : -1);
+    lwCandleSeries.setMarkers(sortedMarkers);
     renderEventList(eventsData.markers);
+
+    // 추세 상태 표시 업데이트
+    const trendEl = document.getElementById('chart-indicator-summary');
+    if (trendEl && signalsData.current_trend) {
+      const trendColors = { TREND_UP: 'var(--green)', TREND_DOWN: 'var(--red)', NEUTRAL: 'var(--dim)' };
+      const trendLabels = { TREND_UP: '추세 ▲', TREND_DOWN: '추세 ▼', NEUTRAL: '중립', INSUFFICIENT_DATA: '—' };
+      const trendHtml = `<span style="color:${trendColors[signalsData.current_trend] || 'var(--dim)'};font-weight:600">${trendLabels[signalsData.current_trend] || '—'}</span>`;
+      trendEl.innerHTML = trendEl.innerHTML.replace(/· ST [▲▼]/, `· ${trendHtml}`);
+    }
 
     // fitContent: 2단계 지연 — chart 내부 렌더 완전 종료 후 range 설정
     // _isSyncingTimeScale는 true 상태 유지 (setData 위에서 켰음)
