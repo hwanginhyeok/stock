@@ -160,6 +160,7 @@ let lwVolumeSeries = null;
 let lwSmaSeries = {};   // key: "5","10",... value: LineSeries
 let lwVwmaSeries = null;
 let lwVpvrSeries = [];  // histogram series for volume profile
+let lwTrendlineSeries = [];  // 추세선 시리즈
 let lwRsiChart = null;
 let lwRsiSeries = null;
 let lwMacdChart = null;
@@ -388,14 +389,16 @@ async function loadChartData(period) {
   const sevMin = showAll ? 'moderate' : 'major';
 
   try {
-    const [ohlcvResp, eventsResp, signalsResp] = await Promise.all([
+    const [ohlcvResp, eventsResp, signalsResp, trendResp] = await Promise.all([
       fetch(`/api/chart/ohlcv?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
       fetch(`/api/chart/events?symbol=TSLA&period=${period}&severity_min=${sevMin}`),
       fetch(`/api/chart/signals?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
+      fetch(`/api/chart/trendlines?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
     ]);
     const ohlcvData = await ohlcvResp.json();
     const eventsData = await eventsResp.json();
     const signalsData = await signalsResp.json();
+    const trendData = await trendResp.json();
 
     // VPVR 계산용 + timeScale 설정
     allChartData = ohlcvData.ohlcv;
@@ -459,6 +462,35 @@ async function loadChartData(period) {
         · ADX ${ind.adx || '-'}
         · ST ${stDir}
       `;
+    }
+
+    // 추세선(빗각) 렌더링
+    lwTrendlineSeries.forEach(s => { try { lwMainChart.removeSeries(s); } catch(e){} });
+    lwTrendlineSeries = [];
+    if (trendData.trendlines?.length) {
+      const trendStyles = {
+        resistance: { long: '#ef5350', medium: '#ef535088' },
+        support:    { long: '#26a69a', medium: '#26a69a88' },
+      };
+      trendData.trendlines.forEach(tl => {
+        const color = trendStyles[tl.type]?.[tl.timeframe] || '#8b949e';
+        const s = lwMainChart.addLineSeries({
+          color: color,
+          lineWidth: tl.timeframe === 'long' ? 2 : 1,
+          lineStyle: tl.breakout ? 1 : 0,  // 돌파 시 점선
+          lastValueVisible: true,
+          priceLineVisible: false,
+          crosshairMarkerVisible: false,
+          title: `${tl.type === 'resistance' ? 'R' : 'S'}${tl.timeframe === 'long' ? 'L' : 'M'}`,
+        });
+        // 시작점 → 끝점 → 현재 시점 연장
+        s.setData([
+          { time: tl.start.time, value: tl.start.price },
+          { time: tl.end.time, value: tl.end.price },
+          { time: tl.extended.time, value: tl.extended.price },
+        ]);
+        lwTrendlineSeries.push(s);
+      });
     }
 
     // 시그널 마커 (BUY/SELL) + 이벤트 마커 통합

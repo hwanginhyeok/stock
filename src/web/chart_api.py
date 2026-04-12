@@ -393,6 +393,120 @@ def get_chart_events(
     }
 
 
+def _detect_pivot_points(records: list[dict], window: int = 5) -> dict:
+    """OHLCV 레코드에서 피봇 하이/로우를 감지한다."""
+    if len(records) < window * 2 + 1:
+        return {"pivot_highs": [], "pivot_lows": []}
+
+    pivot_highs = []
+    pivot_lows = []
+
+    for i in range(window, len(records) - window):
+        curr_high = records[i]["high"]
+        curr_low = records[i]["low"]
+
+        is_pivot_high = all(
+            records[j]["high"] < curr_high
+            for j in range(i - window, i + window + 1)
+            if j != i
+        )
+        is_pivot_low = all(
+            records[j]["low"] > curr_low
+            for j in range(i - window, i + window + 1)
+            if j != i
+        )
+
+        if is_pivot_high:
+            pivot_highs.append({"time": records[i]["time"], "price": curr_high, "index": i})
+        if is_pivot_low:
+            pivot_lows.append({"time": records[i]["time"], "price": curr_low, "index": i})
+
+    return {"pivot_highs": pivot_highs, "pivot_lows": pivot_lows}
+
+
+def _compute_trendlines(records: list[dict], pivot_window: int = 5) -> list[dict]:
+    """피봇 포인트를 연결하여 추세선(빗각)을 생성한다. 최대 4개 (장기/중기 × 저항/지지)."""
+    if len(records) < 100:
+        return []
+
+    current_idx = len(records) - 1
+    current_time = records[current_idx]["time"]
+    current_close = records[current_idx]["close"]
+    trendlines = []
+
+    medium_start = len(records) // 2
+    scenarios = [
+        ("long", records, 0),
+        ("medium", records[medium_start:], medium_start),
+    ]
+
+    for timeframe, scope_records, offset in scenarios:
+        if len(scope_records) < pivot_window * 2 + 1:
+            continue
+
+        pivots = _detect_pivot_points(scope_records, window=pivot_window)
+
+        # resistance 선 (피봇 하이 2개 연결)
+        if len(pivots["pivot_highs"]) >= 2:
+            recent = sorted(pivots["pivot_highs"], key=lambda x: x["index"], reverse=True)[:2]
+            p1, p2 = sorted(recent, key=lambda x: x["index"])
+            idx1, idx2 = p1["index"] + offset, p2["index"] + offset
+            slope = (p2["price"] - p1["price"]) / (idx2 - idx1) if idx2 != idx1 else 0
+            ext_price = p1["price"] + slope * (current_idx - idx1)
+
+            trendlines.append({
+                "type": "resistance", "timeframe": timeframe,
+                "start": {"time": p1["time"], "price": round(p1["price"], 2)},
+                "end": {"time": p2["time"], "price": round(p2["price"], 2)},
+                "slope": round(slope, 4),
+                "extended": {"time": current_time, "price": round(ext_price, 2)},
+                "breakout": current_close > ext_price,
+            })
+
+        # support 선 (피봇 로우 2개 연결)
+        if len(pivots["pivot_lows"]) >= 2:
+            recent = sorted(pivots["pivot_lows"], key=lambda x: x["index"], reverse=True)[:2]
+            p1, p2 = sorted(recent, key=lambda x: x["index"])
+            idx1, idx2 = p1["index"] + offset, p2["index"] + offset
+            slope = (p2["price"] - p1["price"]) / (idx2 - idx1) if idx2 != idx1 else 0
+            ext_price = p1["price"] + slope * (current_idx - idx1)
+
+            trendlines.append({
+                "type": "support", "timeframe": timeframe,
+                "start": {"time": p1["time"], "price": round(p1["price"], 2)},
+                "end": {"time": p2["time"], "price": round(p2["price"], 2)},
+                "slope": round(slope, 4),
+                "extended": {"time": current_time, "price": round(ext_price, 2)},
+                "breakout": current_close < ext_price,
+            })
+
+    return trendlines[:4]
+
+
+@router.get("/trendlines")
+def get_trendlines(
+    symbol: str = "TSLA",
+    period: str = Query("1y", pattern="^(3mo|6mo|1y|2y|5y|max)$"),
+    interval: str = Query("1d", pattern="^(1h|4h|1d|1wk|1mo)$"),
+    pivot_window: int = Query(5, ge=2, le=20),
+) -> dict:
+    """피봇 포인트 기반 추세선(빗각) — 장기/중기 저항·지지선."""
+    records = _fetch_ohlcv(symbol, period, interval)
+    if len(records) < 100:
+        return {"symbol": symbol, "trendlines": [], "pivot_highs": [], "pivot_lows": [], "total_lines": 0}
+
+    pivots = _detect_pivot_points(records, window=pivot_window)
+    trendlines = _compute_trendlines(records, pivot_window=pivot_window)
+
+    return {
+        "symbol": symbol,
+        "trendlines": trendlines,
+        "pivot_highs": pivots["pivot_highs"],
+        "pivot_lows": pivots["pivot_lows"],
+        "total_lines": len(trendlines),
+    }
+
+
 @router.get("/signals")
 def get_trend_signals(
     symbol: str = "TSLA",
