@@ -277,26 +277,30 @@ function initLightweightChart() {
   syncTimeScale(lwRsiChart, [lwMainChart, lwMacdChart]);
   syncTimeScale(lwMacdChart, [lwMainChart, lwRsiChart]);
 
-  // Y축 독립 줌: Shift+마우스휠 → 가격축 확대/축소
+  // XY축 자동 판단 줌: 마우스 위치가 Y축(우측)에 가까우면 Y줌, X축(하단)에 가까우면 X줌
   mainEl.addEventListener('wheel', (e) => {
-    if (!e.shiftKey) return;
-    e.preventDefault();
-    const priceScale = lwMainChart.priceScale('right');
-    const opts = priceScale.options();
-    // autoScale 끄고 수동 모드 전환
-    if (opts.autoScale) {
-      priceScale.applyOptions({ autoScale: false });
+    const rect = mainEl.getBoundingClientRect();
+    const relX = (e.clientX - rect.left) / rect.width;   // 0=왼쪽, 1=오른쪽
+    const relY = (e.clientY - rect.top) / rect.height;    // 0=위, 1=아래
+
+    // 오른쪽 20% 영역 = Y축 줌
+    if (relX > 0.8) {
+      e.preventDefault();
+      e.stopPropagation();
+      const priceScale = lwMainChart.priceScale('right');
+      const opts = priceScale.options();
+      if (opts.autoScale) priceScale.applyOptions({ autoScale: false });
+      const curTop = opts.scaleMargins?.top || 0.1;
+      const curBot = opts.scaleMargins?.bottom || 0.1;
+      const delta = e.deltaY > 0 ? 0.02 : -0.02;
+      priceScale.applyOptions({
+        scaleMargins: {
+          top: Math.max(0.01, Math.min(0.45, curTop + delta)),
+          bottom: Math.max(0.01, Math.min(0.45, curBot + delta)),
+        },
+      });
     }
-    // 가격 범위를 줌 (위로 스크롤 = 축소, 아래로 = 확대)
-    const range = lwMainChart.timeScale().getVisibleLogicalRange();
-    if (!range) return;
-    // Y축 줌: scaleMargins 조정
-    const currentTop = opts.scaleMargins?.top || 0.1;
-    const currentBot = opts.scaleMargins?.bottom || 0.1;
-    const delta = e.deltaY > 0 ? 0.02 : -0.02;
-    const newTop = Math.max(0.01, Math.min(0.4, currentTop + delta));
-    const newBot = Math.max(0.01, Math.min(0.4, currentBot + delta));
-    priceScale.applyOptions({ scaleMargins: { top: newTop, bottom: newBot } });
+    // 나머지 영역은 기본 X축 줌 (lightweight-charts 기본 동작)
   }, { passive: false });
 
   // SMA 시리즈 미리 생성 (한 번만, loadChartData에서 setData만 호출)
