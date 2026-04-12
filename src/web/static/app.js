@@ -202,6 +202,12 @@ function initLightweightChart() {
     },
     rightPriceScale: { borderColor: '#2a2d3a' },
     timeScale: { borderColor: '#2a2d3a', timeVisible: false },
+    handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: true },
+    handleScale: {
+      mouseWheel: true, pinch: true,
+      axisPressedMouseMove: { time: true, price: true },  // X축·Y축 드래그 줌 독립 제어
+      axisDoubleClickReset: { time: true, price: true },  // 더블클릭으로 리셋
+    },
   };
 
   // 메인 차트
@@ -271,6 +277,28 @@ function initLightweightChart() {
   syncTimeScale(lwRsiChart, [lwMainChart, lwMacdChart]);
   syncTimeScale(lwMacdChart, [lwMainChart, lwRsiChart]);
 
+  // Y축 독립 줌: Shift+마우스휠 → 가격축 확대/축소
+  mainEl.addEventListener('wheel', (e) => {
+    if (!e.shiftKey) return;
+    e.preventDefault();
+    const priceScale = lwMainChart.priceScale('right');
+    const opts = priceScale.options();
+    // autoScale 끄고 수동 모드 전환
+    if (opts.autoScale) {
+      priceScale.applyOptions({ autoScale: false });
+    }
+    // 가격 범위를 줌 (위로 스크롤 = 축소, 아래로 = 확대)
+    const range = lwMainChart.timeScale().getVisibleLogicalRange();
+    if (!range) return;
+    // Y축 줌: scaleMargins 조정
+    const currentTop = opts.scaleMargins?.top || 0.1;
+    const currentBot = opts.scaleMargins?.bottom || 0.1;
+    const delta = e.deltaY > 0 ? 0.02 : -0.02;
+    const newTop = Math.max(0.01, Math.min(0.4, currentTop + delta));
+    const newBot = Math.max(0.01, Math.min(0.4, currentBot + delta));
+    priceScale.applyOptions({ scaleMargins: { top: newTop, bottom: newBot } });
+  }, { passive: false });
+
   // SMA 시리즈 미리 생성 (한 번만, loadChartData에서 setData만 호출)
   const smaStyles = {
     '5':   { color: '#ef5350', lineWidth: 1, lineStyle: 0 },
@@ -292,6 +320,11 @@ function initLightweightChart() {
     color: '#ff6b6b', lineWidth: 2.5, lineStyle: 2,
     lastValueVisible: true, priceLineVisible: false,
     title: 'VWMA100',
+  });
+
+  // Y축 리셋 버튼
+  document.getElementById('btn-y-reset')?.addEventListener('click', () => {
+    lwMainChart.priceScale('right').applyOptions({ autoScale: true });
   });
 
   // SMA 토글
