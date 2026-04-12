@@ -20,7 +20,10 @@ from src.storage import (
     OntologyLinkRepository,
 )
 
-app = FastAPI(title="GeoInvest", version="0.1.0")
+from src.web.chart_api import router as chart_router
+
+app = FastAPI(title="InvestOS", version="0.2.0")
+app.include_router(chart_router)
 
 _STATIC_DIR = Path(__file__).parent / "static"
 

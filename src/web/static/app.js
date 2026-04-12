@@ -153,7 +153,21 @@ async function selectIssue(issueId) {
 // View toggle
 // ============================================================
 
-let tvChartInitialized = false;
+let lwChartInitialized = false;
+let lwMainChart = null;
+let lwCandleSeries = null;
+let lwVolumeSeries = null;
+let lwSmaSeries = {};   // key: "5","10",... value: LineSeries
+let lwVwmaSeries = null;
+let lwVpvrSeries = [];  // histogram series for volume profile
+let lwRsiChart = null;
+let lwRsiSeries = null;
+let lwMacdChart = null;
+let lwMacdSeries = null;
+let lwSignalSeries = null;
+let lwHistSeries = null;
+let currentChartPeriod = '6mo';
+let allEventMarkers = [];
 
 function switchView(view) {
   currentView = view;
@@ -164,88 +178,329 @@ function switchView(view) {
   document.getElementById('timeline-container').style.display = view === 'timeline' ? '' : 'none';
   document.getElementById('chart-container').style.display = view === 'chart' ? '' : 'none';
 
-  if (view === 'chart' && !tvChartInitialized) {
-    initTradingViewWidgets();
-    tvChartInitialized = true;
+  if (view === 'chart' && !lwChartInitialized) {
+    initLightweightChart();
+    lwChartInitialized = true;
   }
 }
 
-function initTradingViewWidgets() {
-  // Advanced Chart — TSLA 기본, 다크모드, RSI+MACD 프리로드
-  const chartEl = document.getElementById('tradingview_advanced');
-  if (chartEl && typeof TradingView !== 'undefined') {
-    new TradingView.widget({
-      container_id: 'tradingview_advanced',
-      width: '100%',
-      height: '100%',
-      symbol: 'NASDAQ:TSLA',
-      interval: 'D',
-      timezone: 'Asia/Seoul',
-      theme: 'dark',
-      style: '1',
-      locale: 'ko',
-      toolbar_bg: '#161b22',
-      enable_publishing: false,
-      allow_symbol_change: true,
-      save_image: false,
-      studies: [
-        'RSI@tv-basicstudies',
-        'MACD@tv-basicstudies',
-      ],
-      hide_side_toolbar: false,
-      details: true,
-      calendar: false,
+function initLightweightChart() {
+  const LWC = LightweightCharts;
+  const mainEl = document.getElementById('lw-main-chart');
+  const rsiEl = document.getElementById('lw-rsi-chart');
+  const macdEl = document.getElementById('lw-macd-chart');
+
+  const darkOpts = {
+    layout: { background: { color: '#0d1117' }, textColor: '#d1d5db' },
+    grid: { vertLines: { color: '#1e2329' }, horzLines: { color: '#1e2329' } },
+    crosshair: {
+      vertLine: { color: '#4b5563', labelBackgroundColor: '#374151' },
+      horzLine: { color: '#4b5563', labelBackgroundColor: '#374151' },
+    },
+    rightPriceScale: { borderColor: '#2a2d3a' },
+    timeScale: { borderColor: '#2a2d3a', timeVisible: false },
+  };
+
+  // 메인 차트
+  lwMainChart = LWC.createChart(mainEl, { ...darkOpts, height: mainEl.clientHeight || 400 });
+  lwCandleSeries = lwMainChart.addCandlestickSeries({
+    upColor: '#26a69a', downColor: '#ef5350',
+    borderUpColor: '#26a69a', borderDownColor: '#ef5350',
+    wickUpColor: '#26a69a', wickDownColor: '#ef5350',
+  });
+  lwVolumeSeries = lwMainChart.addHistogramSeries({
+    priceFormat: { type: 'volume' },
+    priceScaleId: 'volume',
+  });
+  lwMainChart.priceScale('volume').applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+
+  // RSI 서브차트
+  lwRsiChart = LWC.createChart(rsiEl, { ...darkOpts, height: 100 });
+  lwRsiChart.timeScale().applyOptions({ visible: false });
+  lwRsiSeries = lwRsiChart.addLineSeries({ color: '#a78bfa', lineWidth: 1.5, priceScaleId: 'right' });
+  // RSI 기준선
+  lwRsiSeries.createPriceLine({ price: 70, color: '#f8514988', lineWidth: 1, lineStyle: 2 });
+  lwRsiSeries.createPriceLine({ price: 30, color: '#3fb95088', lineWidth: 1, lineStyle: 2 });
+
+  // MACD 서브차트
+  lwMacdChart = LWC.createChart(macdEl, { ...darkOpts, height: 100 });
+  lwMacdChart.timeScale().applyOptions({ visible: true });
+  lwMacdSeries = lwMacdChart.addLineSeries({ color: '#58a6ff', lineWidth: 1.5 });
+  lwSignalSeries = lwMacdChart.addLineSeries({ color: '#f85149', lineWidth: 1 });
+  lwHistSeries = lwMacdChart.addHistogramSeries({ color: '#3fb95066' });
+
+  // 크로스헤어 동기화
+  function syncCrosshair(source, targets) {
+    source.subscribeCrosshairMove((param) => {
+      if (!param.time) {
+        targets.forEach(t => t.chart.clearCrosshairPosition());
+        return;
+      }
+      targets.forEach(t => {
+        t.chart.setCrosshairPosition(NaN, param.time, t.series);
+      });
     });
+  }
+  syncCrosshair(lwMainChart, [
+    { chart: lwRsiChart, series: lwRsiSeries },
+    { chart: lwMacdChart, series: lwMacdSeries },
+  ]);
+  syncCrosshair(lwRsiChart, [
+    { chart: lwMainChart, series: lwCandleSeries },
+    { chart: lwMacdChart, series: lwMacdSeries },
+  ]);
+  syncCrosshair(lwMacdChart, [
+    { chart: lwMainChart, series: lwCandleSeries },
+    { chart: lwRsiChart, series: lwRsiSeries },
+  ]);
+
+  // 타임스케일 동기화
+  function syncTimeScale(source, targets) {
+    source.timeScale().subscribeVisibleLogicalRangeChange((range) => {
+      if (!range) return;
+      targets.forEach(t => t.timeScale().setVisibleLogicalRange(range));
+    });
+  }
+  syncTimeScale(lwMainChart, [lwRsiChart, lwMacdChart]);
+  syncTimeScale(lwRsiChart, [lwMainChart, lwMacdChart]);
+  syncTimeScale(lwMacdChart, [lwMainChart, lwRsiChart]);
+
+  // SMA 토글
+  document.getElementById('show-sma').addEventListener('change', (e) => {
+    Object.values(lwSmaSeries).forEach(s => s.applyOptions({ visible: e.target.checked }));
+  });
+  // VWMA 토글
+  document.getElementById('show-vwma').addEventListener('change', (e) => {
+    if (lwVwmaSeries) lwVwmaSeries.applyOptions({ visible: e.target.checked });
+  });
+  // VPVR 토글
+  document.getElementById('show-vpvr').addEventListener('change', (e) => {
+    lwVpvrSeries.forEach(s => s.applyOptions({ visible: e.target.checked }));
+  });
+
+  // 마커 호버 툴팁
+  const tooltip = document.getElementById('chart-tooltip');
+  lwMainChart.subscribeCrosshairMove((param) => {
+    if (!param.point || !param.time) { tooltip.style.display = 'none'; return; }
+    const timeStr = typeof param.time === 'string' ? param.time
+      : `${param.time.year}-${String(param.time.month).padStart(2,'0')}-${String(param.time.day).padStart(2,'0')}`;
+    const ev = allEventMarkers.find(m => m.time === timeStr);
+    if (!ev) { tooltip.style.display = 'none'; return; }
+    tooltip.innerHTML = `
+      <div class="tt-date">${ev.time}</div>
+      <div class="tt-title"><span class="tt-cat" style="background:${ev.color}22;color:${ev.color}">${ev.category_label}</span>${ev.title}</div>
+      <div class="tt-desc">${ev.severity} · ${ev.story_thread || ''}</div>
+    `;
+    tooltip.style.display = 'block';
+    const x = param.point.x;
+    const tw = tooltip.offsetWidth || 260;
+    const cw = mainEl.clientWidth;
+    tooltip.style.left = `${x + tw + 16 > cw ? x - tw - 8 : x + 12}px`;
+    tooltip.style.top = `${Math.max(0, param.point.y - 50)}px`;
+  });
+
+  // 기간 버튼
+  document.querySelectorAll('.period-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentChartPeriod = btn.dataset.period;
+      loadChartData(currentChartPeriod);
+    });
+  });
+
+  // 이벤트 토글
+  document.getElementById('show-events').addEventListener('change', (e) => {
+    renderEventMarkers(e.target.checked);
+  });
+  document.getElementById('show-all-events').addEventListener('change', () => {
+    loadChartData(currentChartPeriod);
+  });
+
+  // 리사이즈 대응
+  const ro = new ResizeObserver(() => {
+    lwMainChart.applyOptions({ width: mainEl.clientWidth });
+    lwRsiChart.applyOptions({ width: rsiEl.clientWidth });
+    lwMacdChart.applyOptions({ width: macdEl.clientWidth });
+  });
+  ro.observe(mainEl);
+
+  // 초기 데이터 로드
+  loadChartData('6mo');
+}
+
+async function loadChartData(period) {
+  const showAll = document.getElementById('show-all-events')?.checked;
+  const sevMin = showAll ? 'moderate' : 'major';
+
+  try {
+    const [ohlcvResp, eventsResp] = await Promise.all([
+      fetch(`/api/chart/ohlcv?symbol=TSLA&period=${period}`),
+      fetch(`/api/chart/events?symbol=TSLA&period=${period}&severity_min=${sevMin}`),
+    ]);
+    const ohlcvData = await ohlcvResp.json();
+    const eventsData = await eventsResp.json();
+
+    // 캔들 + 볼륨
+    lwCandleSeries.setData(ohlcvData.ohlcv);
+    lwVolumeSeries.setData(ohlcvData.ohlcv.map(d => ({
+      time: d.time,
+      value: d.volume,
+      color: d.close >= d.open ? '#26a69a33' : '#ef535033',
+    })));
+
+    // SMA 이평선 (5/10/20/50/100/200)
+    const smaData = ohlcvData.indicators.sma || {};
+    const smaStyles = {
+      '5':   { color: '#ef5350', lineWidth: 1, lineStyle: 0 },
+      '10':  { color: '#f59e0b', lineWidth: 1, lineStyle: 0 },
+      '20':  { color: '#3fb950', lineWidth: 1, lineStyle: 0 },
+      '50':  { color: '#58a6ff', lineWidth: 1.5, lineStyle: 0 },
+      '100': { color: '#a78bfa', lineWidth: 1.5, lineStyle: 0 },
+      '200': { color: '#e6edf3', lineWidth: 2, lineStyle: 0 },
+    };
+    // 기존 SMA 시리즈 제거 후 재생성
+    Object.values(lwSmaSeries).forEach(s => { try { lwMainChart.removeSeries(s); } catch(e){} });
+    lwSmaSeries = {};
+    const showSma = document.getElementById('show-sma')?.checked !== false;
+    for (const [len, style] of Object.entries(smaStyles)) {
+      if (!smaData[len]?.series?.length) continue;
+      const s = lwMainChart.addLineSeries({
+        color: style.color, lineWidth: style.lineWidth, lineStyle: style.lineStyle,
+        lastValueVisible: false, priceLineVisible: false, crosshairMarkerVisible: false,
+        visible: showSma,
+        title: `MA${len}`,
+      });
+      s.setData(smaData[len].series);
+      lwSmaSeries[len] = s;
+    }
+
+    // VWMA 100 (거래량 가중 100일선) — 두꺼운 점선
+    if (lwVwmaSeries) { try { lwMainChart.removeSeries(lwVwmaSeries); } catch(e){} }
+    lwVwmaSeries = null;
+    const vwmaData = ohlcvData.indicators.vwma100;
+    if (vwmaData?.series?.length) {
+      const showVwma = document.getElementById('show-vwma')?.checked !== false;
+      lwVwmaSeries = lwMainChart.addLineSeries({
+        color: '#ff6b6b', lineWidth: 2.5, lineStyle: 2,
+        lastValueVisible: true, priceLineVisible: false,
+        visible: showVwma,
+        title: 'VWMA100',
+      });
+      lwVwmaSeries.setData(vwmaData.series);
+    }
+
+    // Volume Profile (VPVR) — 수평 히스토그램을 가격 라인으로 표현
+    lwVpvrSeries.forEach(s => { try { lwMainChart.removeSeries(s); } catch(e){} });
+    lwVpvrSeries = [];
+    const vpData = ohlcvData.indicators.volume_profile;
+    if (vpData?.length) {
+      const showVp = document.getElementById('show-vpvr')?.checked !== false;
+      // 가격대별 수평 라인 (priceLine)으로 표현 — 두께로 거래량 크기 표현
+      const maxPct = Math.max(...vpData.map(b => b.pct));
+      vpData.forEach(bin => {
+        if (bin.pct < 10) return; // 10% 미만은 생략
+        const opacity = Math.round((bin.pct / maxPct) * 200 + 55).toString(16).padStart(2, '0');
+        const color = bin.pct >= 80 ? `#f59e0b${opacity}` : `#58a6ff${opacity}`;
+        lwCandleSeries.createPriceLine({
+          price: bin.price,
+          color: color,
+          lineWidth: bin.pct >= 80 ? 2 : 1,
+          lineStyle: bin.pct >= 60 ? 0 : 2,
+          axisLabelVisible: bin.pct >= 60,
+          title: bin.pct >= 60 ? `VP ${bin.pct}%` : '',
+        });
+      });
+    }
+
+    // RSI
+    if (ohlcvData.indicators.rsi_series) {
+      lwRsiSeries.setData(ohlcvData.indicators.rsi_series);
+    }
+
+    // MACD
+    if (ohlcvData.indicators.macd_series) lwMacdSeries.setData(ohlcvData.indicators.macd_series);
+    if (ohlcvData.indicators.signal_series) lwSignalSeries.setData(ohlcvData.indicators.signal_series);
+    if (ohlcvData.indicators.histogram_series) {
+      lwHistSeries.setData(ohlcvData.indicators.histogram_series.map(d => ({
+        time: d.time, value: d.value,
+        color: d.value >= 0 ? '#26a69a66' : '#ef535066',
+      })));
+    }
+
+    // 지표 요약
+    const ind = ohlcvData.indicators;
+    const summaryEl = document.getElementById('chart-indicator-summary');
+    if (summaryEl && ind.last_price) {
+      const changeColor = ind.change >= 0 ? 'var(--green)' : 'var(--red)';
+      const stDir = ind.supertrend_direction === 1 ? '▲' : '▼';
+      summaryEl.innerHTML = `
+        <span style="color:var(--white);font-weight:600">$${ind.last_price}</span>
+        <span style="color:${changeColor}">${ind.change >= 0 ? '+' : ''}${ind.change} (${ind.change_pct}%)</span>
+        · RSI <span style="color:${ind.rsi < 30 ? 'var(--green)' : ind.rsi > 70 ? 'var(--red)' : 'var(--dim)'}">${ind.rsi}</span>
+        · ADX ${ind.adx || '-'}
+        · ST ${stDir}
+      `;
+    }
+
+    // 이벤트 마커
+    allEventMarkers = eventsData.markers;
+    renderEventMarkers(document.getElementById('show-events')?.checked !== false);
+    renderEventList(eventsData.markers);
+
+  } catch (err) {
+    console.error('차트 데이터 로드 실패:', err);
+  }
+}
+
+function renderEventMarkers(show) {
+  if (!lwCandleSeries) return;
+  if (!show) { lwCandleSeries.setMarkers([]); return; }
+
+  // lightweight-charts 마커 포맷
+  const markers = allEventMarkers.map(m => ({
+    time: m.time,
+    position: m.position || 'aboveBar',
+    color: m.color,
+    shape: m.severity === 'critical' ? 'arrowDown' : 'circle',
+    text: m.category_label?.charAt(0) || '·',
+    size: m.severity === 'critical' ? 2 : m.is_tesla ? 2 : 1,
+  }));
+
+  // 같은 날짜 중복 처리 — 가장 중요한 것만
+  const byDate = {};
+  markers.forEach(m => {
+    if (!byDate[m.time] || m.size > byDate[m.time].size) byDate[m.time] = m;
+  });
+
+  const deduplicated = Object.values(byDate).sort((a, b) => a.time > b.time ? 1 : -1);
+  lwCandleSeries.setMarkers(deduplicated);
+}
+
+function renderEventList(markers) {
+  const list = document.getElementById('chart-event-list');
+  if (!list) return;
+
+  if (!markers.length) {
+    list.innerHTML = '<div class="empty-state" style="height:100px;">이벤트 없음</div>';
+    return;
   }
 
-  // Technical Analysis 게이지
-  const taEl = document.getElementById('tv-ta-wrapper');
-  if (taEl) {
-    const taScript = document.createElement('script');
-    taScript.type = 'text/javascript';
-    taScript.src = 'https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js';
-    taScript.async = true;
-    taScript.textContent = JSON.stringify({
-      interval: '1D',
-      width: '100%',
-      height: 320,
-      symbol: 'NASDAQ:TSLA',
-      showIntervalTabs: true,
-      locale: 'ko',
-      colorTheme: 'dark',
-      isTransparent: true,
-    });
-    const container = document.createElement('div');
-    container.className = 'tradingview-widget-container';
-    const inner = document.createElement('div');
-    inner.className = 'tradingview-widget-container__widget';
-    container.appendChild(inner);
-    container.appendChild(taScript);
-    taEl.appendChild(container);
-  }
+  // 최신순 정렬
+  const sorted = [...markers].sort((a, b) => b.time > a.time ? 1 : -1);
 
-  // Symbol Info 위젯
-  const infoEl = document.getElementById('tv-info-wrapper');
-  if (infoEl) {
-    const infoScript = document.createElement('script');
-    infoScript.type = 'text/javascript';
-    infoScript.src = 'https://s3.tradingview.com/external-embedding/embed-widget-symbol-info.js';
-    infoScript.async = true;
-    infoScript.textContent = JSON.stringify({
-      symbol: 'NASDAQ:TSLA',
-      width: '100%',
-      locale: 'ko',
-      colorTheme: 'dark',
-      isTransparent: true,
-    });
-    const container = document.createElement('div');
-    container.className = 'tradingview-widget-container';
-    const inner = document.createElement('div');
-    inner.className = 'tradingview-widget-container__widget';
-    container.appendChild(inner);
-    container.appendChild(infoScript);
-    infoEl.appendChild(container);
-  }
+  list.innerHTML = sorted.map(m => `
+    <div class="chart-event-item">
+      <div class="ev-date">
+        <span class="ev-severity" style="background:${m.color}"></span>
+        ${m.time} · ${m.severity}${m.is_tesla ? ' · TSLA' : ''}
+      </div>
+      <div class="ev-title">
+        <span class="ev-badge" style="background:${m.color}22;color:${m.color}">${m.category_label}</span>
+        ${m.title.length > 50 ? m.title.slice(0, 50) + '...' : m.title}
+      </div>
+    </div>
+  `).join('');
 }
 
 // ============================================================

@@ -148,12 +148,38 @@ nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
 .rel-tag.impacts { background: rgba(139,148,158,0.2); color: var(--dim); }
 .rel-tag.sanctions { background: rgba(248,81,73,0.15); color: var(--red); }
 
-/* Chart view (TradingView) */
-.chart-layout { display: grid; grid-template-columns: 1fr 280px; height: 100%; gap: 0; }
-.chart-main { height: 100%; min-height: 400px; overflow: hidden; }
+/* Chart view (자체 차트) */
+.chart-layout { display: grid; grid-template-columns: 1fr 260px; height: 100%; gap: 0; }
+.chart-main { height: 100%; display: flex; flex-direction: column; overflow: hidden; position: relative; }
 .chart-sidebar { background: var(--card); border-left: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; }
-.chart-sidebar-section { flex-shrink: 0; }
-.chart-sidebar-section:first-child { border-bottom: 1px solid var(--border); }
+.chart-sidebar-header { font-size: 10px; font-weight: 600; color: var(--dim); padding: 10px 12px 6px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); }
+
+/* 차트 툴바 */
+.chart-toolbar { display: flex; align-items: center; gap: 12px; padding: 6px 12px; background: var(--card); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.chart-symbol { font-size: 14px; font-weight: 700; color: var(--white); }
+.chart-period-btns { display: flex; gap: 2px; }
+.period-btn { background: transparent; border: 1px solid var(--border); color: var(--dim); font-size: 11px; padding: 3px 10px; border-radius: 4px; cursor: pointer; font-family: inherit; }
+.period-btn:hover { color: var(--white); border-color: var(--dim); }
+.period-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.chart-toggle { font-size: 11px; color: var(--dim); display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.chart-toggle input { accent-color: var(--blue); }
+.chart-indicator-text { font-size: 11px; color: var(--dim); margin-left: auto; }
+
+/* 차트 툴팁 */
+.chart-tooltip { position: absolute; display: none; background: #161b22; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--white); font-size: 12px; z-index: 100; pointer-events: none; max-width: 280px; line-height: 1.5; }
+.chart-tooltip .tt-date { color: var(--dim); font-size: 11px; }
+.chart-tooltip .tt-title { font-weight: 600; margin: 4px 0; }
+.chart-tooltip .tt-cat { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 600; margin-right: 4px; }
+.chart-tooltip .tt-desc { color: var(--dim); }
+
+/* 이벤트 리스트 (사이드바) */
+.chart-event-list { padding: 6px; }
+.chart-event-item { padding: 8px 10px; border-radius: 6px; margin-bottom: 3px; cursor: pointer; border: 1px solid transparent; transition: all 0.1s; }
+.chart-event-item:hover { background: rgba(88,166,255,0.06); border-color: var(--border); }
+.chart-event-item .ev-date { font-size: 10px; color: var(--dim); }
+.chart-event-item .ev-title { font-size: 11px; font-weight: 500; margin-top: 2px; line-height: 1.4; }
+.chart-event-item .ev-badge { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 600; margin-right: 4px; }
+.chart-event-item .ev-severity { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
 
 /* D3 graph */
 .node-circle { cursor: pointer; transition: r 0.15s; }
