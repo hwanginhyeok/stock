@@ -164,6 +164,8 @@ nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
 .chart-toggle { font-size: 11px; color: var(--dim); display: flex; align-items: center; gap: 4px; cursor: pointer; }
 .chart-toggle input { accent-color: var(--blue); }
 .chart-indicator-text { font-size: 11px; color: var(--dim); margin-left: auto; }
+.chart-select { background: var(--bg); color: var(--white); border: 1px solid var(--border); border-radius: 4px; padding: 3px 6px; font-size: 11px; font-family: inherit; }
+.chart-select:focus { outline: none; border-color: var(--blue); }
 .chart-interval-btns { display: flex; gap: 2px; }
 .interval-btn { background: transparent; border: 1px solid var(--border); color: var(--dim); font-size: 11px; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-family: inherit; font-weight: 600; }
 .interval-btn:hover { color: var(--white); border-color: var(--dim); }

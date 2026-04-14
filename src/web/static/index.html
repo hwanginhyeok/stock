@@ -130,9 +130,11 @@
             <label class="chart-toggle">
               <input type="checkbox" id="show-events" checked> 이벤트
             </label>
-            <label class="chart-toggle">
-              <input type="checkbox" id="show-all-events"> 전체
-            </label>
+            <select id="importance-level" class="chart-select">
+              <option value="core">핵심(5)</option>
+              <option value="important" selected>중요(15)</option>
+              <option value="all">전체(50)</option>
+            </select>
             <span id="chart-indicator-summary" class="chart-indicator-text"></span>
           </div>
           <div id="lw-main-chart" style="width:100%;flex:1;"></div>

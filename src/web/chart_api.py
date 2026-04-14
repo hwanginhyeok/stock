@@ -339,18 +339,14 @@ SEVERITY_SHAPES = {
 def get_chart_events(
     symbol: str = "TSLA",
     period: str = Query("6mo", pattern="^(1mo|3mo|6mo|1y|2y|5y|max)$"),
-    severity_min: str = Query("major", pattern="^(critical|major|moderate|minor)$"),
-    tesla_only: bool = False,
+    importance_level: str = Query("important", pattern="^(core|important|all)$"),
 ) -> dict:
-    """차트에 표시할 이벤트 마커를 반환한다.
+    """차트에 표시할 이벤트 마커를 importance 점수 기반으로 필터링하여 반환한다.
 
-    필터링 전략 (B안):
-    1. Tesla 엔티티 직접 연결 이벤트 (항상 포함)
-    2. macro critical 이벤트 (거시 영향)
-    3. severity_min 이상만
+    importance = severity_score × relevance_score × freshness_score
     """
     from src.core.database import get_session, init_db
-    from src.storage import OntologyEntityRepository, OntologyEventRepository, OntologyLinkRepository
+    from src.storage import OntologyEventRepository
 
     init_db()
 
@@ -358,101 +354,156 @@ def get_chart_events(
     period_days = {"1mo": 30, "3mo": 90, "6mo": 180, "1y": 365, "2y": 730, "5y": 1825, "max": 3650}
     cutoff = datetime.now() - timedelta(days=period_days.get(period, 180))
 
-    severity_order = ["critical", "major", "moderate", "minor"]
-    min_idx = severity_order.index(severity_min) if severity_min in severity_order else 1
+    # severity_score 매핑
+    severity_scores = {
+        "critical": 10,
+        "major": 5,
+        "moderate": 2,
+        "minor": 1,
+    }
 
-    # Tesla 관련 엔티티 ID
-    entity_repo = OntologyEntityRepository()
-    tesla_keywords = ["Tesla", "TSLA", "Musk", "xAI", "SpaceX", "FSD", "Optimus", "Cybertruck", "Megapack"]
-    tesla_entity_ids: set[str] = set()
-    for ent in entity_repo.get_active():
-        if any(kw.lower() in ent.name.lower() for kw in tesla_keywords) or ent.ticker == "TSLA":
-            tesla_entity_ids.add(ent.id)
+    # relevance_score 키워드 매핑
+    direct_keywords = [
+        "Tesla", "TSLA", "테슬라", "Musk", "머스크", "FSD", "Robotaxi", "로보택시",
+        "Cybertruck", "사이버트럭", "Optimus", "옵티머스", "Megapack", "메가팩",
+        "Gigafactory", "기가팩토리", "xAI", "SpaceX", "스페이스X",
+    ]
+    indirect_keywords = [
+        "EV", "전기차", "자율주행", "autonomous", "AI 반도체", "AI chip",
+        "엔비디아", "NVIDIA", "관세", "tariff", "EV 보조금", "배터리",
+        "리튬", "lithium", "충전", "charging",
+    ]
+    macro_keywords = [
+        "inflation", "인플레이션", "recession", "침체", "GDP", "유동성",
+        "liquidity", "S&P", "NASDAQ", "나스닥", "Fed", "연준", "금리",
+        "FOMC", "환율",
+    ]
 
-    # Tesla 연결 이벤트 ID
-    link_repo = OntologyLinkRepository()
-    tesla_event_ids: set[str] = set()
-    for eid in tesla_entity_ids:
-        for lk in link_repo.get_many(filters={"source_id": eid}, limit=200):
-            if lk.target_type == "event":
-                tesla_event_ids.add(lk.target_id)
-        for lk in link_repo.get_many(filters={"target_id": eid}, limit=200):
-            if lk.source_type == "event":
-                tesla_event_ids.add(lk.source_id)
+    def _calculate_relevance(title: str) -> tuple[int, str]:
+        """제목에서 relevance_score와 라벨을 계산."""
+        title_lower = title.lower()
+        for kw in direct_keywords:
+            if kw.lower() in title_lower:
+                return 5, "직접"
+        for kw in indirect_keywords:
+            if kw.lower() in title_lower:
+                return 3, "간접"
+        for kw in macro_keywords:
+            if kw.lower() in title_lower:
+                return 2, "거시"
+        return 1, "기타"
 
-    # 이벤트 수집
+    def _calculate_freshness(started_at: datetime | None) -> float:
+        """신선도 점수 계산."""
+        if not started_at:
+            return 0.1
+        now = datetime.now()
+        delta = (now - started_at).days
+        if delta <= 1:
+            return 1.0
+        elif delta <= 7:
+            return 0.8
+        elif delta <= 30:
+            return 0.5
+        elif delta <= 90:
+            return 0.3
+        else:
+            return 0.1
+
+    # 이벤트 수집 및 점수 계산
     event_repo = OntologyEventRepository()
     all_events = event_repo.get_active()
-    markers = []
+    scored_markers = []
 
     for ev in all_events:
         # 기간 필터
         if ev.started_at and ev.started_at < cutoff:
             continue
 
-        sev_idx = severity_order.index(ev.severity) if ev.severity in severity_order else 3
-        is_tesla = ev.id in tesla_event_ids
-        is_macro_critical = ev.event_type == "macro" and ev.severity == "critical"
+        # severity_score
+        sev_score = severity_scores.get(ev.severity, 1)
 
-        # 필터링 로직 (B안)
-        if tesla_only and not is_tesla:
-            continue
-        if not is_tesla and not is_macro_critical and sev_idx > min_idx:
-            continue
-        # moderate 이하 비테슬라 비크리티컬은 제외
-        if not is_tesla and not is_macro_critical and sev_idx >= 2:
-            continue
+        # relevance_score
+        rel_score, rel_label = _calculate_relevance(ev.title)
 
-        cat_info = EVENT_CATEGORIES.get(ev.event_type, {"label": ev.event_type, "color": "#8b949e"})
-        shape = SEVERITY_SHAPES.get(ev.severity, "square")
+        # freshness_score
+        fresh_score = _calculate_freshness(ev.started_at)
+
+        # importance 계산
+        importance = sev_score * rel_score * fresh_score
+
+        # 점수가 0이면 스킵
+        if importance < 1:
+            continue
 
         # 날짜 포맷
         date_str = ev.started_at.strftime("%Y-%m-%d") if ev.started_at else ""
         if not date_str:
             continue
 
-        markers.append({
+        cat_info = EVENT_CATEGORIES.get(ev.event_type, {"label": ev.event_type, "color": "#8b949e"})
+        shape = SEVERITY_SHAPES.get(ev.severity, "square")
+
+        scored_markers.append({
             "time": date_str,
-            "position": "aboveBar" if sev_idx <= 1 else "belowBar",
-            "color": cat_info["color"],
-            "shape": shape,
-            "text": f"[{cat_info['label']}] {ev.title[:40]}",
-            "id": ev.id,
             "title": ev.title,
-            "event_type": ev.event_type,
-            "severity": ev.severity,
-            "is_tesla": is_tesla,
             "category_label": cat_info["label"],
+            "color": cat_info["color"],
+            "severity": ev.severity,
+            "event_type": ev.event_type,
+            "importance": importance,
+            "relevance_label": rel_label,
+            "is_tesla_direct": rel_score == 5,
+            "shape": shape,
+            "position": "aboveBar" if importance >= 10 else "belowBar",
             "story_thread": getattr(ev, "story_thread", "") or "",
+            "id": ev.id,
         })
 
-    # 날짜순 정렬 (lightweight-charts 요구사항)
-    markers.sort(key=lambda m: m["time"])
+    # importance_level 기반 필터
+    if importance_level == "core":
+        min_importance = 15
+        max_per_day = 2
+        max_total = 5
+    elif importance_level == "important":
+        min_importance = 6
+        max_per_day = 3
+        max_total = 15
+    else:  # all
+        min_importance = 1
+        max_per_day = 3
+        max_total = 50
 
-    # 같은 날짜에 너무 많으면 중요한 것만 (최대 3개/일)
+    # 점수 기준 필터
+    filtered = [m for m in scored_markers if m["importance"] >= min_importance]
+
+    # 같은 날짜 중복 제거 (최대 N개/일)
     from collections import defaultdict
     by_date: dict[str, list] = defaultdict(list)
-    for m in markers:
+    for m in filtered:
         by_date[m["time"]].append(m)
 
-    filtered = []
+    deduped = []
     for date, items in by_date.items():
-        # critical 우선, tesla 우선 정렬
-        items.sort(key=lambda x: (
-            0 if x["severity"] == "critical" else 1 if x["severity"] == "major" else 2,
-            0 if x["is_tesla"] else 1,
-        ))
-        filtered.extend(items[:3])
+        # importance 내림차순 정렬
+        items.sort(key=lambda x: x["importance"], reverse=True)
+        deduped.extend(items[:max_per_day])
 
-    filtered.sort(key=lambda m: m["time"])
+    # importance 내림차순 정렬 후 상위 N개
+    deduped.sort(key=lambda m: m["importance"], reverse=True)
+    final_markers = deduped[:max_total]
+
+    # 다시 �짜순 정렬
+    final_markers.sort(key=lambda m: m["time"])
 
     return {
         "symbol": symbol,
         "period": period,
+        "importance_level": importance_level,
         "total_events": len(all_events),
-        "tesla_events": len(tesla_event_ids),
-        "filtered_count": len(filtered),
-        "markers": filtered,
+        "scored_count": len(scored_markers),
+        "filtered_count": len(final_markers),
+        "markers": final_markers,
     }
 
 

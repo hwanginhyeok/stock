@@ -12,7 +12,6 @@
 | 1-46 | `stock-notion-sync` 스킬 — Notion DB 연동 PoC | P1 | 1-43, 1-44 | hih-notion-sync 복제. 이슈 DB 1개부터 |
 | 1-47 | 기존 파이프라인 → 새 엔티티 스키마 migration | P1 | 1-44, 1-45 | DB 마이그레이션 + 역호환 검증 |
 | 1-48 | properties dict 웹 UI 노출 | P1 | 1-44 | `/api/entities/{id}/properties` + D3 노드 클릭 시 본질 속성 표시 |
-| 1-50 | 차트 이벤트 가중 필터 (importance 점수) | P1 | 1-49 | severity × relevance × freshness. 키워드 기반 Tesla 관련성. 사이드바 슬라이더 (핵심 5/중요 15/전체) |
 | 1-51 | 미래 이벤트 (실적·FOMC·Robotaxi) 차트 표시 | P1 | 1-49 | 4/23 TSLA 실적 등 수동 시드. status=upcoming. 차트에 수직 점선 + 라벨 |
 | 1-52 | 정배열/역배열 + 눌림목 시그널 | P1 | 1-49 | SMA 5>10>20>50>100 정배열 감지 + SMA20/50 터치 후 반등 매수 |
 | 1-53 | 빗각·채널 기반 시그널 (인범 매매법) | P1 | 1-49 | 빗각 터치=매수 대기, 이탈 후 회복=강한 매수, 채널 상단=익절 |

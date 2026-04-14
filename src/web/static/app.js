@@ -419,7 +419,7 @@ function initLightweightChart() {
   document.getElementById('show-events').addEventListener('change', (e) => {
     renderEventMarkers(e.target.checked);
   });
-  document.getElementById('show-all-events').addEventListener('change', () => {
+  document.getElementById('importance-level')?.addEventListener('change', () => {
     loadChartData(currentChartPeriod);
   });
 
@@ -436,13 +436,15 @@ function initLightweightChart() {
 }
 
 async function loadChartData(period) {
+  // 이벤트 가중 레벨: core(핵심5) / important(중요15) / all(전체50)
   const showAll = document.getElementById('show-all-events')?.checked;
-  const sevMin = showAll ? 'moderate' : 'major';
+  const importanceLevel = document.getElementById('importance-level')?.value
+    || (showAll ? 'all' : 'important');
 
   try {
     const [ohlcvResp, eventsResp, signalsResp, trendResp] = await Promise.all([
       fetch(`/api/chart/ohlcv?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
-      fetch(`/api/chart/events?symbol=TSLA&period=${period}&severity_min=${sevMin}`),
+      fetch(`/api/chart/events?symbol=TSLA&period=${period}&importance_level=${importanceLevel}`),
       fetch(`/api/chart/signals?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
       fetch(`/api/chart/trendlines?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
     ]);
@@ -633,7 +635,7 @@ function renderEventMarkers(show) {
     color: m.color,
     shape: m.severity === 'critical' ? 'arrowDown' : 'circle',
     text: m.category_label?.charAt(0) || '·',
-    size: m.severity === 'critical' ? 2 : m.is_tesla ? 2 : 1,
+    size: m.severity === 'critical' ? 2 : m.is_tesla_direct ? 2 : 1,
   }));
 
   // 같은 날짜 중복 처리 — 가장 중요한 것만
@@ -658,18 +660,23 @@ function renderEventList(markers) {
   // 최신순 정렬
   const sorted = [...markers].sort((a, b) => b.time > a.time ? 1 : -1);
 
-  list.innerHTML = sorted.map(m => `
+  list.innerHTML = sorted.map(m => {
+    const teslaTag = m.is_tesla_direct ? ' · <span style="color:#26a69a;font-weight:600">TSLA</span>' : '';
+    const relTag = m.relevance_label ? ` · ${m.relevance_label}` : '';
+    const impTag = m.importance ? `<span style="color:#f59e0b;font-weight:600;float:right">★${m.importance.toFixed(0)}</span>` : '';
+    return `
     <div class="chart-event-item">
       <div class="ev-date">
         <span class="ev-severity" style="background:${m.color}"></span>
-        ${m.time} · ${m.severity}${m.is_tesla ? ' · TSLA' : ''}
+        ${m.time} · ${m.severity}${relTag}${teslaTag}
+        ${impTag}
       </div>
       <div class="ev-title">
         <span class="ev-badge" style="background:${m.color}22;color:${m.color}">${m.category_label}</span>
         ${m.title.length > 50 ? m.title.slice(0, 50) + '...' : m.title}
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 // ============================================================

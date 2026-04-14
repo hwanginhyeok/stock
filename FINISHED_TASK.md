@@ -4,6 +4,7 @@
 
 | # | 태스크 | 완료일 | 비고 |
 |---|--------|--------|------|
+| 1-49 | 자체 차트 시스템 구축 (TSLA) | 2026-04-15 | TV 위젯 + lightweight-charts + yfinance + SMA6/VWMA100/VPVR/RSI/MACD + 멀티 타임프레임(1H/4H/D/W/M) + 매수매도 시그널 + 인범 빗각(고고저/저저고) + 평행 채널 + VP 교차 + XY축 독립 줌. 후속: 1-50~53. D-006 기록 |
 | 5-9 | trend_detector Ollama→Gemini Flash 전환 | 2026-04-08 | gemini -p 1차 + Ollama fallback, dry-run 통과 |
 | 1-41 | 엔티티 노이즈 필터 강화 — 금액/수량/비자 패턴 | 2026-04-08 | 공통 모듈 + DB 45개 정리 (3183→3138) |
 | 1-42 | 뉴스 티커 최신화 + GEO/US/KR 핫뉴스 2개씩 | 2026-04-08 | published_at 정렬, 카테고리별 선별 |
