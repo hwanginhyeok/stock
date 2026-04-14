@@ -54,3 +54,14 @@
 - **노하우**: matplotlib + CJK 폰트는 `addfont()` → `rcParams["font.family"]` 2단계 필수. .ttc 컬렉션은 첫 번째 폰트만 등록됨을 인지. 헤드리스 환경에서는 `matplotlib.use("Agg")` 백엔드 설정 필수
 - **회고**: 이 문제는 "한번 해결하면 끝"인데 삽질 시간이 길었다. `.claude/rules/coding.md`에 스니펫으로 기록해둔 게 정답 — 이후 모든 차트 스크립트에서 복사-붙여넣기로 해결
 - **관련 파일**: `.claude/rules/coding.md` (한글 폰트 스니펫), `src/exporters/` 전체
+
+## D-006: lightweight-charts setData 후 fitContent/setVisibleLogicalRange 무효화
+- **날짜**: 2026-04-12
+- **상황**: 차트 기간 전환 시(예: 6M→MAX) `fitContent()` 호출했지만 visible range가 이전 6M 구간에 그대로 고정. 코드에서 호출은 됐는데 효과가 없음
+- **이슈**: lightweight-charts가 `setData()` 후 내부적으로 비동기 auto-scroll을 수행하는데, 이 작업이 setTimeout(300ms~600ms) 안의 fitContent보다 늦게 실행되어 우리가 설정한 range를 덮어씀. 추가로 차트 3개(메인/RSI/MACD)의 타임스케일 동기화 리스너가 피드백 루프를 일으켜 range가 즉시 리셋
+- **삽질**: (1) setTimeout 100ms→300ms→600ms 점진 증가 → 효과 없음 (2) `requestAnimationFrame` 2번 중첩 → 효과 없음 (3) `subscribeVisibleLogicalRangeChange` 1회용 리스너로 첫 트리거에서 range 설정 → 첫 setData 시점이라 데이터 미완 (4) 브라우저 콘솔에서 수동 호출은 동작 → 자동 호출만 안 됨
+- **해결**: `_isSyncingTimeScale` 플래그를 setData 전체 동안 true로 유지(동기화 리스너 비활성화) + 2단계 setTimeout(100ms → fitContent → 100ms → 서브차트 동기화). SMA 시리즈는 매번 삭제/재생성 대신 `initLightweightChart()`에서 한 번만 만들고 `setData()`만 호출
+- **대안**: (a) timeScale 동기화 자체를 제거 → 메인/RSI/MACD가 따로 놀게 됨 (b) `setVisibleRange` (시간 기준) → string time 파싱 이슈 (c) `scrollToPosition(-N)` → 정확한 범위 제어 안 됨
+- **노하우**: lightweight-charts에서 시리즈를 동적으로 추가/제거하면 내부 auto-scroll이 매번 트리거됨 → **시리즈는 한 번만 생성하고 setData로 데이터만 갱신**. 멀티 차트 동기화는 피드백 루프 방지 플래그 필수. visible range는 모든 데이터 로딩이 끝난 뒤 별도 setTimeout으로 강제 설정
+- **회고**: lightweight-charts 공식 문서가 "data updates and auto-scaling" 섹션을 명시 안 함. 처음부터 시리즈 재사용 패턴으로 설계했어야. removeSeries→addLineSeries 반복은 성능도 나쁨
+- **관련 파일**: `src/web/static/app.js` (initLightweightChart, loadChartData, syncTimeScale)
