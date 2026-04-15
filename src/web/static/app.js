@@ -442,16 +442,18 @@ async function loadChartData(period) {
     || (showAll ? 'all' : 'important');
 
   try {
-    const [ohlcvResp, eventsResp, signalsResp, trendResp] = await Promise.all([
+    const [ohlcvResp, eventsResp, signalsResp, trendResp, strategyResp] = await Promise.all([
       fetch(`/api/chart/ohlcv?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
       fetch(`/api/chart/events?symbol=TSLA&period=${period}&importance_level=${importanceLevel}`),
       fetch(`/api/chart/signals?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
       fetch(`/api/chart/trendlines?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
+      fetch(`/api/chart/strategy?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
     ]);
     const ohlcvData = await ohlcvResp.json();
     const eventsData = await eventsResp.json();
     const signalsData = await signalsResp.json();
     const trendData = await trendResp.json();
+    const strategyData = await strategyResp.json();
 
     // VPVR 계산용 + timeScale 설정
     allChartData = ohlcvData.ohlcv;
@@ -555,8 +557,8 @@ async function loadChartData(period) {
       lwTrendlineSeries.push(centerS);
     });
 
-    // 시그널 마커 (BUY/SELL) + 이벤트 마커 통합
-    const signalMarkers = (signalsData.signals || []).map(s => ({
+    // 시그널 마커 통합: VWMA 시그널 + 정배열/눌림목 시그널 + 이벤트
+    const vwmaMarkers = (signalsData.signals || []).map(s => ({
       time: s.time,
       position: s.type.includes('BUY') ? 'belowBar' : 'aboveBar',
       color: s.type.includes('BUY') ? '#26a69a' : '#ef5350',
@@ -564,6 +566,18 @@ async function loadChartData(period) {
       text: s.type === 'STRONG_BUY' ? 'B+' : s.type === 'BUY' ? 'B' : 'S',
       size: s.type === 'STRONG_BUY' ? 3 : 2,
     }));
+    const strategyMarkers = (strategyData.signals || []).map(s => {
+      const isBuy = s.type.includes('BUY') || s.type === 'PERFECT_ORDER_START';
+      return {
+        time: s.time,
+        position: isBuy ? 'belowBar' : 'aboveBar',
+        color: s.color || (isBuy ? '#3fb950' : '#ef5350'),
+        shape: isBuy ? 'arrowUp' : 'arrowDown',
+        text: s.text,
+        size: ['STRONG_SELL', 'PULLBACK_BUY'].includes(s.type) ? 3 : 2,
+      };
+    });
+    const signalMarkers = [...vwmaMarkers, ...strategyMarkers];
     // 시그널은 항상 표시 (이벤트와 합치되 시그널 우선)
     allEventMarkers = eventsData.markers;
     const combinedMarkers = [...signalMarkers];
@@ -592,13 +606,16 @@ async function loadChartData(period) {
     lwCandleSeries.setMarkers(sortedMarkers);
     renderEventList(eventsData.markers);
 
-    // 추세 상태 표시 업데이트
+    // 추세 상태 표시 업데이트 (정배열/역배열 우선)
     const trendEl = document.getElementById('chart-indicator-summary');
-    if (trendEl && signalsData.current_trend) {
-      const trendColors = { TREND_UP: 'var(--green)', TREND_DOWN: 'var(--red)', NEUTRAL: 'var(--dim)' };
-      const trendLabels = { TREND_UP: '추세 ▲', TREND_DOWN: '추세 ▼', NEUTRAL: '중립', INSUFFICIENT_DATA: '—' };
-      const trendHtml = `<span style="color:${trendColors[signalsData.current_trend] || 'var(--dim)'};font-weight:600">${trendLabels[signalsData.current_trend] || '—'}</span>`;
-      trendEl.innerHTML = trendEl.innerHTML.replace(/· ST [▲▼]/, `· ${trendHtml}`);
+    if (trendEl) {
+      const stateColors = { PERFECT_ORDER: 'var(--green)', REVERSE_ORDER: 'var(--red)', TRANSITION: 'var(--yellow)' };
+      const stateLabels = { PERFECT_ORDER: '정배열 ▲', REVERSE_ORDER: '역배열 ▼', TRANSITION: '과도기' };
+      const state = strategyData.current_state;
+      if (state && stateLabels[state]) {
+        const stateHtml = `<span style="color:${stateColors[state]};font-weight:700">${stateLabels[state]}</span>`;
+        trendEl.innerHTML = trendEl.innerHTML.replace(/· ST [▲▼]/, `· ${stateHtml}`);
+      }
     }
 
     // fitContent: 2단계 지연 — chart 내부 렌더 완전 종료 후 range 설정

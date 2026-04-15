@@ -814,3 +814,191 @@ def get_trend_signals(
         "current_adx": round(float(adx.iloc[-1]), 2) if adx is not None and pd.notna(adx.iloc[-1]) else None,
         "total_signals": len(signals),
     }
+
+
+@router.get("/strategy")
+def get_trend_strategy(
+    symbol: str = "TSLA",
+    period: str = Query("6mo", pattern="^(1mo|3mo|6mo|1y|2y|5y|max)$"),
+    interval: str = Query("1d", pattern="^(1h|4h|1d|1wk|1mo)$"),
+) -> dict:
+    """정배열/역배열 + 눌림목 시그널 — 빅테크 눌림목 매수 전략."""
+    extended_period = _EXTENDED_PERIOD.get(period, period)
+    records = _fetch_ohlcv(symbol, extended_period, interval)
+
+    if len(records) < 100:
+        return {
+            "symbol": symbol,
+            "interval": interval,
+            "current_state": "INSUFFICIENT_DATA",
+            "current_state_label": "데이터 부족",
+            "current_sma": {},
+            "signals": [],
+            "state_history": [],
+            "total_signals": 0,
+        }
+
+    import pandas_ta as ta
+
+    df = pd.DataFrame(records)
+    close = df["close"].astype(float)
+    high = df["high"].astype(float)
+    low = df["low"].astype(float)
+
+    sma5 = ta.sma(close, length=5)
+    sma10 = ta.sma(close, length=10)
+    sma20 = ta.sma(close, length=20)
+    sma50 = ta.sma(close, length=50)
+    sma100 = ta.sma(close, length=100)
+
+    def _get_state(idx: int) -> str | None:
+        if not all(pd.notna([sma5.iloc[idx], sma10.iloc[idx], sma20.iloc[idx], sma50.iloc[idx], sma100.iloc[idx]])):
+            return None
+        s5, s10, s20, s50, s100 = sma5.iloc[idx], sma10.iloc[idx], sma20.iloc[idx], sma50.iloc[idx], sma100.iloc[idx]
+        if s5 > s10 > s20 > s50 > s100:
+            return "PERFECT_ORDER"
+        elif s5 < s10 < s20 < s50 < s100:
+            return "REVERSE_ORDER"
+        else:
+            return "TRANSITION"
+
+    signals = []
+    state_history = []
+    prev_state = None
+
+    for i in range(1, len(df)):
+        state = _get_state(i)
+        if state is None:
+            continue
+
+        time_val = records[i]["time"]
+        curr_close = close.iloc[i]
+        curr_low = low.iloc[i]
+        curr_high = high.iloc[i]
+        prev_close = close.iloc[i - 1]
+
+        state_history.append({"time": time_val, "state": state})
+
+        if prev_state != state:
+            if state == "PERFECT_ORDER" and prev_state in (None, "TRANSITION", "REVERSE_ORDER"):
+                signals.append({
+                    "time": time_val,
+                    "type": "PERFECT_ORDER_START",
+                    "label": "정배열 진입",
+                    "price": round(curr_close, 2),
+                    "color": "#26a69a",
+                    "text": "PO",
+                })
+            elif state == "TRANSITION" and prev_state == "PERFECT_ORDER":
+                signals.append({
+                    "time": time_val,
+                    "type": "WEAK_SELL",
+                    "label": "점진 매도",
+                    "price": round(curr_close, 2),
+                    "color": "#f59e0b",
+                    "text": "W",
+                })
+            elif state == "REVERSE_ORDER" and prev_state in ("PERFECT_ORDER", "TRANSITION"):
+                signals.append({
+                    "time": time_val,
+                    "type": "STRONG_SELL",
+                    "label": "추세 붕괴",
+                    "price": round(curr_close, 2),
+                    "color": "#ef5350",
+                    "text": "BR",
+                })
+
+        prev_state = state
+
+    for i in range(2, len(df)):
+        state = _get_state(i)
+        prev_state = _get_state(i - 1)
+        if state != "PERFECT_ORDER" or state is None:
+            continue
+
+        time_val = records[i]["time"]
+        curr_low = low.iloc[i]
+        curr_close = close.iloc[i]
+        next_close = close.iloc[i + 1] if i + 1 < len(df) else None
+
+        if next_close is None:
+            continue
+
+        s20 = sma20.iloc[i] if pd.notna(sma20.iloc[i]) else None
+        s50 = sma50.iloc[i] if pd.notna(sma50.iloc[i]) else None
+
+        touched_ma = None
+        ma_value = None
+
+        if s20 and abs(curr_low - s20) / s20 <= 0.02:
+            touched_ma = "SMA20"
+            ma_value = s20
+        elif s50 and abs(curr_low - s50) / s50 <= 0.02:
+            touched_ma = "SMA50"
+            ma_value = s50
+
+        if touched_ma and next_close > curr_close:
+            signals.append({
+                "time": time_val,
+                "type": "PULLBACK_BUY",
+                "label": "눌림목 매수",
+                "price": round(curr_close, 2),
+                "touched_ma": touched_ma,
+                "ma_value": round(ma_value, 2),
+                "color": "#3fb950",
+                "text": "PB",
+            })
+
+    for i in range(1, len(df)):
+        state = _get_state(i)
+        if state != "REVERSE_ORDER" or state is None:
+            continue
+
+        time_val = records[i]["time"]
+        curr_high = high.iloc[i]
+        curr_close = close.iloc[i]
+        prev_close = close.iloc[i - 1]
+
+        s20 = sma20.iloc[i] if pd.notna(sma20.iloc[i]) else None
+
+        if s20 and abs(curr_high - s20) / s20 <= 0.02 and curr_close < prev_close:
+            signals.append({
+                "time": time_val,
+                "type": "BOUNCE_SELL",
+                "label": "반등 매도",
+                "price": round(curr_close, 2),
+                "touched_ma": "SMA20",
+                "ma_value": round(s20, 2),
+                "color": "#ef5350",
+                "text": "RS",
+            })
+
+    signals.sort(key=lambda x: x["time"])
+
+    current_state = _get_state(len(df) - 1)
+    state_labels = {
+        "PERFECT_ORDER": "정배열",
+        "REVERSE_ORDER": "역배열",
+        "TRANSITION": "과도기",
+    }
+
+    current_sma = {}
+    if all(pd.notna([sma5.iloc[-1], sma10.iloc[-1], sma20.iloc[-1], sma50.iloc[-1], sma100.iloc[-1]])):
+        current_sma = {
+            "5": round(float(sma5.iloc[-1]), 2),
+            "10": round(float(sma10.iloc[-1]), 2),
+            "20": round(float(sma20.iloc[-1]), 2),
+            "50": round(float(sma50.iloc[-1]), 2),
+            "100": round(float(sma100.iloc[-1]), 2),
+        }
+
+    return {
+        "symbol": symbol,
+        "interval": interval,
+        "current_state": current_state or "UNKNOWN",
+        "current_state_label": state_labels.get(current_state, "알 수 없음"),
+        "current_sma": current_sma,
+        "signals": signals,
+        "state_history": state_history[-30:] if len(state_history) > 30 else state_history,
+        "total_signals": len(signals),
+    }

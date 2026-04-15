@@ -4,6 +4,7 @@
 
 | # | 태스크 | 완료일 | 비고 |
 |---|--------|--------|------|
+| 1-50 | 차트 이벤트 가중 필터 (importance 점수) | 2026-04-15 | severity × relevance × freshness. 키워드 기반 Tesla 직접/간접/거시 분류. core/important/all 셀렉터 |
 | 1-49 | 자체 차트 시스템 구축 (TSLA) | 2026-04-15 | TV 위젯 + lightweight-charts + yfinance + SMA6/VWMA100/VPVR/RSI/MACD + 멀티 타임프레임(1H/4H/D/W/M) + 매수매도 시그널 + 인범 빗각(고고저/저저고) + 평행 채널 + VP 교차 + XY축 독립 줌. 후속: 1-50~53. D-006 기록 |
 | 5-9 | trend_detector Ollama→Gemini Flash 전환 | 2026-04-08 | gemini -p 1차 + Ollama fallback, dry-run 통과 |
 | 1-41 | 엔티티 노이즈 필터 강화 — 금액/수량/비자 패턴 | 2026-04-08 | 공통 모듈 + DB 45개 정리 (3183→3138) |
