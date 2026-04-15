@@ -539,8 +539,8 @@ def _detect_pivot_points(records: list[dict], window: int = 5) -> dict:
 
 
 def _find_inbeom_trendlines(records: list[dict], pivot_window: int = 30) -> list[dict]:
-    """인범 스타일 빗각 (고고저/저저고) — 거래량 변곡점 기반."""
-    if len(records) < pivot_window * 2 + 1:
+    """v2: 3점 접촉 검증 + 꼬리/종가 동시 체크 + VP 교차 보너스."""
+    if len(records) < pivot_window * 2:
         return []
 
     pivots = _detect_pivot_points(records, window=pivot_window)
@@ -549,78 +549,114 @@ def _find_inbeom_trendlines(records: list[dict], pivot_window: int = 30) -> list
     if not pivot_highs or not pivot_lows:
         return []
 
+    # VP 계산 (30 bins, 상위 5개 고거래량대)
+    all_lows_p = [r["low"] for r in records]
+    all_highs_p = [r["high"] for r in records]
+    min_price, max_price = min(all_lows_p), max(all_highs_p)
+    bin_size = (max_price - min_price) / 30 if max_price > min_price else 1
+    vp_bins: dict[int, float] = {}
+    for r in records:
+        mid = (r["high"] + r["low"]) / 2
+        bi = min(int((mid - min_price) / bin_size), 29)
+        vp_bins[bi] = vp_bins.get(bi, 0) + r["volume"]
+    top5 = sorted(vp_bins.items(), key=lambda x: x[1], reverse=True)[:5]
+    vp_hot_prices = [min_price + (bi + 0.5) * bin_size for bi, _ in top5]
+
+    # ATR tolerance
     atr = sum(r["high"] - r["low"] for r in records) / len(records)
-    tolerance = atr * 0.5
-    current_time = records[-1]["time"]
-    current_idx = len(records) - 1
+    tol_tail = atr * 0.5
+    tol_close = atr * 0.3
+    tol_vp = atr * 0.5
 
-    # 거래량 필터: 주변 20봉 평균 대비 1.3배 이상
-    def _vol_filter(pvts: list[dict]) -> list[dict]:
-        out = []
-        for p in pvts:
-            i = p["index"]
-            ws, we = max(0, i - 10), min(len(records), i + 11)
-            avg_vol = sum(records[k]["volume"] for k in range(ws, we)) / max(we - ws, 1)
-            if avg_vol > 0 and records[i]["volume"] >= avg_vol * 1.3:
-                out.append(p)
-        return out if len(out) >= 2 else pvts
+    def _scan(is_resistance: bool, min_touches: int, penalty: int = 0):
+        """피봇 쌍 조합 전수 스캔. 꼬리+종가+VP 종합 점수."""
+        plist = pivot_highs if is_resistance else pivot_lows
+        # 성능 제한: 최근 20개 (가격 필터는 적용 안 함 — 최근 저점이 중요)
+        if len(plist) > 20:
+            plist = sorted(plist, key=lambda x: x["index"], reverse=True)[:20]
 
-    vol_highs = _vol_filter(pivot_highs)
-    vol_lows = _vol_filter(pivot_lows)
+        candidates = []
+        for i in range(len(plist)):
+            for j in range(i + 1, len(plist)):
+                p1, p2 = sorted([plist[i], plist[j]], key=lambda x: x["index"])
+                if p2["index"] - p1["index"] < 60:
+                    continue
+                # 최신성 hard filter: start가 전체 데이터의 55% 이전이면 제외
+                # (TSLA는 15년 데이터 → 55%면 약 2018년 이후만 유효)
+                if p1["index"] < len(records) * 0.55:
+                    continue
+                slope = (p2["price"] - p1["price"]) / (p2["index"] - p1["index"])
 
-    def _pick_pair(pts: list[dict], top_pct: float = 0.7, recent_frac: float = 1.0) -> tuple | None:
-        if len(pts) < 2:
+                # 꼬리 접촉 (모든 피봇 중)
+                tail_touches = sum(
+                    1 for pv in (pivot_highs if is_resistance else pivot_lows)
+                    if abs(pv["price"] - (p1["price"] + slope * (pv["index"] - p1["index"]))) <= tol_tail
+                )
+                if tail_touches < min_touches:
+                    continue
+
+                # 종가 접촉 (빗각 구간 + 50봉 확장)
+                close_touches = 0
+                for k in range(p1["index"], min(p2["index"] + 50, len(records))):
+                    line_p = p1["price"] + slope * (k - p1["index"])
+                    if abs(records[k]["close"] - line_p) <= tol_close:
+                        close_touches += 1
+
+                # VP 교차 보너스
+                vp_bonus = 0
+                mid_idx = (p1["index"] + p2["index"]) // 2
+                mid_line = p1["price"] + slope * (mid_idx - p1["index"])
+                if any(abs(mid_line - vp) <= tol_vp for vp in vp_hot_prices):
+                    vp_bonus += 3
+                cur_ext = p1["price"] + slope * (len(records) - 1 - p1["index"])
+                if any(abs(cur_ext - vp) <= tol_vp for vp in vp_hot_prices):
+                    vp_bonus += 2
+
+                score = tail_touches * 2 + close_touches + vp_bonus - penalty
+                candidates.append({
+                    "p1": p1, "p2": p2, "slope": slope, "score": score,
+                    "tail_touches": tail_touches, "close_touches": close_touches,
+                    "vp_bonus": vp_bonus,
+                })
+        return candidates
+
+    def _build(is_resistance: bool):
+        # 1차: 3점 접촉 검증
+        cands = _scan(is_resistance, min_touches=3, penalty=0)
+        is_fallback = False
+        if not cands:
+            # 2차 fallback: 2점 접촉 (페널티 -5)
+            cands = _scan(is_resistance, min_touches=2, penalty=5)
+            is_fallback = True
+        if not cands:
             return None
-        if recent_frac < 1.0:
-            cutoff = int(len(records) * (1 - recent_frac))
-            pts = [p for p in pts if p["index"] >= cutoff]
-        else:
-            prices = sorted(p["price"] for p in pts)
-            thr = prices[int(len(prices) * top_pct)] if top_pct < 1.0 else 0
-            pts = [p for p in pts if p["price"] >= thr]
-        if len(pts) < 2:
-            return None
-        recent = sorted(pts, key=lambda x: x["index"], reverse=True)
-        for i in range(len(recent)):
-            for j in range(i + 1, len(recent)):
-                if abs(recent[i]["index"] - recent[j]["index"]) >= 60:
-                    return tuple(sorted([recent[i], recent[j]], key=lambda x: x["index"]))
-        return tuple(sorted(recent[:2], key=lambda x: x["index"]))
+        best = max(cands, key=lambda x: x["score"])
+        p1, p2 = best["p1"], best["p2"]
+        ext = p1["price"] + best["slope"] * (len(records) - 1 - p1["index"])
+        return {
+            "pattern": "고고저" if is_resistance else "저저고",
+            "type": "resistance" if is_resistance else "support",
+            "start": {"time": p1["time"], "price": p1["price"], "index": p1["index"]},
+            "end": {"time": p2["time"], "price": p2["price"], "index": p2["index"]},
+            "slope": best["slope"],
+            "touch_count": best["tail_touches"],  # 하위 호환
+            "tail_touches": best["tail_touches"],
+            "close_touches": best["close_touches"],
+            "vp_bonus": best["vp_bonus"],
+            "score": best["score"],
+            "extended": {"time": records[-1]["time"], "price": ext},
+            "target_label": "미래 저점 타겟" if is_resistance else "미래 고점 타겟",
+            "volume_confirmed": best["tail_touches"] >= 3,
+            "is_fallback_2points": is_fallback,
+        }
 
     result = []
-
-    # 고고저: 상위 30% 고점 2개 연결 → 하강 저항
-    pair = _pick_pair(vol_highs, top_pct=0.7)
-    if pair:
-        p1, p2 = pair
-        slope = (p2["price"] - p1["price"]) / (p2["index"] - p1["index"])
-        ext = p1["price"] + slope * (current_idx - p1["index"])
-        tc = sum(1 for ph in vol_highs if abs(ph["price"] - (p1["price"] + slope * (ph["index"] - p1["index"]))) <= tolerance)
-        result.append({
-            "pattern": "고고저", "type": "resistance",
-            "start": {"time": p1["time"], "price": p1["price"], "index": p1["index"]},
-            "end": {"time": p2["time"], "price": p2["price"], "index": p2["index"]},
-            "slope": slope, "touch_count": tc,
-            "extended": {"time": current_time, "price": ext},
-            "target_label": "미래 저점 타겟", "volume_confirmed": True,
-        })
-
-    # 저저고: 후반 60% 저점 2개 연결 → 상승 지지
-    pair = _pick_pair(vol_lows, top_pct=1.0, recent_frac=0.6)
-    if pair:
-        p1, p2 = pair
-        slope = (p2["price"] - p1["price"]) / (p2["index"] - p1["index"])
-        ext = p1["price"] + slope * (current_idx - p1["index"])
-        tc = sum(1 for pl in vol_lows if abs(pl["price"] - (p1["price"] + slope * (pl["index"] - p1["index"]))) <= tolerance)
-        result.append({
-            "pattern": "저저고", "type": "support",
-            "start": {"time": p1["time"], "price": p1["price"], "index": p1["index"]},
-            "end": {"time": p2["time"], "price": p2["price"], "index": p2["index"]},
-            "slope": slope, "touch_count": tc,
-            "extended": {"time": current_time, "price": ext},
-            "target_label": "미래 고점 타겟", "volume_confirmed": True,
-        })
-
+    r_line = _build(is_resistance=True)
+    if r_line:
+        result.append(r_line)
+    s_line = _build(is_resistance=False)
+    if s_line:
+        result.append(s_line)
     return result
 
 
@@ -718,10 +754,16 @@ def get_trendlines(
         "symbol": symbol, "period": period, "interval": interval,
         "trendlines": [{
             "pattern": tl["pattern"], "type": tl["type"],
-            "slope": round(tl["slope"], 4), "touch_count": tl["touch_count"],
+            "slope": round(tl["slope"], 4), "touch_count": tl.get("touch_count", 0),
+            "tail_touches": tl.get("tail_touches", 0),
+            "close_touches": tl.get("close_touches", 0),
+            "vp_bonus": tl.get("vp_bonus", 0),
+            "score": tl.get("score", 0),
             "start": tl["start"], "end": tl["end"],
             "extended": {"time": tl["extended"]["time"], "price": round(tl["extended"]["price"], 2)},
-            "volume_confirmed": tl["volume_confirmed"],
+            "volume_confirmed": tl.get("volume_confirmed", False),
+            "is_fallback_2points": tl.get("is_fallback_2points", False),
+            "target_label": tl.get("target_label", ""),
         } for tl in trendlines],
         "channels": channels,
     }
