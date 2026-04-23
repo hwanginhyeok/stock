@@ -226,3 +226,45 @@ nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
 .tl-thread-count {
   font-size: 11px; font-weight: 400; color: var(--dim); margin-left: 6px;
 }
+
+/* 3단 분류 속성 스타일 */
+.props-section {
+  margin-bottom: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+}
+.props-essential {
+  border-left: 3px solid var(--blue);
+  background: rgba(88,166,255,0.05);
+}
+.props-propria {
+  border-left: 3px solid var(--green);
+  background: rgba(63,185,80,0.05);
+}
+.props-accidental {
+  border-left: 3px solid var(--dim);
+  background: rgba(139,148,158,0.05);
+}
+.props-label {
+  font-size: 10px;
+  color: var(--dim);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.props-value {
+  font-size: 11px;
+  color: var(--white);
+}
+.props-toggle {
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--dim);
+  margin-right: 4px;
+  transition: transform 0.15s;
+}
+.props-toggle:hover {
+  color: var(--white);
+}
+.props-item {
+  padding: 4px 0;
+}

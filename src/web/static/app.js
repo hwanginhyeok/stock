@@ -1117,13 +1117,19 @@ async function selectEntity(entityId, listEl) {
   else { const el = document.querySelector(`.entity-item[data-id="${entityId}"]`); if (el) el.classList.add('selected'); }
 
   try {
-    const res = await fetch(`/api/entities/${entityId}/briefing`);
-    if (!res.ok) return;
-    renderBriefing(await res.json());
+    // 브리핑과 속성 3단 분류를 병렬로 fetch
+    const [briefingRes, propsRes] = await Promise.all([
+      fetch(`/api/entities/${entityId}/briefing`),
+      fetch(`/api/entities/${entityId}/properties`).catch(() => null), // 실패 시 null 처리
+    ]);
+    if (!briefingRes.ok) return;
+    const briefingData = await briefingRes.json();
+    const classifiedProps = propsRes?.ok ? await propsRes.json() : null;
+    renderBriefing(briefingData, classifiedProps);
   } catch (e) { console.error('브리핑 로딩 실패:', e); }
 }
 
-function renderBriefing(data) {
+function renderBriefing(data, classifiedProps = null) {
   const container = document.getElementById('briefing-content');
   const entity = data.entity;
   const rels = data.relationships;
@@ -1137,7 +1143,12 @@ function renderBriefing(data) {
     html += `<div class="briefing-section"><h3>별칭</h3><div style="font-size:11px;color:var(--dim);">${entity.aliases.join(', ')}</div></div>`;
   }
 
-  // Structured properties
+  // 3단 분류 속성이 있으면 우선 표시
+  if (classifiedProps && (classifiedProps.essential || classifiedProps.propria || classifiedProps.accidental)) {
+    html += renderClassifiedProperties(classifiedProps);
+  }
+
+  // Structured properties (기존 로직 - 폴백)
   if (entity.properties) {
     const p = entity.properties;
     const sections = [
@@ -1182,6 +1193,93 @@ function renderBriefing(data) {
     html += `</ul></div>`;
   }
   container.innerHTML = html;
+}
+
+// ============================================================
+// 3단 분류 속성 렌더링 헬퍼 함수
+// ============================================================
+
+/**
+ * 3단 분류 속성을 HTML로 렌더링
+ * @param {Object} classifiedProps - { essential: [], propria: [], accidental: [] }
+ * @returns {string} HTML 문자열
+ */
+function renderClassifiedProperties(classifiedProps) {
+  let html = '';
+
+  // 본질 (Essential) - 파란 좌측 보더
+  if (classifiedProps.essential && classifiedProps.essential.length > 0) {
+    html += `<div class="briefing-section">
+      <h3 style="color:var(--blue);border-left:3px solid var(--blue);padding-left:8px;">본질 (Essential)</h3>
+      <div class="props-container">`;
+    for (const prop of classifiedProps.essential) {
+      html += renderPropertyItem(prop, 'essential');
+    }
+    html += `</div></div>`;
+  }
+
+  // 고유 (Propria) - 초록 좌측 보더
+  if (classifiedProps.propria && classifiedProps.propria.length > 0) {
+    html += `<div class="briefing-section">
+      <h3 style="color:var(--green);border-left:3px solid var(--green);padding-left:8px;">고유 (Propria)</h3>
+      <div class="props-container">`;
+    for (const prop of classifiedProps.propria) {
+      html += renderPropertyItem(prop, 'propria');
+    }
+    html += `</div></div>`;
+  }
+
+  // 기타 (Accidental) - 회색 좌측 보더, 디폴트 숨김 (토글 가능)
+  if (classifiedProps.accidental && classifiedProps.accidental.length > 0) {
+    const accidentalId = 'accidental-' + Date.now();
+    html += `<div class="briefing-section">
+      <h3 style="color:var(--dim);border-left:3px solid var(--dim);padding-left:8px;cursor:pointer;" onclick="togglePropsSection('${accidentalId}')">
+        <span class="props-toggle">▶</span> 기타 (Accidental) <span style="font-size:10px;color:var(--dim);">(${classifiedProps.accidental.length})</span>
+      </h3>
+      <div class="props-container" id="${accidentalId}" style="display:none;">`;
+    for (const prop of classifiedProps.accidental) {
+      html += renderPropertyItem(prop, 'accidental');
+    }
+    html += `</div></div>`;
+  }
+
+  return html;
+}
+
+/**
+ * 개별 속성 항목 렌더링
+ * @param {Object} prop - { label: string, value: string|string[] }
+ * @param {string} category - 'essential'|'propria'|'accidental'
+ * @returns {string} HTML 문자열
+ */
+function renderPropertyItem(prop, category) {
+  const valueHtml = Array.isArray(prop.value)
+    ? `<ul style="margin:4px 0;padding-left:16px;">${prop.value.map(v => `<li style="font-size:11px;color:var(--white);margin-bottom:2px;">${v}</li>`).join('')}</ul>`
+    : `<span style="font-size:11px;color:var(--white);">${prop.value}</span>`;
+
+  const labelWeight = category === 'essential' ? 'font-weight:600;' : '';
+  const labelColor = category === 'accidental' ? 'color:var(--dim);' : 'color:var(--dim);';
+
+  return `<div class="props-item" style="margin-bottom:8px;">
+    <div class="props-label" style="${labelWeight}${labelColor}">${prop.label}</div>
+    <div class="props-value">${valueHtml}</div>
+  </div>`;
+}
+
+/**
+ * 속성 섹션 토글 (기타 접기/펼치기)
+ * @param {string} sectionId - 토글할 섹션의 ID
+ */
+function togglePropsSection(sectionId) {
+  const section = document.getElementById(sectionId);
+  const toggle = section.previousElementSibling.querySelector('.props-toggle');
+  if (section.style.display === 'none') {
+    section.style.display = 'block';
+    toggle.textContent = '▼';
+  } else {
+    section.style.display = 'none';
+    toggle.textContent = '▶';
+  }
 }
 
 // ============================================================

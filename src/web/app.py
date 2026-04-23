@@ -673,5 +673,114 @@ def get_latest_news(per_category: int = 2) -> list[dict]:
     return results
 
 
+# ==========================================
+# 엔티티 속성 분류 엔드포인트
+# ==========================================
+
+# 속성 키 → 한국어 라벨 매핑
+PROPERTY_LABELS_KR = {
+    'business_model': '비즈니스 모델', 'moat': '경제적 해자', 'capital_allocation': '자본배분',
+    'revenue_growth': '매출성장률', 'margin': '마진', 'valuation': '밸류에이션',
+    'policy_objective': '정책 목표', 'primary_tool': '핵심 수단', 'mandate': '법적 권한',
+    'current_rate': '현재 금리', 'balance_sheet_size': '대차대조표',
+    'growth_driver': '성장 동인', 'cyclicality': '경기순환성', 'value_chain_position': '가치사슬 위치',
+    'pe_ratio': 'PER', 'market_cap': '시가총액',
+    'measurement_target': '측정 대상', 'signal_direction': '방향성', 'threshold': '임계값',
+    'current_value': '현재 값', 'trend': '추세',
+    'role': '역할', 'influence': '영향력', 'track_record': '트랙 레코드',
+    'category': '카테고리', 'first_principle_bet': '제1원칙 베팅', 'role_in_master_plan': '마스터플랜 역할',
+    'unit_volume': '생산량', 'asp': '평균 판매가', 'production_ramp_rate': '램프업 속도',
+    'moat_type': '해자 유형', 'inputs_required': '필요 입력', 'output_function': '산출 기능',
+    'accuracy_metric': '정확도 지표', 'users': '사용자 수', 'interventions_per_mile': '개입/마일',
+    'production_mandate': '생산 의무', 'vertical_scope': '수직통합 범위', 'product_mix': '제품 조합',
+    'capacity': '생산능력', 'utilization': '가동률', 'opex': '운영비', 'workforce': '인력',
+    'strategic_goal': '전략 목표', 'timeline_horizon': '시간범위', 'essence_component': '본질 축',
+    'capital_required_range': '필요 자본', 'progress_pct': '진행률', 'milestone_count': '마일스톤 수', 'burn_rate': '자금소진율',
+    'objectives': '목표', 'strategy': '전략', 'achievements': '달성', 'failures': '미달성',
+}
+
+
+def _load_ontology_config() -> dict:
+    """ontology_config.yaml을 로딩한다."""
+    import yaml
+    config_path = Path("config/ontology_config.yaml")
+    with open(config_path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+@app.get("/api/entities/{entity_id}/properties")
+def get_entity_properties(entity_id: str) -> dict:
+    """엔티티의 속성을 본질/고유/우연으로 분류하여 반환한다.
+
+    Returns:
+        essential: 본질적 속성 (없으면 엔티티를 이해할 수 없음)
+        propria: 고유적 속성 (본질에서 도출되지만 본질 자체는 아님)
+        accidental: 우연적 속성 (그 외)
+    """
+    # 1. 엔티티 조회
+    entity_repo = OntologyEntityRepository()
+    entity = entity_repo.get_by_id(entity_id)
+    if not entity:
+        raise HTTPException(status_code=404, detail=f"Entity {entity_id} not found")
+
+    # 2. config 로딩
+    config = _load_ontology_config()
+    stock_props = config.get("stock_entity_properties", {})
+    tesla_props = config.get("tesla_entity_properties", {})
+
+    # 3. 사용할 속성 스키마 결정
+    # tesla 특화: properties에 'tesla_subtype' 있거나, entity_type이 capability이면 tesla 사용
+    use_tesla = (
+        "tesla_subtype" in (entity.properties or {}) or
+        entity.entity_type in ["tesla_product", "tesla_capability", "tesla_factory", "tesla_initiative"]
+    )
+
+    if use_tesla:
+        # tesla_entity_properties에서 해당 타입의 essential/propria 조회
+        # entity_type이 tesla_*면 그대로, capability면 tesla_capability 사용
+        lookup_type = entity.entity_type
+        if lookup_type == "capability":
+            lookup_type = "tesla_capability"
+        elif not lookup_type.startswith("tesla_"):
+            # tesla_subtype이 있지만 entity_type이 일반적인 경우
+            subtype = entity.properties.get("tesla_subtype", "")
+            if subtype:
+                lookup_type = f"tesla_{subtype}"
+
+        type_config = tesla_props.get(lookup_type, {})
+    else:
+        # stock_entity_properties에서 해당 타입의 essential/propria 조회
+        type_config = stock_props.get(entity.entity_type, {})
+
+    essential_set = set(type_config.get("essential", []))
+    propria_set = set(type_config.get("propria", []))
+
+    # 4. properties 분류
+    properties = entity.properties or {}
+    classified = {
+        "essential": [],
+        "propria": [],
+        "accidental": []
+    }
+
+    for key, value in properties.items():
+        label = PROPERTY_LABELS_KR.get(key, key)
+        item = {"key": key, "label": label, "value": value}
+
+        if key in essential_set:
+            classified["essential"].append(item)
+        elif key in propria_set:
+            classified["propria"].append(item)
+        else:
+            classified["accidental"].append(item)
+
+    return {
+        "entity_id": entity.id,
+        "entity_type": entity.entity_type,
+        "name": entity.name,
+        "classified": classified,
+    }
+
+
 # Static files (마지막에 마운트 — catch-all)
 app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
