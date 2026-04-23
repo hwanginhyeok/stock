@@ -6,7 +6,10 @@ CSV 파일에서 데이터를 읽어서 반환하는 FastAPI 라우터.
 from __future__ import annotations
 
 import csv
+import json
+from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, Query
 
@@ -186,5 +189,191 @@ def get_tagged_issues(
     
     # 전체 개수는 원본 rows 길이 (limit 적용 전)
     total = len(_load_csv("tagged_issues.csv"))
-    
+
     return {"issues": issues, "total": total}
+
+
+# JSON 파일 로딩 헬퍼 함수
+def _load_json(json_name: str) -> dict[str, Any]:
+    """JSON 파일을 로딩하여 딕셔너리로 반환.
+
+    파일이 없으면 빈 딕셔너리 반환.
+    """
+    json_path = _CSV_DIR / json_name
+    if not json_path.exists():
+        return {}
+
+    try:
+        content = json_path.read_text(encoding="utf-8")
+        return json.loads(content)
+    except (json.JSONDecodeError, IOError):
+        return {}
+
+
+@router.get("/thesis")
+def get_thesis() -> dict:
+    """Tesla 투자 논제(Thesis) 데이터를 반환한다.
+
+    Returns:
+        date: 업데이트 날짜
+        overall_score: 전체 점수 (0-100)
+        overall_label: 전체 라벨 (Bearish/Cautiously Bearish/Neutral/Cautiously Bullish/Bullish)
+        bull_count: Bull 요소 개수
+        bear_count: Bear 요소 개수
+        net_delta: 순 delta 합
+        bull: Bull 요소 리스트
+        bear: Bear 요소 리스트
+    """
+    data = _load_json("thesis.json")
+
+    # 기본값 설정
+    bull_items = data.get("bull", [])
+    bear_items = data.get("bear", [])
+
+    # delta 합 계산
+    bull_delta_sum = sum(item.get("delta", 0) for item in bull_items)
+    bear_delta_sum = sum(item.get("delta", 0) for item in bear_items)
+    net_delta = bull_delta_sum + bear_delta_sum  # bear delta는 음수여야 함
+
+    # overall_score 계산: 기본 50 + net*2, 0~100 클램프
+    overall_score = max(0, min(100, 50 + net_delta * 2))
+
+    # overall_label 결정
+    if overall_score < 35:
+        overall_label = "Bearish"
+    elif overall_score < 45:
+        overall_label = "Cautiously Bearish"
+    elif overall_score < 55:
+        overall_label = "Neutral"
+    elif overall_score < 70:
+        overall_label = "Cautiously Bullish"
+    else:
+        overall_label = "Bullish"
+
+    return {
+        "date": data.get("date", ""),
+        "overall_score": overall_score,
+        "overall_label": overall_label,
+        "bull_count": len(bull_items),
+        "bear_count": len(bear_items),
+        "net_delta": net_delta,
+        "bull": bull_items,
+        "bear": bear_items,
+    }
+
+
+@router.get("/timeline")
+def get_timeline(
+    days_back: int = Query(default=30, ge=0, description="오늘로부터 몇 일 전까지"),
+    days_forward: int = Query(default=60, ge=0, description="오늘로부터 몇 일 후까지")
+) -> dict:
+    """Tesla 타임라인 이벤트를 반환한다 (오늘 기준 필터링).
+
+    Args:
+        days_back: 오늘로부터 몇 일 전까지 (기본 30)
+        days_forward: 오늘로부터 몇 일 후까지 (기본 60)
+
+    Returns:
+        today: 오늘 날짜 (YYYY-MM-DD)
+        events: 필터링된 이벤트 리스트
+            - 각 이벤트에 days_offset, is_past 추가
+    """
+    data = _load_json("timeline_events.json")
+    # JSON이 리스트(배열)이면 직접 사용, dict이면 events 키에서 추출
+    events = data if isinstance(data, list) else data.get("events", [])
+
+    # 오늘 날짜
+    today = datetime.now().date()
+
+    # 필터링 범위
+    start_date = today - timedelta(days=days_back)
+    end_date = today + timedelta(days=days_forward)
+
+    filtered_events = []
+    for event in events:
+        try:
+            event_date = datetime.strptime(event.get("date", ""), "%Y-%m-%d").date()
+        except (ValueError, TypeError):
+            continue
+
+        # 범위 체크
+        if not (start_date <= event_date <= end_date):
+            continue
+
+        # days_offset 계산 (오늘=0)
+        days_offset = (event_date - today).days
+        is_past = days_offset < 0
+
+        filtered_events.append({
+            **event,
+            "days_offset": days_offset,
+            "is_past": is_past,
+        })
+
+    return {
+        "today": today.isoformat(),
+        "events": filtered_events,
+    }
+
+
+@router.get("/topics")
+def get_topics() -> dict:
+    """Tesla 토픽 목록을 반환한다 (quarters 제외, 가볍게).
+
+    Returns:
+        topics: 토픽 리스트
+            - id: 토픽 ID
+            - name: 영어 이름
+            - name_ko: 한국어 이름
+            - status: 상태
+            - essence_component: 연결된 본질 축
+            - current_progress_pct: 현재 진행률
+            - summary: 요약
+    """
+    data = _load_json("topics_quarterly.json")
+    topics = data.get("topics", [])
+
+    # 가볍게: 필요한 필드만 추출
+    light_topics = []
+    for topic in topics:
+        light_topics.append({
+            "id": topic.get("id", ""),
+            "name": topic.get("name", ""),
+            "name_ko": topic.get("name_ko", ""),
+            "status": topic.get("status", ""),
+            "essence_component": topic.get("essence_component", ""),
+            "current_progress_pct": topic.get("current_progress_pct", 0),
+            "summary": topic.get("summary", ""),
+        })
+
+    return {"topics": light_topics}
+
+
+@router.get("/topics/{topic_id}/quarterly")
+def get_topic_quarterly(topic_id: str) -> dict:
+    """특정 토픽의 분기별 상세 정보를 반환한다.
+
+    Args:
+        topic_id: 토픽 ID
+
+    Returns:
+        topic: 토픽 정보 (전체)
+        quarters: 분기별 데이터 리스트
+    """
+    data = _load_json("topics_quarterly.json")
+    topics = data.get("topics", [])
+
+    # 해당 토픽 찾기
+    target_topic = None
+    for topic in topics:
+        if topic.get("id") == topic_id:
+            target_topic = topic
+            break
+
+    if target_topic is None:
+        return {"topic": None, "quarters": []}
+
+    return {
+        "topic": target_topic,
+        "quarters": target_topic.get("quarters", []),
+    }

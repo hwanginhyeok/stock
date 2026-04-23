@@ -2,7 +2,8 @@
 
 | # | 태스크 | 시작일 | blocked | 비고 |
 |---|--------|--------|---------|------|
-| **1-54** | Tesla Essence Dashboard — 본질 4축 대시보드 | 04-23 | | ⚡ GLM 작업 중. 사용자 피드백 긴급 대응 |
+| **1-55** | Thesis + Timeline + Topic Quarterly (Essence 확장) | 04-23 | | ⚡ GLM 작업 중. Bull/Bear + 통합타임라인 + 분기변천사 |
+| 1-54 | Tesla Essence Dashboard — 본질 4축 대시보드 | 04-23 | | ✅ 코드 완료 + hotfix |
 | 1-44 | Tesla 특화 엔티티 스키마 설계 (본질론 기반) | 04-23 | | ✅ 코드 완료 |
 | 1-48 | properties dict 웹 UI 노출 (3단 분류) | 04-23 | | ✅ 코드 완료 |
 | 1-51 | 미래 이벤트 차트 표시 (실적·FOMC 등) | 04-23 | | ✅ 코드 완료 |

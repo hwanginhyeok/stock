@@ -1330,7 +1330,7 @@ function reloadGraph() {
 
 /**
  * Essence 대시보드 로드
- * 4개 API 병렬 호출 후 렌더링
+ * 7개 API 병렬 호출 후 렌더링 (실패 시 null 처리)
  */
 async function loadEssenceDashboard() {
   const container = document.getElementById('essence-content');
@@ -1340,19 +1340,25 @@ async function loadEssenceDashboard() {
   container.innerHTML = '<div class="empty-state">Essence 데이터 로딩 중...</div>';
 
   try {
-    const [essenceRes, moatRes, planRes, issuesRes] = await Promise.all([
-      fetch('/api/tesla/essence'),
-      fetch('/api/tesla/moat'),
-      fetch('/api/tesla/master-plan'),
-      fetch('/api/tesla/issues/tagged?limit=10'),
+    const [thesisRes, timelineRes, topicsRes, essenceRes, moatRes, planRes, issuesRes] = await Promise.all([
+      fetch('/api/tesla/thesis').catch(() => null),
+      fetch('/api/tesla/timeline').catch(() => null),
+      fetch('/api/tesla/topics').catch(() => null),
+      fetch('/api/tesla/essence').catch(() => null),
+      fetch('/api/tesla/moat').catch(() => null),
+      fetch('/api/tesla/master-plan').catch(() => null),
+      fetch('/api/tesla/issues/tagged?limit=10').catch(() => null),
     ]);
 
-    const essenceData = await essenceRes.json();
-    const moatData = await moatRes.json();
-    const planData = await planRes.json();
-    const issuesData = await issuesRes.json();
+    const thesisData = thesisRes?.ok ? await thesisRes.json() : null;
+    const timelineData = timelineRes?.ok ? await timelineRes.json() : null;
+    const topicsData = topicsRes?.ok ? await topicsRes.json() : null;
+    const essenceData = essenceRes?.ok ? await essenceRes.json() : null;
+    const moatData = moatRes?.ok ? await moatRes.json() : null;
+    const planData = planRes?.ok ? await planRes.json() : null;
+    const issuesData = issuesRes?.ok ? await issuesRes.json() : null;
 
-    renderEssenceDashboard(essenceData, moatData, planData, issuesData);
+    renderEssenceDashboard(thesisData, timelineData, topicsData, essenceData, moatData, planData, issuesData);
   } catch (e) {
     console.error('Essence 데이터 로딩 실패:', e);
     container.innerHTML = '<div class="empty-state">데이터 로딩 실패</div>';
@@ -1361,24 +1367,32 @@ async function loadEssenceDashboard() {
 
 /**
  * Essence 대시보드 렌더링
+ * @param {Object} thesisData - Thesis 데이터
+ * @param {Object} timelineData - Timeline 데이터
+ * @param {Object} topicsData - Topics 데이터
  * @param {Object} essenceData - Essence 4축 데이터
  * @param {Object} moatData - MOAT 데이터
  * @param {Object} planData - Master Plan 데이터
  * @param {Object} issuesData - 최신 이슈 데이터
  */
-function renderEssenceDashboard(essenceData, moatData, planData, issuesData) {
+function renderEssenceDashboard(thesisData, timelineData, topicsData, essenceData, moatData, planData, issuesData) {
   const container = document.getElementById('essence-content');
   if (!container) return;
 
   let html = '';
 
-  // 블록1: Essence 4축 (상단)
+  // 상단: Thesis, Essence Timeline, Topics Overview
+  html += renderThesis(thesisData);
+  html += renderEssenceTimeline(timelineData);
+  html += renderTopicsOverview(topicsData);
+
+  // 중단: Essence 4축
   html += renderEssenceAxes(essenceData);
 
-  // 블록2: MOAT + Master Plan (2열)
+  // 하단: MOAT + Master Plan (2열)
   html += renderMoatAndPlan(moatData, planData);
 
-  // 블록3: 오늘의 이슈 (하단)
+  // 최하단: 오늘의 이슈
   html += renderTodayIssues(issuesData);
 
   container.innerHTML = html;
@@ -1512,6 +1526,310 @@ function getComponentColor(component) {
     'market': 'var(--green)',
   };
   return colors[component] || 'var(--dim)';
+}
+
+// ============================================================
+// Essence Dashboard - 신규 렌더링 함수
+// ============================================================
+
+/**
+ * Thesis 섹션 렌더링
+ * @param {Object} data - { date, overall_label, bull: [], bear: [] }
+ * @returns {string} HTML
+ */
+function renderThesis(data) {
+  if (!data || !data.bull || !data.bear) {
+    return '<div class="panel-section" style="background:var(--card);border-radius:8px;padding:16px;margin-bottom:16px;"><div style="color:var(--dim);font-size:11px;">Thesis 데이터 없음</div></div>';
+  }
+
+  const date = data.date || new Date().toLocaleDateString('ko-KR');
+  const overall = data.overall_label || 'Neutral';
+  const overallColor = overall === 'Bullish' ? 'var(--green)' : overall === 'Bearish' ? 'var(--red)' : 'var(--dim)';
+  const bullCount = data.bull.length;
+  const bearCount = data.bear.length;
+  const delta = bullCount - bearCount;
+  const deltaSign = delta > 0 ? '+' : '';
+  const deltaColor = delta > 0 ? 'var(--green)' : delta < 0 ? 'var(--red)' : 'var(--dim)';
+
+  let html = `<div class="panel-section" style="background:var(--card);border-radius:8px;padding:16px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="font-size:14px;font-weight:700;color:var(--white);">TESLA THESIS — ${date}</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="essence-badge" style="background:${overallColor}22;color:${overallColor};">${overall}</span>
+        <span style="font-size:11px;color:var(--white);">Bull ${bullCount} | Bear ${bearCount} | Net <span style="color:${deltaColor};">${deltaSign}${delta}</span></span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <!-- Bull Column -->
+      <div class="bull-column" style="border-top:3px solid var(--green);padding-top:8px;">
+        <div style="font-size:11px;font-weight:600;color:var(--green);margin-bottom:8px;">BULL CASE</div>
+        ${data.bull.map(theme => renderThesisItem(theme, 'bull')).join('')}
+      </div>
+      <!-- Bear Column -->
+      <div class="bear-column" style="border-top:3px solid var(--red);padding-top:8px;">
+        <div style="font-size:11px;font-weight:600;color:var(--red);margin-bottom:8px;">BEAR CASE</div>
+        ${data.bear.map(theme => renderThesisItem(theme, 'bear')).join('')}
+      </div>
+    </div>
+  </div>`;
+
+  return html;
+}
+
+/**
+ * Thesis 항목 렌더링 헬퍼
+ * @param {Object} theme - { title, detail, impact_label_ko, delta, period, date }
+ * @param {string} type - 'bull' 또는 'bear'
+ * @returns {string} HTML
+ */
+function renderThesisItem(theme, type) {
+  const delta = theme.delta || 0;
+  const deltaSign = delta > 0 ? '+' : '';
+  const deltaColor = delta > 0 ? 'var(--green)' : delta < 0 ? 'var(--red)' : 'var(--dim)';
+  const impactColor = type === 'bull' ? 'var(--green)' : 'var(--red)';
+
+  return `<div style="margin-bottom:10px;padding:8px;background:var(--bg);border-radius:4px;">
+    <div style="font-size:12px;font-weight:600;color:var(--white);margin-bottom:2px;">${theme.title || '-'}</div>
+    <div style="font-size:11px;color:var(--dim);margin-bottom:4px;">${theme.detail || ''}</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <span class="essence-badge" style="background:${impactColor}22;color:${impactColor};font-size:9px;padding:2px 6px;">${theme.impact_label_ko || '-'}</span>
+      <div style="text-align:right;">
+        <div style="font-size:11px;font-weight:600;color:${deltaColor};">${deltaSign}${delta}${theme.period ? ` (${theme.period})` : ''}</div>
+        <div style="font-size:10px;color:var(--dim);">${theme.date || '-'}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/**
+ * Essence Timeline 렌더링 (SVG 기반)
+ * @param {Object} data - { events: [{ date, title, impact, impact_label_ko, topic_id }], days_back, days_forward }
+ * @returns {string} HTML
+ */
+function renderEssenceTimeline(data) {
+  if (!data || !data.events || data.events.length === 0) {
+    return '<div class="panel-section" style="background:var(--card);border-radius:8px;padding:16px;margin-bottom:16px;"><div style="color:var(--dim);font-size:11px;">Timeline 데이터 없음</div></div>';
+  }
+
+  const events = data.events || [];
+  const daysBack = data.days_back || 30;
+  const daysForward = data.days_forward || 30;
+  const totalDays = daysBack + daysForward;
+
+  // 오늘 날짜 계산
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // 이벤트를 날짜별로 정렬하고 X 좌표 계산
+  const sortedEvents = events.map(ev => {
+    const evDate = new Date(ev.date);
+    evDate.setHours(0, 0, 0, 0);
+    const diffDays = Math.floor((evDate - today) / (1000 * 60 * 60 * 24));
+    return { ...ev, diffDays };
+  }).sort((a, b) => a.diffDays - b.diffDays);
+
+  // SVG 생성
+  const svgWidth = 1000;
+  const svgHeight = 180;
+  const paddingX = 40;
+  const centerX = svgWidth / 2;
+  const scale = (svgWidth - 2 * paddingX) / totalDays;
+
+  let circles = '';
+  let labels = '';
+  let topicLines = '';
+
+  sortedEvents.forEach((ev, idx) => {
+    const x = centerX + ev.diffDays * scale;
+    const isEven = idx % 2 === 0;
+    const y = isEven ? 60 : 120;
+    const side = ev.thesis_side || ev.impact || 'neutral';
+    const textColor = side === 'bull' ? '#3fb950' : side === 'bear' ? '#f85149' : '#8b949e';
+    const labelY = isEven ? y - 15 : y + 20;
+
+    // 툴팁 텍스트
+    const tooltipText = `${ev.title} | ${ev.date} | ${ev.impact_label_ko || ''}`;
+
+    // 원
+    circles += `<circle cx="${x}" cy="${y}" r="6" fill="${textColor}" stroke="#fff" stroke-width="2">
+      <title>${tooltipText}</title>
+    </circle>`;
+
+    // 라벨 (15자 제한)
+    const label = ev.title.length > 15 ? ev.title.slice(0, 15) + '…' : ev.title;
+    labels += `<text x="${x}" y="${labelY}" text-anchor="middle" font-size="10" fill="${textColor}">${label}</text>`;
+
+    // topic 있으면 밑줄 + 클릭 이벤트
+    if (ev.topic) {
+      topicLines += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y + 8}" stroke="${textColor}" stroke-width="2" style="cursor:pointer;" onclick="document.getElementById('topic-${ev.topic}')?.scrollIntoView({behavior:'smooth',block:'center'})" />
+      <text x="${x}" y="${y + 20}" text-anchor="middle" font-size="8" fill="var(--dim)" style="cursor:pointer;" onclick="document.getElementById('topic-${ev.topic}')?.scrollIntoView({behavior:'smooth',block:'center'})">▶</text>`;
+    }
+  });
+
+  // 오늘 수직선
+  const todayLine = `<line x1="${centerX}" y1="30" x2="${centerX}" y2="150" stroke="#8b949e" stroke-width="1" stroke-dasharray="5,5" />
+    <text x="${centerX}" y="165" text-anchor="middle" font-size="10" fill="#8b949e">오늘</text>`;
+
+  const svg = `<svg width="100%" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" fill="transparent" />
+    ${todayLine}
+    ${circles}
+    ${labels}
+    ${topicLines}
+  </svg>`;
+
+  return `<div class="panel-section" style="background:var(--card);border-radius:8px;padding:16px;margin-bottom:16px;">
+    <div class="panel-title" style="margin-bottom:12px;">Essence Timeline</div>
+    ${svg}
+  </div>`;
+}
+
+/**
+ * Topics Overview 렌더링
+ * @param {Object} data - { topics: [{ id, name_ko, status, progress_pct, essence_component }] }
+ * @returns {string} HTML
+ */
+function renderTopicsOverview(data) {
+  if (!data || !data.topics || data.topics.length === 0) {
+    return '<div class="panel-section" style="background:var(--card);border-radius:8px;padding:16px;margin-bottom:16px;"><div style="color:var(--dim);font-size:11px;">Topics 데이터 없음</div></div>';
+  }
+
+  const topics = data.topics || [];
+
+  let html = '<div class="panel-section" style="background:var(--card);border-radius:8px;padding:16px;margin-bottom:16px;">';
+  html += '<div class="panel-title" style="margin-bottom:12px;">Essence Topics</div>';
+
+  topics.forEach(topic => {
+    const statusColor = topic.status === 'on_track' ? 'var(--green)' : topic.status === 'delayed' ? 'var(--red)' : topic.status === 'accelerating' ? 'var(--blue)' : 'var(--dim)';
+    const statusLabel = topic.status === 'on_track' ? '정상' : topic.status === 'delayed' ? '지연' : topic.status === 'accelerating' ? '가속' : topic.status || '-';
+    const progress = topic.progress_pct || 0;
+    const componentColor = getComponentColor(topic.essence_component);
+
+    html += `<div id="topic-${topic.id}" class="topic-card" style="background:var(--bg);border-radius:6px;padding:12px;margin-bottom:8px;cursor:pointer;border:1px solid var(--border);" onclick="toggleTopicCard(this, '${topic.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:12px;font-weight:600;color:var(--white);">${topic.name_ko || '-'}</span>
+          <span class="essence-badge" style="background:${statusColor}22;color:${statusColor};font-size:9px;">${statusLabel}</span>
+        </div>
+        <span class="topic-toggle-icon" style="font-size:10px;color:var(--dim);">▶</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <div class="progress-bar" style="flex:1;height:4px;border-radius:2px;background:var(--border);">
+          <div class="progress-fill" style="width:${progress}%;background:${statusColor};height:100%;border-radius:2px;"></div>
+        </div>
+        <span style="font-size:10px;color:var(--dim);">${progress}%</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <span class="essence-badge" style="background:${componentColor}22;color:${componentColor};font-size:9px;">${topic.essence_component || '-'}</span>
+      </div>
+      <div class="topic-detail" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+        <div style="color:var(--dim);font-size:10px;text-align:center;">로딩 중...</div>
+      </div>
+    </div>`;
+  });
+
+  html += '</div>';
+  return html;
+}
+
+/**
+ * Topic 카드 토글 및 Lazy Load
+ * @param {HTMLElement} cardEl - 클릭된 카드 엘리먼트
+ * @param {string} topicId - Topic ID
+ */
+async function toggleTopicCard(cardEl, topicId) {
+  const detailEl = cardEl.querySelector('.topic-detail');
+  const toggleIcon = cardEl.querySelector('.topic-toggle-icon');
+
+  if (detailEl.style.display === 'none') {
+    // 펼치기
+    detailEl.style.display = 'block';
+    toggleIcon.textContent = '▼';
+
+    // Lazy load: 이미 로드되지 않았으면 데이터 fetch
+    if (!detailEl.dataset.loaded) {
+      try {
+        const res = await fetch(`/api/tesla/topics/${topicId}/quarterly`);
+        if (res.ok) {
+          const data = await res.json();
+          renderQuarterlyDetail(detailEl, data);
+          detailEl.dataset.loaded = 'true';
+        } else {
+          detailEl.innerHTML = '<div style="color:var(--red);font-size:10px;text-align:center;">로딩 실패</div>';
+        }
+      } catch (e) {
+        console.error('Topic 상세 로딩 실패:', e);
+        detailEl.innerHTML = '<div style="color:var(--red);font-size:10px;text-align:center;">로딩 실패</div>';
+      }
+    }
+  } else {
+    // 접기
+    detailEl.style.display = 'none';
+    toggleIcon.textContent = '▶';
+  }
+}
+
+/**
+ * Quarterly Detail 렌더링
+ * @param {HTMLElement} container - 렌더링할 컨테이너
+ * @param {Object} data - { quarters: [{ quarter, title, outcome, impact_label, confidence, preconditions, is_past }] }
+ */
+function renderQuarterlyDetail(container, data) {
+  if (!data || !data.quarters || data.quarters.length === 0) {
+    container.innerHTML = '<div style="color:var(--dim);font-size:10px;text-align:center;">데이터 없음</div>';
+    return;
+  }
+
+  const quarters = data.quarters || [];
+  const pastQuarters = quarters.filter(q => q.is_past);
+  const futureQuarters = quarters.filter(q => !q.is_past);
+
+  let html = '';
+
+  // 과거 분기
+  if (pastQuarters.length > 0) {
+    html += '<div style="margin-bottom:12px;"><div style="font-size:11px;font-weight:600;color:var(--white);margin-bottom:6px;">과거 실적</div>';
+    pastQuarters.forEach(q => {
+      html += `<div style="padding:6px;background:var(--bg);border-radius:4px;margin-bottom:4px;border-left:2px solid var(--border);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+          <span style="font-size:11px;font-weight:600;color:var(--white);">${q.quarter || '-'}</span>
+          <span class="essence-badge" style="background:var(--border);color:var(--white);font-size:9px;">${q.impact_label || '-'}</span>
+        </div>
+        <div style="font-size:10px;color:var(--white);margin-bottom:2px;">${q.title || '-'}</div>
+        ${q.outcome ? `<div style="font-size:10px;color:var(--dim);">결과: ${q.outcome}</div>` : ''}
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  // 예상 분기
+  if (futureQuarters.length > 0) {
+    html += '<div><div style="font-size:11px;font-weight:600;color:var(--dim);margin-bottom:6px;">예상 일정</div>';
+    futureQuarters.forEach(q => {
+      const confidence = q.confidence || 0;
+      const confColor = confidence >= 70 ? 'var(--green)' : confidence >= 50 ? 'var(--yellow)' : 'var(--red)';
+      const preconditions = q.preconditions || [];
+
+      html += `<div style="padding:6px;background:var(--bg);border-radius:4px;margin-bottom:4px;border-left:2px solid var(--dim);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-size:11px;font-weight:600;color:var(--dim);">${q.quarter || '-'}</span>
+          <span style="font-size:10px;color:${confColor};">확신도 ${confidence}%</span>
+        </div>
+        <div style="font-size:10px;color:var(--dim);margin-bottom:4px;">${q.title || '-'}</div>
+        <div class="progress-bar" style="height:3px;border-radius:2px;background:var(--border);margin-bottom:4px;">
+          <div class="progress-fill" style="width:${confidence}%;background:${confColor};height:100%;border-radius:2px;"></div>
+        </div>
+        ${preconditions.length > 0 ? `
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">
+            ${preconditions.map(p => `<span class="essence-badge" style="background:var(--border);color:var(--dim);font-size:8px;padding:2px 4px;">${p}</span>`).join('')}
+          </div>
+        ` : ''}
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  container.innerHTML = html || '<div style="color:var(--dim);font-size:10px;text-align:center;">데이터 없음</div>';
 }
 
 // ============================================================

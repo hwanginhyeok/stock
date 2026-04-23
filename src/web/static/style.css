@@ -348,3 +348,61 @@ nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
   font-weight: 600;
   flex-shrink: 0;
 }
+
+/* Thesis */
+.thesis-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding:12px 16px; background:var(--card); border-radius:8px; }
+.thesis-title { font-size:16px; font-weight:700; color:var(--white); }
+.thesis-label { font-size:12px; padding:4px 10px; border-radius:12px; font-weight:600; }
+.thesis-label.bullish { background:rgba(63,185,80,0.15); color:var(--green); }
+.thesis-label.bearish { background:rgba(248,81,73,0.15); color:var(--red); }
+.thesis-label.neutral { background:rgba(139,148,158,0.15); color:var(--dim); }
+.thesis-stats { font-size:12px; color:var(--dim); }
+.thesis-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+.bull-column { border-top:3px solid var(--green); padding-top:8px; }
+.bear-column { border-top:3px solid var(--red); padding-top:8px; }
+.thesis-item { background:var(--card); border-radius:6px; padding:10px 12px; margin-bottom:8px; }
+.thesis-item-title { font-size:12px; font-weight:600; color:var(--white); margin-bottom:4px; }
+.thesis-item-detail { font-size:11px; color:var(--dim); line-height:1.5; margin-bottom:6px; }
+.thesis-item-meta { display:flex; align-items:center; justify-content:space-between; }
+.impact-badge { font-size:9px; padding:2px 6px; border-radius:3px; font-weight:600; }
+.impact-badge.essence { background:rgba(88,166,255,0.15); color:var(--blue); }
+.impact-badge.moat { background:rgba(188,140,255,0.15); color:#bc8cff; }
+.impact-badge.propria { background:rgba(63,185,80,0.15); color:var(--green); }
+.impact-badge.initiative { background:rgba(210,153,34,0.15); color:var(--yellow); }
+.thesis-delta { font-size:11px; font-weight:600; }
+.thesis-date { font-size:10px; color:var(--dim); }
+
+/* Timeline */
+.timeline-container { background:var(--card); border-radius:8px; padding:16px; margin-bottom:20px; }
+.timeline-container h3 { font-size:13px; color:var(--dim); margin-bottom:8px; }
+.timeline-svg { width:100%; }
+.timeline-tooltip { position:absolute; background:var(--card); border:1px solid var(--border); border-radius:6px; padding:8px 12px; font-size:11px; color:var(--white); pointer-events:none; z-index:100; max-width:250px; }
+
+/* Topics */
+.topics-container { margin-bottom:20px; }
+.topics-container > h3 { font-size:13px; color:var(--dim); margin-bottom:8px; }
+.topic-card { background:var(--card); border-radius:8px; margin-bottom:8px; overflow:hidden; }
+.topic-header { display:flex; align-items:center; gap:8px; padding:10px 14px; cursor:pointer; }
+.topic-header:hover { background:rgba(255,255,255,0.03); }
+.topic-name { font-size:13px; font-weight:600; color:var(--white); flex:1; }
+.topic-status { font-size:10px; padding:2px 6px; border-radius:3px; font-weight:600; }
+.topic-status.on_track { background:rgba(63,185,80,0.15); color:var(--green); }
+.topic-status.delayed { background:rgba(248,81,73,0.15); color:var(--red); }
+.topic-status.accelerating { background:rgba(88,166,255,0.15); color:var(--blue); }
+.topic-progress-mini { width:60px; height:6px; background:var(--bg); border-radius:3px; overflow:hidden; }
+.topic-progress-mini-fill { height:100%; border-radius:3px; }
+.topic-expand-icon { font-size:10px; color:var(--dim); transition:transform 0.2s; }
+.topic-card.expanded .topic-expand-icon { transform:rotate(90deg); }
+.topic-detail { padding:0 14px 14px; display:none; }
+.topic-card.expanded .topic-detail { display:block; }
+
+/* Quarterly */
+.quarterly-section-title { font-size:11px; font-weight:600; color:var(--dim); text-transform:uppercase; margin:10px 0 6px; border-bottom:1px solid var(--border); padding-bottom:4px; }
+.quarterly-row { display:grid; grid-template-columns:70px 1fr; gap:8px; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.03); font-size:11px; }
+.quarterly-period { font-weight:600; color:var(--white); }
+.quarterly-event-title { color:var(--white); }
+.quarterly-outcome { color:var(--dim); font-size:10px; }
+.quarterly-expected { color:var(--dim); font-size:10px; font-style:italic; }
+.confidence-bar { display:inline-block; width:50px; height:8px; background:var(--bg); border-radius:4px; overflow:hidden; vertical-align:middle; margin-left:6px; }
+.confidence-fill { height:100%; border-radius:4px; }
+.precondition-chip { display:inline-block; font-size:9px; padding:1px 5px; border-radius:3px; background:rgba(139,148,158,0.1); color:var(--dim); margin:1px 2px; }
