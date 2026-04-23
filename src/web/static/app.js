@@ -1603,7 +1603,7 @@ function renderThesisItem(theme, type) {
 
 /**
  * Essence Timeline 렌더링 (SVG 기반)
- * @param {Object} data - { events: [{ date, title, impact, impact_label_ko, topic_id }], days_back, days_forward }
+ * @param {Object} data - { events: [{ date, title, impact, impact_label_ko, topic, thesis_side, detail }], days_back, days_forward }
  * @returns {string} HTML
  */
 function renderEssenceTimeline(data) {
@@ -1612,71 +1612,258 @@ function renderEssenceTimeline(data) {
   }
 
   const events = data.events || [];
-  const daysBack = data.days_back || 30;
-  const daysForward = data.days_forward || 30;
+  const daysBack = data.days_back || 28;
+  const daysForward = data.days_forward || 56;
   const totalDays = daysBack + daysForward;
+
+  // SVG 기본 설정 (반응형을 위해 viewBox 사용)
+  const svgWidth = 1000;
+  const svgHeight = 380;
+  const paddingX = 50;
+  const centerX = svgWidth / 2;
+  const centerY = 190;
+  const scale = (svgWidth - 2 * paddingX) / totalDays;
 
   // 오늘 날짜 계산
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // 이벤트를 날짜별로 정렬하고 X 좌표 계산
-  const sortedEvents = events.map(ev => {
+  // 충돌 감지 알고리즘: 레인 배정
+  // events는 x좌표 오름차순 정렬되어 있어야 함
+  function assignLanes(events) {
+    const lanes = []; // 각 lane의 마지막 사용 끝 x좌표
+    return events.map(ev => {
+      const labelWidth = (ev.label || '').length * 9 + 12;
+      const xStart = ev.x;
+      const xEnd = xStart + labelWidth / 2;
+
+      // 사용 가능한 lane 찾기 (기존 이벤트와 4px 이상 간격)
+      let assignedLane = 0;
+      for (let i = 0; i < 4; i++) {
+        if (lanes[i] === undefined || lanes[i] < xStart - 4) {
+          assignedLane = i;
+          break;
+        }
+      }
+
+      // lane 최대 3개 (넘치면 3에 cap)
+      if (assignedLane >= 4) assignedLane = 3;
+
+      lanes[assignedLane] = xEnd;
+      return { ...ev, lane: assignedLane };
+    });
+  }
+
+  // 이벤트 전처리: 날짜 계산 및 X 좌표 할당
+  const eventsWithX = events.map(ev => {
     const evDate = new Date(ev.date);
     evDate.setHours(0, 0, 0, 0);
     const diffDays = Math.floor((evDate - today) / (1000 * 60 * 60 * 24));
-    return { ...ev, diffDays };
-  }).sort((a, b) => a.diffDays - b.diffDays);
+    const x = centerX + diffDays * scale;
+    const label = ev.title.length > 10 ? ev.title.slice(0, 10) + '…' : ev.title;
+    return { ...ev, diffDays, x, label };
+  });
 
-  // SVG 생성
-  const svgWidth = 1000;
-  const svgHeight = 180;
-  const paddingX = 40;
-  const centerX = svgWidth / 2;
-  const scale = (svgWidth - 2 * paddingX) / totalDays;
+  // 이벤트 분류 및 정렬
+  const bullEvents = eventsWithX
+    .filter(ev => ev.thesis_side === 'bull')
+    .sort((a, b) => a.x - b.x);
+  const bearEvents = eventsWithX
+    .filter(ev => ev.thesis_side === 'bear')
+    .sort((a, b) => a.x - b.x);
+  const neutralEvents = eventsWithX
+    .filter(ev => ev.thesis_side === 'neutral');
 
-  let circles = '';
-  let labels = '';
-  let topicLines = '';
-
-  sortedEvents.forEach((ev, idx) => {
-    const x = centerX + ev.diffDays * scale;
-    const isEven = idx % 2 === 0;
-    const y = isEven ? 60 : 120;
-    const side = ev.thesis_side || ev.impact || 'neutral';
-    const textColor = side === 'bull' ? '#3fb950' : side === 'bear' ? '#f85149' : '#8b949e';
-    const labelY = isEven ? y - 15 : y + 20;
-
-    // 툴팁 텍스트
-    const tooltipText = `${ev.title} | ${ev.date} | ${ev.impact_label_ko || ''}`;
-
-    // 원
-    circles += `<circle cx="${x}" cy="${y}" r="6" fill="${textColor}" stroke="#fff" stroke-width="2">
-      <title>${tooltipText}</title>
-    </circle>`;
-
-    // 라벨 (15자 제한)
-    const label = ev.title.length > 15 ? ev.title.slice(0, 15) + '…' : ev.title;
-    labels += `<text x="${x}" y="${labelY}" text-anchor="middle" font-size="10" fill="${textColor}">${label}</text>`;
-
-    // topic 있으면 밑줄 + 클릭 이벤트
-    if (ev.topic) {
-      topicLines += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y + 8}" stroke="${textColor}" stroke-width="2" style="cursor:pointer;" onclick="document.getElementById('topic-${ev.topic}')?.scrollIntoView({behavior:'smooth',block:'center'})" />
-      <text x="${x}" y="${y + 20}" text-anchor="middle" font-size="8" fill="var(--dim)" style="cursor:pointer;" onclick="document.getElementById('topic-${ev.topic}')?.scrollIntoView({behavior:'smooth',block:'center'})">▶</text>`;
+  // neutral 이벤트를 카운트가 적은 쪽에 배정
+  const targetSide = bullEvents.length <= bearEvents.length ? 'bull' : 'bear';
+  neutralEvents.forEach(ev => {
+    ev.thesis_side = targetSide;
+    if (targetSide === 'bull') {
+      bullEvents.push(ev);
+    } else {
+      bearEvents.push(ev);
     }
   });
 
-  // 오늘 수직선
-  const todayLine = `<line x1="${centerX}" y1="30" x2="${centerX}" y2="150" stroke="#8b949e" stroke-width="1" stroke-dasharray="5,5" />
-    <text x="${centerX}" y="165" text-anchor="middle" font-size="10" fill="#8b949e">오늘</text>`;
+  // 각 side별 레인 배정
+  const bullsWithLanes = assignLanes(bullEvents.sort((a, b) => a.x - b.x));
+  const bearsWithLanes = assignLanes(bearEvents.sort((a, b) => a.x - b.x));
 
-  const svg = `<svg width="100%" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">
-    <rect width="100%" height="100%" fill="transparent" />
-    ${todayLine}
-    ${circles}
-    ${labels}
-    ${topicLines}
-  </svg>`;
+  // SVG 요소 생성
+  let circles = '';
+  let labels = '';
+  let leaderLines = '';
+  let topicScripts = '';
+
+  // Bull 레인 이벤트 렌더링 (y=40~170, 위로 쌓임)
+  bullsWithLanes.forEach(ev => {
+    const color = '#3fb950';
+    const labelY = centerY - 20 - ev.lane * 28;
+    const labelDate = ev.date ? new Date(ev.date).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }) : '';
+
+    // 원
+    circles += `<circle cx="${ev.x}" cy="${centerY}" r="6" fill="${color}" class="timeline-event-circle"
+      data-title="${ev.title}" data-date="${ev.date}" data-impact="${ev.impact_label_ko || ''}" data-side="bull"
+      data-detail="${ev.detail || ''}" data-topic="${ev.topic || ''}" />`;
+
+    // 리더라인 (점에서 라벨까지)
+    leaderLines += `<line x1="${ev.x}" y1="${centerY}" x2="${ev.x}" y2="${labelY + 10}" stroke="${color}" stroke-width="1" opacity="0.3" />`;
+
+    // 라벨 (2줄: 제목 + 날짜)
+    const labelWithTopic = ev.topic ? `<text x="${ev.x}" y="${labelY + 22}" text-anchor="middle" font-size="8" fill="var(--dim)" class="timeline-topic-link" data-topic="${ev.topic}" style="cursor:pointer;text-decoration:underline;">관련 토픽</text>` : '';
+    labels += `
+      <text x="${ev.x}" y="${labelY}" text-anchor="middle" font-size="10" fill="${color}" font-weight="600" class="timeline-event-label">${ev.label}</text>
+      <text x="${ev.x}" y="${labelY + 10}" text-anchor="middle" font-size="8" fill="#8b949e">${labelDate}</text>
+      ${labelWithTopic}
+    `;
+  });
+
+  // Bear 레인 이벤트 렌더링 (y=210~340, 아래로 쌓임)
+  bearsWithLanes.forEach(ev => {
+    const color = '#f85149';
+    const labelY = centerY + 20 + ev.lane * 28;
+    const labelDate = ev.date ? new Date(ev.date).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }) : '';
+
+    // 원
+    circles += `<circle cx="${ev.x}" cy="${centerY}" r="6" fill="${color}" class="timeline-event-circle"
+      data-title="${ev.title}" data-date="${ev.date}" data-impact="${ev.impact_label_ko || ''}" data-side="bear"
+      data-detail="${ev.detail || ''}" data-topic="${ev.topic || ''}" />`;
+
+    // 리더라인
+    leaderLines += `<line x1="${ev.x}" y1="${centerY}" x2="${ev.x}" y2="${labelY - 2}" stroke="${color}" stroke-width="1" opacity="0.3" />`;
+
+    // 라벨
+    const labelWithTopic = ev.topic ? `<text x="${ev.x}" y="${labelY + 12}" text-anchor="middle" font-size="8" fill="var(--dim)" class="timeline-topic-link" data-topic="${ev.topic}" style="cursor:pointer;text-decoration:underline;">관련 토픽</text>` : '';
+    labels += `
+      <text x="${ev.x}" y="${labelY}" text-anchor="middle" font-size="10" fill="${color}" font-weight="600" class="timeline-event-label">${ev.label}</text>
+      <text x="${ev.x}" y="${labelY + 10}" text-anchor="middle" font-size="8" fill="#8b949e">${labelDate}</text>
+      ${labelWithTopic}
+    `;
+  });
+
+  // X축 눈금 (-28d, -21d, -14d, -7d, 0, +14d, +28d, +42d, +56d)
+  const tickDays = [-28, -21, -14, -7, 0, 14, 28, 42, 56];
+  let xAxisTicks = '';
+  tickDays.forEach(days => {
+    const x = centerX + days * scale;
+    const tickDate = new Date(today);
+    tickDate.setDate(tickDate.getDate() + days);
+    const dateLabel = days === 0 ? 'TODAY' : tickDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }).replace('/', '/');
+    const isToday = days === 0;
+    const tickColor = isToday ? '#e5c07b' : '#8b949e';
+
+    xAxisTicks += `
+      <line x1="${x}" y1="20" x2="${x}" y2="30" stroke="${tickColor}" stroke-width="${isToday ? 2 : 1}" />
+      <text x="${x}" y="18" text-anchor="middle" font-size="9" fill="${tickColor}" font-weight="${isToday ? '700' : '400'}">${dateLabel}</text>
+    `;
+  });
+
+  // 배경 (과거/미래 구분)
+  const pastBg = `<rect x="${paddingX}" y="40" width="${centerX - paddingX}" height="300" fill="rgba(139,148,158,0.05)" />`;
+  const futureBg = `<rect x="${centerX}" y="40" width="${centerX - paddingX}" height="300" fill="rgba(64,149,255,0.05)" />`;
+
+  // 중앙축선 + 오늘 수직선
+  const centerLine = `<line x1="${paddingX}" y1="${centerY}" x2="${svgWidth - paddingX}" y2="${centerY}" stroke="#8b949e" stroke-width="1" opacity="0.3" />`;
+  const todayLine = `<line x1="${centerX}" y1="40" x2="${centerX}" y2="340" stroke="#e5c07b" stroke-width="2" />`;
+
+  const svg = `
+    <svg width="100%" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg" class="essence-timeline-svg">
+      <rect width="100%" height="100%" fill="transparent" />
+      ${pastBg}
+      ${futureBg}
+      ${xAxisTicks}
+      ${centerLine}
+      ${todayLine}
+      ${leaderLines}
+      ${circles}
+      ${labels}
+    </svg>
+    <style>
+      .timeline-event-circle { cursor: pointer; transition: r 0.15s ease; }
+      .timeline-event-circle:hover { r: 8; }
+      .timeline-topic-link:hover { fill: #58a6ff !important; }
+      .timeline-tooltip {
+        position: fixed;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-size: 11px;
+        color: var(--white);
+        z-index: 1000;
+        pointer-events: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        max-width: 280px;
+      }
+      .timeline-tooltip .tt-title { font-weight: 600; margin-bottom: 4px; color: var(--white); }
+      .timeline-tooltip .tt-date { font-size: 10px; color: var(--dim); margin-bottom: 4px; }
+      .timeline-tooltip .tt-impact { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; margin-bottom: 4px; }
+      .timeline-tooltip .tt-detail { font-size: 10px; color: var(--fg); line-height: 1.4; }
+      .tt-impact.bull { background: rgba(63, 185, 80, 0.2); color: #3fb950; }
+      .tt-impact.bear { background: rgba(248, 81, 73, 0.2); color: #f85149; }
+      .tt-impact.neutral { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
+    </style>
+    <script>
+      (function() {
+        // 호버 툴팁 기능
+        const svg = document.querySelector('.essence-timeline-svg');
+        if (!svg) return;
+
+        // 기존 툴팁 제거
+        const existingTooltip = document.querySelector('.timeline-tooltip');
+        if (existingTooltip) existingTooltip.remove();
+
+        svg.addEventListener('mouseenter', '.timeline-event-circle', function(e) {
+          const circle = e.target;
+          const title = circle.getAttribute('data-title');
+          const date = circle.getAttribute('data-date');
+          const impact = circle.getAttribute('data-impact');
+          const side = circle.getAttribute('data-side');
+          const detail = circle.getAttribute('data-detail');
+
+          const tooltip = document.createElement('div');
+          tooltip.className = 'timeline-tooltip';
+          tooltip.innerHTML = \`
+            <div class="tt-title">\${title}</div>
+            <div class="tt-date">\${date}</div>
+            <div class="tt-impact \${side}">\${impact || side}</div>
+            \${detail ? \`<div class="tt-detail">\${detail}</div>\` : ''}
+          \`;
+
+          document.body.appendChild(tooltip);
+
+          const updateTooltipPos = (e) => {
+            const x = e.pageX + 12;
+            const y = e.pageY - 12;
+            tooltip.style.left = x + 'px';
+            tooltip.style.top = y + 'px';
+          };
+
+          updateTooltipPos(e);
+          circle.addEventListener('mousemove', updateTooltipPos);
+
+          circle.addEventListener('mouseleave', () => {
+            tooltip.remove();
+          }, { once: true });
+        }, true);
+
+        // 토픽 링크 클릭
+        svg.addEventListener('click', '.timeline-topic-link', function(e) {
+          const topicId = e.target.getAttribute('data-topic');
+          if (topicId) {
+            const topicEl = document.getElementById('topic-' + topicId);
+            if (topicEl) {
+              topicEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              topicEl.style.borderColor = 'var(--blue)';
+              setTimeout(() => {
+                topicEl.style.borderColor = 'var(--border)';
+              }, 2000);
+            }
+          }
+        }, true);
+      })();
+    </script>
+  `;
 
   return `<div class="panel-section" style="background:var(--card);border-radius:8px;padding:16px;margin-bottom:16px;">
     <div class="panel-title" style="margin-bottom:12px;">Essence Timeline</div>
