@@ -56,6 +56,20 @@ def _to_float(value: str | None, default: float = 0.0) -> float:
         return default
 
 
+def _compute_is_past(occurred_at_str):
+    """날짜 문자열이 오늘 이전인지 계산."""
+    from datetime import date, datetime
+    d = datetime.strptime(occurred_at_str, '%Y-%m-%d').date()
+    return d < date.today()
+
+
+def _days_offset(occurred_at_str):
+    """오늘부터 날짜까지의 일수 차이 (음수=과거, 양수=미래)."""
+    from datetime import date, datetime
+    d = datetime.strptime(occurred_at_str, '%Y-%m-%d').date()
+    return (d - date.today()).days
+
+
 @router.get("/essence")
 def get_essence_scores() -> dict:
     """Tesla 본질 점수 데이터를 반환한다.
@@ -221,8 +235,10 @@ def get_thesis() -> dict:
         bull_count: Bull 요소 개수
         bear_count: Bear 요소 개수
         net_delta: 순 delta 합
-        bull: Bull 요소 리스트
-        bear: Bear 요소 리스트
+        bull: Bull 요소 리스트 (occurred_at 내림차순)
+            - 각 아이템에 is_past, days_offset 추가
+        bear: Bear 요소 리스트 (occurred_at 내림차순)
+            - 각 아이템에 is_past, days_offset 추가
     """
     data = _load_json("thesis.json")
 
@@ -250,6 +266,25 @@ def get_thesis() -> dict:
     else:
         overall_label = "Bullish"
 
+    # bull/bear 리스트에 is_past, days_offset 추가하고 내림차순 정렬
+    def enrich_and_sort(items):
+        enriched = []
+        for item in items:
+            occurred_at = item.get("occurred_at", "")
+            if occurred_at:
+                item_enriched = {
+                    **item,
+                    "is_past": _compute_is_past(occurred_at),
+                    "days_offset": _days_offset(occurred_at),
+                }
+                enriched.append(item_enriched)
+            else:
+                # occurred_at이 없는 경우도 포함
+                enriched.append(item)
+        # occurred_at 내림차순 정렬 (최신이 위)
+        enriched.sort(key=lambda x: x.get("occurred_at", ""), reverse=True)
+        return enriched
+
     return {
         "date": data.get("date", ""),
         "overall_score": overall_score,
@@ -257,8 +292,8 @@ def get_thesis() -> dict:
         "bull_count": len(bull_items),
         "bear_count": len(bear_items),
         "net_delta": net_delta,
-        "bull": bull_items,
-        "bear": bear_items,
+        "bull": enrich_and_sort(bull_items),
+        "bear": enrich_and_sort(bear_items),
     }
 
 
@@ -276,14 +311,17 @@ def get_timeline(
     Returns:
         today: 오늘 날짜 (YYYY-MM-DD)
         events: 필터링된 이벤트 리스트
-            - 각 이벤트에 days_offset, is_past 추가
+            - occurred_at: 사건 발생일, not 수집일
+            - days_offset: 오늘로부터의 일수 차이
+            - is_past: 과거 여부
     """
+    from datetime import date, timedelta
+
     data = _load_json("timeline_events.json")
     # JSON이 리스트(배열)이면 직접 사용, dict이면 events 키에서 추출
     events = data if isinstance(data, list) else data.get("events", [])
 
-    # 오늘 날짜
-    today = datetime.now().date()
+    today = date.today()
 
     # 필터링 범위
     start_date = today - timedelta(days=days_back)
@@ -291,8 +329,13 @@ def get_timeline(
 
     filtered_events = []
     for event in events:
+        occurred_at = event.get("occurred_at", "")
+        if not occurred_at:
+            continue
+
         try:
-            event_date = datetime.strptime(event.get("date", ""), "%Y-%m-%d").date()
+            from datetime import datetime
+            event_date = datetime.strptime(occurred_at, "%Y-%m-%d").date()
         except (ValueError, TypeError):
             continue
 
@@ -300,7 +343,7 @@ def get_timeline(
         if not (start_date <= event_date <= end_date):
             continue
 
-        # days_offset 계산 (오늘=0)
+        # days_offset, is_past 계산
         days_offset = (event_date - today).days
         is_past = days_offset < 0
 
@@ -309,6 +352,9 @@ def get_timeline(
             "days_offset": days_offset,
             "is_past": is_past,
         })
+
+    # occurred_at 오름차순 정렬
+    filtered_events.sort(key=lambda e: e.get("occurred_at", ""))
 
     return {
         "today": today.isoformat(),
@@ -359,7 +405,12 @@ def get_topic_quarterly(topic_id: str) -> dict:
     Returns:
         topic: 토픽 정보 (전체)
         quarters: 분기별 데이터 리스트
+            - 각 분기에 is_past 추가 (서버 계산)
+            - 각 event에 days_offset 추가
+            - events는 occurred_at 또는 expected_start 기준 오름차순 정렬
     """
+    from datetime import date, datetime
+
     data = _load_json("topics_quarterly.json")
     topics = data.get("topics", [])
 
@@ -373,7 +424,60 @@ def get_topic_quarterly(topic_id: str) -> dict:
     if target_topic is None:
         return {"topic": None, "quarters": []}
 
+    quarters = target_topic.get("quarters", [])
+    today = date.today()
+
+    enriched_quarters = []
+    for quarter in quarters:
+        # 분기의 is_past 계산: 분기 종료월 마지막 날짜 < today
+        # 예: 2024Q3 → 2024-09-30
+        quarter_str = quarter.get("period", "") or quarter.get("quarter", "")
+        is_past = False
+        try:
+            # 분기 문자열 파싱 (예: "2024Q3")
+            if "Q" in quarter_str:
+                year, q_num = quarter_str.split("Q")
+                year = int(year)
+                q_num = int(q_num)
+                # 분기 종료월 계산
+                end_month = q_num * 3  # Q1→3, Q2→6, Q3→9, Q4→12
+                # 해당 월의 마지막 날짜 계산
+                if end_month == 12:
+                    end_date = date(year, 12, 31)
+                else:
+                    # 다음 달 1일에서 1일 빼기
+                    end_date = date(year, end_month + 1, 1)
+                    from datetime import timedelta
+                    end_date = end_date - timedelta(days=1)
+                is_past = end_date < today
+        except (ValueError, TypeError):
+            pass
+
+        # events 정렬 및 days_offset 추가
+        events = quarter.get("events", [])
+        enriched_events = []
+        for event in events:
+            # occurred_at 또는 expected_start 사용
+            event_date_str = event.get("occurred_at") or event.get("expected_start", "")
+            event_enriched = {**event}
+            if event_date_str:
+                try:
+                    event_date = datetime.strptime(event_date_str, "%Y-%m-%d").date()
+                    event_enriched["days_offset"] = (event_date - today).days
+                except (ValueError, TypeError):
+                    pass
+            enriched_events.append(event_enriched)
+
+        # events 정렬: occurred_at 또는 expected_start 기준 오름차순
+        enriched_events.sort(key=lambda e: e.get("occurred_at") or e.get("expected_start", ""))
+
+        enriched_quarters.append({
+            **quarter,
+            "is_past": is_past,
+            "events": enriched_events,
+        })
+
     return {
         "topic": target_topic,
-        "quarters": target_topic.get("quarters", []),
+        "quarters": enriched_quarters,
     }

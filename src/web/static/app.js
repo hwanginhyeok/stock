@@ -1578,7 +1578,7 @@ function renderThesis(data) {
 
 /**
  * Thesis 항목 렌더링 헬퍼
- * @param {Object} theme - { title, detail, impact_label_ko, delta, period, date }
+ * @param {Object} theme - { title, detail, impact_label_ko, delta, period, date, occurred_at }
  * @param {string} type - 'bull' 또는 'bear'
  * @returns {string} HTML
  */
@@ -1587,6 +1587,8 @@ function renderThesisItem(theme, type) {
   const deltaSign = delta > 0 ? '+' : '';
   const deltaColor = delta > 0 ? 'var(--green)' : delta < 0 ? 'var(--red)' : 'var(--dim)';
   const impactColor = type === 'bull' ? 'var(--green)' : 'var(--red)';
+  // occurred_at 필드 우선 사용, 없으면 date 폴백
+  const themeDate = theme.occurred_at || theme.date;
 
   return `<div style="margin-bottom:10px;padding:8px;background:var(--bg);border-radius:4px;">
     <div style="font-size:12px;font-weight:600;color:var(--white);margin-bottom:2px;">${theme.title || '-'}</div>
@@ -1595,7 +1597,7 @@ function renderThesisItem(theme, type) {
       <span class="essence-badge" style="background:${impactColor}22;color:${impactColor};font-size:9px;padding:2px 6px;">${theme.impact_label_ko || '-'}</span>
       <div style="text-align:right;">
         <div style="font-size:11px;font-weight:600;color:${deltaColor};">${deltaSign}${delta}${theme.period ? ` (${theme.period})` : ''}</div>
-        <div style="font-size:10px;color:var(--dim);">${theme.date || '-'}</div>
+        <div style="font-size:10px;color:var(--dim);">${themeDate || '-'}</div>
       </div>
     </div>
   </div>`;
@@ -1656,12 +1658,14 @@ function renderEssenceTimeline(data) {
 
   // 이벤트 전처리: 날짜 계산 및 X 좌표 할당
   const eventsWithX = events.map(ev => {
-    const evDate = new Date(ev.date);
+    // occurred_at 필드 우선 사용, 없으면 date 폴백
+    const eventDate = ev.occurred_at || ev.date;
+    const evDate = new Date(eventDate);
     evDate.setHours(0, 0, 0, 0);
     const diffDays = Math.floor((evDate - today) / (1000 * 60 * 60 * 24));
     const x = centerX + diffDays * scale;
     const label = ev.title.length > 10 ? ev.title.slice(0, 10) + '…' : ev.title;
-    return { ...ev, diffDays, x, label };
+    return { ...ev, diffDays, x, label, eventDate };
   });
 
   // 이벤트 분류 및 정렬
@@ -1699,11 +1703,13 @@ function renderEssenceTimeline(data) {
   bullsWithLanes.forEach(ev => {
     const color = '#3fb950';
     const labelY = centerY - 20 - ev.lane * 28;
-    const labelDate = ev.date ? new Date(ev.date).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }) : '';
+    // occurred_at 필드 우선 사용, 없으면 date 폴백
+    const eventDate = ev.occurred_at || ev.date;
+    const labelDate = eventDate ? new Date(eventDate).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }) : '';
 
-    // 원
+    // 원 (툴팁용 데이터 속성)
     circles += `<circle cx="${ev.x}" cy="${centerY}" r="6" fill="${color}" class="timeline-event-circle"
-      data-title="${ev.title}" data-date="${ev.date}" data-impact="${ev.impact_label_ko || ''}" data-side="bull"
+      data-title="${ev.title}" data-date="${eventDate}" data-impact="${ev.impact_label_ko || ''}" data-side="bull"
       data-detail="${ev.detail || ''}" data-topic="${ev.topic || ''}" />`;
 
     // 리더라인 (점에서 라벨까지)
@@ -1722,11 +1728,13 @@ function renderEssenceTimeline(data) {
   bearsWithLanes.forEach(ev => {
     const color = '#f85149';
     const labelY = centerY + 20 + ev.lane * 28;
-    const labelDate = ev.date ? new Date(ev.date).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }) : '';
+    // occurred_at 필드 우선 사용, 없으면 date 폴백
+    const eventDate = ev.occurred_at || ev.date;
+    const labelDate = eventDate ? new Date(eventDate).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }) : '';
 
-    // 원
+    // 원 (툴팁용 데이터 속성)
     circles += `<circle cx="${ev.x}" cy="${centerY}" r="6" fill="${color}" class="timeline-event-circle"
-      data-title="${ev.title}" data-date="${ev.date}" data-impact="${ev.impact_label_ko || ''}" data-side="bear"
+      data-title="${ev.title}" data-date="${eventDate}" data-impact="${ev.impact_label_ko || ''}" data-side="bear"
       data-detail="${ev.detail || ''}" data-topic="${ev.topic || ''}" />`;
 
     // 리더라인
@@ -1823,9 +1831,10 @@ function renderEssenceTimeline(data) {
 
           const tooltip = document.createElement('div');
           tooltip.className = 'timeline-tooltip';
+          // 툴팁에 '발생일:' 접두어 추가
           tooltip.innerHTML = \`
             <div class="tt-title">\${title}</div>
-            <div class="tt-date">\${date}</div>
+            <div class="tt-date">발생일: \${date}</div>
             <div class="tt-impact \${side}">\${impact || side}</div>
             \${detail ? \`<div class="tt-detail">\${detail}</div>\` : ''}
           \`;
@@ -1977,6 +1986,8 @@ function renderQuarterlyDetail(container, data) {
   if (pastQuarters.length > 0) {
     html += '<div style="margin-bottom:12px;"><div style="font-size:11px;font-weight:600;color:var(--white);margin-bottom:6px;">과거 실적</div>';
     pastQuarters.forEach(q => {
+      // 과거 이벤트: occurred_at 표시
+      const displayDate = q.occurred_at ? new Date(q.occurred_at).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }) : '';
       html += `<div style="padding:6px;background:var(--bg);border-radius:4px;margin-bottom:4px;border-left:2px solid var(--border);">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
           <span style="font-size:11px;font-weight:600;color:var(--white);">${q.quarter || '-'}</span>
@@ -1984,6 +1995,7 @@ function renderQuarterlyDetail(container, data) {
         </div>
         <div style="font-size:10px;color:var(--white);margin-bottom:2px;">${q.title || '-'}</div>
         ${q.outcome ? `<div style="font-size:10px;color:var(--dim);">결과: ${q.outcome}</div>` : ''}
+        ${displayDate ? `<div style="font-size:10px;color:var(--dim);">발생일: ${displayDate}</div>` : ''}
       </div>`;
     });
     html += '</div>';
@@ -1996,6 +2008,8 @@ function renderQuarterlyDetail(container, data) {
       const confidence = q.confidence || 0;
       const confColor = confidence >= 70 ? 'var(--green)' : confidence >= 50 ? 'var(--yellow)' : 'var(--red)';
       const preconditions = q.preconditions || [];
+      // 미래 이벤트: expected_start 표시
+      const displayDate = q.expected_start ? new Date(q.expected_start).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }) : '';
 
       html += `<div style="padding:6px;background:var(--bg);border-radius:4px;margin-bottom:4px;border-left:2px solid var(--dim);">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
@@ -2006,6 +2020,7 @@ function renderQuarterlyDetail(container, data) {
         <div class="progress-bar" style="height:3px;border-radius:2px;background:var(--border);margin-bottom:4px;">
           <div class="progress-fill" style="width:${confidence}%;background:${confColor};height:100%;border-radius:2px;"></div>
         </div>
+        ${displayDate ? `<div style="font-size:10px;color:var(--dim);">예정일: ${displayDate}</div>` : ''}
         ${preconditions.length > 0 ? `
           <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">
             ${preconditions.map(p => `<span class="essence-badge" style="background:var(--border);color:var(--dim);font-size:8px;padding:2px 4px;">${p}</span>`).join('')}
