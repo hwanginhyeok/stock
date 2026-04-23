@@ -1390,7 +1390,7 @@ function renderEssenceDashboard(essenceData, moatData, planData, issuesData) {
  * @returns {string} HTML
  */
 function renderEssenceAxes(data) {
-  const axes = data?.axes || [];
+  const axes = data?.components || [];
   if (axes.length === 0) return '<div class="empty-state">Essence 데이터 없음</div>';
 
   const cards = axes.map(axis => {
@@ -1449,7 +1449,7 @@ function renderMoatAndPlan(moatData, planData) {
       const progress = init.progress_pct || 0;
       const color = progress >= 70 ? 'var(--green)' : progress >= 50 ? 'var(--yellow)' : 'var(--red)';
       html += `
-        <div style="font-size:11px;color:var(--white);margin-bottom:2px;">${init.name}</div>
+        <div style="font-size:11px;color:var(--white);margin-bottom:2px;">${init.label_ko || init.initiative}</div>
         <div class="progress-bar">
           <div class="progress-fill" style="width:${progress}%;background:${color};"></div>
         </div>
