@@ -21,9 +21,11 @@ from src.storage import (
 )
 
 from src.web.chart_api import router as chart_router
+from src.web.tesla_api import router as tesla_router
 
 app = FastAPI(title="InvestOS", version="0.2.0")
 app.include_router(chart_router)
+app.include_router(tesla_router)
 
 _STATIC_DIR = Path(__file__).parent / "static"
 

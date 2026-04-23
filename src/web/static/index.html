@@ -55,6 +55,7 @@
       <button class="toggle-btn active" id="btn-graph" onclick="switchView('graph')">관계도</button>
       <button class="toggle-btn" id="btn-timeline" onclick="switchView('timeline')">타임라인</button>
       <button class="toggle-btn" id="btn-chart" onclick="switchView('chart')">차트</button>
+      <button class="toggle-btn" id="btn-essence" onclick="switchView('essence')">Essence</button>
     </div>
 
     <!-- Graph view -->
@@ -150,6 +151,11 @@
           <div id="chart-event-list" class="chart-event-list"></div>
         </div>
       </div>
+    </div>
+
+    <!-- Essence view -->
+    <div id="essence-container" class="view-container" style="display:none;">
+      <div id="essence-content" style="padding:20px;height:100%;overflow-y:auto;"></div>
     </div>
   </div>
 

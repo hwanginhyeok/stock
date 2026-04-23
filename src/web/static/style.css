@@ -268,3 +268,83 @@ nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
 .props-item {
   padding: 4px 0;
 }
+
+/* Essence Dashboard */
+.essence-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.essence-card {
+  background: var(--card);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.essence-label {
+  font-size: 11px;
+  color: var(--dim);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.essence-score {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.essence-delta {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.essence-event {
+  font-size: 11px;
+  color: var(--dim);
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+.moat-plan-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.progress-bar {
+  height: 20px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 4px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.issue-row {
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  background: var(--card);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.essence-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  flex-shrink: 0;
+}

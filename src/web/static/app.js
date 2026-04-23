@@ -178,13 +178,20 @@ function switchView(view) {
   document.getElementById('btn-graph').classList.toggle('active', view === 'graph');
   document.getElementById('btn-timeline').classList.toggle('active', view === 'timeline');
   document.getElementById('btn-chart').classList.toggle('active', view === 'chart');
+  document.getElementById('btn-essence').classList.toggle('active', view === 'essence');
   document.getElementById('graph-container').style.display = view === 'graph' ? '' : 'none';
   document.getElementById('timeline-container').style.display = view === 'timeline' ? '' : 'none';
   document.getElementById('chart-container').style.display = view === 'chart' ? '' : 'none';
+  document.getElementById('essence-container').style.display = view === 'essence' ? '' : 'none';
 
   if (view === 'chart' && !lwChartInitialized) {
     initLightweightChart();
     lwChartInitialized = true;
+  }
+
+  // Essence 탭 선택 시 데이터 로드
+  if (view === 'essence') {
+    loadEssenceDashboard();
   }
 }
 
@@ -1315,6 +1322,196 @@ setInterval(loadNewsTicker, 5 * 60 * 1000);
 // Top N 필터 변경 시 그래프만 다시 로드
 function reloadGraph() {
   if (currentIssueId) selectIssue(currentIssueId);
+}
+
+// ============================================================
+// Essence Dashboard
+// ============================================================
+
+/**
+ * Essence 대시보드 로드
+ * 4개 API 병렬 호출 후 렌더링
+ */
+async function loadEssenceDashboard() {
+  const container = document.getElementById('essence-content');
+  if (!container) return;
+
+  // 로딩 표시
+  container.innerHTML = '<div class="empty-state">Essence 데이터 로딩 중...</div>';
+
+  try {
+    const [essenceRes, moatRes, planRes, issuesRes] = await Promise.all([
+      fetch('/api/tesla/essence'),
+      fetch('/api/tesla/moat'),
+      fetch('/api/tesla/master-plan'),
+      fetch('/api/tesla/issues/tagged?limit=10'),
+    ]);
+
+    const essenceData = await essenceRes.json();
+    const moatData = await moatRes.json();
+    const planData = await planRes.json();
+    const issuesData = await issuesRes.json();
+
+    renderEssenceDashboard(essenceData, moatData, planData, issuesData);
+  } catch (e) {
+    console.error('Essence 데이터 로딩 실패:', e);
+    container.innerHTML = '<div class="empty-state">데이터 로딩 실패</div>';
+  }
+}
+
+/**
+ * Essence 대시보드 렌더링
+ * @param {Object} essenceData - Essence 4축 데이터
+ * @param {Object} moatData - MOAT 데이터
+ * @param {Object} planData - Master Plan 데이터
+ * @param {Object} issuesData - 최신 이슈 데이터
+ */
+function renderEssenceDashboard(essenceData, moatData, planData, issuesData) {
+  const container = document.getElementById('essence-content');
+  if (!container) return;
+
+  let html = '';
+
+  // 블록1: Essence 4축 (상단)
+  html += renderEssenceAxes(essenceData);
+
+  // 블록2: MOAT + Master Plan (2열)
+  html += renderMoatAndPlan(moatData, planData);
+
+  // 블록3: 오늘의 이슈 (하단)
+  html += renderTodayIssues(issuesData);
+
+  container.innerHTML = html;
+}
+
+/**
+ * Essence 4축 카드 렌더링
+ * @param {Object} data - { axes: [{ label_ko, score, delta_7d, last_event_title, color }] }
+ * @returns {string} HTML
+ */
+function renderEssenceAxes(data) {
+  const axes = data?.axes || [];
+  if (axes.length === 0) return '<div class="empty-state">Essence 데이터 없음</div>';
+
+  const cards = axes.map(axis => {
+    const score = axis.score || 0;
+    const delta = axis.delta_7d || 0;
+    const deltaColor = delta > 0 ? 'var(--green)' : delta < 0 ? 'var(--red)' : 'var(--dim)';
+    const deltaSign = delta > 0 ? '+' : '';
+    const scoreColor = score >= 70 ? 'var(--green)' : score >= 50 ? 'var(--yellow)' : 'var(--red)';
+
+    return `<div class="essence-card" style="border-top:4px solid ${axis.color || 'var(--dim)'};">
+      <div class="essence-label">${axis.label_ko || 'Unknown'}</div>
+      <div class="essence-score" style="color:${scoreColor}">${score}</div>
+      <div class="essence-delta" style="color:${deltaColor}">7일 ${deltaSign}${delta}</div>
+      ${axis.last_event_title ? `<div class="essence-event">${axis.last_event_title}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  return `<div class="essence-grid">${cards}</div>`;
+}
+
+/**
+ * MOAT + Master Plan 2열 렌더링
+ * @param {Object} moatData - { moats: [{ moat_type, strength }] }
+ * @param {Object} planData - { initiatives: [{ name, progress_pct }] }
+ * @returns {string} HTML
+ */
+function renderMoatAndPlan(moatData, planData) {
+  let html = '<div class="moat-plan-grid">';
+
+  // 왼쪽: MOAT
+  html += '<div class="panel-section" style="background:var(--card);border-radius:8px;padding:16px;">';
+  html += '<div class="panel-title" style="margin-bottom:12px;">MOAT 현재 상태</div>';
+  const moats = moatData?.moats || [];
+  if (moats.length > 0) {
+    moats.forEach(moat => {
+      const strength = moat.strength || 0;
+      const color = strength >= 70 ? 'var(--green)' : strength >= 50 ? 'var(--yellow)' : 'var(--red)';
+      html += `
+        <div style="font-size:11px;color:var(--white);margin-bottom:2px;">${moat.moat_type}</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${strength}%;background:${color};"></div>
+        </div>
+      `;
+    });
+  } else {
+    html += '<div style="color:var(--dim);font-size:11px;">MOAT 데이터 없음</div>';
+  }
+  html += '</div>';
+
+  // 오른쪽: Master Plan
+  html += '<div class="panel-section" style="background:var(--card);border-radius:8px;padding:16px;">';
+  html += '<div class="panel-title" style="margin-bottom:12px;">Master Plan 진행도</div>';
+  const initiatives = planData?.initiatives || [];
+  if (initiatives.length > 0) {
+    initiatives.forEach(init => {
+      const progress = init.progress_pct || 0;
+      const color = progress >= 70 ? 'var(--green)' : progress >= 50 ? 'var(--yellow)' : 'var(--red)';
+      html += `
+        <div style="font-size:11px;color:var(--white);margin-bottom:2px;">${init.name}</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${progress}%;background:${color};"></div>
+        </div>
+      `;
+    });
+  } else {
+    html += '<div style="color:var(--dim);font-size:11px;">Master Plan 데이터 없음</div>';
+  }
+  html += '</div>';
+
+  html += '</div>';
+  return html;
+}
+
+/**
+ * 오늘의 이슈 렌더링
+ * @param {Object} issuesData - { issues: [{ title, essence_component, severity, sentiment }] }
+ * @returns {string} HTML
+ */
+function renderTodayIssues(issuesData) {
+  let html = '<div class="panel-section" style="background:var(--card);border-radius:8px;padding:16px;margin-bottom:16px;">';
+  html += '<div class="panel-title" style="margin-bottom:12px;">오늘의 이슈</div>';
+
+  const issues = issuesData?.issues || [];
+  if (issues.length > 0) {
+    issues.forEach(issue => {
+      const component = issue.essence_component || 'noise';
+      const badgeColor = component === 'noise' ? 'var(--dim)' : getComponentColor(component);
+      const severity = issue.severity || 'moderate';
+      const sentiment = issue.sentiment || 'neutral';
+      const sentimentColor = sentiment === 'positive' ? 'var(--green)' : sentiment === 'negative' ? 'var(--red)' : 'var(--dim)';
+
+      html += `
+        <div class="issue-row" style="border-left:3px solid ${sentimentColor};">
+          <span class="essence-badge" style="background:${badgeColor}22;color:${badgeColor};">${component}</span>
+          <span style="flex:1;font-size:12px;color:var(--white);">${issue.title}</span>
+          <span class="essence-badge" style="background:var(--border);color:var(--dim);">${severity}</span>
+        </div>
+      `;
+    });
+  } else {
+    html += '<div style="color:var(--dim);font-size:11px;">이슈 없음</div>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
+/**
+ * Essence 컴포넌트별 색상 반환
+ * @param {string} component - essence_component 값
+ * @returns {string} CSS 색상 값
+ */
+function getComponentColor(component) {
+  const colors = {
+    'innovation': 'var(--blue)',
+    'manufacturing': 'var(--cyan)',
+    'energy': 'var(--yellow)',
+    'software': 'var(--purple)',
+    'market': 'var(--green)',
+  };
+  return colors[component] || 'var(--dim)';
 }
 
 // ============================================================
