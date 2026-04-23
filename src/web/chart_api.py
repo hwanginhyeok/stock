@@ -13,6 +13,22 @@ from fastapi import APIRouter, Query
 
 router = APIRouter(prefix="/api/chart", tags=["chart"])
 
+# 미래/예정 이벤트 시드 데이터
+FUTURE_EVENTS = [
+    {"date": "2026-04-23", "title": "TSLA Q1 실적발표", "category": "earnings", "importance": "critical"},
+    {"date": "2026-05-07", "title": "FOMC 금리결정", "category": "macro", "importance": "major"},
+    {"date": "2026-06-01", "title": "Robotaxi 오스틴 런칭 (예정)", "category": "product", "importance": "critical"},
+]
+
+# 미래 이벤트 카테고리별 색상
+FUTURE_EVENT_COLORS = {
+    "earnings": "#ff6b6b",   # 빨강
+    "macro": "#4ecdc4",      # 청록
+    "product": "#45b7d1",    # 파랑
+    "regulatory": "#f9ca24", # 노랑
+    "initiative": "#a55eea", # 보라
+}
+
 # OHLCV 캐시 (메모리, 5분 TTL)
 _ohlcv_cache: dict[str, tuple[float, list[dict]]] = {}
 _CACHE_TTL = 300
@@ -1043,4 +1059,36 @@ def get_trend_strategy(
         "signals": signals,
         "state_history": state_history[-30:] if len(state_history) > 30 else state_history,
         "total_signals": len(signals),
+    }
+
+
+@router.get("/future-events")
+def get_future_events() -> dict:
+    """미래/예정 이벤트 목록 반환.
+
+    당분간 시드 데이터 사용 (나중에 DB로 전환 예정).
+    """
+    now = datetime.now()
+
+    result_events = []
+    for event in FUTURE_EVENTS:
+        event_date = datetime.strptime(event["date"], "%Y-%m-%d").date()
+        today = now.date()
+        is_past = event_date < today
+
+        result_events.append({
+            "date": event["date"],
+            "title": event["title"],
+            "category": event["category"],
+            "importance": event["importance"],
+            "color": FUTURE_EVENT_COLORS.get(event["category"], "#8b949e"),
+            "is_past": is_past,
+        })
+
+    # 날짜순 정렬
+    result_events.sort(key=lambda x: x["date"])
+
+    return {
+        "events": result_events,
+        "total": len(result_events),
     }

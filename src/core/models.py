@@ -114,6 +114,7 @@ class EntityType(StrEnum):
     COUNTRY = "country"
     PROXY = "proxy"
     COMMODITY = "commodity"
+    CAPABILITY = "capability"
 
 
 class EventType(StrEnum):
@@ -468,6 +469,48 @@ class OntologyLink(BaseEntity, TimestampMixin):
     evidence: str = ""
     source_urls: list[str] = Field(default_factory=list)
     geo_issue_id: str = ""
+
+
+# ============================================================
+# Tesla 본질론 기반 모델
+# ============================================================
+
+
+class TeslaEssenceComponent(StrEnum):
+    """Tesla 본질 4축."""
+
+    VERTICAL_INTEGRATION = "vertical_integration"
+    FIRST_PRINCIPLE_ENGINEERING = "first_principle_engineering"
+    CLEAN_ENERGY_MISSION = "clean_energy_mission"
+    AUTONOMY_ROBOTICS = "autonomy_robotics"
+
+
+class TeslaIssueCategory(StrEnum):
+    """Tesla 이슈 번호 카테고리."""
+
+    E = "essence"
+    P = "product"
+    C = "capability"
+    F = "factory"
+    I = "initiative"
+    R = "regulatory"
+    M = "musk_statement"
+
+
+class TeslaIssue(BaseEntity, TimestampMixin):
+    """Tesla 이슈 추적 (TSLA-{category}-{number} 형식)."""
+
+    issue_id: str  # TSLA-E-001 형식
+    category: TeslaIssueCategory
+    title: str
+    summary: str = ""
+    essence_component: TeslaEssenceComponent | None = None  # 영향 주는 본질 축
+    severity: Severity = Severity.MODERATE
+    status: str = "open"  # open/in_progress/resolved/wontfix
+    related_entity_ids: list[str] = Field(default_factory=list)
+    related_event_ids: list[str] = Field(default_factory=list)
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class GeoIssue(BaseEntity, TimestampMixin):

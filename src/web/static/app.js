@@ -171,6 +171,7 @@ let currentChartPeriod = '6mo';
 let currentChartInterval = '1d';
 let allEventMarkers = [];
 let allChartData = null;
+let futureEvents = [];  // 미래/예정 이벤트 저장
 
 function switchView(view) {
   currentView = view;
@@ -372,7 +373,7 @@ function initLightweightChart() {
     });
   });
 
-  // visible range 변경 시 VPVR 업데이트 (debounce)
+  // visible range 변경 시 VPVR + 미래 이벤트 업데이트 (debounce)
   let vpvrDebounce;
   lwMainChart.timeScale().subscribeVisibleTimeRangeChange(() => {
     if (!document.getElementById('show-vpvr')?.checked) return;
@@ -382,6 +383,13 @@ function initLightweightChart() {
         renderVPVR(lwMainChart, lwCandleSeries, allChartData, mainEl);
       }
     }, 200);
+  });
+
+  // 미래 이벤트 토글
+  lwMainChart.timeScale().subscribeVisibleTimeRangeChange(() => {
+    if (document.getElementById('show-future-events')?.checked && futureEvents && futureEvents.length > 0) {
+      renderFutureEventLines(futureEvents);
+    }
   });
 
   // 마커 호버 툴팁
@@ -419,6 +427,20 @@ function initLightweightChart() {
   document.getElementById('show-events').addEventListener('change', (e) => {
     renderEventMarkers(e.target.checked);
   });
+
+  // 미래 이벤트 토글
+  const showFutureEventsCheckbox = document.getElementById('show-future-events');
+  if (showFutureEventsCheckbox) {
+    showFutureEventsCheckbox.addEventListener('change', (e) => {
+      if (e.target.checked && futureEvents.length > 0) {
+        renderFutureEventLines(futureEvents);
+      } else {
+        const canvas = document.getElementById('future-event-canvas');
+        if (canvas) canvas.remove();
+      }
+    });
+  }
+
   document.getElementById('importance-level')?.addEventListener('change', () => {
     loadChartData(currentChartPeriod);
   });
@@ -428,6 +450,16 @@ function initLightweightChart() {
     lwMainChart.applyOptions({ width: mainEl.clientWidth });
     lwRsiChart.applyOptions({ width: rsiEl.clientWidth });
     lwMacdChart.applyOptions({ width: macdEl.clientWidth });
+
+    // 미래 이벤트 캔버스 크기 동기화
+    const futureCanvas = document.getElementById('future-event-canvas');
+    if (futureCanvas) {
+      futureCanvas.width = mainEl.clientWidth;
+      futureCanvas.height = mainEl.clientHeight;
+      if (document.getElementById('show-future-events')?.checked && futureEvents.length > 0) {
+        renderFutureEventLines(futureEvents);
+      }
+    }
   });
   ro.observe(mainEl);
 
@@ -442,18 +474,23 @@ async function loadChartData(period) {
     || (showAll ? 'all' : 'important');
 
   try {
-    const [ohlcvResp, eventsResp, signalsResp, trendResp, strategyResp] = await Promise.all([
+    const [ohlcvResp, eventsResp, signalsResp, trendResp, strategyResp, futureEventsResp] = await Promise.all([
       fetch(`/api/chart/ohlcv?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
       fetch(`/api/chart/events?symbol=TSLA&period=${period}&importance_level=${importanceLevel}`),
       fetch(`/api/chart/signals?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
       fetch(`/api/chart/trendlines?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
       fetch(`/api/chart/strategy?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
+      fetch('/api/chart/future-events'),
     ]);
     const ohlcvData = await ohlcvResp.json();
     const eventsData = await eventsResp.json();
     const signalsData = await signalsResp.json();
     const trendData = await trendResp.json();
     const strategyData = await strategyResp.json();
+    const futureEventsData = await futureEventsResp.json();
+
+    // 미래 이벤트 저장
+    futureEvents = futureEventsData.events || [];
 
     // VPVR 계산용 + timeScale 설정
     allChartData = ohlcvData.ohlcv;
@@ -633,6 +670,10 @@ async function loadChartData(period) {
         if (document.getElementById('show-vpvr')?.checked) {
           renderVPVR(lwMainChart, lwCandleSeries, allChartData, document.getElementById('lw-main-chart'));
         }
+        // 미래 이벤트 수직 점선 렌더링
+        if (document.getElementById('show-future-events')?.checked && futureEvents.length > 0) {
+          renderFutureEventLines(futureEvents);
+        }
       }, 100);
     }, 100);
 
@@ -759,6 +800,66 @@ function renderVPVR(chart, series, ohlcvData, container) {
 
     ctx.fillRect(canvas.width - barWidth - 60, y - barHeight / 2, barWidth, barHeight);
   });
+}
+
+// ============================================================
+// 미래 이벤트 수직 점선 + 라벨 렌더링
+// ============================================================
+
+function renderFutureEventLines(events) {
+  const mainEl = document.getElementById('lw-main-chart');
+  if (!mainEl || !lwMainChart) return;
+
+  // 기존 캔버스 제거
+  let canvas = document.getElementById('future-event-canvas');
+  if (canvas) canvas.remove();
+
+  // 새 캔버스 생성
+  canvas = document.createElement('canvas');
+  canvas.id = 'future-event-canvas';
+  canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:3;';
+  mainEl.style.position = 'relative';
+  mainEl.appendChild(canvas);
+
+  // 캔버스 크기 동기화
+  canvas.width = mainEl.clientWidth;
+  canvas.height = mainEl.clientHeight;
+
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const timeScale = lwMainChart.timeScale();
+
+  events.forEach(evt => {
+    // 날짜를 lightweight-charts 시간으로 변환
+    const ts = new Date(evt.date).getTime() / 1000;
+    const x = timeScale.timeToCoordinate(ts);
+    if (x === null || x < 0 || x > canvas.width) return;
+
+    // 수직 점선
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = evt.color;
+    ctx.globalAlpha = evt.is_past ? 0.4 : 0.8;
+    ctx.lineWidth = evt.importance === 'critical' ? 2 : 1;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+    ctx.stroke();
+
+    // 라벨
+    ctx.setLineDash([]);
+    ctx.globalAlpha = evt.is_past ? 0.5 : 1.0;
+    ctx.font = '11px sans-serif';
+    ctx.fillStyle = evt.color;
+    ctx.save();
+    ctx.translate(x + 4, 20);
+    ctx.rotate(-Math.PI / 6);  // 30도 기울임
+    const label = evt.title.length > 15 ? evt.title.slice(0, 15) + '…' : evt.title;
+    ctx.fillText(label, 0, 0);
+    ctx.restore();
+  });
+
+  ctx.globalAlpha = 1.0;
 }
 
 // ============================================================
