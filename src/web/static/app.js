@@ -1621,10 +1621,10 @@ function renderEssenceTimeline(data) {
 
   // SVG 기본 설정 (반응형 viewBox)
   const svgWidth = 1000;
-  const leftMargin = 120; // 왼쪽 topic 라벨 영역
+  const leftMargin = 170; // 왼쪽 topic 라벨 영역
   const headerH = 40; // 상단 눈금 영역
-  const laneH = 50; // 각 topic 레인 높이
-  const svgHeight = headerH + topics.length * laneH + 20;
+  const laneH = 65; // 각 topic 레인 높이
+  const svgHeight = headerH + topics.length * laneH + 40;
 
   // 오늘 날짜 계산
   const today = new Date();
@@ -1658,10 +1658,10 @@ function renderEssenceTimeline(data) {
 
     // 점 반지름 (impact_level 기준)
     const impactLevel = ev.impact_level || 'minor';
-    let radius = 4;
-    if (impactLevel === 'critical') radius = 8;
-    else if (impactLevel === 'major') radius = 6;
-    else if (impactLevel === 'moderate') radius = 5;
+    let radius = 5;
+    if (impactLevel === 'critical') radius = 10;
+    else if (impactLevel === 'major') radius = 8;
+    else if (impactLevel === 'moderate') radius = 6;
 
     // 색상 (thesis_side 기준)
     const thesisSide = ev.thesis_side || 'neutral';
@@ -1669,8 +1669,8 @@ function renderEssenceTimeline(data) {
     if (thesisSide === 'bull') color = '#3fb950';
     else if (thesisSide === 'bear') color = '#f85149';
 
-    // 라벨 (8자 제한)
-    const label = ev.title.length > 8 ? ev.title.slice(0, 8) + '…' : ev.title;
+    // 라벨 (10자 제한)
+    const label = ev.title.length > 10 ? ev.title.slice(0, 10) + '…' : ev.title;
 
     return { ...ev, diffDays, x, y, isPast, topicIdx, radius, color, label, eventDate };
   });
@@ -1697,21 +1697,23 @@ function renderEssenceTimeline(data) {
     bgLayers += `<rect x="0" y="${y}" width="${svgWidth}" height="${laneH}" class="${bgClass}" />`;
   });
 
-  // 2. 왼쪽 topic 라벨
+  // 2. 왼쪽 topic 라벨 (pill 스타일)
   topics.forEach((t, i) => {
-    const y = headerH + i * laneH + laneH / 2;
+    const laneCenter = headerH + i * laneH + laneH / 2;
 
     // essence_component별 색상
-    let dotColor = '#8b949e';
+    let essenceColor = '#8b949e';
     const comp = t.essence_component;
-    if (comp === 'autonomy_robotics') dotColor = '#d29922';
-    else if (comp === 'vertical_integration') dotColor = '#3fb950';
-    else if (comp === 'clean_energy_mission') dotColor = '#58a6ff';
-    else if (comp === 'first_principle_engineering') dotColor = '#bc8cff';
+    if (comp === 'autonomy_robotics') essenceColor = '#d29922';
+    else if (comp === 'vertical_integration') essenceColor = '#3fb950';
+    else if (comp === 'clean_energy_mission') essenceColor = '#58a6ff';
+    else if (comp === 'first_principle_engineering') essenceColor = '#bc8cff';
 
     topicLabels += `
-      <circle cx="15" cy="${y}" r="3" fill="${dotColor}" />
-      <text x="24" y="${y + 4}" font-size="11" font-weight="600" fill="var(--fg)" text-anchor="start">${t.name_ko || t.id}</text>
+      <g transform="translate(10, ${laneCenter - 14})">
+        <rect width="150" height="28" rx="14" fill="${essenceColor}" fill-opacity="0.15" stroke="${essenceColor}" stroke-opacity="0.6" />
+        <text x="85" y="14" font-size="14" font-weight="700" fill="#e6edf3" text-anchor="middle" dy="0.35em">${t.name_ko || t.id}</text>
+      </g>
     `;
   });
 
@@ -1723,22 +1725,27 @@ function renderEssenceTimeline(data) {
     laneLastEndX[topicIdx] = leftMargin - 4; // 초기화
 
     laneEvents.forEach(ev => {
-      // 점 스타일
-      const fillStyle = ev.isPast ? `fill="${ev.color}"` : `fill="none" stroke="${ev.color}" stroke-width="2"`;
+      // 점 스타일 (stroke-width=2.5)
+      const fillStyle = ev.isPast ? `fill="${ev.color}"` : `fill="none" stroke="${ev.color}" stroke-width="2.5"`;
 
       eventCircles += `<circle cx="${ev.x}" cy="${ev.y}" r="${ev.radius}" ${fillStyle} class="swimlane-event-circle"
         data-title="${ev.title}" data-date="${ev.eventDate}" data-days="${ev.diffDays}"
         data-impact="${ev.impact_label_ko || ''}" data-side="${ev.thesis_side}"
         data-source="${ev.source || ''}" data-topic="${ev.topic || ''}" style="cursor:pointer;" />`;
 
-      // 라벨 충돌 감지
-      const labelWidth = ev.label.length * 6 + 4; // 대략적인 폭
-      const labelStartX = ev.x + ev.radius + 4;
+      // 라벨 충돌 감지 (점 오른쪽 6px)
+      const labelWidth = ev.label.length * 8 + 8;
+      const bgWidth = labelWidth;
+      const bgHeight = 18;
+      const labelStartX = ev.x + ev.radius + 6;
       const labelEndX = labelStartX + labelWidth;
 
       // 이전 라벨과 4px 이상 간격이 필요
       if (labelStartX > laneLastEndX[topicIdx] + 4) {
-        eventLabels += `<text x="${labelStartX}" y="${ev.y + 3}" font-size="10"
+        // 라벨 배경 rect
+        eventLabels += `<rect x="${labelStartX}" y="${ev.y - bgHeight/2}" width="${bgWidth}" height="${bgHeight}" rx="4" fill="rgba(13,17,23,0.6)" />`;
+        // 라벨 텍스트 (font-size=12, font-weight=500)
+        eventLabels += `<text x="${labelStartX + 4}" y="${ev.y + 4}" font-size="12" font-weight="500"
           fill="${ev.color}" text-anchor="start" class="swimlane-label">${ev.label}</text>`;
         laneLastEndX[topicIdx] = labelEndX;
       }
@@ -1754,8 +1761,8 @@ function renderEssenceTimeline(data) {
   // 5. 오늘 수직선
   const todayLine = `<line x1="${todayX}" y1="0" x2="${todayX}" y2="${svgHeight}" stroke="#e5c07b" stroke-width="2" />`;
   const todayLabel = `
-    <rect x="${todayX - 22}" y="2" width="44" height="16" rx="3" fill="#e5c07b" />
-    <text x="${todayX}" y="13" text-anchor="middle" font-size="9" font-weight="700" fill="#1a1a1a">TODAY</text>
+    <rect x="${todayX - 30}" y="2" width="60" height="22" rx="3" fill="#e5c07b" />
+    <text x="${todayX}" y="17" text-anchor="middle" font-size="13" font-weight="700" fill="#1a1a1a">TODAY</text>
   `;
 
   // 6. X축 눈금 (상단)
@@ -1771,7 +1778,7 @@ function renderEssenceTimeline(data) {
 
     xAxisTicks += `
       <line x1="${x}" y1="25" x2="${x}" y2="${svgHeight}" stroke="var(--dim)" stroke-width="1" opacity="0.1" />
-      <text x="${x}" y="20" text-anchor="middle" font-size="9" fill="var(--dim)">${dateLabel}</text>
+      <text x="${x}" y="20" text-anchor="middle" font-size="12" fill="var(--dim)">${dateLabel}</text>
     `;
   });
 
