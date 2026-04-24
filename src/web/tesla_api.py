@@ -481,3 +481,155 @@ def get_topic_quarterly(topic_id: str) -> dict:
         "topic": target_topic,
         "quarters": enriched_quarters,
     }
+
+
+@router.get("/issues")
+def get_issues(
+    category: str | None = Query(default=None, description="카테고리 필터"),
+    status: str | None = Query(default=None, description="상태 필터"),
+    thesis_side: str | None = Query(default=None, description="테시스 방향 필터"),
+    essence_component: str | None = Query(default=None, description="본질 축 필터"),
+    limit: int = Query(default=50, ge=1, le=200, description="반환할 최대 이슈 수")
+) -> dict:
+    """Tesla 이슈 목록을 반환한다 (필터링 가능).
+
+    Args:
+        category: 카테고리 필터 (선택)
+        status: 상태 필터 (선택)
+        thesis_side: 테시스 방향 필터 (선택)
+        essence_component: 본질 축 필터 (선택)
+        limit: 반환할 최대 이슈 수 (기본 50, 최대 200)
+
+    Returns:
+        issues: 필터링된 이슈 리스트
+            - 빈 문자열은 null로 변환
+            - date 필드는 문자열 그대로 반환
+        total: 필터 후 전체 건수
+    """
+    from fastapi import HTTPException
+
+    rows = _load_csv("issues.csv")
+
+    # 빈 문자열을 None으로 변환하는 헬퍼 함수
+    def _empty_str_to_none(value: str | None) -> str | None:
+        if value is None or value == "":
+            return None
+        return value
+
+    # 필터링 적용
+    filtered = []
+    for row in rows:
+        # 각 필터 조건 확인 (값이 있을 때만 필터링)
+        if category is not None and row.get("category") != category:
+            continue
+        if status is not None and row.get("status") != status:
+            continue
+        if thesis_side is not None and row.get("thesis_side") != thesis_side:
+            continue
+        if essence_component is not None and row.get("essence_component") != essence_component:
+            continue
+        filtered.append(row)
+
+    # last_event_at 기준 내림차순 정렬 (빈 값은 맨 뒤)
+    def _sort_key(row: dict) -> tuple:
+        """정렬 키: 빈 값은 최우선 순위로 뒤로 보냄."""
+        last_event_at = row.get("last_event_at", "")
+        if last_event_at == "" or last_event_at is None:
+            return (0, "")  # 빈 값은 맨 뒤
+        return (1, last_event_at)  # 있는 값은 앞쪽, 날짜순
+
+    filtered.sort(key=_sort_key, reverse=True)
+
+    # 전체 건수 (limit 적용 전)
+    total = len(filtered)
+
+    # limit 적용
+    filtered = filtered[:limit]
+
+    # 결과 변환 (빈 문자열 → None)
+    issues = []
+    for row in filtered:
+        issue = {}
+        for key, value in row.items():
+            issue[key] = _empty_str_to_none(value)
+        issues.append(issue)
+
+    return {"issues": issues, "total": total}
+
+
+@router.get("/issues/{issue_id}")
+def get_issue_detail(issue_id: str) -> dict:
+    """특정 Tesla 이슈의 상세 정보와 연결된 마일스톤을 반환한다.
+
+    Args:
+        issue_id: 이슈 ID
+
+    Returns:
+        issue: 이슈 상세 정보 (빈 문자열은 null로 변환)
+        milestones: 연결된 마일스톤 리스트
+            - occurred_at 또는 target_at 기준 오름차순 정렬
+            - 둘 다 있으면 occurred_at 우선
+            - 빈 문자열은 null로 변환
+
+    Raises:
+        404: 이슈를 찾을 수 없는 경우
+    """
+    from fastapi import HTTPException
+
+    # 빈 문자열을 None으로 변환하는 헬퍼 함수
+    def _empty_str_to_none(value: str | None) -> str | None:
+        if value is None or value == "":
+            return None
+        return value
+
+    # issues.csv에서 해당 issue_id 찾기
+    issues = _load_csv("issues.csv")
+    target_issue = None
+    for row in issues:
+        if row.get("issue_id") == issue_id:
+            target_issue = row
+            break
+
+    if target_issue is None:
+        raise HTTPException(status_code=404, detail=f"Issue '{issue_id}' not found")
+
+    # issue에서 빈 문자열 → None 변환
+    issue_cleaned = {}
+    for key, value in target_issue.items():
+        issue_cleaned[key] = _empty_str_to_none(value)
+
+    # milestones.csv에서 해당 issue_id의 마일스톤 찾기
+    milestones = _load_csv("milestones.csv")
+    filtered_milestones = []
+    for row in milestones:
+        if row.get("issue_id") == issue_id:
+            filtered_milestones.append(row)
+
+    # 마일스톤 정렬: occurred_at 또는 target_at 기준 오름차순
+    def _milestone_sort_key(row: dict) -> tuple:
+        """마일스톤 정렬 키: occurred_at 우선, 없으면 target_at 사용."""
+        occurred_at = row.get("occurred_at") or ""
+        target_at = row.get("target_at") or ""
+
+        # occurred_at가 있으면 우선, 없으면 target_at 사용
+        if occurred_at and occurred_at != "":
+            return (1, occurred_at)  # occurred_at가 있는 경우 우선
+        elif target_at and target_at != "":
+            return (0, target_at)   # target_at만 있는 경우
+        else:
+            return (-1, "")         # 둘 다 없는 경우 맨 뒤
+
+    filtered_milestones.sort(key=_milestone_sort_key)
+
+    # 마일스톤에서 빈 문자열 → None 변환
+    milestones_cleaned = []
+    for row in filtered_milestones:
+        milestone_cleaned = {}
+        for key, value in row.items():
+            milestone_cleaned[key] = _empty_str_to_none(value)
+        milestones_cleaned.append(milestone_cleaned)
+
+    return {
+        "issue": issue_cleaned,
+        "milestones": milestones_cleaned,
+    }
