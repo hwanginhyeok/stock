@@ -1525,11 +1525,12 @@ function renderTodayIssues(issuesData) {
       const sentimentColor = sentiment === 'positive' ? 'var(--green)' : sentiment === 'negative' ? 'var(--red)' : 'var(--dim)';
 
       html += `
-        <div class="issue-row" style="border-left:3px solid ${sentimentColor};">
+        <div class="issue-row" data-issue-id="${issue.issue_id}" style="border-left:3px solid ${sentimentColor};cursor:pointer;padding:8px;margin-bottom:6px;background:var(--bg);border-radius:4px;transition:background 0.2s;">
           <span class="essence-badge" style="background:${badgeColor}22;color:${badgeColor};">${componentLabel}</span>
           <span style="flex:1;font-size:12px;color:var(--white);">${issue.title}</span>
           <span class="essence-badge" style="background:var(--border);color:var(--dim);">${severity}</span>
         </div>
+        <div class="issue-detail-panel" id="issue-detail-${issue.issue_id}" style="display:none;padding:12px;margin-bottom:6px;background:rgba(13,17,23,0.5);border-radius:4px;border-left:3px solid var(--blue);font-size:11px;"></div>
       `;
     });
   } else {
@@ -1537,6 +1538,109 @@ function renderTodayIssues(issuesData) {
   }
 
   html += '</div>';
+
+  // 이슈 행 클릭 이벤트 핸들러 추가
+  html += `
+    <script>
+      (function() {
+        const issueRows = document.querySelectorAll('.issue-row');
+        issueRows.forEach(row => {
+          row.addEventListener('click', async function() {
+            const issueId = this.getAttribute('data-issue-id');
+            const detailPanel = document.getElementById('issue-detail-' + issueId);
+
+            // 상세 패널 토글
+            if (detailPanel.style.display === 'block') {
+              detailPanel.style.display = 'none';
+              return;
+            }
+
+            // 로딩 표시
+            detailPanel.style.display = 'block';
+            detailPanel.innerHTML = '<div style="color:var(--dim);text-align:center;padding:8px;">로딩 중...</div>';
+
+            try {
+              // 이슈 상세 정보 가져오기
+              const response = await fetch('/api/tesla/issues/' + issueId);
+              const data = await response.json();
+
+              if (!response.ok) {
+                throw new Error(data.message || 'Failed to fetch issue details');
+              }
+
+              const issue = data.issue || {};
+              const milestones = data.milestones || [];
+
+              // severity 배지 색상
+              const severityColor = issue.severity === 'critical' ? 'var(--red)' :
+                                   issue.severity === 'major' ? 'var(--orange)' :
+                                   issue.severity === 'moderate' ? 'var(--yellow)' : 'var(--dim)';
+
+              // status 배지 색상
+              const statusColor = issue.status === 'active' ? 'var(--red)' :
+                                 issue.status === 'monitoring' ? 'var(--yellow)' :
+                                 issue.status === 'resolved' ? 'var(--green)' : 'var(--dim)';
+
+              // 마일스톤 HTML 생성
+              let milestonesHtml = '';
+              if (milestones.length > 0) {
+                milestonesHtml = '<div style="margin-top:12px;"><div style="font-weight:600;color:var(--white);margin-bottom:6px;">마일스톤:</div>';
+                milestones.forEach(ms => {
+                  const msStatusColor = ms.status === 'completed' ? 'var(--green)' :
+                                       ms.status === 'in_progress' ? 'var(--blue)' :
+                                       ms.status === 'pending' ? 'var(--dim)' : 'var(--yellow)';
+                  milestonesHtml += \`
+                    <div style="padding:6px;background:var(--bg);border-radius:3px;margin-bottom:4px;">
+                      <div style="display:flex;align-items:center;gap:6px;">
+                        <span style="font-size:10px;color:var(--dim);">\${ms.target_at || '-'}</span>
+                        <span class="essence-badge" style="background:\${msStatusColor}22;color:\${msStatusColor};font-size:9px;padding:2px 6px;">\${ms.status || '-'}</span>
+                      </div>
+                      <div style="font-size:11px;color:var(--fg);margin-top:2px;">\${ms.title || '-'}</div>
+                    </div>
+                  \`;
+                });
+                milestonesHtml += '</div>';
+              }
+
+              // 상세 내용 렌더링
+              detailPanel.innerHTML = \`
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+                  <span class="essence-badge" style="background:var(--blue)22;color:var(--blue);font-weight:700;font-size:10px;padding:3px 8px;">#\${issue.issue_id || '-'}</span>
+                  <span style="font-size:12px;font-weight:600;color:var(--white);flex:1;">\${issue.title || '-'}</span>
+                  <span class="essence-badge" style="background:\${severityColor}22;color:\${severityColor};">\${issue.severity || '-'}</span>
+                  <span class="essence-badge" style="background:\${statusColor}22;color:\${statusColor};">\${issue.status || '-'}</span>
+                </div>
+                <div style="font-size:11px;color:var(--dim);margin-bottom:4px;">
+                  <span style="color:var(--fg);">카테고리:</span> \${issue.category || '-'}
+                </div>
+                <div style="font-size:11px;color:var(--dim);margin-bottom:4px;">
+                  <span style="color:var(--fg);">최초 발생:</span> \${issue.first_occurred_at || '-'}
+                </div>
+                <div style="font-size:11px;color:var(--dim);margin-bottom:4px;">
+                  <span style="color:var(--fg);">마지막 이벤트:</span> \${issue.last_event_at || '-'}
+                </div>
+                \${issue.blocker ? \`<div style="margin-top:6px;padding:6px;background:rgba(248,81,73,0.15);border-left:3px solid var(--red);border-radius:3px;color:var(--red);font-size:11px;"><strong>⚠️ BLOCKER:</strong> \${issue.blocker}</div>\` : ''}
+                \${milestonesHtml}
+              \`;
+
+            } catch (error) {
+              console.error('이슈 상세 조회 실패:', error);
+              detailPanel.innerHTML = '<div style="color:var(--red);text-align:center;padding:8px;">상세 정보를 불러오지 못했습니다.</div>';
+            }
+          });
+
+          // 호버 효과
+          row.addEventListener('mouseenter', function() {
+            this.style.background = 'rgba(64,149,255,0.1)';
+          });
+          row.addEventListener('mouseleave', function() {
+            this.style.background = 'var(--bg)';
+          });
+        });
+      })();
+    </script>
+  `;
+
   return html;
 }
 
@@ -1953,8 +2057,28 @@ function renderEssenceTimeline(data) {
           const impact = circle.getAttribute('data-impact');
           const side = circle.getAttribute('data-side');
           const source = circle.getAttribute('data-source');
+          const isGroup = circle.getAttribute('data-is-group') === 'true';
+          const groupCount = parseInt(circle.getAttribute('data-group-count') || '0');
+          const groupEventsStr = circle.getAttribute('data-group-events');
 
           const daysLabel = days >= 0 ? 'D+' + days : 'D' + days;
+
+          // 그룹 이벤트일 때 전체 리스트 표시
+          let groupEventsHtml = '';
+          if (isGroup && groupCount > 0 && groupEventsStr) {
+            try {
+              const groupEvents = JSON.parse(groupEventsStr);
+              if (groupEvents && groupEvents.length > 0) {
+                groupEventsHtml = '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);"><div style="font-size:9px;color:var(--dim);margin-bottom:4px;">같은 날짜의 다른 이벤트:</div>';
+                groupEvents.forEach((ge, idx) => {
+                  groupEventsHtml += \`<div style="font-size:10px;color:var(--fg);\${idx > 0 ? 'margin-top:2px;' : ''}">\${idx + 1}. \${ge.title}</div>\`;
+                });
+                groupEventsHtml += '</div>';
+              }
+            } catch (err) {
+              console.error('그룹 이벤트 파싱 실패:', err);
+            }
+          }
 
           const tooltip = document.createElement('div');
           tooltip.className = 'swimlane-tooltip';
@@ -1963,6 +2087,7 @@ function renderEssenceTimeline(data) {
             <div class="tt-date">발생일: \${date} (\${daysLabel})</div>
             <div class="tt-impact \${side}">\${impact || side}</div>
             \${source ? \`<div class="tt-detail">출처: \${source}</div>\` : ''}
+            \${groupEventsHtml}
           \`;
 
           document.body.appendChild(tooltip);
