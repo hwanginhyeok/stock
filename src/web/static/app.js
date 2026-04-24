@@ -1614,229 +1614,241 @@ function renderEssenceTimeline(data) {
   }
 
   const events = data.events || [];
+  const topics = data.topics || [];
   const daysBack = data.days_back || 28;
   const daysForward = data.days_forward || 56;
   const totalDays = daysBack + daysForward;
 
-  // SVG 기본 설정 (반응형을 위해 viewBox 사용)
+  // SVG 기본 설정 (반응형 viewBox)
   const svgWidth = 1000;
-  const svgHeight = 380;
-  const paddingX = 50;
-  const centerX = svgWidth / 2;
-  const centerY = 190;
-  const scale = (svgWidth - 2 * paddingX) / totalDays;
+  const leftMargin = 120; // 왼쪽 topic 라벨 영역
+  const headerH = 40; // 상단 눈금 영역
+  const laneH = 50; // 각 topic 레인 높이
+  const svgHeight = headerH + topics.length * laneH + 20;
 
   // 오늘 날짜 계산
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // 충돌 감지 알고리즘: 레인 배정
-  // events는 x좌표 오름차순 정렬되어 있어야 함
-  function assignLanes(events) {
-    const lanes = []; // 각 lane의 마지막 사용 끝 x좌표
-    return events.map(ev => {
-      const labelWidth = (ev.label || '').length * 9 + 12;
-      const xStart = ev.x;
-      const xEnd = xStart + labelWidth / 2;
+  // 이벤트 전처리: 날짜 계산 및 topic 인덱스 매핑
+  const topicIdxMap = {};
+  topics.forEach((t, i) => {
+    topicIdxMap[t.id] = i;
+  });
 
-      // 사용 가능한 lane 찾기 (기존 이벤트와 4px 이상 간격)
-      let assignedLane = 0;
-      for (let i = 0; i < 4; i++) {
-        if (lanes[i] === undefined || lanes[i] < xStart - 4) {
-          assignedLane = i;
-          break;
-        }
-      }
-
-      // lane 최대 3개 (넘치면 3에 cap)
-      if (assignedLane >= 4) assignedLane = 3;
-
-      lanes[assignedLane] = xEnd;
-      return { ...ev, lane: assignedLane };
-    });
-  }
-
-  // 이벤트 전처리: 날짜 계산 및 X 좌표 할당
-  const eventsWithX = events.map(ev => {
-    // occurred_at 필드 우선 사용, 없으면 date 폴백
+  const processedEvents = events.map(ev => {
     const eventDate = ev.occurred_at || ev.date;
     const evDate = new Date(eventDate);
     evDate.setHours(0, 0, 0, 0);
     const diffDays = Math.floor((evDate - today) / (1000 * 60 * 60 * 24));
-    const x = centerX + diffDays * scale;
-    const label = ev.title.length > 10 ? ev.title.slice(0, 10) + '…' : ev.title;
-    return { ...ev, diffDays, x, label, eventDate };
-  });
+    const isPast = diffDays < 0;
 
-  // 이벤트 분류 및 정렬
-  const bullEvents = eventsWithX
-    .filter(ev => ev.thesis_side === 'bull')
-    .sort((a, b) => a.x - b.x);
-  const bearEvents = eventsWithX
-    .filter(ev => ev.thesis_side === 'bear')
-    .sort((a, b) => a.x - b.x);
-  const neutralEvents = eventsWithX
-    .filter(ev => ev.thesis_side === 'neutral');
-
-  // neutral 이벤트를 카운트가 적은 쪽에 배정
-  const targetSide = bullEvents.length <= bearEvents.length ? 'bull' : 'bear';
-  neutralEvents.forEach(ev => {
-    ev.thesis_side = targetSide;
-    if (targetSide === 'bull') {
-      bullEvents.push(ev);
-    } else {
-      bearEvents.push(ev);
+    // topic별 인덱스 매핑 (null이면 'other' 레인)
+    let topicIdx = topicIdxMap[ev.topic];
+    if (topicIdx === undefined) {
+      const otherTopic = topics.find(t => t.id === 'other');
+      topicIdx = otherTopic ? topicIdxMap['other'] : topics.length - 1;
     }
+
+    // X 좌표 계산
+    const x = leftMargin + (diffDays + daysBack) / totalDays * (svgWidth - leftMargin);
+
+    // Y 좌표 (레인 중앙)
+    const y = headerH + topicIdx * laneH + laneH / 2;
+
+    // 점 반지름 (impact_level 기준)
+    const impactLevel = ev.impact_level || 'minor';
+    let radius = 4;
+    if (impactLevel === 'critical') radius = 8;
+    else if (impactLevel === 'major') radius = 6;
+    else if (impactLevel === 'moderate') radius = 5;
+
+    // 색상 (thesis_side 기준)
+    const thesisSide = ev.thesis_side || 'neutral';
+    let color = '#8b949e';
+    if (thesisSide === 'bull') color = '#3fb950';
+    else if (thesisSide === 'bear') color = '#f85149';
+
+    // 라벨 (8자 제한)
+    const label = ev.title.length > 8 ? ev.title.slice(0, 8) + '…' : ev.title;
+
+    return { ...ev, diffDays, x, y, isPast, topicIdx, radius, color, label, eventDate };
   });
 
-  // 각 side별 레인 배정
-  const bullsWithLanes = assignLanes(bullEvents.sort((a, b) => a.x - b.x));
-  const bearsWithLanes = assignLanes(bearEvents.sort((a, b) => a.x - b.x));
+  // topic별로 이벤트 정렬 (x축 기준)
+  const eventsByTopic = {};
+  topics.forEach((t, i) => {
+    eventsByTopic[i] = processedEvents
+      .filter(ev => ev.topicIdx === i)
+      .sort((a, b) => a.x - b.x);
+  });
 
   // SVG 요소 생성
-  let circles = '';
-  let labels = '';
-  let leaderLines = '';
-  let topicScripts = '';
+  let bgLayers = '';
+  let topicLabels = '';
+  let eventCircles = '';
+  let eventLabels = '';
 
-  // Bull 레인 이벤트 렌더링 (y=40~170, 위로 쌓임)
-  bullsWithLanes.forEach(ev => {
-    const color = '#3fb950';
-    const labelY = centerY - 20 - ev.lane * 28;
-    // occurred_at 필드 우선 사용, 없으면 date 폴백
-    const eventDate = ev.occurred_at || ev.date;
-    const labelDate = eventDate ? new Date(eventDate).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }) : '';
+  // 1. 배경 레이어 (zebra stripe)
+  topics.forEach((t, i) => {
+    const y = headerH + i * laneH;
+    const isEven = i % 2 === 0;
+    const bgClass = isEven ? 'swimlane-row-even' : 'swimlane-row-odd';
+    bgLayers += `<rect x="0" y="${y}" width="${svgWidth}" height="${laneH}" class="${bgClass}" />`;
+  });
 
-    // 원 (툴팁용 데이터 속성)
-    circles += `<circle cx="${ev.x}" cy="${centerY}" r="6" fill="${color}" class="timeline-event-circle"
-      data-title="${ev.title}" data-date="${eventDate}" data-impact="${ev.impact_label_ko || ''}" data-side="bull"
-      data-detail="${ev.detail || ''}" data-topic="${ev.topic || ''}" />`;
+  // 2. 왼쪽 topic 라벨
+  topics.forEach((t, i) => {
+    const y = headerH + i * laneH + laneH / 2;
 
-    // 리더라인 (점에서 라벨까지)
-    leaderLines += `<line x1="${ev.x}" y1="${centerY}" x2="${ev.x}" y2="${labelY + 10}" stroke="${color}" stroke-width="1" opacity="0.3" />`;
+    // essence_component별 색상
+    let dotColor = '#8b949e';
+    const comp = t.essence_component;
+    if (comp === 'autonomy_robotics') dotColor = '#d29922';
+    else if (comp === 'vertical_integration') dotColor = '#3fb950';
+    else if (comp === 'clean_energy_mission') dotColor = '#58a6ff';
+    else if (comp === 'first_principle_engineering') dotColor = '#bc8cff';
 
-    // 라벨 (2줄: 제목 + 날짜)
-    const labelWithTopic = ev.topic ? `<text x="${ev.x}" y="${labelY + 22}" text-anchor="middle" font-size="8" fill="var(--dim)" class="timeline-topic-link" data-topic="${ev.topic}" style="cursor:pointer;text-decoration:underline;">관련 토픽</text>` : '';
-    labels += `
-      <text x="${ev.x}" y="${labelY}" text-anchor="middle" font-size="10" fill="${color}" font-weight="600" class="timeline-event-label">${ev.label}</text>
-      <text x="${ev.x}" y="${labelY + 10}" text-anchor="middle" font-size="8" fill="#8b949e">${labelDate}</text>
-      ${labelWithTopic}
+    topicLabels += `
+      <circle cx="15" cy="${y}" r="3" fill="${dotColor}" />
+      <text x="24" y="${y + 4}" font-size="11" font-weight="600" fill="var(--fg)" text-anchor="start">${t.name_ko || t.id}</text>
     `;
   });
 
-  // Bear 레인 이벤트 렌더링 (y=210~340, 아래로 쌓임)
-  bearsWithLanes.forEach(ev => {
-    const color = '#f85149';
-    const labelY = centerY + 20 + ev.lane * 28;
-    // occurred_at 필드 우선 사용, 없으면 date 폴백
-    const eventDate = ev.occurred_at || ev.date;
-    const labelDate = eventDate ? new Date(eventDate).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }) : '';
+  // 3. 이벤트 및 라벨 (레인별 충돌 감지)
+  const laneLastEndX = {}; // 각 레인의 마지막 라벨 끝 위치
 
-    // 원 (툴팁용 데이터 속성)
-    circles += `<circle cx="${ev.x}" cy="${centerY}" r="6" fill="${color}" class="timeline-event-circle"
-      data-title="${ev.title}" data-date="${eventDate}" data-impact="${ev.impact_label_ko || ''}" data-side="bear"
-      data-detail="${ev.detail || ''}" data-topic="${ev.topic || ''}" />`;
+  Object.keys(eventsByTopic).forEach(topicIdx => {
+    const laneEvents = eventsByTopic[topicIdx];
+    laneLastEndX[topicIdx] = leftMargin - 4; // 초기화
 
-    // 리더라인
-    leaderLines += `<line x1="${ev.x}" y1="${centerY}" x2="${ev.x}" y2="${labelY - 2}" stroke="${color}" stroke-width="1" opacity="0.3" />`;
+    laneEvents.forEach(ev => {
+      // 점 스타일
+      const fillStyle = ev.isPast ? `fill="${ev.color}"` : `fill="none" stroke="${ev.color}" stroke-width="2"`;
 
-    // 라벨
-    const labelWithTopic = ev.topic ? `<text x="${ev.x}" y="${labelY + 12}" text-anchor="middle" font-size="8" fill="var(--dim)" class="timeline-topic-link" data-topic="${ev.topic}" style="cursor:pointer;text-decoration:underline;">관련 토픽</text>` : '';
-    labels += `
-      <text x="${ev.x}" y="${labelY}" text-anchor="middle" font-size="10" fill="${color}" font-weight="600" class="timeline-event-label">${ev.label}</text>
-      <text x="${ev.x}" y="${labelY + 10}" text-anchor="middle" font-size="8" fill="#8b949e">${labelDate}</text>
-      ${labelWithTopic}
-    `;
+      eventCircles += `<circle cx="${ev.x}" cy="${ev.y}" r="${ev.radius}" ${fillStyle} class="swimlane-event-circle"
+        data-title="${ev.title}" data-date="${ev.eventDate}" data-days="${ev.diffDays}"
+        data-impact="${ev.impact_label_ko || ''}" data-side="${ev.thesis_side}"
+        data-source="${ev.source || ''}" data-topic="${ev.topic || ''}" style="cursor:pointer;" />`;
+
+      // 라벨 충돌 감지
+      const labelWidth = ev.label.length * 6 + 4; // 대략적인 폭
+      const labelStartX = ev.x + ev.radius + 4;
+      const labelEndX = labelStartX + labelWidth;
+
+      // 이전 라벨과 4px 이상 간격이 필요
+      if (labelStartX > laneLastEndX[topicIdx] + 4) {
+        eventLabels += `<text x="${labelStartX}" y="${ev.y + 3}" font-size="10"
+          fill="${ev.color}" text-anchor="start" class="swimlane-label">${ev.label}</text>`;
+        laneLastEndX[topicIdx] = labelEndX;
+      }
+      // 충돌 시 라벨 생략 (호버로만 확인)
+    });
   });
 
-  // X축 눈금 (-28d, -21d, -14d, -7d, 0, +14d, +28d, +42d, +56d)
+  // 4. 과거/미래 배경
+  const todayX = leftMargin + (daysBack / totalDays) * (svgWidth - leftMargin);
+  const pastBg = `<rect x="${leftMargin}" y="${headerH}" width="${todayX - leftMargin}" height="${topics.length * laneH}" fill="rgba(139,148,158,0.04)" />`;
+  const futureBg = `<rect x="${todayX}" y="${headerH}" width="${svgWidth - todayX}" height="${topics.length * laneH}" fill="rgba(64,149,255,0.04)" />`;
+
+  // 5. 오늘 수직선
+  const todayLine = `<line x1="${todayX}" y1="0" x2="${todayX}" y2="${svgHeight}" stroke="#e5c07b" stroke-width="2" />`;
+  const todayLabel = `
+    <rect x="${todayX - 22}" y="2" width="44" height="16" rx="3" fill="#e5c07b" />
+    <text x="${todayX}" y="13" text-anchor="middle" font-size="9" font-weight="700" fill="#1a1a1a">TODAY</text>
+  `;
+
+  // 6. X축 눈금 (상단)
   const tickDays = [-28, -21, -14, -7, 0, 14, 28, 42, 56];
   let xAxisTicks = '';
   tickDays.forEach(days => {
-    const x = centerX + days * scale;
+    const x = leftMargin + (days + daysBack) / totalDays * (svgWidth - leftMargin);
     const tickDate = new Date(today);
     tickDate.setDate(tickDate.getDate() + days);
-    const dateLabel = days === 0 ? 'TODAY' : tickDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }).replace('/', '/');
-    const isToday = days === 0;
-    const tickColor = isToday ? '#e5c07b' : '#8b949e';
+    const mm = String(tickDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(tickDate.getDate()).padStart(2, '0');
+    const dateLabel = `${mm}/${dd}`;
 
     xAxisTicks += `
-      <line x1="${x}" y1="20" x2="${x}" y2="30" stroke="${tickColor}" stroke-width="${isToday ? 2 : 1}" />
-      <text x="${x}" y="18" text-anchor="middle" font-size="9" fill="${tickColor}" font-weight="${isToday ? '700' : '400'}">${dateLabel}</text>
+      <line x1="${x}" y1="25" x2="${x}" y2="${svgHeight}" stroke="var(--dim)" stroke-width="1" opacity="0.1" />
+      <text x="${x}" y="20" text-anchor="middle" font-size="9" fill="var(--dim)">${dateLabel}</text>
     `;
   });
 
-  // 배경 (과거/미래 구분)
-  const pastBg = `<rect x="${paddingX}" y="40" width="${centerX - paddingX}" height="300" fill="rgba(139,148,158,0.05)" />`;
-  const futureBg = `<rect x="${centerX}" y="40" width="${centerX - paddingX}" height="300" fill="rgba(64,149,255,0.05)" />`;
-
-  // 중앙축선 + 오늘 수직선
-  const centerLine = `<line x1="${paddingX}" y1="${centerY}" x2="${svgWidth - paddingX}" y2="${centerY}" stroke="#8b949e" stroke-width="1" opacity="0.3" />`;
-  const todayLine = `<line x1="${centerX}" y1="40" x2="${centerX}" y2="340" stroke="#e5c07b" stroke-width="2" />`;
-
   const svg = `
-    <svg width="100%" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg" class="essence-timeline-svg">
-      <rect width="100%" height="100%" fill="transparent" />
+    <svg width="100%" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg" class="swimlane-timeline-svg">
+      <style>
+        .swimlane-row-even { fill: var(--bg); }
+        .swimlane-row-odd { fill: var(--bg); opacity: 0.7; }
+        .swimlane-event-circle { transition: r 0.15s ease; }
+        .swimlane-event-circle:hover { r: 10 !important; stroke-width: 3 !important; }
+        .swimlane-tooltip {
+          position: fixed;
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 6px;
+          padding: 10px 12px;
+          font-size: 11px;
+          color: var(--white);
+          z-index: 1000;
+          pointer-events: none;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          max-width: 280px;
+        }
+        .swimlane-tooltip .tt-title { font-weight: 600; margin-bottom: 4px; color: var(--white); }
+        .swimlane-tooltip .tt-date { font-size: 10px; color: var(--dim); margin-bottom: 4px; }
+        .swimlane-tooltip .tt-impact { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; margin-bottom: 4px; }
+        .swimlane-tooltip .tt-detail { font-size: 10px; color: var(--fg); line-height: 1.4; }
+        .tt-impact.bull { background: rgba(63, 185, 80, 0.2); color: #3fb950; }
+        .tt-impact.bear { background: rgba(248, 81, 73, 0.2); color: #f85149; }
+        .tt-impact.neutral { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
+      </style>
+
+      <!-- 배경 -->
+      ${bgLayers}
       ${pastBg}
       ${futureBg}
+
+      <!-- X축 눈금 -->
       ${xAxisTicks}
-      ${centerLine}
+
+      <!-- 오늘 선 -->
       ${todayLine}
-      ${leaderLines}
-      ${circles}
-      ${labels}
+      ${todayLabel}
+
+      <!-- Topic 라벨 -->
+      ${topicLabels}
+
+      <!-- 이벤트 점 -->
+      ${eventCircles}
+
+      <!-- 이벤트 라벨 -->
+      ${eventLabels}
     </svg>
-    <style>
-      .timeline-event-circle { cursor: pointer; transition: r 0.15s ease; }
-      .timeline-event-circle:hover { r: 8; }
-      .timeline-topic-link:hover { fill: #58a6ff !important; }
-      .timeline-tooltip {
-        position: fixed;
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        padding: 10px 12px;
-        font-size: 11px;
-        color: var(--white);
-        z-index: 1000;
-        pointer-events: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        max-width: 280px;
-      }
-      .timeline-tooltip .tt-title { font-weight: 600; margin-bottom: 4px; color: var(--white); }
-      .timeline-tooltip .tt-date { font-size: 10px; color: var(--dim); margin-bottom: 4px; }
-      .timeline-tooltip .tt-impact { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; margin-bottom: 4px; }
-      .timeline-tooltip .tt-detail { font-size: 10px; color: var(--fg); line-height: 1.4; }
-      .tt-impact.bull { background: rgba(63, 185, 80, 0.2); color: #3fb950; }
-      .tt-impact.bear { background: rgba(248, 81, 73, 0.2); color: #f85149; }
-      .tt-impact.neutral { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
-    </style>
     <script>
       (function() {
-        // 호버 툴팁 기능
-        const svg = document.querySelector('.essence-timeline-svg');
+        // 호버 툴팁
+        const svg = document.querySelector('.swimlane-timeline-svg');
         if (!svg) return;
 
-        // 기존 툴팁 제거
-        const existingTooltip = document.querySelector('.timeline-tooltip');
-        if (existingTooltip) existingTooltip.remove();
-
-        svg.addEventListener('mouseenter', '.timeline-event-circle', function(e) {
+        svg.addEventListener('mouseenter', '.swimlane-event-circle', function(e) {
           const circle = e.target;
           const title = circle.getAttribute('data-title');
           const date = circle.getAttribute('data-date');
+          const days = circle.getAttribute('data-days');
           const impact = circle.getAttribute('data-impact');
           const side = circle.getAttribute('data-side');
-          const detail = circle.getAttribute('data-detail');
+          const source = circle.getAttribute('data-source');
+
+          const daysLabel = days >= 0 ? 'D+' + days : 'D' + days;
 
           const tooltip = document.createElement('div');
-          tooltip.className = 'timeline-tooltip';
-          // 툴팁에 '발생일:' 접두어 추가
+          tooltip.className = 'swimlane-tooltip';
           tooltip.innerHTML = \`
             <div class="tt-title">\${title}</div>
-            <div class="tt-date">발생일: \${date}</div>
+            <div class="tt-date">발생일: \${date} (\${daysLabel})</div>
             <div class="tt-impact \${side}">\${impact || side}</div>
-            \${detail ? \`<div class="tt-detail">\${detail}</div>\` : ''}
+            \${source ? \`<div class="tt-detail">출처: \${source}</div>\` : ''}
           \`;
 
           document.body.appendChild(tooltip);
@@ -1856,8 +1868,8 @@ function renderEssenceTimeline(data) {
           }, { once: true });
         }, true);
 
-        // 토픽 링크 클릭
-        svg.addEventListener('click', '.timeline-topic-link', function(e) {
+        // 클릭: topic 스크롤
+        svg.addEventListener('click', '.swimlane-event-circle', function(e) {
           const topicId = e.target.getAttribute('data-topic');
           if (topicId) {
             const topicEl = document.getElementById('topic-' + topicId);
@@ -1875,7 +1887,7 @@ function renderEssenceTimeline(data) {
   `;
 
   return `<div class="panel-section" style="background:var(--card);border-radius:8px;padding:16px;margin-bottom:16px;">
-    <div class="panel-title" style="margin-bottom:12px;">Essence Timeline</div>
+    <div class="panel-title" style="margin-bottom:12px;">Essence Timeline (Topics Swimlane)</div>
     ${svg}
   </div>`;
 }

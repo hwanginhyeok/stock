@@ -407,8 +407,15 @@ nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
 .confidence-fill { height:100%; border-radius:4px; }
 .precondition-chip { display:inline-block; font-size:9px; padding:1px 5px; border-radius:3px; background:rgba(139,148,158,0.1); color:var(--dim); margin:1px 2px; }
 
-/* Essence Timeline v2 — 레인 분리 */
+/* Essence Timeline v3 — 스와임레인 */
 .essence-timeline-container { position: relative; }
+.timeline-swimlane-svg { width: 100%; }
+.swimlane-row-even { fill: rgba(255,255,255,0.015); }
+.swimlane-row-odd { fill: rgba(255,255,255,0.035); }
+.swimlane-topic-label { fill: var(--white); font-weight: 600; }
+.swimlane-today-line { stroke: #e5c07b; stroke-width: 2; }
+.swimlane-grid-line { stroke: #30363d; stroke-width: 1; stroke-dasharray: 2,3; opacity: 0.3; }
+.swimlane-event-future { fill: none; stroke-width: 2; }
 .timeline-tooltip {
   position: absolute; background: #161b22; border: 1px solid #30363d;
   border-radius: 6px; padding: 8px 10px; font-size: 11px; color: #c9d1d9;

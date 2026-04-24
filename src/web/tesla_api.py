@@ -310,13 +310,48 @@ def get_timeline(
 
     Returns:
         today: 오늘 날짜 (YYYY-MM-DD)
+        days_back: 조회 기간 (과거 방향 일수)
+        days_forward: 조회 기간 (미래 방향 일수)
+        topics: 토픽 리스트 (robotaxi, fsd, optimus, 4680, megapack, other 순서)
+            - id: 토픽 ID
+            - name_ko: 한국어 이름
+            - essence_component: 연결된 본질 축
         events: 필터링된 이벤트 리스트
             - occurred_at: 사건 발생일, not 수집일
             - days_offset: 오늘로부터의 일수 차이
             - is_past: 과거 여부
+            - topic: 토픽 ID (null인 경우 프론트에서 'other'로 매핑)
     """
     from datetime import date, timedelta
 
+    # topics_quarterly.json에서 토픽 로딩
+    topics_data = _load_json("topics_quarterly.json")
+    all_topics = topics_data.get("topics", [])
+
+    # 토픽 ID로 매핑 생성
+    topics_map = {t.get("id"): t for t in all_topics}
+
+    # 지정된 순서대로 topics 배열 생성
+    topic_order = ["robotaxi", "fsd", "optimus", "4680", "megapack"]
+    topics = []
+
+    for topic_id in topic_order:
+        if topic_id in topics_map:
+            topic = topics_map[topic_id]
+            topics.append({
+                "id": topic.get("id"),
+                "name_ko": topic.get("name_ko"),
+                "essence_component": topic.get("essence_component"),
+            })
+
+    # 'other' 토픽 하드코딩 추가
+    topics.append({
+        "id": "other",
+        "name_ko": "기타",
+        "essence_component": None,
+    })
+
+    # 타임라인 이벤트 로딩
     data = _load_json("timeline_events.json")
     # JSON이 리스트(배열)이면 직접 사용, dict이면 events 키에서 추출
     events = data if isinstance(data, list) else data.get("events", [])
@@ -358,6 +393,9 @@ def get_timeline(
 
     return {
         "today": today.isoformat(),
+        "days_back": days_back,
+        "days_forward": days_forward,
+        "topics": topics,
         "events": filtered_events,
     }
 
