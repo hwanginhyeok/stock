@@ -25,6 +25,29 @@ const CATEGORY_LABELS = {
   sector: '섹터', deal: '딜', macro: '매크로', war: '전쟁', policy: '정책',
 };
 
+// 한글 라벨 상수 (Essence, MOAT, Master Plan)
+const ESSENCE_LABELS_KR = {
+  autonomy_robotics: '자율성·로봇',
+  vertical_integration: '수직통합',
+  clean_energy_mission: '청정에너지 미션',
+  first_principle_engineering: '제1원칙 엔지니어링',
+  noise: '일반',
+};
+const MOAT_LABELS_KR = {
+  network_effects: '네트워크 효과',
+  cost_advantage: '비용 우위',
+  intangible_assets: '무형 자산',
+  efficient_scale: '효율적 규모',
+  switching_costs: '전환 비용',
+};
+const INITIATIVE_LABELS_KR = {
+  'Robotaxi Network': '로보택시 네트워크',
+  'Optimus Gen2': '옵티머스 2세대',
+  'Dojo Scale-Out': 'Dojo 확장',
+  'Energy Gridscale': '에너지 그리드스케일',
+  'Affordable EV ($25k)': '보급형 EV ($25k)',
+};
+
 let currentIssueId = null;
 let currentView = 'graph';
 let currentCategory = 'geo';
@@ -1442,10 +1465,12 @@ function renderMoatAndPlan(moatData, planData) {
     moats.forEach(moat => {
       const strength = moat.strength || 0;
       const color = strength >= 70 ? 'var(--green)' : strength >= 50 ? 'var(--yellow)' : 'var(--red)';
+      const moatLabel = MOAT_LABELS_KR[moat.moat_type] || moat.moat_type;
       html += `
-        <div style="font-size:11px;color:var(--white);margin-bottom:2px;">${moat.moat_type}</div>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width:${strength}%;background:${color};"></div>
+        <div style="font-size:11px;color:var(--white);margin-bottom:2px;">${moatLabel}</div>
+        <div class="progress-bar" style="display:flex;align-items:center;gap:6px;">
+          <div class="progress-fill" style="width:${strength}%;background:${color};flex:1;height:100%;border-radius:2px;"></div>
+          <span style="font-size:11px;color:var(--dim);min-width:32px;text-align:right;">${strength}%</span>
         </div>
       `;
     });
@@ -1462,10 +1487,12 @@ function renderMoatAndPlan(moatData, planData) {
     initiatives.forEach(init => {
       const progress = init.progress_pct || 0;
       const color = progress >= 70 ? 'var(--green)' : progress >= 50 ? 'var(--yellow)' : 'var(--red)';
+      const initLabel = INITIATIVE_LABELS_KR[init.label_ko] || init.label_ko || init.initiative;
       html += `
-        <div style="font-size:11px;color:var(--white);margin-bottom:2px;">${init.label_ko || init.initiative}</div>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width:${progress}%;background:${color};"></div>
+        <div style="font-size:11px;color:var(--white);margin-bottom:2px;">${initLabel}</div>
+        <div class="progress-bar" style="display:flex;align-items:center;gap:6px;">
+          <div class="progress-fill" style="width:${progress}%;background:${color};flex:1;height:100%;border-radius:2px;"></div>
+          <span style="font-size:11px;color:var(--dim);min-width:32px;text-align:right;">${progress}%</span>
         </div>
       `;
     });
@@ -1492,13 +1519,14 @@ function renderTodayIssues(issuesData) {
     issues.forEach(issue => {
       const component = issue.essence_component || 'noise';
       const badgeColor = component === 'noise' ? 'var(--dim)' : getComponentColor(component);
+      const componentLabel = ESSENCE_LABELS_KR[component] || component || '일반';
       const severity = issue.severity || 'moderate';
       const sentiment = issue.sentiment || 'neutral';
       const sentimentColor = sentiment === 'positive' ? 'var(--green)' : sentiment === 'negative' ? 'var(--red)' : 'var(--dim)';
 
       html += `
         <div class="issue-row" style="border-left:3px solid ${sentimentColor};">
-          <span class="essence-badge" style="background:${badgeColor}22;color:${badgeColor};">${component}</span>
+          <span class="essence-badge" style="background:${badgeColor}22;color:${badgeColor};">${componentLabel}</span>
           <span style="flex:1;font-size:12px;color:var(--white);">${issue.title}</span>
           <span class="essence-badge" style="background:var(--border);color:var(--dim);">${severity}</span>
         </div>
@@ -1630,6 +1658,9 @@ function renderEssenceTimeline(data) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // 오늘 라벨의 X 좌표 (중앙) - TODAY 보호구역 계산용
+  const todayX = leftMargin + (daysBack / totalDays) * (svgWidth - leftMargin);
+
   // 이벤트 전처리: 날짜 계산 및 topic 인덱스 매핑
   const topicIdxMap = {};
   topics.forEach((t, i) => {
@@ -1656,12 +1687,12 @@ function renderEssenceTimeline(data) {
     // Y 좌표 (레인 중앙)
     const y = headerH + topicIdx * laneH + laneH / 2;
 
-    // 점 반지름 (impact_level 기준)
+    // 점 반지름 (impact_level 기준) - +2 적용
     const impactLevel = ev.impact_level || 'minor';
-    let radius = 5;
-    if (impactLevel === 'critical') radius = 10;
-    else if (impactLevel === 'major') radius = 8;
-    else if (impactLevel === 'moderate') radius = 6;
+    let radius = 7; // minor 5→7
+    if (impactLevel === 'critical') radius = 12; // 10→12
+    else if (impactLevel === 'major') radius = 10; // 8→10
+    else if (impactLevel === 'moderate') radius = 8; // 6→8
 
     // 색상 (thesis_side 기준)
     const thesisSide = ev.thesis_side || 'neutral';
@@ -1669,18 +1700,52 @@ function renderEssenceTimeline(data) {
     if (thesisSide === 'bull') color = '#3fb950';
     else if (thesisSide === 'bear') color = '#f85149';
 
-    // 라벨 (10자 제한)
-    const label = ev.title.length > 10 ? ev.title.slice(0, 10) + '…' : ev.title;
+    // 라벨 (14자 제한)
+    const label = ev.title.length > 14 ? ev.title.slice(0, 14) + '…' : ev.title;
 
-    return { ...ev, diffDays, x, y, isPast, topicIdx, radius, color, label, eventDate };
+    // TODAY 보호구역 여부 확인 (centerX±40px 범위)
+    const isInProtectedZone = Math.abs(x - todayX) < 40;
+
+    return { ...ev, diffDays, x, y, isPast, topicIdx, radius, color, label, eventDate, isInProtectedZone };
   });
 
-  // topic별로 이벤트 정렬 (x축 기준)
+  // 같은 레인 + 같은 occurred_at 이벤트 그룹화
   const eventsByTopic = {};
   topics.forEach((t, i) => {
-    eventsByTopic[i] = processedEvents
+    const topicEvents = processedEvents
       .filter(ev => ev.topicIdx === i)
       .sort((a, b) => a.x - b.x);
+
+    // occurred_at별로 그룹화
+    const groupedEvents = [];
+    const groups = {};
+    topicEvents.forEach(ev => {
+      const key = ev.eventDate;
+      if (!groups[key]) {
+        groups[key] = [ev];
+      } else {
+        groups[key].push(ev);
+      }
+    });
+
+    // 그룹별로 첫 이벤트만 라벨 표시, 나머지는 점만
+    Object.keys(groups).forEach(key => {
+      const group = groups[key];
+      if (group.length === 1) {
+        groupedEvents.push({ ...group[0], showLabel: true, isGroup: false, groupCount: 0, groupEvents: null });
+      } else {
+        // 첫 이벤트만 라벨 표시 + '+N' 텍스트
+        group.forEach((ev, idx) => {
+          if (idx === 0) {
+            groupedEvents.push({ ...ev, showLabel: true, isGroup: true, groupCount: group.length - 1, groupEvents: group.slice(1) });
+          } else {
+            groupedEvents.push({ ...ev, showLabel: false, isGroup: false, groupCount: 0, groupEvents: null });
+          }
+        });
+      }
+    });
+
+    eventsByTopic[i] = groupedEvents;
   });
 
   // SVG 요소 생성
@@ -1688,18 +1753,33 @@ function renderEssenceTimeline(data) {
   let topicLabels = '';
   let eventCircles = '';
   let eventLabels = '';
+  let emptyLabels = ''; // 이벤트 없는 레인용 라벨
 
-  // 1. 배경 레이어 (zebra stripe)
+  // 1. 배경 레이어 (zebra stripe) + events 없는 레인은 slim(30px)
   topics.forEach((t, i) => {
+    const laneEvents = eventsByTopic[i] || [];
+    const hasEvents = laneEvents.length > 0;
+    const currentLaneH = hasEvents ? laneH : 30; // 이벤트 없으면 30px로 축소
     const y = headerH + i * laneH;
     const isEven = i % 2 === 0;
     const bgClass = isEven ? 'swimlane-row-even' : 'swimlane-row-odd';
-    bgLayers += `<rect x="0" y="${y}" width="${svgWidth}" height="${laneH}" class="${bgClass}" />`;
+
+    // 배경 레이어
+    bgLayers += `<rect x="0" y="${y}" width="${svgWidth}" height="${currentLaneH}" class="${bgClass}" />`;
+
+    // 이벤트 없는 레인: 중앙에 '이벤트 없음' 텍스트
+    if (!hasEvents) {
+      const laneCenterY = y + currentLaneH / 2;
+      emptyLabels += `<text x="${leftMargin / 2}" y="${laneCenterY + 4}" text-anchor="middle" font-size="10" fill="var(--dim)" opacity="0.5">이벤트 없음</text>`;
+    }
   });
 
   // 2. 왼쪽 topic 라벨 (pill 스타일)
   topics.forEach((t, i) => {
-    const laneCenter = headerH + i * laneH + laneH / 2;
+    const laneEvents = eventsByTopic[i] || [];
+    const hasEvents = laneEvents.length > 0;
+    const currentLaneH = hasEvents ? laneH : 30; // 이벤트 없으면 30px로 축소
+    const laneCenter = headerH + i * laneH + currentLaneH / 2;
 
     // essence_component별 색상
     let essenceColor = '#8b949e';
@@ -1709,6 +1789,7 @@ function renderEssenceTimeline(data) {
     else if (comp === 'clean_energy_mission') essenceColor = '#58a6ff';
     else if (comp === 'first_principle_engineering') essenceColor = '#bc8cff';
 
+    // pill 배지 (이벤트 없어도 표시)
     topicLabels += `
       <g transform="translate(10, ${laneCenter - 14})">
         <rect width="150" height="28" rx="14" fill="${essenceColor}" fill-opacity="0.15" stroke="${essenceColor}" stroke-opacity="0.6" />
@@ -1722,16 +1803,33 @@ function renderEssenceTimeline(data) {
 
   Object.keys(eventsByTopic).forEach(topicIdx => {
     const laneEvents = eventsByTopic[topicIdx];
+    if (laneEvents.length === 0) return; // 이벤트 없는 레인은 건너뜀
+
     laneLastEndX[topicIdx] = leftMargin - 4; // 초기화
+    const laneCenter = headerH + topicIdx * laneH + laneH / 2;
 
     laneEvents.forEach(ev => {
       // 점 스타일 (stroke-width=2.5)
       const fillStyle = ev.isPast ? `fill="${ev.color}"` : `fill="none" stroke="${ev.color}" stroke-width="2.5"`;
 
+      // 그룹 정보를 data 속성에 추가
+      const groupDataAttrs = ev.isGroup && ev.groupCount > 0
+        ? `data-is-group="true" data-group-count="${ev.groupCount}" data-group-events='${JSON.stringify(ev.groupEvents.map(e => ({ title: e.title, date: e.eventDate })))}'`
+        : '';
+
       eventCircles += `<circle cx="${ev.x}" cy="${ev.y}" r="${ev.radius}" ${fillStyle} class="swimlane-event-circle"
         data-title="${ev.title}" data-date="${ev.eventDate}" data-days="${ev.diffDays}"
         data-impact="${ev.impact_label_ko || ''}" data-side="${ev.thesis_side}"
-        data-source="${ev.source || ''}" data-topic="${ev.topic || ''}" style="cursor:pointer;" />`;
+        data-source="${ev.source || ''}" data-topic="${ev.topic || ''}" ${groupDataAttrs} style="cursor:pointer;" />`;
+
+      // 라벨 표시 여부 확인 (showLabel 속성)
+      if (!ev.showLabel) return;
+
+      // TODAY 보호구역 처리: centerX±40px 범위이면 y를 lane_center+18로 이동 (두번째 줄)
+      let labelY = ev.y;
+      if (ev.isInProtectedZone) {
+        labelY = laneCenter + 18;
+      }
 
       // 라벨 충돌 감지 (점 오른쪽 6px)
       const labelWidth = ev.label.length * 8 + 8;
@@ -1742,11 +1840,17 @@ function renderEssenceTimeline(data) {
 
       // 이전 라벨과 4px 이상 간격이 필요
       if (labelStartX > laneLastEndX[topicIdx] + 4) {
+        // 그룹 이벤트이면 '+N' 텍스트 추가
+        let labelText = ev.label;
+        if (ev.isGroup && ev.groupCount > 0) {
+          labelText += ` <tspan font-size="8" fill="${ev.color}">+${ev.groupCount}</tspan>`;
+        }
+
         // 라벨 배경 rect
-        eventLabels += `<rect x="${labelStartX}" y="${ev.y - bgHeight/2}" width="${bgWidth}" height="${bgHeight}" rx="4" fill="rgba(13,17,23,0.6)" />`;
-        // 라벨 텍스트 (font-size=12, font-weight=500)
-        eventLabels += `<text x="${labelStartX + 4}" y="${ev.y + 4}" font-size="12" font-weight="500"
-          fill="${ev.color}" text-anchor="start" class="swimlane-label">${ev.label}</text>`;
+        eventLabels += `<rect x="${labelStartX}" y="${labelY - bgHeight/2}" width="${bgWidth}" height="${bgHeight}" rx="4" fill="rgba(13,17,23,0.6)" />`;
+        // 라벨 텍스트 (font-size=13, font-weight=500)
+        eventLabels += `<text x="${labelStartX + 4}" y="${labelY + 4}" font-size="13" font-weight="500"
+          fill="${ev.color}" text-anchor="start" class="swimlane-label">${labelText}</text>`;
         laneLastEndX[topicIdx] = labelEndX;
       }
       // 충돌 시 라벨 생략 (호버로만 확인)
@@ -1815,6 +1919,9 @@ function renderEssenceTimeline(data) {
       ${bgLayers}
       ${pastBg}
       ${futureBg}
+
+      <!-- 이벤트 없는 레인 라벨 -->
+      ${emptyLabels}
 
       <!-- X축 눈금 -->
       ${xAxisTicks}
@@ -1917,8 +2024,9 @@ function renderTopicsOverview(data) {
   topics.forEach(topic => {
     const statusColor = topic.status === 'on_track' ? 'var(--green)' : topic.status === 'delayed' ? 'var(--red)' : topic.status === 'accelerating' ? 'var(--blue)' : 'var(--dim)';
     const statusLabel = topic.status === 'on_track' ? '정상' : topic.status === 'delayed' ? '지연' : topic.status === 'accelerating' ? '가속' : topic.status || '-';
-    const progress = topic.progress_pct || 0;
+    const progress = topic.current_progress_pct || 0;
     const componentColor = getComponentColor(topic.essence_component);
+    const componentLabel = ESSENCE_LABELS_KR[topic.essence_component] || topic.essence_component || '-';
 
     html += `<div id="topic-${topic.id}" class="topic-card" style="background:var(--bg);border-radius:6px;padding:12px;margin-bottom:8px;cursor:pointer;border:1px solid var(--border);" onclick="toggleTopicCard(this, '${topic.id}')">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
@@ -1932,10 +2040,10 @@ function renderTopicsOverview(data) {
         <div class="progress-bar" style="flex:1;height:4px;border-radius:2px;background:var(--border);">
           <div class="progress-fill" style="width:${progress}%;background:${statusColor};height:100%;border-radius:2px;"></div>
         </div>
-        <span style="font-size:10px;color:var(--dim);">${progress}%</span>
+        <span style="font-size:11px;color:var(--dim);min-width:32px;text-align:right;">${progress}%</span>
       </div>
       <div style="display:flex;align-items:center;gap:4px;">
-        <span class="essence-badge" style="background:${componentColor}22;color:${componentColor};font-size:9px;">${topic.essence_component || '-'}</span>
+        <span class="essence-badge" style="background:${componentColor}22;color:${componentColor};font-size:9px;">${componentLabel}</span>
       </div>
       <div class="topic-detail" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
         <div style="color:var(--dim);font-size:10px;text-align:center;">로딩 중...</div>
