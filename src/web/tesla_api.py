@@ -299,30 +299,27 @@ def get_thesis() -> dict:
 
 @router.get("/timeline")
 def get_timeline(
-    days_back: int = Query(default=30, ge=0, description="오늘로부터 몇 일 전까지"),
-    days_forward: int = Query(default=60, ge=0, description="오늘로부터 몇 일 후까지")
+    days_back: int = Query(default=2500, ge=0, description="오늘로부터 몇 일 전까지"),
+    days_forward: int = Query(default=365, ge=0, description="오늘로부터 몇 일 후까지"),
+    importance_level: str = Query(default="important", pattern="^(core|important|all)$"),
 ) -> dict:
-    """Tesla 타임라인 이벤트를 반환한다 (오늘 기준 필터링).
+    """Tesla 타임라인 이벤트를 importance 점수로 필터링하여 반환한다.
 
     Args:
         days_back: 오늘로부터 몇 일 전까지 (기본 30)
         days_forward: 오늘로부터 몇 일 후까지 (기본 60)
-
-    Returns:
-        today: 오늘 날짜 (YYYY-MM-DD)
-        days_back: 조회 기간 (과거 방향 일수)
-        days_forward: 조회 기간 (미래 방향 일수)
-        topics: 토픽 리스트 (robotaxi, fsd, optimus, 4680, megapack, other 순서)
-            - id: 토픽 ID
-            - name_ko: 한국어 이름
-            - essence_component: 연결된 본질 축
-        events: 필터링된 이벤트 리스트
-            - occurred_at: 사건 발생일, not 수집일
-            - days_offset: 오늘로부터의 일수 차이
-            - is_past: 과거 여부
-            - topic: 토픽 ID (null인 경우 프론트에서 'other'로 매핑)
+        importance_level: 중요도 필터 (core/important/all, 기본 important)
     """
     from datetime import date, timedelta
+
+    # importance 문자열 → 숫자 매핑
+    IMPORTANCE_SCORES: dict[str, int] = {
+        "critical": 20, "major": 12, "moderate": 6, "minor": 3,
+    }
+    # importance_level별 임계값
+    LEVEL_THRESHOLDS: dict[str, int] = {
+        "core": 15, "important": 6, "all": 1,
+    }
 
     # topics_quarterly.json에서 토픽 로딩
     topics_data = _load_json("topics_quarterly.json")
@@ -353,7 +350,6 @@ def get_timeline(
 
     # 타임라인 이벤트 로딩
     data = _load_json("timeline_events.json")
-    # JSON이 리스트(배열)이면 직접 사용, dict이면 events 키에서 추출
     events = data if isinstance(data, list) else data.get("events", [])
 
     today = date.today()
@@ -362,39 +358,62 @@ def get_timeline(
     start_date = today - timedelta(days=days_back)
     end_date = today + timedelta(days=days_forward)
 
-    filtered_events = []
+    scored_events = []
     for event in events:
         occurred_at = event.get("occurred_at", "")
         if not occurred_at:
             continue
 
         try:
-            from datetime import datetime
             event_date = datetime.strptime(occurred_at, "%Y-%m-%d").date()
         except (ValueError, TypeError):
             continue
 
-        # 범위 체크
         if not (start_date <= event_date <= end_date):
             continue
 
-        # days_offset, is_past 계산
         days_offset = (event_date - today).days
         is_past = days_offset < 0
 
-        filtered_events.append({
+        # importance 점수 계산: base × freshness_bonus
+        base_score = IMPORTANCE_SCORES.get(event.get("importance", "minor"), 3)
+        abs_days = abs(days_offset)
+        if abs_days <= 7:
+            freshness_bonus = 1.5
+        elif abs_days <= 30:
+            freshness_bonus = 1.2
+        else:
+            freshness_bonus = 1.0
+        importance_score = round(base_score * freshness_bonus, 1)
+
+        scored_events.append({
             **event,
             "days_offset": days_offset,
             "is_past": is_past,
+            "importance_score": importance_score,
         })
 
-    # occurred_at 오름차순 정렬
-    filtered_events.sort(key=lambda e: e.get("occurred_at", ""))
+    # 각 레벨별 건수 계산 (필터 전)
+    counts = {
+        "total": len(scored_events),
+        "core": sum(1 for e in scored_events if e["importance_score"] >= LEVEL_THRESHOLDS["core"]),
+        "important": sum(1 for e in scored_events if e["importance_score"] >= LEVEL_THRESHOLDS["important"]),
+        "all": len(scored_events),
+    }
+
+    # importance_level 기반 필터
+    min_score = LEVEL_THRESHOLDS.get(importance_level, 6)
+    filtered_events = [e for e in scored_events if e["importance_score"] >= min_score]
+
+    # importance_score 내림차순 → occurred_at 오름차순
+    filtered_events.sort(key=lambda e: (-e["importance_score"], e.get("occurred_at", "")))
 
     return {
         "today": today.isoformat(),
         "days_back": days_back,
         "days_forward": days_forward,
+        "importance_level": importance_level,
+        "counts": counts,
         "topics": topics,
         "events": filtered_events,
     }

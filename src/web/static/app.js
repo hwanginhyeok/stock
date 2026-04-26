@@ -1365,7 +1365,7 @@ async function loadEssenceDashboard() {
   try {
     const [thesisRes, timelineRes, topicsRes, essenceRes, moatRes, planRes, issuesRes] = await Promise.all([
       fetch('/api/tesla/thesis').catch(() => null),
-      fetch('/api/tesla/timeline').catch(() => null),
+      fetch('/api/tesla/timeline?importance_level=important').catch(() => null),
       fetch('/api/tesla/topics').catch(() => null),
       fetch('/api/tesla/essence').catch(() => null),
       fetch('/api/tesla/moat').catch(() => null),
@@ -1419,6 +1419,98 @@ function renderEssenceDashboard(thesisData, timelineData, topicsData, essenceDat
   html += renderTodayIssues(issuesData);
 
   container.innerHTML = html;
+
+  // 타임라인 importance 셀렉터 이벤트 바인딩
+  _bindTimelineSelector();
+  // 타임라인 SVG 툴팁/클릭 이벤트 바인딩
+  _bindTimelineSvgEvents();
+}
+
+/** 타임라인 importance 셀렉터 변경 시 재로딩 */
+function _bindTimelineSelector() {
+  const sel = document.getElementById('timeline-importance-level');
+  if (!sel) return;
+  sel.addEventListener('change', async function() {
+    const level = this.value;
+    try {
+      const res = await fetch('/api/tesla/timeline?importance_level=' + level);
+      if (!res.ok) return;
+      const newData = await res.json();
+      const panel = document.getElementById('essence-timeline-panel');
+      if (panel) {
+        panel.outerHTML = renderEssenceTimeline(newData);
+        _bindTimelineSelector();
+        _bindTimelineSvgEvents();
+      }
+    } catch(e) { console.error('타임라인 재로딩 실패:', e); }
+  });
+}
+
+/** 타임라인 SVG 호버 툴팁 + 클릭 이벤트 */
+function _bindTimelineSvgEvents() {
+  const svg = document.querySelector('.swimlane-timeline-svg');
+  if (!svg) return;
+
+  svg.addEventListener('mouseover', function(e) {
+    if (!e.target.classList.contains('swimlane-event-circle')) return;
+    const circle = e.target;
+    const title = circle.getAttribute('data-title');
+    const date = circle.getAttribute('data-date');
+    const days = circle.getAttribute('data-days');
+    const impact = circle.getAttribute('data-impact');
+    const side = circle.getAttribute('data-side');
+    const source = circle.getAttribute('data-source');
+    const isGroup = circle.getAttribute('data-is-group') === 'true';
+    const groupCount = parseInt(circle.getAttribute('data-group-count') || '0');
+    const groupEventsStr = circle.getAttribute('data-group-events');
+
+    const daysLabel = days >= 0 ? 'D+' + days : 'D' + days;
+
+    let groupEventsHtml = '';
+    if (isGroup && groupCount > 0 && groupEventsStr) {
+      try {
+        const groupEvents = JSON.parse(groupEventsStr);
+        groupEventsHtml = '<div style="margin-top:6px;border-top:1px solid var(--border);padding-top:4px;">';
+        groupEventsHtml += `<div style="font-size:9px;color:var(--dim);margin-bottom:2px;">+${groupCount}건 동일일자</div>`;
+        groupEvents.forEach(ge => {
+          groupEventsHtml += `<div style="font-size:10px;color:var(--fg);">· ${ge.title}</div>`;
+        });
+        groupEventsHtml += '</div>';
+      } catch(_) {}
+    }
+
+    const tooltip = document.createElement('div');
+    tooltip.className = 'swimlane-tooltip';
+    tooltip.innerHTML = `
+      <div class="tt-title">${title}</div>
+      <div class="tt-date">발생일: ${date} (${daysLabel})</div>
+      <div class="tt-impact ${side}">${impact || side}</div>
+      ${source ? `<div class="tt-detail">출처: ${source}</div>` : ''}
+      ${groupEventsHtml}
+    `;
+    document.body.appendChild(tooltip);
+
+    const updatePos = (ev) => {
+      tooltip.style.left = (ev.pageX + 12) + 'px';
+      tooltip.style.top = (ev.pageY - 12) + 'px';
+    };
+    updatePos(e);
+    circle.addEventListener('mousemove', updatePos);
+    circle.addEventListener('mouseleave', () => tooltip.remove(), { once: true });
+  });
+
+  svg.addEventListener('click', function(e) {
+    if (!e.target.classList.contains('swimlane-event-circle')) return;
+    const topicId = e.target.getAttribute('data-topic');
+    if (topicId) {
+      const topicEl = document.getElementById('topic-' + topicId);
+      if (topicEl) {
+        topicEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        topicEl.style.borderColor = 'var(--blue)';
+        setTimeout(() => { topicEl.style.borderColor = 'var(--border)'; }, 2000);
+      }
+    }
+  });
 }
 
 /**
@@ -1747,9 +1839,24 @@ function renderEssenceTimeline(data) {
 
   const events = data.events || [];
   const topics = data.topics || [];
-  const daysBack = data.days_back || 28;
-  const daysForward = data.days_forward || 56;
+
+  // 이벤트 실제 범위 기반 시각 프레이밍 (API 범위와 무관)
+  let minOffset = 0, maxOffset = 0;
+  events.forEach(ev => {
+    const d = ev.days_offset || 0;
+    if (d < minOffset) minOffset = d;
+    if (d > maxOffset) maxOffset = d;
+  });
+  // 여유 7일 패딩
+  const daysBack = Math.abs(minOffset) + 7;
+  const daysForward = Math.max(maxOffset, 14) + 7;
   const totalDays = daysBack + daysForward;
+
+  // 셀렉터 + 건수 헤더
+  const counts = data.counts || {};
+  const currentLevel = data.importance_level || 'important';
+  const shownCount = events.length;
+  const totalCount = counts.total || shownCount;
 
   // SVG 기본 설정 (반응형 viewBox)
   const svgWidth = 1000;
@@ -1832,13 +1939,14 @@ function renderEssenceTimeline(data) {
       }
     });
 
-    // 그룹별로 첫 이벤트만 라벨 표시, 나머지는 점만
+    // 그룹별로 importance_score 최고를 대표로, 나머지는 점만
     Object.keys(groups).forEach(key => {
       const group = groups[key];
+      // importance_score 내림차순 정렬 → 최고가 대표
+      group.sort((a, b) => (b.importance_score || 0) - (a.importance_score || 0));
       if (group.length === 1) {
         groupedEvents.push({ ...group[0], showLabel: true, isGroup: false, groupCount: 0, groupEvents: null });
       } else {
-        // 첫 이벤트만 라벨 표시 + '+N' 텍스트
         group.forEach((ev, idx) => {
           if (idx === 0) {
             groupedEvents.push({ ...ev, showLabel: true, isGroup: true, groupCount: group.length - 1, groupEvents: group.slice(1) });
@@ -1962,7 +2070,6 @@ function renderEssenceTimeline(data) {
   });
 
   // 4. 과거/미래 배경
-  const todayX = leftMargin + (daysBack / totalDays) * (svgWidth - leftMargin);
   const pastBg = `<rect x="${leftMargin}" y="${headerH}" width="${todayX - leftMargin}" height="${topics.length * laneH}" fill="rgba(139,148,158,0.04)" />`;
   const futureBg = `<rect x="${todayX}" y="${headerH}" width="${svgWidth - todayX}" height="${topics.length * laneH}" fill="rgba(64,149,255,0.04)" />`;
 
@@ -1973,8 +2080,12 @@ function renderEssenceTimeline(data) {
     <text x="${todayX}" y="17" text-anchor="middle" font-size="13" font-weight="700" fill="#1a1a1a">TODAY</text>
   `;
 
-  // 6. X축 눈금 (상단)
-  const tickDays = [-28, -21, -14, -7, 0, 14, 28, 42, 56];
+  // 6. X축 눈금 (상단) — 데이터 범위에 맞게 동적 생성
+  const tickStep = Math.max(Math.round(totalDays / 8), 7);
+  const tickDays = [];
+  for (let d = -daysBack; d <= daysForward; d += tickStep) tickDays.push(d);
+  if (!tickDays.includes(0)) tickDays.push(0);
+  tickDays.sort((a, b) => a - b);
   let xAxisTicks = '';
   tickDays.forEach(days => {
     const x = leftMargin + (days + daysBack) / totalDays * (svgWidth - leftMargin);
@@ -1997,26 +2108,6 @@ function renderEssenceTimeline(data) {
         .swimlane-row-odd { fill: var(--bg); opacity: 0.7; }
         .swimlane-event-circle { transition: r 0.15s ease; }
         .swimlane-event-circle:hover { r: 10 !important; stroke-width: 3 !important; }
-        .swimlane-tooltip {
-          position: fixed;
-          background: var(--card);
-          border: 1px solid var(--border);
-          border-radius: 6px;
-          padding: 10px 12px;
-          font-size: 11px;
-          color: var(--white);
-          z-index: 1000;
-          pointer-events: none;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-          max-width: 280px;
-        }
-        .swimlane-tooltip .tt-title { font-weight: 600; margin-bottom: 4px; color: var(--white); }
-        .swimlane-tooltip .tt-date { font-size: 10px; color: var(--dim); margin-bottom: 4px; }
-        .swimlane-tooltip .tt-impact { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; margin-bottom: 4px; }
-        .swimlane-tooltip .tt-detail { font-size: 10px; color: var(--fg); line-height: 1.4; }
-        .tt-impact.bull { background: rgba(63, 185, 80, 0.2); color: #3fb950; }
-        .tt-impact.bear { background: rgba(248, 81, 73, 0.2); color: #f85149; }
-        .tt-impact.neutral { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
       </style>
 
       <!-- 배경 -->
@@ -2043,90 +2134,24 @@ function renderEssenceTimeline(data) {
       <!-- 이벤트 라벨 -->
       ${eventLabels}
     </svg>
-    <script>
-      (function() {
-        // 호버 툴팁
-        const svg = document.querySelector('.swimlane-timeline-svg');
-        if (!svg) return;
-
-        svg.addEventListener('mouseenter', '.swimlane-event-circle', function(e) {
-          const circle = e.target;
-          const title = circle.getAttribute('data-title');
-          const date = circle.getAttribute('data-date');
-          const days = circle.getAttribute('data-days');
-          const impact = circle.getAttribute('data-impact');
-          const side = circle.getAttribute('data-side');
-          const source = circle.getAttribute('data-source');
-          const isGroup = circle.getAttribute('data-is-group') === 'true';
-          const groupCount = parseInt(circle.getAttribute('data-group-count') || '0');
-          const groupEventsStr = circle.getAttribute('data-group-events');
-
-          const daysLabel = days >= 0 ? 'D+' + days : 'D' + days;
-
-          // 그룹 이벤트일 때 전체 리스트 표시
-          let groupEventsHtml = '';
-          if (isGroup && groupCount > 0 && groupEventsStr) {
-            try {
-              const groupEvents = JSON.parse(groupEventsStr);
-              if (groupEvents && groupEvents.length > 0) {
-                groupEventsHtml = '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);"><div style="font-size:9px;color:var(--dim);margin-bottom:4px;">같은 날짜의 다른 이벤트:</div>';
-                groupEvents.forEach((ge, idx) => {
-                  groupEventsHtml += \`<div style="font-size:10px;color:var(--fg);\${idx > 0 ? 'margin-top:2px;' : ''}">\${idx + 1}. \${ge.title}</div>\`;
-                });
-                groupEventsHtml += '</div>';
-              }
-            } catch (err) {
-              console.error('그룹 이벤트 파싱 실패:', err);
-            }
-          }
-
-          const tooltip = document.createElement('div');
-          tooltip.className = 'swimlane-tooltip';
-          tooltip.innerHTML = \`
-            <div class="tt-title">\${title}</div>
-            <div class="tt-date">발생일: \${date} (\${daysLabel})</div>
-            <div class="tt-impact \${side}">\${impact || side}</div>
-            \${source ? \`<div class="tt-detail">출처: \${source}</div>\` : ''}
-            \${groupEventsHtml}
-          \`;
-
-          document.body.appendChild(tooltip);
-
-          const updateTooltipPos = (e) => {
-            const x = e.pageX + 12;
-            const y = e.pageY - 12;
-            tooltip.style.left = x + 'px';
-            tooltip.style.top = y + 'px';
-          };
-
-          updateTooltipPos(e);
-          circle.addEventListener('mousemove', updateTooltipPos);
-
-          circle.addEventListener('mouseleave', () => {
-            tooltip.remove();
-          }, { once: true });
-        }, true);
-
-        // 클릭: topic 스크롤
-        svg.addEventListener('click', '.swimlane-event-circle', function(e) {
-          const topicId = e.target.getAttribute('data-topic');
-          if (topicId) {
-            const topicEl = document.getElementById('topic-' + topicId);
-            if (topicEl) {
-              topicEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              topicEl.style.borderColor = 'var(--blue)';
-              setTimeout(() => {
-                topicEl.style.borderColor = 'var(--border)';
-              }, 2000);
-            }
-          }
-        }, true);
-      })();
-    </script>
   `;
 
-  return `<div class="panel-section" style="background:var(--card);border-radius:8px;padding:16px;margin-bottom:16px;">
-    <div class="panel-title" style="margin-bottom:12px;">Essence Timeline (Topics Swimlane)</div>
+  const selectorHtml = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div class="panel-title" style="margin:0;">Essence Timeline</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;color:var(--dim);">${shownCount} / ${totalCount}건</span>
+        <select id="timeline-importance-level" class="chart-select" style="font-size:11px;padding:2px 6px;">
+          <option value="core"${currentLevel === 'core' ? ' selected' : ''}>Core (${counts.core || 0})</option>
+          <option value="important"${currentLevel === 'important' ? ' selected' : ''}>Important (${counts.important || 0})</option>
+          <option value="all"${currentLevel === 'all' ? ' selected' : ''}>All (${counts.all || 0})</option>
+        </select>
+      </div>
+    </div>
+  `;
+
+  return `<div class="panel-section" id="essence-timeline-panel" style="background:var(--card);border-radius:8px;padding:16px;margin-bottom:16px;">
+    ${selectorHtml}
     ${svg}
   </div>`;
 }
