@@ -4,6 +4,14 @@
 
 | # | 태스크 | 완료일 | 비고 |
 |---|--------|--------|------|
+| 1-55 | Thesis + Timeline + Topic Quarterly | 2026-04-23 | Essence Dashboard 구성 요소 |
+| 1-56 | Timeline 레인 분리 + 충돌 방지 | 2026-04-23 | swimlane 렌더링 |
+| 1-57 | occurred_at 통일 + 사실성 감사 | 2026-04-24 | 이벤트 날짜 정합성 |
+| 1-54 | Tesla Essence Dashboard | 2026-04-23 | 웹 대시보드 |
+| 1-44 | Tesla 특화 엔티티 스키마 설계 (본질론 기반) | 2026-04-23 | 코드 완료 |
+| 1-48 | properties dict 웹 UI 노출 (3단 분류) | 2026-04-23 | 코드 완료 |
+| 1-51 | 미래 이벤트 차트 표시 (실적·FOMC 등) | 2026-04-23 | 코드 완료 |
+| 1-30 | InvestOS — 테슬라 인텔리전스 인프라 | 2026-04-24 | 1-44~1-47로 분해 완료 |
 | 1-43 | HIH_2 entity 체계 조사 & stock 매핑 설계 | 2026-04-23 | 블로커 해제 (독립 진행). stock 현황 조사 완료 → 1-44~1-48로 분해. `docs/프로젝트/task/1-43.md` |
 | 1-50 | 차트 이벤트 가중 필터 (importance 점수) | 2026-04-15 | severity × relevance × freshness. 키워드 기반 Tesla 직접/간접/거시 분류. core/important/all 셀렉터 |
 | 1-49 | 자체 차트 시스템 구축 (TSLA) | 2026-04-15 | TV 위젯 + lightweight-charts + yfinance + SMA6/VWMA100/VPVR/RSI/MACD + 멀티 타임프레임(1H/4H/D/W/M) + 매수매도 시그널 + 인범 빗각(고고저/저저고) + 평행 채널 + VP 교차 + XY축 독립 줌. 후속: 1-50~53. D-006 기록 |
