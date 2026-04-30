@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TMUS | T-Mobile US Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #ff4d9a; --accent-dim: #ff4d9a33;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#e2007415,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #ff4d9a44; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  /* CARDS */
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--accent); }
+  .negative { color:var(--red); }
+
+  /* KPI TIER */
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#ff4d9a22; color:var(--accent); }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  /* QUOTE */
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  /* TONE METER */
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  /* NEXT Q */
+  .next-q { background:linear-gradient(135deg,#4da6ff10,var(--surface)); border:1px solid #4da6ff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--blue); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--blue); }
+
+  /* LINKS */
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  /* TAGS */
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  /* KPI NOTE */
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+  /* NOTE BOX */
+  .note-box { background:#ffc10710; border:1px solid #ffc10733; border-radius:6px; padding:12px 16px; margin:12px 0; font-size:13px; color:var(--yellow); }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NASDAQ: TMUS</div>
+    <h1>T-Mobile US</h1>
+    <div class="company-kr">티모바일 US</div>
+    <div class="subtitle">Q1 FY2026 실적 딥다이브 &mdash; 2026.04.28 장후 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-04-28</span>
+      <span>|</span>
+      <span>섹터: 통신 / 무선</span>
+      <span>|</span>
+      <span>시가총액: ~$2,340억 (주가 $198.17 기준)</span>
+      <span>|</span>
+      <span>CEO: Srini Gopalan (2025.11 취임)</span>
+    </div>
+    <div class="verdict beat">BEAT &mdash; EPS +12% 서프라이즈 / 매출 소폭 상회 / 가이던스 상향</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">총 매출</div>
+      <div class="value">$23.11B</div>
+      <div class="compare">컨센서스: $22.97B <span class="beat-tag">BEAT +0.6%</span></div>
+      <div class="compare">전년비: +10.6%</div>
+    </div>
+    <div class="num-card">
+      <div class="label">조정 EPS</div>
+      <div class="value">$2.27</div>
+      <div class="compare">컨센서스: $2.02~$2.06 <span class="beat-tag">BEAT +12~14%</span></div>
+      <div class="compare">전년비: 강한 성장</div>
+    </div>
+    <div class="num-card">
+      <div class="label">Core 조정 EBITDA</div>
+      <div class="value">$9.2B</div>
+      <div class="compare">전년비: +12%</div>
+      <div class="compare">마진: ~40% (업계 최고 수준)</div>
+    </div>
+  </div>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">서비스 매출</div>
+      <div class="value">$18.8B</div>
+      <div class="compare">전년비: +11%</div>
+      <div class="compare">포스트페이드 서비스 매출: +15% YoY</div>
+    </div>
+    <div class="num-card">
+      <div class="label">순이익</div>
+      <div class="value">$2.5B</div>
+      <div class="compare">전년비: <span class="miss-tag">-15%</span></div>
+      <div class="compare">UScellular 합병 관련 감가상각 $476M(세후) 반영</div>
+    </div>
+    <div class="num-card">
+      <div class="label">조정 FCF 마진</div>
+      <div class="value">24%</div>
+      <div class="compare">업계 최고 수준</div>
+      <div class="compare">FY2026 가이던스: $18.1~18.7B</div>
+    </div>
+  </div>
+
+  <div class="note-box">
+    순이익 -15% YoY는 UScellular 인수 완료 과정에서 발생한 일회성 가속 감가상각($476M 세후)이 원인. 경영진이 강조하는 Core EBITDA와 조정 FCF 기준으로는 역대 최고 수준.
+  </div>
+
+  <h3>매출 구성</h3>
+  <table>
+    <thead><tr><th>수익원</th><th>Q1 2026</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td>포스트페이드 서비스 매출</td><td class="mono">포함 $18.8B 중 대부분</td><td class="mono positive">+15%</td><td><span class="kw-tag bullish">CORE DRIVER</span></td></tr>
+      <tr><td>홈 인터넷(FWA) 서비스 매출</td><td class="mono">~$700M</td><td class="mono positive">+85%</td><td><span class="kw-tag bullish">BREAKOUT</span></td></tr>
+      <tr><td>총 서비스 매출</td><td class="mono">$18.8B</td><td class="mono positive">+11%</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
+      <tr><td>장비 및 기타 매출</td><td class="mono">~$4.3B</td><td class="mono">포함 총 $23.1B</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="next-q">
+    <h3>FY2026 가이던스 (상향 조정)</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">Core 조정 EBITDA</div><div class="nq-value">$37.1~37.5B</div></div>
+      <div class="next-q-item"><div class="nq-label">조정 FCF</div><div class="nq-value">$18.1~18.7B</div></div>
+      <div class="next-q-item"><div class="nq-label">현금 CapEx</div><div class="nq-value">~$10B</div></div>
+    </div>
+    <div style="margin-top:16px;">
+      <div class="next-q-grid">
+        <div class="next-q-item"><div class="nq-label">포스트페이드 넷 계정 추가 (FY)</div><div class="nq-value">950K~1.05M</div></div>
+        <div class="next-q-item"><div class="nq-label">주주환원 승인액 (2026)</div><div class="nq-value">$18.2B</div></div>
+        <div class="next-q-item"><div class="nq-label">서비스 매출 성장 (FY)</div><div class="nq-value">~8%</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>통신사를 읽는 숫자들</h2>
+
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 포스트페이드 순증 + 해지율</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>포스트페이드 넷 계정 추가</strong></td>
+        <td class="mono positive" style="font-size:18px; font-weight:700;">217,000</td>
+        <td class="mono positive">+6% YoY</td>
+        <td>통신사의 핵심 성장 지표. Q1 2026부터 포스트페이드 <em>폰</em> 넷 애드를 별도 공개 중단 &rarr; 계정(Account) 단위로 전환</td>
+      </tr>
+      <tr>
+        <td><strong>포스트페이드 계정 해지율 (Churn)</strong></td>
+        <td class="mono neutral-tag" style="font-size:18px; font-weight:700;">1.04%</td>
+        <td class="mono">&mdash;</td>
+        <td>포스트페이드 <em>폰</em> 해지율은 ~3bp 소폭 상승이지만 안정적 수준 유지. 계정 해지율이 더 높은 이유는 FWA(브로드밴드) 사업이 구조적으로 해지율이 높기 때문</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>메트릭 전환 주의:</strong> T-Mobile은 Q1 2026부터 포스트페이드 폰 넷 애드 공개를 중단했다. 경쟁사(AT&amp;T, Verizon)와의 직접 비교가 어려워졌다는 비판이 있다. 경영진은 "FWA+무선 통합 성장을 반영하기 위한 변화"라고 설명. 시장에서는 "좋은 숫자를 숨기는 건지, 아니면 유선/무선 경계가 사라지는 추세인지" 논쟁 중.
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">가입자 건강 &mdash; 이게 무너지면 끝</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>총 브로드밴드 가입자</strong></td><td class="mono positive">750만명 돌파</td><td class="mono positive">폭발적 성장</td><td>미국 3위 ISP. Comcast, Charter 다음. AT&amp;T 파이버 추월</td></tr>
+      <tr><td><strong>브로드밴드 넷 애드 (Q1)</strong></td><td class="mono positive">500,000+ 추가</td><td class="mono positive">YoY 가속</td><td>미국 최고속 인터넷 성장 사업자. 5G 속도가 경쟁사 대비 50%+ 빠름(Ookla)</td></tr>
+      <tr><td><strong>포스트페이드 ARPA</strong></td><td class="mono">$151.93</td><td class="mono positive">+3.9% YoY</td><td>계정당 매출 = 같은 가입자에서 더 많이 버는 능력. 꾸준한 우상향</td></tr>
+      <tr><td><strong>FWA 서비스 매출</strong></td><td class="mono positive">~$700M</td><td class="mono positive">+85% YoY</td><td>이제 케이블 사업자에 실질적 위협. 연간 $3B 규모로 성장 중</td></tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>ARPA vs ARPU:</strong> T-Mobile은 ARPA(Account당 매출)를 주력 지표로 사용한다. 하나의 계정에 여러 회선+브로드밴드가 묶여 있기 때문. ARPA $151.93이 +3.9% 성장 = 번들 가입 확대 + 프리미엄 요금제 이동 효과.
+  </div>
+
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">수익성 &mdash; 현금 창출 기계</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Core 조정 EBITDA</strong></td><td class="mono positive">$9.2B</td><td class="mono positive">+12%</td><td>UScellular 통합 비용 제외 핵심 수익성 지표. 업계 최고 성장률</td></tr>
+      <tr><td><strong>조정 FCF 마진</strong></td><td class="mono positive">24%</td><td class="mono">&mdash;</td><td>"업계 최고(Best-in-Class)" — 경영진이 반복 강조. AT&amp;T, Verizon 대비 높은 현금 효율</td></tr>
+      <tr><td><strong>현금 CapEx 가이던스 (FY)</strong></td><td class="mono">~$10B</td><td class="mono">&mdash;</td><td>5G 네트워크 + UScellular 통합 투자. 이전 가이던스 유지</td></tr>
+      <tr><td><strong>순이익</strong></td><td class="mono negative">$2.5B (-15%)</td><td class="mono negative">YoY 감소</td><td>UScellular 인수 관련 일회성 가속 감가상각 $476M(세후) 반영. 조정 기준으로는 강세</td></tr>
+    </tbody>
+  </table>
+
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">네트워크 &mdash; 경쟁 해자</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>FWA 다운로드 속도 (Ookla)</strong></td><td class="mono positive">경쟁사 대비 50%+ 빠름</td><td>Comcast/Charter 케이블보다 빠른 FWA. 이것이 FWA 성장의 본질적 이유</td></tr>
+      <tr><td><strong>5G 커버리지</strong></td><td class="mono">미국 전역 가장 광범위</td><td>600MHz 저대역으로 농촌 포함 전국 커버. UScellular 인수로 추가 확장</td></tr>
+      <tr><td><strong>현금 CapEx (FY 가이던스)</strong></td><td class="mono">~$10B</td><td>5G 심층 커버 + 엣지 컴퓨팅 + UScellular 통합 투자. 전년 대비 유지</td></tr>
+      <tr><td><strong>SuperBroadband (신규)</strong></td><td class="mono">Q1 2026 출시</td><td>5G FWA + Starlink 위성을 단일 플랫폼으로 통합. 기업(B2B) 비즈니스 연속성 솔루션</td></tr>
+      <tr><td><strong>UScellular 통합 진행</strong></td><td class="mono">2026 말 완료 예정</td><td>$5.0B 규모 인수. 중서부/농촌 스펙트럼 + 가입자 확보. 2026 CapEx 가이던스에 포함</td></tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>SuperBroadband:</strong> 5G와 Starlink(SpaceX)를 하나의 관리 플랫폼에 묶어 백업 인터넷 제공. "연결이 끊기면 Starlink가 자동 전환" — 기업 고객 대상 SLA(서비스 레벨 보장) 가능. T-Mobile이 "Un-Cable Company"로 포지셔닝하는 핵심 전략.
+  </div>
+
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">성장 동력 &mdash; FWA, 기업, MVNO</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>FWA 총 가입자</strong></td><td class="mono positive">750만명+ (미국 3위 ISP)</td><td>케이블 사업자 파괴자. AT&amp;T 파이버보다 가입자 많음. 2024년 말 대비 빠른 성장</td></tr>
+      <tr><td><strong>기업(Enterprise) 사업</strong></td><td class="mono">지속 성장</td><td>SuperBroadband + 5G 프라이빗 네트워크로 B2B 확장. 포스트페이드 ARPA 상승의 일부 요인</td></tr>
+      <tr><td><strong>MVNO (도매)</strong></td><td class="mono">안정적</td><td>Cable MVNO(Comcast, Charter)가 T-Mobile 망 임차. 역설적으로 T-Mobile이 경쟁사의 기반도 지원</td></tr>
+      <tr><td><strong>파이버 JV (신규 발표)</strong></td><td class="mono">100만 가구 추가 목표</td><td>자체 파이버망 JV 설립 발표. FWA만으로 커버 어려운 지역 보완. "Un-Cable" 전략의 완성형</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter">
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:85%;background:var(--accent);"></div></div>
+      <div class="tone-score">8.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:75%;background:var(--yellow);"></div></div>
+      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 호감도</div>
+      <div class="tone-bar"><div class="fill" style="width:80%;background:var(--blue);"></div></div>
+      <div class="tone-score">8.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">전망 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:85%;background:var(--accent);"></div></div>
+      <div class="tone-score">8.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Srini Gopalan (CEO &mdash; 2025년 11월 취임 후 첫 완전 분기)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 실용적 운영가. Mike Sievert의 "Un-Carrier 반항아" 이미지에서 벗어나 "실행력과 수익성"을 강조하는 방향으로 전환. 가이던스 상향이라는 구체적 행동으로 자신감 표현.
+  </p>
+
+  <div class="keywords">
+    <span class="kw-tag bullish">BEST-IN-CLASS</span>
+    <span class="kw-tag bullish">DURABLE GROWTH</span>
+    <span class="kw-tag bullish">ARPA MOMENTUM</span>
+    <span class="kw-tag bullish">FASTEST GROWING ISP</span>
+    <span class="kw-tag bullish">SUPERBROADBAND</span>
+    <span class="kw-tag neutral-tag">USCELLULAR INTEGRATION</span>
+    <span class="kw-tag neutral-tag">METRIC TRANSITION</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Srini Gopalan &mdash; 핵심 가치 명제</div>
+    <blockquote>"We are providing customers the most important technology in their lives that they use every single day. Through best network, best experience, and best value — how can we prove that to customers every single day, not once every thousand days when they are replacing their phone?"</blockquote>
+    <div class="analysis"><strong>"every single day"</strong> 반복 — 스마트폰 교체 주기(1~2년)가 아닌 일상적 서비스 품질로 경쟁하겠다는 선언. 단순한 단말 보조금 경쟁에서 네트워크 경험 경쟁으로 프레이밍 전환. <strong>"save more with T-Mobile than anywhere else"</strong> — 가격 경쟁력도 포기하지 않겠다는 투트랙.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Srini Gopalan &mdash; FWA / 브로드밴드 전략</div>
+    <blockquote>"T-Mobile is now the fastest-growing ISP in the United States. Our home internet service revenue grew approximately 85% year-over-year, crossing 7.5 million cumulative broadband customers. And our 5G speeds are more than 50% faster than the next competitor — that's why customers are choosing us."</blockquote>
+    <div class="analysis">Comcast, Charter를 직접 겨냥한 공격적 발언. <strong>85% YoY 성장</strong>은 단순 넷 애드가 아닌 매출 성장이라 더 강력한 숫자. "50% faster" — Ookla 데이터로 검증된 수치. FWA 넷 애드 50만 이상은 Comcast+Charter가 1분기에 잃은 가입자 규모와 맞물린다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Srini Gopalan &mdash; UScellular 통합</div>
+    <blockquote>"Our integration of U.S. Cellular is progressing smoothly, and we are on track to complete the process by the end of 2026. This acquisition has been instrumental in enhancing our network capabilities and expanding our reach in underserved markets."</blockquote>
+    <div class="analysis">일회성 감가상각($476M)으로 GAAP 순이익이 -15%인데 경영진은 "on track" + "smooth"로 방어. 핵심은 UScellular 스펙트럼(600MHz~2.5GHz)이 중서부 농촌 FWA 확장에 직결된다는 점. 통합 완료(2026년 말)가 2027 성장의 기반.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Srini Gopalan &mdash; SuperBroadband 발표</div>
+    <blockquote>"SuperBroadband aggregates 5G Fixed Wireless and Starlink satellite connectivity under a single management platform, providing business customers with a resilient, nationwide broadband solution that ensures connectivity even in the most challenging environments."</blockquote>
+    <div class="analysis">Elon Musk의 Starlink와 협력 — 파이버가 없는 지역에서 위성 백업. <strong>기업(B2B) 고객 타깃</strong>이라 ARPA 상승 효과 기대. "single management platform" = T-Mobile이 고객 접점(단일 청구서, 단일 관리)을 장악하는 번들 전략. 위성통신 시장에서 직접 경쟁하는 게 아니라 Starlink를 '라스트마일 보험'으로 사용.</div>
+  </div>
+
+  <h3>Peter Aspaldik (CFO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 수치 중심 실용주의자. 가이던스 상향이라는 명확한 액션으로 불확실성 차단. 주주환원($18.2B) 숫자로 투자자 신뢰 확보.
+  </p>
+
+  <div class="quote-block">
+    <div class="speaker">Peter Aspaldik &mdash; 가이던스 상향 논리</div>
+    <blockquote>"We are raising our full-year Core adjusted EBITDA guidance by $100 million at the low end to $37.1 to $37.5 billion. Adjusted free cash flow guidance is raised to $18.1 to $18.7 billion — a free cash flow margin of approximately 24%, which we believe is best in class in the industry."</blockquote>
+    <div class="analysis"><strong>"$100M 상향"</strong> — 소폭이지만 방향성이 중요. Q1 서프라이즈가 일회성이 아니라는 시그널. <strong>FCF 마진 24%</strong> — AT&amp;T(~15%), Verizon(~18%) 대비 압도적. 자본 효율성이 곧 주주환원 여력. $18.2B 주주환원 프로그램은 시가총액 대비 ~7.8% 규모.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Peter Aspaldik &mdash; 메트릭 전환 방어</div>
+    <blockquote>"Beginning in Q1 2026, we are transitioning to reporting postpaid net account additions, which better reflects our multiline, multi-product household strategy. Postpaid phone churn remains stable — up approximately 3 basis points, with the higher account churn driven by our fastest-growing broadband business."</blockquote>
+    <div class="analysis"><strong>가장 논란이 많은 발언.</strong> 포스트페이드 폰 넷 애드 공개 중단 = 경쟁사(AT&amp;T, Verizon)와의 비교 지표 소멸. "FWA가 구조적으로 해지율이 높다"는 설명은 논리적이지만, 시장에서는 "원래 폰 해지율도 나빠지는 거 아니냐"는 의심 완전 해소 안 됨. 앞으로 분기마다 이 지표 전환이 가장 뜨거운 Q&amp;A 주제가 될 것.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 강한 EPS 서프라이즈와 가이던스 상향으로 분위기 자체는 긍정적. 다만 메트릭 전환에 대한 투명성 요구가 주된 긴장 포인트.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; 메트릭 전환 공격</div>
+    <blockquote>"Can you explain why you're moving away from postpaid phone net adds at exactly this moment? How should investors compare your competitive position with AT&amp;T and Verizon going forward?"</blockquote>
+    <div class="analysis">업계에서 가장 표준화된 비교 지표를 갑자기 없앤 데 대한 날카로운 질문. T-Mobile은 "번들 + FWA 시대에 폰만 보는 건 시대착오"라고 방어하지만, 시장은 "<strong>좋은 숫자가 나올 때 바꾸는 게 아니라 나쁠 때 바꾸는 게 더 의심스럽다</strong>"는 시각도 있다. Oppenheimer는 이를 소화하고 업그레이드 진행.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; FWA 지속 가능성</div>
+    <blockquote>"You're adding 500,000 broadband subscribers a quarter. At what point does that growth rate naturally slow, and can you maintain 85% revenue growth from FWA?"</blockquote>
+    <div class="analysis">FWA 총가입자 750만. 미국 유선 브로드밴드 시장 전체 약 1억 가구 중 T-Mobile 침투율은 아직 7~8% 수준. 경영진은 "여전히 초기 단계"라고 대응. 케이블 사업자(Comcast ~3,100만, Charter ~3,200만)가 잃어가는 가입자의 상당 부분이 T-Mobile FWA로 이동 중.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Oppenheimer &mdash; 업그레이드 코멘트</div>
+    <blockquote>"T-Mobile continues to demonstrate best-in-class execution. The combination of ARPA growth, FWA momentum, and free cash flow generation at 24% margin justifies a premium multiple. We upgrade to Outperform."</blockquote>
+    <div class="analysis"><strong>실적 발표 직후 Oppenheimer 업그레이드.</strong> 주가 +6.13% 급등의 직접적 트리거 중 하나. "premium multiple justification" = P/E 확장 여지 인정. FCF 마진 24%가 업계 최고라는 점이 핵심 근거.</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr><td style="width:160px;font-weight:600;color:var(--accent);">Srini Gopalan (CEO)</td><td>"FWA 750만, FCF 마진 24%, 가이던스 상향 — 숫자가 증명한다. T-Mobile은 통신사를 넘어 미국 최고속 인터넷 사업자다"</td></tr>
+      <tr><td style="font-weight:600;color:var(--accent);">Peter Aspaldik (CFO)</td><td>"Core EBITDA 가이던스 $100M 상향, FCF $18.1~18.7B, 주주환원 $18.2B — 자본 배분 능력이 업계 최고라는 것을 수치로 보여준다"</td></tr>
+      <tr><td style="font-weight:600;color:var(--yellow);">애널리스트</td><td>"EPS 서프라이즈 +12%, FWA 가속 모두 좋다. 다만 메트릭 전환(폰 넷 애드 폐기)은 계속 지켜봐야 할 투명성 이슈"</td></tr>
+      <tr><td style="font-weight:600;color:var(--blue);">시장 반응</td><td>장후 +6.13% → $198.17. 가이던스 상향 + Oppenheimer 업그레이드 + $18.2B 주주환원이 트리플 카탈리스트</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid">
+    <a class="link-card" href="https://www.t-mobile.com/news/business/t-mobile-q1-2026-earnings" target="_blank">
+      <div class="link-icon">&#x1F4C4;</div>
+      <div class="link-text"><div class="link-title">T-Mobile IR 보도자료</div><div class="link-url">t-mobile.com/news</div></div>
+    </a>
+    <a class="link-card" href="https://investor.t-mobile.com/events-and-presentations/events/event-details/2026/T-Mobile-Q1-2026-Earnings-Call-2026-kK_PEln7c3/default.aspx" target="_blank">
+      <div class="link-icon">&#x1F3AC;</div>
+      <div class="link-text"><div class="link-title">Q1 2026 실적 발표 이벤트</div><div class="link-url">investor.t-mobile.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.fool.com/earnings/call-transcripts/2026/04/28/t-mobile-tmus-q1-2026-earnings-transcript/" target="_blank">
+      <div class="link-icon">&#x1F4DD;</div>
+      <div class="link-text"><div class="link-title">컨퍼런스 콜 트랜스크립트</div><div class="link-url">fool.com (Motley Fool)</div></div>
+    </a>
+    <a class="link-card" href="https://www.marketscreener.com/news/t-mobile-us-q1-2026-investor-factbook-ce7f59d2d089f426" target="_blank">
+      <div class="link-icon">&#x1F4CA;</div>
+      <div class="link-text"><div class="link-title">Q1 2026 인베스터 팩트북</div><div class="link-url">MarketScreener</div></div>
+    </a>
+    <a class="link-card" href="https://seekingalpha.com/news/4581252-t-mobile-signals-18_1b-18_7b-2026-adjusted-free-cash-flow-as-it-raises-postpaid-net-account" target="_blank">
+      <div class="link-icon">&#x1F50E;</div>
+      <div class="link-text"><div class="link-title">Seeking Alpha 실적 요약</div><div class="link-url">seekingalpha.com</div></div>
+    </a>
+    <a class="link-card" href="https://convergedigest.com/t-mobile-q1-2026-arpa-growth-and-fwa-momentum-drive-revenue-surge/" target="_blank">
+      <div class="link-icon">&#x1F310;</div>
+      <div class="link-text"><div class="link-title">Converge Digest: ARPA+FWA 분석</div><div class="link-url">convergedigest.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.zacks.com/stock/news/2910772/tmus-q1-earnings-beat-estimates-on-strong-service-revenue-growth" target="_blank">
+      <div class="link-icon">&#x1F4C8;</div>
+      <div class="link-text"><div class="link-title">Zacks: 실적 비트 분석</div><div class="link-url">zacks.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.geekwire.com/2026/t-mobile-enlists-starlink-satellites-for-new-superbroadband-business-internet-service/" target="_blank">
+      <div class="link-icon">&#x1F6F0;</div>
+      <div class="link-text"><div class="link-title">SuperBroadband + Starlink 분석</div><div class="link-url">geekwire.com</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-04-30 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>

@@ -27,6 +27,9 @@ data/db/
 data/generated/
 data/research/
 
+# 엔티티 리뷰 cron 산출물 (매일 자동 생성, 추적 불필요)
+data/reports/entity_review_*.md
+
 # 아티클: 텍스트만 추적, 이미지는 제외
 data/articles/**/*.png
 data/articles/**/*.jpg

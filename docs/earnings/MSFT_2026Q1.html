@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSFT | 마이크로소프트 Q3 FY2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #4dc3ff; --accent-dim: #4dc3ff33;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+    --green: #00d632; --green-dim: #00d63222;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#00a4ef15,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #4dc3ff44; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  /* CARDS */
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+  .num-card .compare .green-tag { color:var(--green); font-weight:600; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--green); }
+  .negative { color:var(--red); }
+  .neutral { color:var(--yellow); }
+
+  /* KPI TIER */
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#00d63222; color:var(--green); }
+  .tier-badge.t2 { background:#4dc3ff22; color:var(--accent); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  /* QUOTE */
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block.cfo { border-left-color:var(--purple); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block.cfo .speaker { color:var(--purple); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  /* TONE METER */
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  /* NEXT Q */
+  .next-q { background:linear-gradient(135deg,#4dc3ff10,var(--surface)); border:1px solid #4dc3ff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--accent); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--accent); }
+  .next-q-item .nq-note { font-size:11px; color:var(--text-muted); margin-top:2px; }
+
+  /* LINKS */
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  /* TAGS */
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--green-dim); color:var(--green); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+  .kw-tag.blue-tag { background:#4dc3ff22; color:var(--accent); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  /* KPI NOTE */
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+  /* ACCENT BOX */
+  .accent-box { background:linear-gradient(135deg,#4dc3ff0a,var(--surface)); border:1px solid #4dc3ff44; border-radius:8px; padding:20px 24px; margin:20px 0; }
+  .accent-box .ab-label { font-size:11px; font-family:'IBM Plex Mono',monospace; letter-spacing:2px; color:var(--accent); margin-bottom:8px; text-transform:uppercase; }
+  .accent-box p { font-size:14px; line-height:1.7; color:var(--text-dim); }
+  .accent-box strong { color:var(--text); }
+
+  /* CAPEX ALERT */
+  .capex-alert { background:linear-gradient(135deg,#ffc10710,var(--surface)); border:1px solid #ffc10744; border-radius:8px; padding:20px 24px; margin:20px 0; }
+  .capex-alert .ab-label { font-size:11px; font-family:'IBM Plex Mono',monospace; letter-spacing:2px; color:var(--yellow); margin-bottom:8px; text-transform:uppercase; }
+  .capex-alert p { font-size:14px; line-height:1.7; color:var(--text-dim); }
+  .capex-alert strong { color:var(--yellow); }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NASDAQ: MSFT</div>
+    <h1>Microsoft Corporation</h1>
+    <div class="company-kr">마이크로소프트</div>
+    <div class="subtitle">Q3 FY2026 실적 딥다이브 &mdash; 2026.04.29 장후 발표 (캘린더 2026 Q1)</div>
+    <div class="meta-row">
+      <span>발표일: 2026-04-29</span>
+      <span>|</span>
+      <span>섹터: 기술 / 클라우드 &middot; 소프트웨어</span>
+      <span>|</span>
+      <span>시가총액: ~$2.9조</span>
+      <span>|</span>
+      <span>회계연도: 7월 시작 (Q3 FY2026 = 2026년 1~3월)</span>
+    </div>
+    <div class="verdict beat">BEAT &mdash; 매출 +1.8% vs 컨센서스 / EPS $4.27 (예상 $4.06 대비 +5.2%) / Azure 40% CC 성장</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">매출</div>
+      <div class="value">$82.9B</div>
+      <div class="compare">컨센서스: $81.5B <span class="beat-tag">BEAT +1.8%</span></div>
+      <div class="compare">전년비: +18% YoY (+15% CC)</div>
+    </div>
+    <div class="num-card">
+      <div class="label">조정 EPS</div>
+      <div class="value">$4.27</div>
+      <div class="compare">컨센서스: $4.06 <span class="beat-tag">BEAT +5.2%</span></div>
+      <div class="compare">전년비: 상승 지속</div>
+    </div>
+    <div class="num-card">
+      <div class="label">영업이익</div>
+      <div class="value">$38.4B</div>
+      <div class="compare">영업이익률: 46.3%</div>
+      <div class="compare">전년비: +20% YoY (+16% CC)</div>
+    </div>
+  </div>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">현금흐름 (영업)</div>
+      <div class="value">$46.7B</div>
+      <div class="compare">전년비: +26%</div>
+      <div class="compare">잉여현금흐름: $15.8B (Capex 급증 반영)</div>
+    </div>
+    <div class="num-card">
+      <div class="label">Capex (분기)</div>
+      <div class="value">$31.9B</div>
+      <div class="compare">컨센서스 대비 $3.4B 하회 <span class="beat-tag">SURPRISE</span></div>
+      <div class="compare">연간 전망: ~$190B (CY2026)</div>
+    </div>
+    <div class="num-card">
+      <div class="label">AI 연간 매출 런레이트</div>
+      <div class="value">$37B</div>
+      <div class="compare"><span class="beat-tag">+123% YoY</span></div>
+      <div class="compare">Azure AI + Copilot + 모델 빌더 통합</div>
+    </div>
+  </div>
+
+  <h3>사업부 매출 분해</h3>
+  <table>
+    <thead><tr><th>사업부</th><th>Q3 FY2026 매출</th><th>전년비</th><th>핵심 드라이버</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Intelligent Cloud</strong><br><span style="font-size:12px;color:var(--text-muted)">Azure, Server, GitHub</span></td>
+        <td class="mono">$34.7B</td>
+        <td class="mono positive">+30% YoY</td>
+        <td><span class="kw-tag bullish">Azure +40% CC</span></td>
+      </tr>
+      <tr>
+        <td><strong>Productivity &amp; Business Processes</strong><br><span style="font-size:12px;color:var(--text-muted)">Office 365, LinkedIn, Dynamics</span></td>
+        <td class="mono">$35.0B</td>
+        <td class="mono positive">+17% YoY</td>
+        <td><span class="kw-tag bullish">M365 상업 +19%</span> <span class="kw-tag blue-tag">Copilot 20M席</span></td>
+      </tr>
+      <tr>
+        <td><strong>More Personal Computing</strong><br><span style="font-size:12px;color:var(--text-muted)">Windows, Xbox, Surface, Bing</span></td>
+        <td class="mono">$13.2B</td>
+        <td class="mono negative">-1% YoY</td>
+        <td><span class="kw-tag bearish">Xbox -5%</span> <span class="kw-tag neutral-tag">Bing Search +12%</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>핵심 사업부 세부 KPI</h3>
+  <table>
+    <thead><tr><th>항목</th><th>수치</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td>Azure &amp; 기타 클라우드 서비스</td><td class="mono">비공개 (성장률만)</td><td class="mono positive">+40% (CC +39%)</td><td><span class="kw-tag bullish">가이던스 상단 초과</span></td></tr>
+      <tr><td>Microsoft Cloud (전체)</td><td class="mono">비공개</td><td class="mono positive">상당한 성장</td><td><span class="kw-tag bullish">AI 수요 견인</span></td></tr>
+      <tr><td>M365 Commercial Cloud</td><td class="mono">포함 집계</td><td class="mono positive">+19% (+15% CC)</td><td><span class="kw-tag bullish">Copilot 견인</span></td></tr>
+      <tr><td>M365 Consumer Cloud</td><td class="mono">포함 집계</td><td class="mono positive">+33%</td><td><span class="kw-tag bullish">구독 확장</span></td></tr>
+      <tr><td>LinkedIn</td><td class="mono">포함 집계</td><td class="mono positive">+12%</td><td><span class="kw-tag neutral-tag">광고 회복</span></td></tr>
+      <tr><td>Dynamics 365</td><td class="mono">포함 집계</td><td class="mono positive">+22%</td><td><span class="kw-tag bullish">AI Agent 수요</span></td></tr>
+      <tr><td>Windows OEM &amp; Devices</td><td class="mono">포함 집계</td><td class="mono negative">-2% (-3% CC)</td><td><span class="kw-tag bearish">PC 수요 약세</span></td></tr>
+      <tr><td>Xbox 콘텐츠 &amp; 서비스</td><td class="mono">포함 집계</td><td class="mono negative">-5% (-7% CC)</td><td><span class="kw-tag bearish">게이밍 둔화</span></td></tr>
+      <tr><td>검색 광고 (TAC 제외)</td><td class="mono">포함 집계</td><td class="mono positive">+12%</td><td><span class="kw-tag neutral-tag">Bing AI 광고</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="next-q">
+    <h3>Q4 FY2026 가이던스 (2026년 4~6월)</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item">
+        <div class="nq-label">Q4 매출 가이던스</div>
+        <div class="nq-value">$86.7~87.8B</div>
+        <div class="nq-note">컨센서스 $87.5B 대비 소폭 하회</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">Azure 성장률 (CC)</div>
+        <div class="nq-value">39~40%</div>
+        <div class="nq-note">컨센서스 37% 상회 — 추가 가속화</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">Q4 영업이익률</div>
+        <div class="nq-value">~44%</div>
+        <div class="nq-note">Q3 46.3%에서 축소 (Capex 증가 반영)</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">CY2026 Capex 전망</div>
+        <div class="nq-value">~$190B</div>
+        <div class="nq-note">메모리 가격 상승 포함 +$25B</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">Copilot 시트</div>
+        <div class="nq-value">20M+</div>
+        <div class="nq-note">Q2 15M → Q3 20M (+33% QoQ)</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">AI 런레이트</div>
+        <div class="nq-value">$37B ARR</div>
+        <div class="nq-note">YoY +123% — "inflection" 진입 중</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>이 회사를 읽는 숫자들</h2>
+
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; Azure 성장률 (CC)</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q3 FY2026</th><th>가이던스</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Azure &amp; 클라우드 성장률 (CC)</strong></td>
+        <td class="mono positive" style="font-size:18px; font-weight:700;">+39% CC</td>
+        <td class="mono">37~38% 가이던스<br><span class="positive">+1~2%p 초과</span></td>
+        <td>Microsoft의 모든 AI 수익화 지표 중 1순위. Azure 성장률이 가속하면 밸류에이션 리레이팅 근거 생김</td>
+      </tr>
+      <tr>
+        <td><strong>Microsoft Cloud 전체 매출</strong></td>
+        <td class="mono positive" style="font-size:18px; font-weight:700;">$82.9B 전체</td>
+        <td class="mono">&mdash;</td>
+        <td>Azure + M365 + Dynamics + LinkedIn의 통합 클라우드 생태계. "클라우드 회사"로의 전환 완료도 척도</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>Azure 40% vs CC 39% 왜 다른가:</strong> Azure 매출은 달러로 집계되지만 실제 청구는 다양한 통화(유로, 엔, 원 등)로 이루어진다. CC(Constant Currency)는 환율 변동을 제거한 '진짜 사업 성장률'. Q3에 달러가 약세였기 때문에 보고 기준(40%)이 CC(39%)보다 1%p 높게 나왔다. 가이던스 비교는 반드시 CC 기준으로 해야 사과 대 사과 비교.
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">AI 수익화 &mdash; 말에서 숫자로</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q3 FY2026</th><th>전분기</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>AI 연간 매출 런레이트 (ARR)</strong></td>
+        <td class="mono positive" style="font-weight:700;">$37B ARR</td>
+        <td class="mono">이전 분기 $13B (추정)</td>
+        <td>Azure AI 서비스 + Copilot + 모델 빌더 전체. YoY +123%. 이제 "AI는 비용"이 아닌 "AI는 수익" 단계</td>
+      </tr>
+      <tr>
+        <td><strong>365 Copilot 상업용 시트 수</strong></td>
+        <td class="mono positive" style="font-weight:700;">20M 시트</td>
+        <td class="mono">Q2: 15M 시트</td>
+        <td>분기 +33% QoQ 성장. "early"에서 "scaling" 단계 진입 신호. 아직 전체 M365 고객 대비 침투율은 낮음</td>
+      </tr>
+      <tr>
+        <td><strong>GitHub Copilot</strong></td>
+        <td class="mono">별도 공개 없음</td>
+        <td class="mono">&mdash;</td>
+        <td>Nadella가 "per-user + usage" 비즈니스 모델로 전환 중이라고 언급. 개발자 생산성의 핵심 병목 제거 도구</td>
+      </tr>
+      <tr>
+        <td><strong>Security Copilot</strong></td>
+        <td class="mono">별도 공개 없음</td>
+        <td class="mono">&mdash;</td>
+        <td>Nadella가 Security를 "agentic computing의 핵심 도메인"으로 명시. 매출 구체화는 향후 분기 과제</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>왜 $37B ARR가 중요한 변곡점인가:</strong> 1년 전 이 숫자가 ~$16B이었다. 123% YoY 성장은 단순 업셀이 아닌 신규 카테고리 창출 속도다. 비교: Salesforce 전체 ARR이 $350억 수준. Microsoft AI가 1년 만에 Salesforce 전체를 따라잡는 속도로 성장 중. 다만 이 ARR의 세부 구성(모델 빌더 비중이 얼마인지)이 미공개라 진짜 "Microsoft의 AI 수익"이 얼마인지 불투명.
+  </div>
+
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">수익성 &mdash; AI 투자가 이익을 갉아먹는가</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q3 FY2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>영업이익률</strong></td>
+        <td class="mono positive">46.3%</td>
+        <td class="mono positive">확대</td>
+        <td>Capex가 $31.9B이어도 영업이익률이 확대됨. 소프트웨어 레버리지의 힘. 하지만 Q4 44%로 축소 예상</td>
+      </tr>
+      <tr>
+        <td><strong>영업현금흐름</strong></td>
+        <td class="mono positive">$46.7B</td>
+        <td class="mono positive">+26%</td>
+        <td>현금 창출 엔진 건재. 배당 + 자사주 매입 여력 충분</td>
+      </tr>
+      <tr>
+        <td><strong>잉여현금흐름 (FCF)</strong></td>
+        <td class="mono neutral">$15.8B</td>
+        <td class="mono negative">Capex 급증으로 감소</td>
+        <td>$46.7B 영업CF - $31.9B Capex = $15.8B. 1년 전 대비 FCF는 Capex에 먹히는 중. AI 인프라 투자의 대가</td>
+      </tr>
+      <tr>
+        <td><strong>Capex / 매출 비율</strong></td>
+        <td class="mono neutral">38.5%</td>
+        <td class="mono negative">급상승</td>
+        <td>매출의 거의 40%를 Capex로 쓰는 이례적 수준. "지금 심는 나무" vs "언제 수확하나"의 핵심 논쟁</td>
+      </tr>
+      <tr>
+        <td><strong>CY2026 총 Capex 전망</strong></td>
+        <td class="mono neutral">~$190B</td>
+        <td class="mono negative">메모리 가격 +$25B 추가</td>
+        <td>관세/공급망 불안에 따른 메모리 가격 상승 직격탄. "제어 밖의 비용"이라는 Hood의 인정</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="capex-alert">
+    <div class="ab-label">Capex 리스크 경고</div>
+    <p>Microsoft의 CY2026 Capex 전망 <strong>$190B</strong>는 시장이 예상했던 수준을 크게 상회한다. Amy Hood는 이 중 <strong>약 $25B이 메모리 가격 급등(관세 영향 포함)</strong>에서 기인한다고 밝혔다. 문제는 이 Capex가 언제, 얼마의 매출로 돌아오는지 경영진이 구체적인 로드맵을 제시하지 않는다는 점이다. Azure 가이던스가 39~40%로 가속하는 것이 "수확 시작의 신호"라고 볼 수도 있지만, FCF 압박은 당분간 지속될 전망이다.</p>
+  </div>
+
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">사업부별 세부 건강도</span>
+  </div>
+  <table>
+    <thead><tr><th>사업부 / 제품</th><th>Q3 FY2026</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td><strong>M365 Commercial Cloud</strong></td><td class="mono">포함 집계</td><td class="mono positive">+19% (+15% CC)</td><td><span class="kw-tag bullish">Copilot 업셀 가속</span></td></tr>
+      <tr><td><strong>M365 Consumer Cloud</strong></td><td class="mono">포함 집계</td><td class="mono positive">+33%</td><td><span class="kw-tag bullish">소비자 구독 폭발</span></td></tr>
+      <tr><td><strong>Dynamics 365</strong></td><td class="mono">포함 집계</td><td class="mono positive">+22%</td><td><span class="kw-tag bullish">ERP/CRM AI 에이전트</span></td></tr>
+      <tr><td><strong>LinkedIn</strong></td><td class="mono">포함 집계</td><td class="mono positive">+12%</td><td><span class="kw-tag neutral-tag">광고 시장 회복</span></td></tr>
+      <tr><td><strong>Windows OEM &amp; Devices</strong></td><td class="mono">포함 집계</td><td class="mono negative">-2% (-3% CC)</td><td><span class="kw-tag bearish">PC 교체 수요 부진</span></td></tr>
+      <tr><td><strong>Xbox &amp; 게이밍</strong></td><td class="mono">포함 집계</td><td class="mono negative">-5% (-7% CC)</td><td><span class="kw-tag bearish">Activision 시너지 지연</span></td></tr>
+      <tr><td><strong>Bing 검색 광고 (TAC 제외)</strong></td><td class="mono">포함 집계</td><td class="mono positive">+12%</td><td><span class="kw-tag neutral-tag">AI 검색 광고 초기 성장</span></td></tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>Activision 인수 시너지 현황:</strong> Xbox 콘텐츠 &amp; 서비스 -5% YoY. 2023년 $69B에 인수한 Activision의 매출 기여가 아직 기대 이하다. Call of Duty의 Game Pass 편입으로 단기 수익이 희생되고 있으며, 구독 모델로의 전환 완성이 언제 이루어질지 불투명. 이번 분기 Nadella 발언에서도 게이밍은 거의 언급되지 않음 — 전략적 우선순위에서 밀려난 시그널.
+  </div>
+
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">전략 &mdash; OpenAI 관계, 경쟁, 에이전트 전환</span>
+  </div>
+  <table>
+    <thead><tr><th>주제</th><th>현황</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>OpenAI 파트너십 재구조화</strong></td>
+        <td class="mono">수익 공유 계약 2030까지 유지,<br>IP 로열티 Free 구조 완성</td>
+        <td>Amy Hood: "2030까지의 예측 가능성이 큰 긍정 요소" — OpenAI 매출 공유를 받으면서 IP는 무료로 쓴다는 구조. OpenAI IPO 대비 선제 포지션 완성</td>
+      </tr>
+      <tr>
+        <td><strong>클라우드 경쟁 구도</strong></td>
+        <td class="mono">Azure 40% vs AWS 17% vs GCP ~28%</td>
+        <td>Azure가 AWS 성장률의 2배 이상. 기업 AI 워크로드의 Microsoft 쏠림 현상. AWS는 아직 AI 수익화를 Azure만큼 공격적으로 보고하지 않음</td>
+      </tr>
+      <tr>
+        <td><strong>Copilot 침투 속도</strong></td>
+        <td class="mono">20M 시트 (15M → 20M QoQ)</td>
+        <td>전체 M365 상업 고객 수 대비 침투율은 아직 10% 미만 추정. TAM은 훨씬 크다. 하지만 고객당 $30/월 추가 비용이 예산 압박 기업에겐 여전히 장벽</td>
+      </tr>
+      <tr>
+        <td><strong>에이전트 컴퓨팅 전환</strong></td>
+        <td class="mono">Dynamics, Power Platform,<br>Security 등에 에이전트 빌드</td>
+        <td>Nadella가 "per-user에서 per-user + usage" 모델로 전환을 선언. 에이전트가 사람 대신 작업을 처리하면 가격 책정 방식 자체가 바뀜 — 다음 2년의 핵심 변수</td>
+      </tr>
+      <tr>
+        <td><strong>공급 제약 (Capacity)</strong></td>
+        <td class="mono">"at least through 2026" 제약 지속</td>
+        <td>Nadella + Hood 모두 "수요는 공급을 초과한다"고 강조. 이는 Azure 성장의 상한선이 사업 역량이 아닌 GPU/메모리 공급으로 결정된다는 뜻 — Capex 투자 정당화 근거이자 리스크</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter">
+    <div class="tone-item">
+      <div class="tone-label">Nadella 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:90%;background:var(--accent);"></div></div>
+      <div class="tone-score" style="color:var(--accent);">9.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">Hood 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:75%;background:var(--purple);"></div></div>
+      <div class="tone-score" style="color:var(--purple);">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 회의감</div>
+      <div class="tone-bar"><div class="fill" style="width:55%;background:var(--yellow);"></div></div>
+      <div class="tone-score" style="color:var(--yellow);">5.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">가이던스 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:80%;background:var(--green);"></div></div>
+      <div class="tone-score" style="color:var(--green);">8.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Satya Nadella (CEO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 침착한 플랫폼 철학자. 숫자보다 패러다임 전환 내러티브가 압도적으로 강하다. "아직 초기(early innings)"가 아니라 "이미 시작됐다(at the beginning of one of the most consequential platform shifts)"로 타이밍을 정의한다.
+  </p>
+
+  <div class="keywords">
+    <span class="kw-tag blue-tag">AGENTIC COMPUTING ERA</span>
+    <span class="kw-tag blue-tag">PLATFORM SHIFT</span>
+    <span class="kw-tag bullish">TAM EXPANSION</span>
+    <span class="kw-tag bullish">EVAL-MAX</span>
+    <span class="kw-tag neutral-tag">PER-USER + USAGE</span>
+    <span class="kw-tag bullish">$37B AI ARR</span>
+    <span class="kw-tag blue-tag">AGENTIC SYSTEMS</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Satya Nadella &mdash; 오프닝 / 플랫폼 전환 선언</div>
+    <blockquote>"We are at the beginning of one of the most consequential platform shifts that will change the entire tech stack as agents proliferate and become the dominant workload. This will drive TAM mix and change the value creation equation across the entire economy."</blockquote>
+    <div class="analysis"><strong>"most consequential"</strong> — 마이크로소프트 역사에서 이 단어를 쓴 건 PC→인터넷, 인터넷→클라우드 전환 때다. Nadella가 에이전트 시대를 그 반열에 올려놓겠다는 선언. <strong>"value creation equation across the entire economy"</strong> — 단순 SW 매출이 아니라 경제 전체의 생산성 함수가 바뀐다는 주장. 현재 Azure가 그 인프라의 1순위라는 포지셔닝.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Satya Nadella &mdash; AI 비즈니스 모델 전환</div>
+    <blockquote>"The basic transformation of any per-user business of ours — whether it is productivity, coding, or security — will become a per-user and usage business. That is the best way to think about it."</blockquote>
+    <div class="analysis">이 문장이 이번 콜의 가장 중요한 발언이다. 현재 Copilot은 <strong>자리당 $30/월 고정 요금</strong>이다. Nadella는 향후 사용량(토큰, 에이전트 완료 작업 수 등)에 따른 과금도 추가된다고 예고한 것. 이것이 실현되면 ARPU 천장이 없어진다 — 사람이 더 많이 일시킬수록 더 많이 낸다. SaaS에서 AI-as-a-service로의 전환이 가격 결정 방식 자체를 바꾼다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Satya Nadella &mdash; AI 인프라 &amp; 전략</div>
+    <blockquote>"We are focused on delivering cloud and AI infrastructure and solutions that empower every business to maximize their outcomes in the agentic computing era."</blockquote>
+    <div class="analysis">"empower every business" — 개인이 아닌 기업을 단위로 삼는 B2B 포지셔닝. Copilot이 소비자 챗봇이 아니라 기업 생산성 운영체제라는 것. "agentic computing era"를 5회 이상 반복 — 프레임을 고정시키는 어조. 방어적 설명 없이 비전만으로 콜을 채운다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Satya Nadella &mdash; Azure 수요 &amp; 공급 제약</div>
+    <blockquote>"Demand continues to significantly outpace our available capacity... We expect to remain supply constrained at least through 2026."</blockquote>
+    <div class="analysis">수요가 공급을 초과한다는 것은 "팔 수 있는 것보다 원하는 사람이 더 많다"는 뜻. 이것은 Azure 성장 상한이 시장 포화가 아닌 데이터센터 확장 속도라는 의미다. 강점이자 동시에 Capex $190B의 정당화 근거. 그런데 "at least through 2026" — 올해 내내 이 제약이 지속된다면 Azure 성장률 가속의 잠재력이 더 크다는 뜻이기도 하다.</div>
+  </div>
+
+  <h3>Amy Hood (CFO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 정밀한 수치 관리자. 숫자를 쌓아서 설득하되, 불확실한 요소(메모리 가격, 관세)는 직접 인정한다. "예측 가능성"을 키워드로 투자자 신뢰를 유지하는 스타일.
+  </p>
+
+  <div class="quote-block cfo">
+    <div class="speaker">Amy Hood &mdash; OpenAI 파트너십 재구조화</div>
+    <blockquote>"Having the revenue share exist through 2030 — the predictability of that is a real positive for us — and, as Satya pointed out, the IP being royalty-free with the elimination of our rev share to them."</blockquote>
+    <div class="analysis">재구조화의 핵심을 두 문장으로 정리: <strong>(1) Microsoft가 OpenAI 수익 공유를 2030까지 받는다</strong> — 안정적 업사이드. <strong>(2) OpenAI IP를 로열티 없이 쓴다</strong> — 비용 제거. OpenAI가 GPT를 상업화할수록 Microsoft에 돈이 오고, Microsoft는 그 기술을 공짜로 쓴다. OpenAI의 잠재적 IPO에 앞서 이 구조를 잠근 것.</div>
+  </div>
+
+  <div class="quote-block cfo">
+    <div class="speaker">Amy Hood &mdash; Capex &amp; 메모리 가격</div>
+    <blockquote>"For calendar year 2026, we expect to invest roughly $190 billion in capital expenditures, which includes approximately $25 billion from the impact of higher component pricing."</blockquote>
+    <div class="analysis"><strong>$25B이 관세/메모리 가격 상승</strong>에서 나왔다. 이것은 "계획된 투자"가 아니라 "통제 밖의 비용 증가"다. 그럼에도 Hood가 이를 명시적으로 밝힌 것은 투명성 시그널 — 숨기지 않겠다는 IR 철학. 단, $190B의 ROI 타임라인을 묻는 질문에는 구체적 답변을 회피 — Capex 정당화의 약한 고리.</div>
+  </div>
+
+  <div class="quote-block cfo">
+    <div class="speaker">Amy Hood &mdash; Q4 가이던스 &amp; 마진</div>
+    <blockquote>"Q4 operating margin will be approximately 44%, down from 46.3% in Q3, reflecting continued investment in cloud and AI infrastructure."</blockquote>
+    <div class="analysis">영업이익률 -2.3%p 하락. 이것이 장후 주가 -1%+의 주된 원인이다. 매출도 컨센서스($87.5B) 대비 중간값($87.25B)이 소폭 하회. 시장은 숫자 BEAT에도 마진 가이던스 하락에 더 집중했다. Hood의 Q4 전망은 솔직하지만, 투자자 입장에서 "지금도 비싸고 마진도 줄어든다"는 메시지.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 숫자 BEAT를 인정하되, Capex 정당화와 Copilot ROI 증명을 강하게 요구. "보여줬으니 이제 수확도 보여라" 모드.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; Azure 성장 가속 지속 가능성</div>
+    <blockquote>"Azure growth accelerated from 31% in Q2 to 40% in Q3. How much of this is pent-up demand release versus structural acceleration?"</blockquote>
+    <div class="analysis">Q2 31% → Q3 40%. +9%p 가속은 인상적이지만, 시장은 "이게 일회성이냐 구조적이냐"를 묻는다. Nadella는 "공급이 풀리면서 대기 수요가 집행됐다"고 답했는데, 이는 Q4 39~40% 가이던스가 실현 가능함을 시사하는 동시에 "공급이 제약이기 때문에 수요는 계속 있다"는 낙관론이다.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; Copilot ROI 질문</div>
+    <blockquote>"20 million seats is impressive, but can you quantify the incremental revenue Copilot is adding versus cannibalization of existing M365 seats?"</blockquote>
+    <div class="analysis">가장 날카로운 질문. Copilot이 $30/월 추가지만, 기존 M365 고객에게 업셀하는 것이라면 순수 신규 매출이 아닐 수 있다. 경영진은 구체적인 순증분 매출을 공개하지 않았다. <strong>"20M 시트"는 인상적인 수치지만, 그것이 이미 M365를 쓰던 기업의 업그레이드인지 신규 고객 유입인지가 진짜 성장 질을 결정한다.</strong></div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; Capex $190B 정당화 요구</div>
+    <blockquote>"$190 billion in annual capex is unprecedented. Can you walk us through the return on invested capital framework?"</blockquote>
+    <div class="analysis">Hood는 "수요가 공급을 초과하기 때문에 투자를 계속한다"고 답했지만, 구체적인 ROIC 수치나 타임라인은 제시하지 않았다. 이것이 시장이 BEAT에도 불구하고 주가를 눌러둔 핵심 이유다. <strong>"AI 인프라 투자 vs 주주 환원 사이의 균형"</strong>이 향후 2~3분기 동안 투자자가 가장 집중할 논쟁이 될 것이다.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">시장 심리 종합 &mdash; Investing.com</div>
+    <blockquote>"Results exceed expectations, stock dips."</blockquote>
+    <div class="analysis">실적 BEAT에도 주가 하락. 전형적인 "Buy the rumor, Sell the news" 패턴이기도 하지만, 진짜 이유는 <strong>마진 가이던스 하락 + $190B Capex에 대한 ROI 불확실성</strong>. 회사는 잘하고 있지만, 이 투자 사이클의 끝을 시장이 아직 볼 수 없다.</div>
+  </div>
+</div>
+
+<!-- ===== 04: Azure 관전포인트 심층 분석 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; Azure 심층 분석</div>
+  <h2>핵심 관전포인트: Azure 성장률은 진짜인가</h2>
+
+  <div class="accent-box">
+    <div class="ab-label">Azure 성장률 추이</div>
+    <p>Q1 FY2026: <strong>+31% CC</strong> &rarr; Q2 FY2026: <strong>+31% CC</strong> &rarr; Q3 FY2026: <strong>+39% CC (+40% 보고)</strong></p>
+    <p style="margin-top:8px;">2개 분기 연속 31%에서 정체하다 Q3에 갑자기 +8%p 가속. 이것은 단순 수요 회복인가, 아니면 구조적 가속인가. Q4 가이던스 39~40% CC는 이 가속이 지속됨을 경영진이 자신한다는 신호다.</p>
+  </div>
+
+  <h3>Azure 가속의 3가지 원인 분해</h3>
+  <table>
+    <thead><tr><th>원인</th><th>기여도</th><th>지속 가능성</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>1. 공급 제약 완화</strong><br><span style="font-size:12px;color:var(--text-muted)">GPU 공급 증가로 대기 수요 집행</span></td>
+        <td class="mono positive">상당 (Nadella 직접 언급)</td>
+        <td><span class="kw-tag neutral-tag">반영구적 — 2026년 내내 수요 > 공급</span></td>
+      </tr>
+      <tr>
+        <td><strong>2. AI 워크로드 이전</strong><br><span style="font-size:12px;color:var(--text-muted)">기업들의 AI 모델 학습/추론 Azure 이전</span></td>
+        <td class="mono positive">구조적 성장 동력</td>
+        <td><span class="kw-tag bullish">구조적 — 기업 AI 지출 증가세 지속</span></td>
+      </tr>
+      <tr>
+        <td><strong>3. 모델 빌더 (OpenAI 포함)</strong><br><span style="font-size:12px;color:var(--text-muted)">AI 기업들의 Azure 인프라 사용</span></td>
+        <td class="mono neutral">$37B ARR에 포함</td>
+        <td><span class="kw-tag neutral-tag">집중도 리스크 — OpenAI 의존 과도 시 변수</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="accent-box">
+    <div class="ab-label">Azure vs 경쟁사 비교 (2026년 Q1 캘린더 기준)</div>
+    <p><strong>Azure: +40% YoY</strong> (CC +39%) | <strong>AWS: ~+17% YoY</strong> | <strong>Google Cloud: ~+28% YoY</strong></p>
+    <p style="margin-top:8px;">Azure가 AWS 성장률의 2.3배. 이 격차가 AI 워크로드에서의 Microsoft 선점 효과다. AWS는 Bedrock을 공격적으로 밀고 있지만, 기업 고객에서 M365 + Azure의 통합 번들이 이미 구축된 Microsoft의 해자(Moat)를 단기간에 넘기 어렵다. 다만 AWS의 AI 매출이 아직 충분히 공개되지 않아 실제 격차가 어느 정도인지 불분명.</p>
+  </div>
+</div>
+
+<!-- ===== 05: Copilot 수익화 진행도 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; Copilot 수익화 분석</div>
+  <h2>Copilot: "early"에서 "inflection"으로 가고 있나</h2>
+
+  <table>
+    <thead><tr><th>시점</th><th>Copilot 시트</th><th>상태 평가</th></tr></thead>
+    <tbody>
+      <tr><td>Q2 FY2026 (Jan 2026)</td><td class="mono">15M 시트</td><td><span class="kw-tag neutral-tag">EARLY SCALING</span></td></tr>
+      <tr><td>Q3 FY2026 (Apr 2026)</td><td class="mono positive">20M 시트 (+33% QoQ)</td><td><span class="kw-tag bullish">ACCELERATING</span></td></tr>
+      <tr><td>Q4 가이던스 (Jul 2026)</td><td class="mono">미공개</td><td><span class="kw-tag blue-tag">KEY WATCH</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="accent-box">
+    <div class="ab-label">Copilot 경제학: 시트당 수익 계산</div>
+    <p>M365 Business Premium ($22/월) + Copilot 추가 ($30/월) = <strong>시트당 $52/월</strong>. 20M 시트 기준 연간 환산: <strong>$12.5B ARR</strong>. 단, 실제 혼합 단가는 기업 규모/계약 조건에 따라 다르며, 일부 기업은 기존 EA(Enterprise Agreement) 내 할인을 받는다.</p>
+    <p style="margin-top:8px;">핵심 논쟁: 이 $12.5B ARR이 순수 증분인가, 아니면 M365 번들 가격 조정으로 일부 잠식되는가. 경영진이 공개하지 않는 것이 오히려 이 질문에 대한 간접 답변일 수 있다.</p>
+  </div>
+
+  <h3>Copilot 진행도: "early" vs "inflection" 판단</h3>
+  <table>
+    <thead><tr><th>지표</th><th>현황</th><th>판단</th></tr></thead>
+    <tbody>
+      <tr><td>시트 성장 속도</td><td>15M → 20M (분기 +33%)</td><td><span class="kw-tag bullish">Inflection 진입 중</span></td></tr>
+      <tr><td>Copilot ARR 공개 여부</td><td>미공개 (AI ARR $37B에 혼합)</td><td><span class="kw-tag bearish">아직 Early — 독립 공개 못 할 수준</span></td></tr>
+      <tr><td>고객 ROI 증거</td><td>사례 중심 (수치 없음)</td><td><span class="kw-tag neutral-tag">Early — 통계적 증거 부재</span></td></tr>
+      <tr><td>비가격 침투율 (vs 전체 M365)</td><td>10% 미만 추정</td><td><span class="kw-tag neutral-tag">Early — 침투 여지 90% 남음</span></td></tr>
+      <tr><td>경쟁사 대안 존재</td><td>Google Workspace AI, Salesforce</td><td><span class="kw-tag neutral-tag">경쟁 시작 — 차별화 지속 필요</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="kpi-note">
+    <strong>결론:</strong> Copilot은 "early"를 졸업하고 "early inflection"에 진입 중이다. 시트 성장 가속은 실수요 신호지만, 독립 ARR 미공개와 고객 ROI 데이터 부재는 "아직 증명 단계"임을 뜻한다. Nadella가 "per-user + usage" 모델 전환을 언급한 것은 현행 고정 시트 가격의 한계를 인식하고 있다는 방증이기도 하다.
+  </div>
+</div>
+
+<!-- ===== 06: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">06 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr><td style="width:160px;font-weight:600;color:var(--accent);">Satya Nadella</td><td>"에이전트 컴퓨팅 시대가 시작됐다. 이것은 PC→인터넷 전환과 맞먹는 플랫폼 전환이며, Microsoft는 그 인프라와 시스템을 동시에 제공하는 유일한 기업이다."</td></tr>
+      <tr><td style="font-weight:600;color:var(--purple);">Amy Hood</td><td>"예상을 상회했고, 공급 제약이 완화될수록 더 빠른 성장을 보여줄 것이다. Capex $190B은 수요가 공급을 초과하기 때문에 불가피하다."</td></tr>
+      <tr><td style="font-weight:600;color:var(--yellow);">애널리스트</td><td>"Azure 40%는 인상적이다. 그런데 $190B Capex의 ROIC를 언제, 어떻게 보여줄 것인가. Q4 마진 하락도 걱정된다."</td></tr>
+      <tr><td style="font-weight:600;color:var(--red);">시장 반응</td><td>장후 -1%+ 하락. 숫자 BEAT에도 마진 가이던스 하락 + Capex 규모에 대한 우려가 눌렀다. "지금은 잘하고 있는데 앞으로 마진이 더 줄어든다"는 두려움.</td></tr>
+      <tr><td style="font-weight:600;color:var(--green);">핵심 관전포인트</td><td>Q4에 Azure 39~40% CC 달성 여부 + Copilot 시트 25M+ 여부 + 영업이익률 44% 방어 여부. 이 3가지가 모두 충족되면 Capex 논란이 불식된다.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 07: 소스 ===== -->
+<div class="section">
+  <div class="section-label">07 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid">
+    <a class="link-card" href="https://www.microsoft.com/en-us/investor/earnings/fy-2026-q3/press-release-webcast" target="_blank">
+      <div class="link-icon">&#x1F4C4;</div>
+      <div class="link-text"><div class="link-title">Microsoft IR 공식 보도자료</div><div class="link-url">microsoft.com/investor/earnings/fy-2026-q3</div></div>
+    </a>
+    <a class="link-card" href="https://www.microsoft.com/en-us/Investor/earnings/FY-2026-Q3/performance" target="_blank">
+      <div class="link-icon">&#x1F4CA;</div>
+      <div class="link-text"><div class="link-title">FY26 Q3 Performance 페이지</div><div class="link-url">microsoft.com — 사업부별 상세 지표</div></div>
+    </a>
+    <a class="link-card" href="https://www.microsoft.com/en-us/investor/events/fy-2026/earnings-fy-2026-q3" target="_blank">
+      <div class="link-icon">&#x1F3AC;</div>
+      <div class="link-text"><div class="link-title">컨퍼런스 콜 웹캐스트</div><div class="link-url">microsoft.com — FY2026 Q3 Earnings Call</div></div>
+    </a>
+    <a class="link-card" href="https://www.fool.com/earnings/call-transcripts/2026/04/29/microsoft-msft-q3-2026-earnings-transcript/" target="_blank">
+      <div class="link-icon">&#x1F4DD;</div>
+      <div class="link-text"><div class="link-title">컨콜 전문 트랜스크립트</div><div class="link-url">fool.com — 2026-04-29</div></div>
+    </a>
+    <a class="link-card" href="https://www.cnbc.com/2026/04/29/microsoft-msft-q3-earnings-report-2026.html" target="_blank">
+      <div class="link-icon">&#x1F4F0;</div>
+      <div class="link-text"><div class="link-title">CNBC 실적 분석</div><div class="link-url">cnbc.com — Azure 40% 성장 보도</div></div>
+    </a>
+    <a class="link-card" href="https://news.microsoft.com/source/2026/04/29/microsoft-cloud-and-ai-strength-fuels-third-quarter-results/" target="_blank">
+      <div class="link-icon">&#x1F310;</div>
+      <div class="link-text"><div class="link-title">Microsoft Newsroom 공식 발표</div><div class="link-url">news.microsoft.com — 2026-04-29</div></div>
+    </a>
+    <a class="link-card" href="https://investinglive.com/stocks/microsoft-q3-beats-on-revenue-eps-and-cloud-as-capex-comes-in-34bn-below-estimates-20260429/" target="_blank">
+      <div class="link-icon">&#x1F50D;</div>
+      <div class="link-text"><div class="link-title">Capex 컨센서스 하회 분석</div><div class="link-url">investinglive.com — Capex $3.4B 서프라이즈</div></div>
+    </a>
+    <a class="link-card" href="https://finance.yahoo.com/markets/stocks/articles/microsoft-q3-2026-earnings-beat-205308206.html" target="_blank">
+      <div class="link-icon">&#x1F4B9;</div>
+      <div class="link-text"><div class="link-title">Yahoo Finance 실적 분석</div><div class="link-url">finance.yahoo.com — Q3 2026 Beat</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-04-30 &mdash; 주식부자 / MSFT Q3 FY2026
+</div>
+
+</div>
+</body>
+</html>
