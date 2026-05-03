@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AAPL | Apple Inc. Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #0071e3; --accent-dim: #0071e333;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#0071e315,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #0071e344; }
+  .verdict.mixed { background:var(--yellow); color:#000; border:1px solid #ffc10744; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--accent); }
+  .negative { color:var(--red); }
+
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#0071e322; color:var(--accent); }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  .next-q { background:linear-gradient(135deg,#4da6ff10,var(--surface)); border:1px solid #4da6ff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--blue); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--blue); }
+
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">AAPL</div>
+    <h1>Apple Inc.</h1>
+    <div class="company-kr">애플</div>
+    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-01 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-05-01</span>
+      <span>|</span>
+      <span>섹터: Technology</span>
+      <span>|</span>
+      <span>시가총액: ~$4.0조</span>
+    </div>
+    <div class="verdict beat">BEAT &mdash; 매출 $1,111.8억 (+17% YoY) vs 컨센서스 $1,097억 / EPS $2.01 (+22% YoY) vs 컨센서스 $1.94. 모든 지역·카테고리에서 기록적인 성장을 달성한 분기였으나, iPhone 매출이 컨센서스를 소폭 미달한 점은 미래 성장세에 대한 불확실성을 시사한다.</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">매출</div>
+      <div class="value">$143.8억</div>
+      <div class="compare">컨센서스: N/A</div>
+      <div class="compare">전년비: N/A</div>
+    </div>
+    <div class="num-card">
+      <div class="label">희석 EPS</div>
+      <div class="value">N/A</div>
+      <div class="compare">컨센서스: N/A</div>
+      <div class="compare">전년비: N/A</div>
+    </div>
+    <div class="num-card">
+      <div class="label">조정 EBITDA</div>
+      <div class="value">N/A</div>
+      <div class="compare">마진: N/A</div>
+      <div class="compare">전년비: N/A</div>
+    </div>
+  </div>
+
+  <h3>매출 구성</h3>
+  <table>
+    <thead><tr><th>수익원</th><th>분기 실적</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td>iPhone</td><td class="mono">$569.9억</td><td class="mono">+21.7%</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
+      <tr><td>Services</td><td class="mono">$309.8억</td><td class="mono">+16%</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
+      <tr><td>Mac</td><td class="mono">$84.0억</td><td class="mono">+6%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+      <tr><td>Wearables/Home/Accessories</td><td class="mono">$79.0억</td><td class="mono">+5%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+      <tr><td>iPad</td><td class="mono">$69.1억</td><td class="mono">+8%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="next-q">
+    <h3>다음 분기 가이던스 / 컨센서스</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">Q3 매출 성장률</div><div class="nq-value">+14~17% YoY</div></div>
+      <div class="next-q-item"><div class="nq-label">Q3 Services 성장률</div><div class="nq-value">~+16%</div></div>
+      <div class="next-q-item"><div class="nq-label">가이던스 전제 조건</div><div class="nq-value">관세 동결 (현 관세율·정책 유지 가정)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>이 회사를 읽는 숫자들</h2>
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 경영진이 직접 선언한 최우선 지표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>활성 기기 설치 기반</strong></td><td class="mono">역대 최고 (ATH)</td><td class="mono">전 카테고리·지역 ATH</td><td>서비스 매출의 궁극적 원천. 기기가 늘어날수록 App Store·iCloud·AppleCare 매출 증가</td></tr>
+      <tr><td><strong>Services 매출</strong></td><td class="mono">$309.8억</td><td class="mono">+16%</td><td>75%+ 총이익률 — 하드웨어 마진의 2배. 서비스 매출이 1% 오르면 총이익은 0.75% 상승</td></tr>
+    </tbody>
+  </table>
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">사용자 건강 &mdash; 이게 무너지면 끝</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>iPhone 매출</strong></td><td class="mono">$569.9억</td><td class="mono">+21.7%</td><td>3월 분기 기록. 그러나 컨센서스 $575억 소폭 미달 — 유일한 미스</td></tr>
+      <tr><td><strong>iPhone 매출 비중</strong></td><td class="mono">51.3%</td><td class="mono">전년 49.3%</td><td>서비스 성장에도 iPhone 의존도 소폭 상승. 이중성 — 강하지만 집중 위험</td></tr>
+      <tr><td><strong>Mac 매출</strong></td><td class="mono">$84.0억</td><td class="mono">+6%</td><td>MacBook Neo 수요 견고. 신규 고객 비중 높음 — 에코시스템 확장 지표</td></tr>
+      <tr><td><strong>iPad 매출</strong></td><td class="mono">$69.1억</td><td class="mono">+8%</td><td>구매자 절반 이상이 신규 고객. 신흥국 진출 교두보</td></tr>
+    </tbody>
+  </table>
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">자산 규모 &mdash; 밸류에이션의 근거</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>전사 총이익률</strong></td><td class="mono">49.3%</td><td class="mono">전분기 대비 +110bp</td><td>관세 비용 감소 + 서비스 믹스 개선이 동시에 작용</td></tr>
+      <tr><td><strong>서비스 총이익률</strong></td><td class="mono">~75%</td><td class="mono">지속 상승</td><td>거의 비용 없이 매출 증가 = 이익 레버리지의 핵심</td></tr>
+      <tr><td><strong>영업현금흐름</strong></td><td class="mono">$287억</td><td class="mono">3월 분기 최대</td><td>자사주 매입 $260억을 내고도 현금 창출. 자본배분 여력 충분</td></tr>
+    </tbody>
+  </table>
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">거래량 &mdash; 수수료 매출의 선행지표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>App Store</strong></td><td class="mono">견고 성장</td><td class="mono">N/A</td><td>게임·앱 구독 확대. 개발자 수수료 구조 유지 (법적 리스크 모니터)</td></tr>
+      <tr><td><strong>iCloud+ (구독)</strong></td><td class="mono">꾸준한 상승</td><td class="mono">N/A</td><td>기기 설치 기반 ATH와 직결. 사진·문서 스토리지 수요 증가</td></tr>
+      <tr><td><strong>AppleCare+</strong></td><td class="mono">설치 기반 ATH 수혜</td><td class="mono">N/A</td><td>기기가 늘어날수록 보험 가입 모수 증가. 고마진 상품</td></tr>
+    </tbody>
+  </table>
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">신규 사업 &mdash; 미래 베팅</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Apple Intelligence</strong></td><td class="mono">출시 확대 중</td><td class="mono">N/A</td><td>Cook: 'Apple Intelligence가 플랫폼 전반에 통합. 이게 성장의 원동력' — 정성적 주장, 수치 증거 아직 부족</td></tr>
+      <tr><td><strong>Siri + Google Gemini 협업</strong></td><td class="mono">파트너십 진행 중</td><td class="mono">N/A</td><td>Cook: 'Google과의 협업이 잘 되고 있다' — 애매하지만 긍정적. Apple이 LLM을 내재화하기보다 파트너 활용 전략</td></tr>
+      <tr><td><strong>메모리 비용 역풍</strong></td><td class="mono">Q3부터 심화 예상</td><td class="mono">N/A</td><td>'유의미하게 높은 메모리 비용' — iPhone 17 AI 모델용 8GB+ LPDDR5X 메모리 탑재 확대가 원인</td></tr>
+      <tr><td><strong>CEO 전환 — John Ternus</strong></td><td class="mono">2026.09.01 취임 예정</td><td class="mono">N/A</td><td>하드웨어 엔지니어링 수장 → CEO. 재무·전략 배경 아닌 제품·공학 배경. '제품 중심 리더십' 신호</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter>
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:90.0%;background:#0071e3;"></div></div>
+      <div class="tone-score">9.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:75.0%;background:#ffc107;"></div></div>
+      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 회의감</div>
+      <div class="tone-bar"><div class="fill" style="width:50.0%;background:#ff4d4d;"></div></div>
+      <div class="tone-score">5.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">전망 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:65.0%;background:#4da6ff;"></div></div>
+      <div class="tone-score">6.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Tim Cook</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 침착한 실행자. 흥분하지 않고, 겁먹지 않으며, 숫자로 말하게 한다. 관세와 CEO 전환이라는 두 개의 폭탄 앞에서도 '우리는 잘 하고 있다'를 통계로 증명하는 스타일. 스티브 잡스가 마법사였다면, Cook은 엔지니어다.
+  </p>
+  <div class="keywords">
+    <span class="kw-tag bullish">ALL-TIME RECORDS</span>
+    <span class="kw-tag bullish">DOUBLE-DIGIT GROWTH</span>
+    <span class="kw-tag bullish">EVERY REGION</span>
+    <span class="kw-tag bullish">INDIA MOMENTUM</span>
+    <span class="kw-tag bullish">TARIFF REFUND PROCESS</span>
+    <span class="kw-tag bullish">GOOGLE COLLABORATION</span>
+    <span class="kw-tag bullish">MEMORY COST HEADWIND</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Tim Cook &mdash; 오프닝 / 실적 요약</div>
+    <blockquote>"We are thrilled with the performance in greater China. People love the performance, they love the durability, they love the camera, they love Center Stage, and they love that Apple Intelligence is integrated across the platform."</blockquote>
+    <div class="analysis">관세 불안, 중국 정치 리스크 등 온갖 역풍 속에서 Greater China +28%. Cook은 이것을 첫 번째 증거로 올렸다. 'love'를 5번 연속 사용 — 감성 언어를 의도적으로 쌓아 '제품이 이긴다'는 내러티브 구축. 기술·스펙 대신 사용자 감정으로 환기시키는 전통적 애플 화법.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Tim Cook &mdash; 지역 성장</div>
+    <blockquote>"We're seeing double-digit growth in the majority of the markets we track. From the U.S. to Latin America, to greater China, to Western Europe, to India, to Japan, to Southeast Asia."</blockquote>
+    <div class="analysis">특정 지역 하나가 아닌 지명 7개를 연속 나열하는 전략. '전선 어디에도 구멍이 없다'는 메시지. 일부 지역이 부진하면 이런 식으로 말할 수 없으므로, 이 발언 자체가 팩트 체크 역할을 한다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Tim Cook &mdash; 관세 대응</div>
+    <blockquote>"In terms of applying for a refund of tariffs paid, we're following the established processes, and we plan to reinvest any amount we receive back into U.S. innovation and advanced manufacturing."</blockquote>
+    <div class="analysis">'established processes' — 규정대로 한다는 뜻이지만, 관료적 언어로 리스크를 희석시키는 효과. 'reinvest into U.S.'는 정치적으로 계산된 메시지 — 트럼프 행정부의 '미국 우선주의'에 맞춰 불필요한 마찰 회피.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Tim Cook &mdash; Apple Intelligence / Siri</div>
+    <blockquote>"The collaboration with Google is going well... we're happy with where things are and we're happy with the work that we're doing independently as well."</blockquote>
+    <div class="analysis">'going well'과 'we're happy' — 평가치고는 극도로 모호하다. Apple Intelligence가 얼마나 많은 사람이 쓰는지, MAU가 얼마인지, 구매 결정에 얼마나 영향을 미치는지 — 어떤 수치도 공개하지 않았다. AI 스토리를 제품 매력으로 우회시키는 전형적인 Cook 화법.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Tim Cook &mdash; 메모리 비용 경고 (유일한 역풍 직접 언급)</div>
+    <blockquote>"We expect significantly higher memory costs... We believe memory costs will drive an increasing impact on our business going forward, and we'll look at a range of options."</blockquote>
+    <div class="analysis">Cook이 이번 콜에서 유일하게 구체적인 역풍을 자인한 문장. 'significantly higher'는 IR 언어로는 매우 강한 표현이다. 'a range of options'는 가격 인상, 메모리 스펙 조정, 서비스 믹스 강화 등을 모두 열어둔 표현.</div>
+  </div>
+
+  <h3>Kevan Parekh</h3>
+
+  <div class="quote-block">
+    <div class="speaker">Kevan Parekh &mdash; Q3 가이던스</div>
+    <blockquote>"We expect June quarter total company revenue to grow by 14 to 17 percent year-over-year. Services revenue is expected to grow at a similar rate to what was reported in the March quarter."</blockquote>
+    <div class="analysis">월가가 +9.5% 성장을 예상한 자리에서 +14~17%를 제시했다 — 이것 자체가 최고의 주가 촉매다. 가이던스 레인지가 3%포인트(14~17%)로 넓은 것은 관세 불확실성을 반영한 보수적 설계.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Kevan Parekh &mdash; 관세 가정</div>
+    <blockquote>"Our guidance assumes that global tariff rates, policies, and their application remain in effect as of today, and the global macroeconomic outlook does not worsen from today."</blockquote>
+    <div class="analysis">'remain in effect as of today' — 가이던스 면책 조항의 전형. 관세가 바뀌면 이 가이던스는 쓸모없어진다는 뜻이다. 트럼프 행정부의 관세 정책이 하루에도 바뀌는 환경에서 Apple이 줄 수 있는 가장 솔직한 답변이기도 하다.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 존중하되 회의적. "증명해봐" 모드 가동.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 (소속 불명)</div>
+    <blockquote>"iPhone +22%가 관세 선수요인가 진짜 성장인가?"</blockquote>
+    <div class="analysis"><strong>답변:</strong> Cook은 '계량하기 어렵다'고 회피하며, Greater China·India·Japan 등 글로벌 성장이 뒷받침된다고 우회 답변<br><br>시장이 원하는 답은 '이중 얼마가 일시적 선수고'인데 Cook은 글로벌 성장 사례로 우회. 선수고 효과를 인정하면 Q3 기저 부담을 자인하는 꼴이기 때문.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 (소속 불명)</div>
+    <blockquote>"Apple Intelligence가 언제 서비스 매출에 수치로 잡히냐?"</blockquote>
+    <div class="analysis"><strong>답변:</strong> Parekh는 'AI는 우리에게 매우 중요한 투자 영역이며, 제품 로드맵 위에 점진적으로 투자를 늘릴 것이다'라고 원칙적 답변만<br><br>수치 없는 원칙 발언. Apple Intelligence가 실제로 구매 결정을 얼마나 바꾸는지, 유료 전환 계획이 있는지 — 어떤 답도 없었다.</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Tim Cook</td><td>"기록, 기록, 기록. 모든 지역, 모든 카테고리. 관세는 프로세스대로 대응 중. 메모리는 도전이지만 우리는 옵션을 갖고 있다."</td></tr>
+      <tr><td style='font-weight:600;color:var(--accent);'>Kevan Parekh</td><td>"Q3 가이던스 +14~17%는 진지한 숫자다. 서비스는 계속 같은 속도. 단, 관세가 안 바뀐다는 가정 하에."</td></tr>
+      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"좋다. 근데 iPhone +22%가 진짜냐 선수고냐. Apple Intelligence가 언제 매출로 잡히냐. 메모리 비용 얼마나 먹히냐."</td></tr>
+      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>장후 +3% 초반 → 거래 세션 동안 조정. 익일 $268~272 박스권. 비트는 했지만 '기대의 상향'으로 이어지지는 않음.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid>
+    <a class="link-card" href="https://www.apple.com/newsroom/2026/04/apple-reports-second-quarter-results/" target="_blank">
+      <div class="link-icon">🍎</div>
+      <div class="link-text"><div class="link-title">Apple 공식 Q2 FY2026 보도자료</div><div class="link-url">https://www.apple.com/newsroom/2026/04/apple-reports-second-quarter-results/</div></div>
+    </a>
+    <a class="link-card" href="https://investor.apple.com/investor-relations/default.aspx" target="_blank">
+      <div class="link-icon">📊</div>
+      <div class="link-text"><div class="link-title">Apple IR (투자자 관계)</div><div class="link-url">https://investor.apple.com/investor-relations/default.aspx</div></div>
+    </a>
+    <a class="link-card" href="https://www.fool.com/earnings/call-transcripts/2026/04/30/apple-aapl-q2-2026-earnings-call-transcript/" target="_blank">
+      <div class="link-icon">📜</div>
+      <div class="link-text"><div class="link-title">컨퍼런스 콜 전문 (Motley Fool)</div><div class="link-url">https://www.fool.com/earnings/call-transcripts/2026/04/30/apple-aapl-q2-2026-earnings-call-transcript/</div></div>
+    </a>
+    <a class="link-card" href="https://www.apple.com/newsroom/2026/04/tim-cook-to-become-apple-executive-chairman-john-ternus-to-become-apple-ceo/" target="_blank">
+      <div class="link-icon">👔</div>
+      <div class="link-text"><div class="link-title">CEO 전환 공식 발표</div><div class="link-url">https://www.apple.com/newsroom/2026/04/tim-cook-to-become-apple-executive-chairman-john-ternus-to-become-apple-ceo/</div></div>
+    </a>
+
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-05-01 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>
