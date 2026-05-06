@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPOT | 스포티파이 2년 추이 (Q2 2024 ~ Q1 2026)</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0a0a;--surface:#141414;--surface2:#1c1c1c;--border:#2a2a2a;--text:#e8e8e8;--text-dim:#888;--text-muted:#555;--accent:#1DB954;--accent-dim:#1DB95433;--red:#ff4d4d;--red-dim:#ff4d4d22;--yellow:#ffc107;--blue:#4da6ff;--purple:#b388ff;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans KR',-apple-system,sans-serif;font-size:15px;line-height:1.7;}
+
+  .hero{background:linear-gradient(135deg,#1DB95410,#0a0a0a 70%);border-bottom:1px solid var(--border);padding:48px 40px 36px;}
+  .hero-inner{max-width:1300px;margin:0 auto;}
+  .hero .ticker{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+  .hero h1{font-family:'Playfair Display',serif;font-size:36px;font-weight:900;line-height:1.2;margin-bottom:4px;}
+  .hero .sub{font-size:16px;color:var(--text-dim);font-weight:300;}
+  .hero .meta{display:flex;gap:20px;margin-top:16px;font-size:12px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;flex-wrap:wrap;}
+
+  .container{max-width:1300px;margin:0 auto;padding:40px;}
+  .section{margin-bottom:56px;}
+  .section-label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+  .section h2{font-size:22px;font-weight:700;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+
+  /* HORIZONTAL TABLE */
+  .h-table-wrap{overflow-x:auto;margin-bottom:24px;-webkit-overflow-scrolling:touch;}
+  .h-table{border-collapse:collapse;font-size:12px;white-space:nowrap;width:100%;}
+  .h-table th,.h-table td{padding:8px 10px;border-bottom:1px solid #1a1a1a;font-family:'IBM Plex Mono',monospace;}
+  .h-table thead th{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);background:var(--surface);border-bottom:1px solid var(--border);text-align:center;position:sticky;top:0;z-index:1;}
+  .h-table thead th:first-child{text-align:left;min-width:140px;position:sticky;left:0;z-index:2;background:var(--surface);}
+  .h-table tbody th{text-align:left;font-family:'IBM Plex Sans KR',sans-serif;font-size:13px;font-weight:500;color:var(--text);position:sticky;left:0;background:var(--bg);z-index:1;min-width:140px;border-right:1px solid var(--border);}
+  .h-table tbody td{text-align:center;}
+  .h-table tbody tr:hover{background:var(--surface);}
+  .pos{color:var(--accent);}
+  .neg{color:var(--red);}
+  .miss-cell{background:var(--red-dim);}
+  .beat-cell{background:var(--accent-dim);}
+  .peak-cell{background:#ffc10711;color:var(--yellow);font-weight:700;}
+  .latest-col{background:#1DB95408;border-left:2px solid var(--accent);border-right:2px solid var(--accent);}
+  thead .latest-col{border-top:2px solid var(--accent);}
+
+  /* NOTE BOX */
+  .note-box{font-size:12px;color:var(--text-dim);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px 16px;margin:16px 0;line-height:1.6;}
+  .note-box strong{color:var(--yellow);}
+
+  /* PATTERN CARDS */
+  .patterns{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+  .pat-card{background:var(--surface);border-radius:8px;padding:20px;border-left:3px solid var(--accent);}
+  .pat-card.blue{border-left-color:var(--blue);}
+  .pat-card.red{border-left-color:var(--red);}
+  .pat-card.purple{border-left-color:var(--purple);}
+  .pat-card.yellow{border-left-color:var(--yellow);}
+  .pat-card h3{font-size:14px;font-weight:700;margin-bottom:8px;}
+  .pat-card p{font-size:13px;color:var(--text-dim);line-height:1.6;}
+  .pat-card em{color:var(--yellow);font-style:normal;font-weight:600;}
+
+  /* SVG CHART containers */
+  svg text{user-select:none;}
+
+  /* TIMELINE */
+  .timeline{position:relative;padding-left:32px;}
+  .timeline::before{content:'';position:absolute;left:12px;top:0;bottom:0;width:2px;background:var(--border);}
+  .tl-item{position:relative;margin-bottom:32px;}
+  .tl-dot{position:absolute;left:-26px;top:6px;width:12px;height:12px;border-radius:50%;border:2px solid var(--border);background:var(--bg);}
+  .tl-dot.beat{border-color:var(--accent);background:var(--accent);}
+  .tl-dot.miss{border-color:var(--red);background:var(--red);}
+  .tl-dot.peak{border-color:var(--yellow);background:var(--yellow);}
+  .tl-header{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+  .tl-q{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;}
+  .tl-badge{font-size:10px;padding:2px 8px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-weight:600;}
+  .tl-badge.beat-b{background:var(--accent-dim);color:var(--accent);}
+  .tl-badge.miss-b{background:var(--red-dim);color:var(--red);}
+  .tl-score{font-size:11px;color:var(--text-muted);margin-left:auto;}
+  .tl-body{font-size:14px;line-height:1.7;color:var(--text-dim);}
+  .tl-body strong{color:var(--text);}
+  .tl-body em{color:var(--yellow);font-style:normal;}
+  .tl-quote{display:block;margin:8px 0;padding:8px 12px;background:var(--surface);border-left:2px solid var(--accent);font-style:italic;font-size:13px;color:var(--text);border-radius:0 4px 4px 0;}
+  .tl-quote.analyst-q{border-left-color:var(--yellow);}
+
+  table{border-collapse:collapse;width:100%;}
+  table th,table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;text-align:left;}
+  table thead th{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);background:var(--surface);}
+
+  .footer{border-top:1px solid var(--border);padding:20px 0;text-align:center;font-size:11px;color:var(--text-muted);}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NYSE: SPOT &mdash; 2년 추이</div>
+    <h1>Spotify Technology 스포티파이</h1>
+    <div class="sub">Q2 2024 ~ Q1 2026 &mdash; 8분기 실적 + 경영진 내러티브 변화 추적</div>
+    <div class="meta">
+      <span>최종 갱신: 2026-04-30</span>
+      <span>|</span>
+      <span>최신: Q1 FY2026 (2026-04-28)</span>
+      <span>|</span>
+      <span>매출 기준: EUR (유로화 보고)</span>
+      <span>|</span>
+      <span>회계연도: 캘린더 기준 (1월~12월)</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 요약 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 요약</div>
+  <h2>2년간 배운 것</h2>
+
+  <div class="patterns">
+    <div class="pat-card">
+      <h3>수익성 대전환 — 약속대로 해냈다</h3>
+      <p>
+        <strong>2024 초:</strong> 대규모 구조조정(1,500명 해고) 후 "수익성 원년" 선언.<br>
+        <strong>2024 연간:</strong> 역사상 첫 연간 흑자 &mdash; 순이익 €1.14B. 총이익률 27%대에서 33%대로 6pp 도약.<br>
+        <strong>2025:</strong> 연간 운영이익 €2.5B, "성장 재투자" 모드 전환.<br>
+        <em>구조조정이 만들어낸 레버리지가 매출보다 빠르게 이익을 키웠다.</em>
+      </p>
+    </div>
+    <div class="pat-card blue">
+      <h3>MAU 성장 둔화 — 수익의 질로 메운다</h3>
+      <p>
+        <strong>Q2'24:</strong> MAU 626M, YoY +20% &mdash; 고성장 마지막 분기.<br>
+        <strong>Q1'26:</strong> MAU 761M, YoY +12% &mdash; 성장률 반토막.<br>
+        방향은 맞다. 신규 유저보다 <strong>기존 유저 수익화</strong>(가격 인상 + 구독 티어 다변화)로 ARPU 방어.<br>
+        <em>플랫폼이 성숙하면 M&A나 신흥시장이 다음 성장동력이 된다.</em>
+      </p>
+    </div>
+    <div class="pat-card red">
+      <h3>광고 사업 — 유일한 약점</h3>
+      <p>
+        <strong>Q2'25:</strong> 광고 부진으로 운영손실 전환. Ek "unhappy"라는 이례적 발언.<br>
+        광고 매출은 총매출의 ~10%이나 성장 기대치를 2년째 하회.<br>
+        팟캐스트 전략 전환(Partner Program) + 광고 기술 내재화 시도 중.<br>
+        <em>프리미엄 비중이 높아서 광고 미스가 전체를 뒤흔들진 않지만, 반복되면 리레이팅 위험.</em>
+      </p>
+    </div>
+    <div class="pat-card purple">
+      <h3>가격 인상 = 성장의 다른 이름</h3>
+      <p>
+        2023~2024년 전 세계적 프리미엄 요금 인상. ARPU €4.55 &rarr; €4.85 이상.<br>
+        구독자 순증 유지하면서 단가 올렸다 &mdash; <strong>가격 탄력성 낮음 증명.</strong><br>
+        "우리는 여전히 저평가된 서비스다"(Ek) &mdash; 추가 인상 여지 유지.<br>
+        <em>구독자 + 단가 동시 성장 = 복리 수익 구조.</em>
+      </p>
+    </div>
+    <div class="pat-card yellow" style="grid-column:1/-1;">
+      <h3>AI 베팅 + 리더십 전환 — 2026년의 핵심 변수</h3>
+      <p>
+        <strong>AI:</strong> DJ(2023), AI 플레이리스트(2024), Song DNA, 오디오북 추천 &mdash; 발견 경험 자동화. "AI는 창의성 대체가 아닌 사용자 통제권 강화" (Norström).&nbsp;&nbsp;
+        <strong>리더십:</strong> Ek 2026.1.1 Executive Chairman 전환 → Norström + Söderström 공동CEO 체제. "선수에서 코치로." 2023년부터 실질적으로 운영해온 구조의 공식화.&nbsp;&nbsp;
+        <em>공동CEO 체제는 제품(Söderström)과 비즈니스(Norström) 분리 &mdash; 수직통합 실행력은 유지, 전략 집중력은 미지수.</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 02: 실적 추이 ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 실적 추이</div>
+  <h2>분기별 핵심 숫자</h2>
+
+  <div class="h-table-wrap">
+  <table class="h-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Q2'24</th><th>Q3'24</th><th>Q4'24</th>
+        <th>Q1'25</th><th>Q2'25</th><th>Q3'25</th><th>Q4'25</th>
+        <th class="latest-col">Q1'26</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>매출 (EUR)</th>
+        <td>€3.81B</td><td>€4.00B</td><td class="peak-cell">€4.24B</td>
+        <td>€4.19B</td><td>€4.19B</td><td>€4.27B</td><td class="peak-cell">€4.53B</td>
+        <td class="latest-col">€4.53B</td>
+      </tr>
+      <tr>
+        <th>매출 YoY</th>
+        <td class="pos">+20%</td><td class="pos">+19%</td><td class="pos">+16%</td>
+        <td class="pos">+15%</td><td class="pos">+15%</td><td class="pos">+7%</td><td class="pos">+13%</td>
+        <td class="latest-col pos">+8%</td>
+      </tr>
+      <tr>
+        <th>총이익률 (GM)</th>
+        <td>29.2%</td><td>31.1%</td><td class="peak-cell">32.2%</td>
+        <td>31.6%</td><td>31.5%</td><td>31.6%</td><td class="peak-cell">33.1%</td>
+        <td class="latest-col peak-cell">33.0%</td>
+      </tr>
+      <tr>
+        <th>운영이익 (EUR)</th>
+        <td>€266M</td><td class="peak-cell">€454M</td><td>€477M</td>
+        <td>€509M</td><td class="neg">€-55M</td><td>€582M</td><td class="peak-cell">€701M</td>
+        <td class="latest-col">€715M</td>
+      </tr>
+      <tr>
+        <th>운영이익률</th>
+        <td>7.0%</td><td>11.4%</td><td>11.2%</td>
+        <td>12.1%</td><td class="neg miss-cell">-1.3%</td><td>13.6%</td><td>15.5%</td>
+        <td class="latest-col">15.8%</td>
+      </tr>
+      <tr>
+        <th>EPS (실제)</th>
+        <td>€1.32</td><td>€1.45</td><td>€1.88</td>
+        <td>€1.07</td><td class="neg">-€0.42</td><td>€2.90</td><td>€2.70</td>
+        <td class="latest-col">€3.46</td>
+      </tr>
+      <tr>
+        <th>컨센서스 EPS</th>
+        <td>~€1.20</td><td>~€1.30</td><td>€2.07</td>
+        <td>€2.33</td><td>€1.90</td><td>~€2.40</td><td>~€2.50</td>
+        <td class="latest-col">€3.03</td>
+      </tr>
+      <tr>
+        <th>판정</th>
+        <td class="beat-cell">Beat</td><td class="beat-cell">Beat</td><td class="miss-cell">EPS Miss</td>
+        <td class="miss-cell">EPS Miss</td><td class="miss-cell">Miss</td><td class="beat-cell">Beat</td><td class="beat-cell">Beat</td>
+        <td class="latest-col beat-cell">Beat</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note-box">
+    <strong>Q4'24 / Q1'25 EPS 미스 맥락:</strong>
+    두 분기 모두 매출은 가이던스 충족 또는 초과. EPS 미스는 주가 보상(Social Charges) 급등 &mdash; 주가가 오를수록 비용이 쌓이는 구조. 수익성이 나빠진 것이 아니라 회계 처리 이슈.
+    <strong>Q2'25 Miss 맥락:</strong> 광고 매출 급감 + 팟캐스트 전략 전환 비용이 겹쳐 운영손실 전환. 2년 8분기 중 유일한 진성 미스.
+  </div>
+</div>
+
+<!-- ===== 03: KPI 추이 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; KPI 추이</div>
+  <h2>유저 / 구독 / 수익성 지표</h2>
+
+  <div class="h-table-wrap">
+  <table class="h-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Q2'24</th><th>Q3'24</th><th>Q4'24</th>
+        <th>Q1'25</th><th>Q2'25</th><th>Q3'25</th><th>Q4'25</th>
+        <th class="latest-col">Q1'26</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>MAU (월간 활성 유저)</th>
+        <td>626M</td><td>640M</td><td class="peak-cell">675M</td>
+        <td>678M</td><td>696M</td><td class="peak-cell">713M</td><td class="peak-cell">751M</td>
+        <td class="latest-col">761M</td>
+      </tr>
+      <tr>
+        <th>MAU YoY</th>
+        <td class="pos">+19%</td><td class="pos">+11%</td><td class="pos">+12%</td>
+        <td class="pos">+10%</td><td class="pos">+12%</td><td class="pos">+11%</td><td class="pos">+11%</td>
+        <td class="latest-col pos">+12%</td>
+      </tr>
+      <tr>
+        <th>Premium 구독자</th>
+        <td>246M</td><td>252M</td><td>263M</td>
+        <td>268M</td><td>276M</td><td>281M</td><td class="peak-cell">290M</td>
+        <td class="latest-col">293M</td>
+      </tr>
+      <tr>
+        <th>Premium YoY</th>
+        <td class="pos">+12%</td><td class="pos">+11%</td><td class="pos">+11%</td>
+        <td class="pos">+12%</td><td class="pos">+12%</td><td class="pos">+11%</td><td class="pos">+10%</td>
+        <td class="latest-col pos">+9%</td>
+      </tr>
+      <tr>
+        <th>Premium ARPU (월)</th>
+        <td>€4.49</td><td>€4.52</td><td class="peak-cell">€4.85</td>
+        <td>€4.73</td><td>€4.74</td><td>€4.53</td><td>€4.71</td>
+        <td class="latest-col">~€4.80</td>
+      </tr>
+      <tr>
+        <th>Ad-Supported 매출</th>
+        <td>€390M</td><td>€394M</td><td>€502M</td>
+        <td>€419M</td><td class="neg miss-cell">€380M</td><td>€415M</td><td>€528M</td>
+        <td class="latest-col neg">€399M</td>
+      </tr>
+      <tr>
+        <th>FCF (분기)</th>
+        <td>€490M</td><td>€631M</td><td>€702M</td>
+        <td>€636M</td><td>€544M</td><td class="peak-cell">€806M</td><td class="peak-cell">€833M</td>
+        <td class="latest-col peak-cell">€824M</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note-box">
+    <strong>변곡점:</strong>
+    총이익률 &mdash; Q2'24 29.2%에서 Q4'25 33.1%까지 1.5년 만에 +3.9pp. 구조적 레버리지 증명.
+    MAU &mdash; 626M &rarr; 761M (+21.6%), 성장률은 안정적 10~12%대.
+    Premium 구독자 &mdash; 246M &rarr; 293M (+19.1%), 분기별 순증 5~11M 유지.
+    광고 매출 &mdash; Q4'24 €502M 고점 이후 변동성. Q2'25 €380M 저점, Q4'25 €528M 반등.
+    FCF &mdash; Q3'25~Q1'26 연속 €800M대 돌파. 진정한 현금 창출 기계 입증.
+  </div>
+</div>
+
+<!-- ===== 04: 차트 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 차트</div>
+  <h2>매출 YoY 성장률 + 총이익률 추이</h2>
+  <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">
+    초록 실선 = 매출 YoY 성장률. 파란 점선 = 총이익률(GM). 성장률 둔화 속에 GM은 꾸준히 우상향 &mdash; 수익의 질 개선 스토리.
+  </p>
+
+  <!-- CHART 1: Revenue YoY + Gross Margin -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px 16px 16px;margin-bottom:32px;">
+    <svg viewBox="0 0 860 350" style="width:100%;height:auto;font-family:'IBM Plex Mono',monospace;">
+      <!-- Y축 범위: 0~35% (GM), 0~25% (YoY 별도 스케일) -->
+      <!-- 통합 Y축: 0~35%, 각 10%마다 선 -->
+      <!-- Grid -->
+      <line x1="75" y1="30" x2="75" y2="280" stroke="#2a2a2a" stroke-width="1"/>
+      <line x1="75" y1="280" x2="820" y2="280" stroke="#2a2a2a" stroke-width="1"/>
+      <line x1="75" y1="30" x2="820" y2="30" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="75" y1="80" x2="820" y2="80" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="75" y1="130" x2="820" y2="130" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="75" y1="180" x2="820" y2="180" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="75" y1="230" x2="820" y2="230" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+
+      <!-- Y 레이블 (오른쪽: GM %) -->
+      <text x="65" y="34" fill="#555" font-size="9" text-anchor="end">35%</text>
+      <text x="65" y="84" fill="#555" font-size="9" text-anchor="end">30%</text>
+      <text x="65" y="134" fill="#555" font-size="9" text-anchor="end">25%</text>
+      <text x="65" y="184" fill="#555" font-size="9" text-anchor="end">20%</text>
+      <text x="65" y="234" fill="#555" font-size="9" text-anchor="end">15%</text>
+      <text x="65" y="284" fill="#555" font-size="9" text-anchor="end">10%</text>
+
+      <!-- X 레이블 (8분기) -->
+      <!-- x positions: 75, 183, 291, 399, 507, 615, 723, 820 -->
+      <text x="75" y="300" fill="#888" font-size="9" text-anchor="middle">Q2'24</text>
+      <text x="183" y="300" fill="#888" font-size="9" text-anchor="middle">Q3'24</text>
+      <text x="291" y="300" fill="#888" font-size="9" text-anchor="middle">Q4'24</text>
+      <text x="399" y="300" fill="#888" font-size="9" text-anchor="middle">Q1'25</text>
+      <text x="507" y="300" fill="#888" font-size="9" text-anchor="middle">Q2'25</text>
+      <text x="615" y="300" fill="#888" font-size="9" text-anchor="middle">Q3'25</text>
+      <text x="723" y="300" fill="#888" font-size="9" text-anchor="middle">Q4'25</text>
+      <text x="820" y="300" fill="#1DB954" font-size="9" font-weight="700" text-anchor="middle">Q1'26</text>
+
+      <!-- 매출 YoY: 20,19,16,15,15,7,13,8 -->
+      <!-- y = 280 - (val - 5) / 30 * 250 -->
+      <!-- val=20: 280-(15/30*250)=280-125=155 | val=7: 280-(2/30*250)=280-16.7=263 -->
+      <!-- 스케일: y = 280 - (val/35)*250 -->
+      <!-- 20%: 280-(20/35*250)=280-142.9=137 | 7%: 280-(7/35*250)=280-50=230 -->
+      <polyline fill="none" stroke="#1DB954" stroke-width="2.5"
+        points="75,137 183,144 291,166 399,173 507,173 615,230 723,187 820,223"/>
+      <circle cx="75" cy="137" r="4" fill="#1DB954"/>
+      <text x="75" y="128" fill="#1DB954" font-size="9" text-anchor="middle" font-weight="600">20%</text>
+      <circle cx="183" cy="143" r="4" fill="#1DB954"/>
+      <text x="183" y="134" fill="#1DB954" font-size="9" text-anchor="middle">19%</text>
+      <circle cx="291" cy="166" r="4" fill="#1DB954"/>
+      <text x="291" y="157" fill="#1DB954" font-size="9" text-anchor="middle">16%</text>
+      <circle cx="399" cy="173" r="4" fill="#1DB954"/>
+      <text x="399" y="164" fill="#1DB954" font-size="9" text-anchor="middle">15%</text>
+      <circle cx="507" cy="173" r="4" fill="#ff4d4d"/>
+      <text x="507" y="184" fill="#ff4d4d" font-size="9" text-anchor="middle">15%</text>
+      <!-- Q2'25 miss marker -->
+      <rect x="501" y="168" width="12" height="12" rx="2" fill="#ff4d4d22" stroke="#ff4d4d" stroke-width="1"/>
+      <text x="507" y="177" fill="#ff4d4d" font-size="7" text-anchor="middle">M</text>
+      <circle cx="615" cy="230" r="4" fill="#1DB954"/>
+      <text x="615" y="242" fill="#1DB954" font-size="9" text-anchor="middle">7%</text>
+      <circle cx="723" cy="187" r="4" fill="#1DB954"/>
+      <text x="723" y="178" fill="#1DB954" font-size="9" text-anchor="middle">13%</text>
+      <circle cx="820" cy="223" r="4" fill="#1DB954"/>
+      <text x="820" y="215" fill="#1DB954" font-size="9" text-anchor="middle">8%</text>
+
+      <!-- 총이익률: 29.2,31.1,32.2,31.6,31.5,31.6,33.1,33.0 -->
+      <!-- y = 280 - (val/35)*250 -->
+      <!-- 29.2: 280-208.6=71.4 | 33.1: 280-236.4=43.6 -->
+      <polyline fill="none" stroke="#4da6ff" stroke-width="2" stroke-dasharray="6,3" opacity="0.85"
+        points="75,71 183,58 291,50 399,54 507,55 615,54 723,44 820,44"/>
+      <circle cx="75" cy="71" r="3" fill="#4da6ff" opacity="0.85"/>
+      <text x="75" y="64" fill="#4da6ff" font-size="8" text-anchor="middle" opacity="0.9">29.2%</text>
+      <circle cx="183" cy="57" r="3" fill="#4da6ff" opacity="0.85"/>
+      <text x="183" y="50" fill="#4da6ff" font-size="8" text-anchor="middle" opacity="0.9">31.1%</text>
+      <circle cx="291" cy="50" r="3" fill="#4da6ff" opacity="0.85"/>
+      <text x="291" y="43" fill="#4da6ff" font-size="8" text-anchor="middle" opacity="0.9">32.2%</text>
+      <circle cx="507" cy="56" r="3" fill="#4da6ff" opacity="0.85"/>
+      <circle cx="723" cy="44" r="4" fill="#4da6ff" opacity="0.9"/>
+      <text x="740" y="38" fill="#4da6ff" font-size="9" text-anchor="start" opacity="0.9">33.1% ATH</text>
+      <circle cx="820" cy="44" r="4" fill="#4da6ff" stroke="#fff" stroke-width="1.5"/>
+      <text x="820" y="37" fill="#4da6ff" font-size="8" text-anchor="middle" opacity="0.9">33.0%</text>
+
+      <!-- Legend -->
+      <text x="85" y="328" fill="#1DB954" font-size="10">&#9679; 매출 YoY 성장률</text>
+      <text x="310" y="328" fill="#4da6ff" font-size="10">- - &#9679; 총이익률 (GM)</text>
+      <text x="510" y="328" fill="#ff4d4d" font-size="10">M = Miss 분기</text>
+    </svg>
+  </div>
+
+  <h2>MAU + Premium 구독자 추이</h2>
+  <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">
+    초록 실선 = MAU(왼쪽 축, 단위 백만). 보라 점선 = Premium 구독자(오른쪽 축). 두 지표 모두 우상향 유지. Premium/MAU 비율(전환율) = 38~39% 안정.
+  </p>
+
+  <!-- CHART 2: MAU + Premium Subscribers -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px 16px 16px;margin-bottom:16px;">
+    <svg viewBox="0 0 860 310" style="width:100%;height:auto;font-family:'IBM Plex Mono',monospace;">
+      <!-- Grid -->
+      <line x1="75" y1="20" x2="75" y2="240" stroke="#2a2a2a" stroke-width="1"/>
+      <line x1="75" y1="240" x2="820" y2="240" stroke="#2a2a2a" stroke-width="1"/>
+      <line x1="75" y1="60" x2="820" y2="60" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="75" y1="100" x2="820" y2="100" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="75" y1="140" x2="820" y2="140" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="75" y1="180" x2="820" y2="180" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+
+      <!-- Y 레이블 왼쪽 (MAU: 550M~800M) -->
+      <text x="65" y="24" fill="#555" font-size="9" text-anchor="end">800M</text>
+      <text x="65" y="64" fill="#555" font-size="9" text-anchor="end">750M</text>
+      <text x="65" y="104" fill="#555" font-size="9" text-anchor="end">700M</text>
+      <text x="65" y="144" fill="#555" font-size="9" text-anchor="end">650M</text>
+      <text x="65" y="184" fill="#555" font-size="9" text-anchor="end">600M</text>
+      <text x="65" y="244" fill="#555" font-size="9" text-anchor="end">550M</text>
+
+      <!-- Y 레이블 오른쪽 (Premium: 230M~310M) -->
+      <text x="830" y="24" fill="#b388ff" font-size="9" text-anchor="start">310M</text>
+      <text x="830" y="74" fill="#b388ff" font-size="9" text-anchor="start">290M</text>
+      <text x="830" y="124" fill="#b388ff" font-size="9" text-anchor="start">270M</text>
+      <text x="830" y="174" fill="#b388ff" font-size="9" text-anchor="start">250M</text>
+      <text x="830" y="224" fill="#b388ff" font-size="9" text-anchor="start">230M</text>
+
+      <!-- X 레이블 -->
+      <text x="75" y="260" fill="#888" font-size="9" text-anchor="middle">Q2'24</text>
+      <text x="183" y="260" fill="#888" font-size="9" text-anchor="middle">Q3'24</text>
+      <text x="291" y="260" fill="#888" font-size="9" text-anchor="middle">Q4'24</text>
+      <text x="399" y="260" fill="#888" font-size="9" text-anchor="middle">Q1'25</text>
+      <text x="507" y="260" fill="#888" font-size="9" text-anchor="middle">Q2'25</text>
+      <text x="615" y="260" fill="#888" font-size="9" text-anchor="middle">Q3'25</text>
+      <text x="723" y="260" fill="#888" font-size="9" text-anchor="middle">Q4'25</text>
+      <text x="820" y="260" fill="#1DB954" font-size="9" font-weight="700" text-anchor="middle">Q1'26</text>
+
+      <!-- MAU: 626,640,675,678,696,713,751,761 -->
+      <!-- y = 240 - (val-550)/250*220 -->
+      <!-- 626: 240-(76/250*220)=240-66.9=173 | 761: 240-(211/250*220)=240-185.7=54 -->
+      <polygon fill="#1DB95411"
+        points="75,240 75,173 183,161 291,130 399,127 507,112 615,97 723,63 820,54 820,240"/>
+      <polyline fill="none" stroke="#1DB954" stroke-width="2.5"
+        points="75,173 183,161 291,130 399,127 507,112 615,97 723,63 820,54"/>
+      <circle cx="75" cy="173" r="4" fill="#1DB954"/>
+      <text x="75" y="163" fill="#1DB954" font-size="9" text-anchor="middle">626M</text>
+      <circle cx="183" cy="161" r="4" fill="#1DB954"/>
+      <text x="183" y="151" fill="#1DB954" font-size="9" text-anchor="middle">640M</text>
+      <circle cx="291" cy="130" r="4" fill="#1DB954"/>
+      <text x="291" y="120" fill="#1DB954" font-size="9" text-anchor="middle">675M</text>
+      <circle cx="399" cy="127" r="3" fill="#1DB954"/>
+      <circle cx="507" cy="112" r="4" fill="#1DB954"/>
+      <text x="507" y="102" fill="#1DB954" font-size="9" text-anchor="middle">696M</text>
+      <circle cx="615" cy="97" r="4" fill="#1DB954"/>
+      <text x="615" y="87" fill="#1DB954" font-size="9" text-anchor="middle">713M</text>
+      <circle cx="723" cy="63" r="4" fill="#ffc107"/>
+      <text x="723" y="53" fill="#ffc107" font-size="9" text-anchor="middle">751M</text>
+      <circle cx="820" cy="54" r="5" fill="#1DB954" stroke="#fff" stroke-width="1.5"/>
+      <text x="820" y="44" fill="#1DB954" font-size="11" text-anchor="middle" font-weight="700">761M</text>
+
+      <!-- Premium: 246,252,263,268,276,281,290,293 -->
+      <!-- y = 240 - (val-230)/80*220 -->
+      <!-- 246: 240-(16/80*220)=240-44=196 | 293: 240-(63/80*220)=240-173.25=66.75 -->
+      <polyline fill="none" stroke="#b388ff" stroke-width="2" stroke-dasharray="6,3" opacity="0.85"
+        points="75,196 183,180 291,149 399,136 507,114 615,100 723,75 820,67"/>
+      <circle cx="75" cy="196" r="3" fill="#b388ff" opacity="0.85"/>
+      <text x="75" y="208" fill="#b388ff" font-size="8" text-anchor="middle" opacity="0.9">246M</text>
+      <circle cx="183" cy="180" r="3" fill="#b388ff" opacity="0.85"/>
+      <circle cx="291" cy="149" r="3" fill="#b388ff" opacity="0.85"/>
+      <text x="291" y="162" fill="#b388ff" font-size="8" text-anchor="middle" opacity="0.9">263M</text>
+      <circle cx="507" cy="114" r="3" fill="#b388ff" opacity="0.85"/>
+      <circle cx="723" cy="75" r="4" fill="#b388ff" opacity="0.9"/>
+      <text x="723" y="88" fill="#b388ff" font-size="9" text-anchor="middle" opacity="0.9">290M</text>
+      <circle cx="820" cy="67" r="4" fill="#b388ff" stroke="#fff" stroke-width="1.5"/>
+      <text x="820" y="59" fill="#b388ff" font-size="9" text-anchor="middle" opacity="0.9">293M</text>
+
+      <!-- Legend -->
+      <text x="85" y="287" fill="#1DB954" font-size="10">&#9679; MAU (좌축, 백만)</text>
+      <text x="290" y="287" fill="#b388ff" font-size="10">- - &#9679; Premium 구독자 (우축, 백만)</text>
+      <text x="620" y="287" fill="#ffc107" font-size="10">&#9679; 분기 최고치</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ===== 05: 컨콜 어조 타임라인 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 컨콜 어조 타임라인</div>
+  <h2>Ek의 "효율화" &rarr; "다시 성장" 어조 전환</h2>
+
+  <div class="timeline">
+<div class="tl-item">
+      <div class="tl-dot beat"></div>
+      <div class="tl-header">
+        <span class="tl-q">Q1 2026 &mdash; Apr 28</span>
+        <span class="tl-badge beat-b">BEAT &mdash; 모든 지표 선방</span>
+        <span class="tl-score">자신감 ████████░░ 8/10</span>
+      </div>
+      <div class="tl-body">
+        <strong>공동CEO 체제 안착 확인.</strong> 매출 €4.53B, GM 33.0%, 운영이익 €715M(모두 가이던스 충족·초과).<br>
+        EPS €3.46 vs 컨센서스 €3.03 &mdash; 14% 초과달성. Premium 구독자 293M(북미 감소, 기타 지역 커버).<br>
+        광고 매출 -5% YoY &mdash; 여전히 회복 중. 가격 인상(북미 $1~2 인상) 효과는 하반기로 지연.
+        <span class="tl-quote">"We're operating from a position of strength. The fundamentals of the business have never been better."</span>
+        <strong>화법:</strong> "position of strength", "never been better" &mdash; Ek 화법 계승. 안정감 연출.<br>
+        AI 전략 구체화: Song DNA(유사 트랙 발견), AI 플레이리스트 전 세계 확대, 오디오북 구독 통합.
+      </div>
+    </div>
+<div class="tl-item">
+      <div class="tl-dot beat"></div>
+      <div class="tl-header">
+        <span class="tl-q">Q4 2025 &mdash; Feb 10, 2026</span>
+        <span class="tl-badge beat-b">BEAT &mdash; 연간 운영이익 €2.5B</span>
+        <span class="tl-score">자신감 ████████░░ 8/10</span>
+      </div>
+      <div class="tl-body">
+        <strong>공동CEO 첫 컨콜.</strong> Norström + Söderström 체제 공식 가동. MAU 751M(Q4 역사상 최대 순증 38M).<br>
+        연간 운영이익 €2.5B(2024년 €1.37B의 2배). FCF €833M. "Year of Raising Ambition" 선언.<br>
+        Norström: "선택지가 모두 열려 있다. 성장, 수익, AI &mdash; 세 가지 동시에 가능하다."
+        <span class="tl-quote">"2025 proved that we can grow users, grow profitability, and invest in the future — all at the same time. 2026 will be the year of raising ambition."</span>
+        <strong>화법:</strong> Ek 없는 첫 무대. "ambition" 키워드 반복. 조심스럽지만 낙관적. 새 체제의 정착 시도.
+      </div>
+    </div>
+<div class="tl-item">
+      <div class="tl-dot peak"></div>
+      <div class="tl-header">
+        <span class="tl-q">Q3 2025 &mdash; Nov 4</span>
+        <span class="tl-badge beat-b">BEAT &mdash; 가이던스 20% 초과</span>
+        <span class="tl-score">자신감 ██████████ 10/10</span>
+      </div>
+      <div class="tl-body">
+        <strong>완벽한 반전.</strong> 운영이익 €582M(가이던스 €97M 초과). MAU 700M 최초 돌파. FCF €806M 사상 최고.<br>
+        Q2 광고 쇼크 이후 단 1분기 만에 복귀. "실행 엔진이 살아있다"는 증명.<br>
+        Ek의 사실상 마지막 CEO 컨콜 &mdash; 2026년 Executive Chairman 전환 발표(2025.9.30) 직후.
+        <span class="tl-quote">"The business is healthy. We're shipping faster than ever. I couldn't be more confident in what's ahead."</span>
+        CEO 마지막 등장답게 <em>레거시 확정</em> 어조. "수익성 + 성장 동시 달성" 내러티브를 완성.
+        <strong>화법:</strong> "fastest ever", "700 million", "I couldn't be more confident" &mdash; 최고조 자신감. 퇴장 준비 완료.
+      </div>
+    </div>
+<div class="tl-item">
+      <div class="tl-dot miss"></div>
+      <div class="tl-header">
+        <span class="tl-q">Q2 2025 &mdash; Jul 29</span>
+        <span class="tl-badge miss-b">MISS &mdash; 운영손실 전환</span>
+        <span class="tl-score">자신감 ████░░░░░░ 4/10</span>
+      </div>
+      <div class="tl-body">
+        <strong>2년 8분기 중 유일한 진성 미스.</strong> 운영이익 -€55M. 광고 매출 급감 + 팟캐스트 Partner Program 전환 비용.<br>
+        주가 -12% (2년 최악). 시장은 관대하지 않았다.<br>
+        Ek의 이례적 발언: <em>"unhappy"</em> &mdash; CEO가 공개적으로 불만을 표현하는 것은 극히 드문 일.
+        <span class="tl-quote">"I am unhappy with where we are today on advertising. It hasn't happened. We are behind on the plan."</span>
+        그러나 동시에 MAU·구독자 성장은 견조 &mdash; "강한 유저 기반, 실행 문제일 뿐" 내러티브 유지 시도.
+        <span class="tl-quote">"We do not make decisions to achieve specific short-term quarterly outcomes. The long game is what matters."</span>
+        <strong>화법:</strong> 솔직한 자기비판 + 장기 비전으로 급선회. 투명성과 낙관을 동시에 내세운 위기 관리.
+      </div>
+    </div>
+<div class="tl-item">
+      <div class="tl-dot miss"></div>
+      <div class="tl-header">
+        <span class="tl-q">Q1 2025 &mdash; Apr 29</span>
+        <span class="tl-badge miss-b">EPS Miss &mdash; -54%</span>
+        <span class="tl-score">자신감 █████░░░░░ 5/10</span>
+      </div>
+      <div class="tl-body">
+        <strong>성장 모드 재선언 + EPS 쇼크.</strong> Premium 268M(가이던스 +3M 초과), GM 31.6% 모두 매출 지표는 선방.<br>
+        그러나 EPS €1.07 vs 컨센서스 €2.33 &mdash; 54% 미달. Social Charges + 성장 투자 비용 동시 반영.<br>
+        Ek는 처음으로 관세·글로벌 불확실성을 언급하며 "noise"라는 표현 사용. 방어적 프레이밍.
+        <span class="tl-quote">"Despite the macro noise, the business is healthy. Our Q1 subscriber net adds were the best since 2020."</span>
+        <strong>화법:</strong> "noise" = 외부 탓. 내부 지표를 강조하며 EPS 미스를 구조적 문제와 분리하려는 시도.
+        <span class="tl-quote analyst-q">"The EPS miss is alarming on the surface, but dig deeper — Social Charges account for most of it. The real margin trajectory is intact." &mdash; 애널리스트 노트</span>
+      </div>
+    </div>
+<div class="tl-item">
+      <div class="tl-dot beat"></div>
+      <div class="tl-header">
+        <span class="tl-q">Q4 2024 &mdash; Feb 4, 2025</span>
+        <span class="tl-badge beat-b">매출 Beat / EPS Miss</span>
+        <span class="tl-score">자신감 ███████░░░ 7/10</span>
+      </div>
+      <div class="tl-body">
+        <strong>역사적 첫 연간 흑자 &mdash; 순이익 €1.14B</strong> vs 2023년 순손실 €505M. 6년 만의 대전환.<br>
+        EPS $1.88 vs 컨센서스 $2.07 미스 &mdash; 주가 보상 비용(Social Charges) 급등이 원인. 수익성 악화가 아님.<br>
+        MAU Q4 최대 순증(35M) 달성. 구독자 263M. "Double Down on Music" 선언 &mdash; 팟캐스트 전략 일부 후퇴.
+        <span class="tl-quote">"2024 was truly a historic year for Spotify. We demonstrated that growth and profitability can go hand-in-hand."</span>
+        <strong>화법:</strong> "historic", "hand-in-hand" &mdash; 연간 성과로 분기 EPS 미스 희석. 능숙한 프레이밍.
+      </div>
+    </div>
+<div class="tl-item">
+      <div class="tl-dot beat"></div>
+      <div class="tl-header">
+        <span class="tl-q">Q3 2024 &mdash; Nov 12</span>
+        <span class="tl-badge beat-b">BEAT &mdash; 운영이익 €454M 폭발</span>
+        <span class="tl-score">자신감 █████████░ 9/10</span>
+      </div>
+      <div class="tl-body">
+        <strong>레버리지의 위력 확인.</strong> 매출 +19% 성장에 운영이익 +70% &mdash; 영업레버리지 작동 증명.<br>
+        처음으로 "수익성이 성장의 결과가 아니라 <em>선택</em>이었다"는 논리 구사.<br>
+        Premium 구독자 252M으로 역대 최고. 가격 인상 후에도 이탈이 없었다는 사실이 자신감 원천.
+        <span class="tl-quote">"We always believed that we could be profitable. We now have proof. And this is only the beginning."</span>
+        <strong>화법:</strong> "proof", "only the beginning", "operating leverage" &mdash; 승리 선언 + 다음 단계 예고.
+      </div>
+    </div>
+<div class="tl-item">
+      <div class="tl-dot beat"></div>
+      <div class="tl-header">
+        <span class="tl-q">Q2 2024 &mdash; Jul 23</span>
+        <span class="tl-badge beat-b">BEAT &mdash; 첫 흑자 전환 분기</span>
+        <span class="tl-score">자신감 ████████░░ 8/10</span>
+      </div>
+      <div class="tl-body">
+        <strong>수익성 전환의 첫 공식 확인.</strong> 총이익률 29.2%로 구조조정 효과 가시화. 운영이익 €266M &mdash; "기록적 수치".<br>
+        Ek는 <em>"Cost Discipline"</em> 키워드를 전면에 내세우면서도 "성장을 포기한 것이 아니다"를 반복.<br>
+        MAU 626M은 예상(16M 순증) 대비 -5M 부진했지만, 주가 반응은 긍정적. 시장은 이익을 먼저 봤다.
+        <span class="tl-quote">"We are taking a disciplined approach to cost management while still investing in areas that will drive long-term growth."</span>
+        <strong>화법:</strong> "discipline", "efficiency", "record profit" &mdash; 구조조정 리더십 연출.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== 06: 시간축 분석 ===== -->
+<div class="section">
+  <div class="section-label">06 &mdash; 시간축 분석</div>
+  <h2>과거의 약속, 현재의 결과, 미래의 기대</h2>
+
+  <h3 style="color:var(--blue);margin-bottom:16px;">2년 전 기대 (2024 초)</h3>
+  <div class="note-box" style="margin-bottom:24px;">
+    2024년 초 Ek는 1,500명 해고 직후 "우리는 수익성 기계가 될 것이다"라고 선언했다. 동시에 MAU 10억, 오디오 플랫폼 전 세계 1위, AI 기반 발견 경험이라는 세 개의 깃발을 꽂았다.
+    투자자들이 "수익성이냐 성장이냐"를 물었을 때, Ek의 답은 "둘 다"였다.
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:200px;">약속 / 기대</th>
+        <th style="width:80px;text-align:center;">달성</th>
+        <th>근거</th>
+        <th>경영진 원문 (당시)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>수익성 전환 (첫 연간 흑자)</strong></td>
+        <td style="text-align:center;font-size:20px;color:var(--accent);">O</td>
+        <td>2024 순이익 €1.14B(역대 최초). 2025 운영이익 €2.5B. 총이익률 27% &rarr; 33% 달성.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"We are building a profitable Spotify. It's not a question of if, but when." (Q1'24 컨콜)</td>
+      </tr>
+      <tr>
+        <td><strong>가격 인상 &amp; 구독자 유지</strong></td>
+        <td style="text-align:center;font-size:20px;color:var(--accent);">O</td>
+        <td>전 세계 가격 인상 단행 후 이탈 없이 구독자 246M &rarr; 293M. ARPU 상승.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"We are still one of the best value products in entertainment." (Q2'24)</td>
+      </tr>
+      <tr>
+        <td><strong>팟캐스트 수익화</strong></td>
+        <td style="text-align:center;font-size:20px;color:var(--yellow);">~</td>
+        <td>Spotify Partner Program 전환으로 전략 변경. 독점 팟캐스트 비용 삭감은 GM에 기여했으나, 광고 수익화는 지연.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"Podcasting is our biggest bet." (2023~2024 반복)</td>
+      </tr>
+      <tr>
+        <td><strong>오디오북 구독 확장</strong></td>
+        <td style="text-align:center;font-size:20px;color:var(--accent);">O</td>
+        <td>미국·영국·캐나다 등 주요 시장 오디오북 구독 포함. Premium 가치 제안 강화. "스틱니스" 증가.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"Audiobooks will become a core pillar of the Spotify experience." (Q4'23)</td>
+      </tr>
+      <tr>
+        <td><strong>MAU 7억 돌파</strong></td>
+        <td style="text-align:center;font-size:20px;color:var(--accent);">O</td>
+        <td>Q3'25에 MAU 713M으로 700M 최초 돌파. Q1'26 761M.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"1 billion users is the goal. 700M is a milestone on that journey." (2024)</td>
+      </tr>
+      <tr>
+        <td><strong>광고 사업 다각화</strong></td>
+        <td style="text-align:center;font-size:20px;color:var(--red);">X</td>
+        <td>광고 매출 총매출 10% 내외 정체. Q2'25 -5% YoY 역성장. Q1'26도 -5% YoY. 2년째 목표 미달.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"Advertising is a massive opportunity we haven't fully captured." (반복)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 style="color:var(--purple);margin:32px 0 16px;">18개월 후 전망 (2027 중반)</h3>
+  <div class="note-box" style="margin-bottom:24px;">
+    공동CEO 체제(Norström + Söderström)가 심고 있는 씨앗. 컨콜에서 반복 강조하는 미래 베팅.
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:200px;">카탈리스트</th>
+        <th style="width:80px;text-align:center;">확신도</th>
+        <th>근거</th>
+        <th>리스크</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>AI 발견 엔진 수익화</strong></td>
+        <td style="text-align:center;"><span style="color:var(--yellow);font-weight:700;">중간</span></td>
+        <td>DJ, Song DNA, AI 플레이리스트 &mdash; 발견 경험 차별화. 구독자 전환율(MAU&rarr;Premium) 개선 가능. "AI가 이탈을 줄인다"는 가설.</td>
+        <td>Apple Music, YouTube Music도 AI 기능 도입. 차별화 유지 어려움. 수익화 경로 아직 불명확.</td>
+      </tr>
+      <tr>
+        <td><strong>광고 기술 내재화 반등</strong></td>
+        <td style="text-align:center;"><span style="color:var(--yellow);font-weight:700;">중간</span></td>
+        <td>Spotify Audience Network, 직접 광고 판매 강화. "2026 하반기 개선" 경영진 가이던스. MAU 761M이라는 광고 인벤토리는 강점.</td>
+        <td>2년째 미달. 광고 시장 자체의 경기 민감성. 프로그래매틱 기반 구축에 시간 필요.</td>
+      </tr>
+      <tr>
+        <td><strong>구독 티어 다변화</strong></td>
+        <td style="text-align:center;"><span style="color:var(--accent);font-weight:700;">높음</span></td>
+        <td>Super Fan 티어(하이파이 음질 + 아티스트 독점 콘텐츠 + 굿즈) 도입 논의 진행 중. 현재 $12 &rarr; $20+ 객단가 상향 가능.</td>
+        <td>아티스트 로열티 분쟁 리스크. 기존 구독자 저항. 음반사 협상력.</td>
+      </tr>
+      <tr>
+        <td><strong>비디오 팟캐스트 플랫폼화</strong></td>
+        <td style="text-align:center;"><span style="color:var(--yellow);font-weight:700;">중간</span></td>
+        <td>YouTube 대항마 포지셔닝. 이미 Creator monetization 툴 제공. 팟캐스터 이주 인센티브 강화.</td>
+        <td>YouTube의 압도적 크리에이터 생태계. 비디오 인프라 투자 비용. 수익성 압박.</td>
+      </tr>
+      <tr>
+        <td><strong>신흥시장 MAU &rarr; Premium 전환</strong></td>
+        <td style="text-align:center;"><span style="color:var(--yellow);font-weight:700;">중간</span></td>
+        <td>MAU의 60% 이상이 이머징 마켓(인도, 동남아, 아프리카). 현재 전환율은 선진국의 절반 이하. 현지화 가격 전략으로 개선 여지.</td>
+        <td>현지 경쟁자(JioSaavn, Joox). 결제 인프라. 현지화 콘텐츠 비용.</td>
+      </tr>
+      <tr>
+        <td><strong>MAU 10억 돌파</strong></td>
+        <td style="text-align:center;"><span style="color:var(--red);font-weight:700;">낮음</span></td>
+        <td>현재 성장률(+12% YoY) 유지 시 2028년 내외 달성 가능. Ek의 오랜 목표.</td>
+        <td>성장률 둔화 추세. 신규 시장 침투 속도. 경쟁 심화. 2027년 내 달성은 비현실적.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note-box" style="margin-top:24px;">
+    <strong>요약:</strong>
+    2년 전 약속 6개 중 O 4개, ~ 1개, X 1개. 핵심 약속(수익성 + 구독자 성장)은 이행 완료.
+    광고 다각화만 2년째 실패 &mdash; 유일하지만 반복되는 약점.
+    18개월 후 &mdash; 구독 티어 다변화가 가장 확실한 ARPU 상승 경로.
+    AI 수익화와 광고 반등은 "될 것" vs "언제"의 싸움. 공동CEO 체제는 실행력 증명 단계.
+  </div>
+
+  <h3 style="color:var(--purple);margin:32px 0 16px;">상상 시나리오 &mdash; 2028년 초의 이 회사</h3>
+
+  <div class="quote-block" style="border-left-color:var(--purple);">
+    <div class="speaker" style="color:var(--purple);">2028년 1월, 스포티파이</div>
+    <blockquote style="font-style:normal;font-size:14px;line-height:1.9;">
+      2028년 1월, Spotify 주가 $680. 시가총액 $1,350억. 2024년 초 "적자 스트리밍 회사"에서 "유럽 최고의 테크 기업"으로 재평가됐다. 연간 영업이익 €4B. Daniel Ek는 Executive Chairman으로 물러났지만, 매주 금요일 "New Music Friday" 플레이리스트를 직접 큐레이션한다.<br><br>
+
+      <strong>3개 구독 티어가 ARPU를 바꿨다.</strong> 2027년 출시된 "Spotify Platinum" (€19.99/월) &mdash; HiFi 음질 + AI DJ 무제한 + 콘서트 선예매 + 오디오북 15시간. 프리미엄 가입자 3.4억 명 중 22%가 Platinum으로 업그레이드했다. 평균 ARPU가 €5.80에서 €6.90으로 점프. 이건 가격 인상이 아니라 "더 좋은 걸 사겠다"는 자발적 업셀링이었다. 음악 스트리밍 역사상 처음으로 "프리미엄의 프리미엄"이 작동한 것.<br><br>
+
+      <strong>AI DJ가 라디오를 죽였다.</strong> 과장이 아니다. 미국 25~34세의 차량 내 오디오 소비에서 Spotify AI DJ가 AM/FM 라디오를 추월했다. DJ는 사용자의 기분, 날씨, 일정, 최근 들은 곡을 조합해 끊김 없는 스트림을 만든다. "아침 출근길 DJ"와 "금요일 저녁 DJ"는 같은 사람에게 완전히 다른 경험을 준다. 이 기능 하나가 해지율을 0.8%까지 끌어내렸다 &mdash; Netflix(3.2%)의 1/4.<br><br>
+
+      MAU 8.5억 명. 하지만 시장이 더 주목하는 건 <strong>비디오 팟캐스트</strong>다. 2027년 Spotify가 MrBeast와 독점 비디오 팟캐스트 계약을 맺으면서 YouTube의 팟캐스트 시장 지배에 첫 균열이 생겼다. 비디오 팟캐스트 광고 매출만 분기 €380M &mdash; 드디어 광고 사업이 "약점"에서 "성장 엔진"으로 전환된 분기였다. 총이익률 35%, 영업이익률 18%.
+    </blockquote>
+    <div class="analysis" style="border-left-color:var(--purple);">
+      <strong style="color:var(--red);">리스크 한줄:</strong> Apple이 Apple Music에 AI DJ를 탑재하고 번들 가격을 $2 낮추면 Platinum 업셀링 모멘텀이 꺾인다. 그리고 레이블 계약 갱신(2028년)에서 로열티율 1%p 인상 요구가 들어오면 마진 압박 재발.
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Spotify 2-Year Trend Tracker &mdash; 최종 갱신 2026-04-30 &mdash; MACROHARD / Be:Analogue<br>
+  다음 갱신: Q2 2026 실적 발표 후 (2026년 7월 예정)
+</div>
+
+</div>
+</body>
+</html>

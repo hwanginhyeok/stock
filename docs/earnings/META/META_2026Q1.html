@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>META | 메타 플랫폼스 Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #4d8bff; --accent-dim: #4d8bff33;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+    --green: #00d632; --green-dim: #00d63222;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#0668E115,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #4d8bff44; }
+  .verdict.mixed { background:#ffc10722; color:var(--yellow); border:1px solid #ffc10744; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  /* CARDS */
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--green); font-weight:600; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--green); }
+  .negative { color:var(--red); }
+  .neutral { color:var(--yellow); }
+
+  /* KPI TIER */
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#00d63222; color:var(--green); }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  /* QUOTE */
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block.cfo { border-left-color:var(--purple); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block.cfo .speaker { color:var(--purple); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  /* TONE METER */
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  /* NEXT Q */
+  .next-q { background:linear-gradient(135deg,#4d8bff10,var(--surface)); border:1px solid #4d8bff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--accent); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--accent); }
+
+  /* LINKS */
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  /* TAGS */
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--green-dim); color:var(--green); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+  .kw-tag.blue-tag { background:#4da6ff22; color:var(--blue); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  /* KPI NOTE */
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+  /* ALERT BOX */
+  .alert-box { background:#ff4d4d11; border:1px solid #ff4d4d44; border-radius:8px; padding:16px 20px; margin:16px 0; font-size:13px; color:var(--text-dim); }
+  .alert-box strong { color:var(--red); }
+
+  /* HIGHLIGHT BOX */
+  .highlight-box { background:#4d8bff11; border:1px solid #4d8bff33; border-radius:8px; padding:16px 20px; margin:16px 0; font-size:13px; color:var(--text-dim); }
+  .highlight-box strong { color:var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NASDAQ: META</div>
+    <h1>Meta Platforms</h1>
+    <div class="company-kr">메타 플랫폼스</div>
+    <div class="subtitle">Q1 FY2026 실적 딥다이브 &mdash; 2026.04.29 장후 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-04-29</span>
+      <span>|</span>
+      <span>섹터: 통신서비스 / 소셜미디어·광고</span>
+      <span>|</span>
+      <span>시가총액: ~$1.6조</span>
+      <span>|</span>
+      <span>영업이익률: 41%</span>
+    </div>
+    <div class="verdict mixed">MIXED &mdash; 매출·EPS Beat / Capex 기습 상향 → 장후 -6.5%</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">매출</div>
+      <div class="value" style="color:var(--green);">$563.1억</div>
+      <div class="compare">컨센서스: $554.9억 <span class="beat-tag">BEAT +1.5%</span></div>
+      <div class="compare">전년비: +33% (2021년 이후 최고 성장률)</div>
+    </div>
+    <div class="num-card">
+      <div class="label">조정 EPS</div>
+      <div class="value" style="color:var(--green);">$7.31</div>
+      <div class="compare">컨센서스: $6.64 <span class="beat-tag">BEAT +10.1%</span></div>
+      <div class="compare">보고 EPS $10.44 (세금 환급 $80.3억 포함)</div>
+    </div>
+    <div class="num-card">
+      <div class="label">영업이익</div>
+      <div class="value">$229억</div>
+      <div class="compare">영업이익률: 41%</div>
+      <div class="compare">전년비: +27%</div>
+    </div>
+  </div>
+
+  <div class="alert-box">
+    <strong>EPS 해석 주의:</strong> 보고 EPS $10.44는 미국 국세청의 R&amp;D 세금 처리 지침 변경에 따른 $80.3억 세금 환급 효과가 포함된 수치. 이를 제거한 조정 EPS는 $7.31로, 이것이 비즈니스 실질 수익력을 나타내며 이 수치도 컨센서스($6.64)를 10% 상회했다.
+  </div>
+
+  <h3>매출 구성</h3>
+  <table>
+    <thead><tr><th>사업부문</th><th>Q1 2026</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Family of Apps (FoA) 광고</strong></td><td class="mono">$550.0억</td><td class="mono positive">+33%</td><td><span class="kw-tag bullish">CORE ENGINE</span></td></tr>
+      <tr><td><strong>FoA 기타 (Quest, 구독 등)</strong></td><td class="mono">$9.3억</td><td class="mono positive">+53%</td><td><span class="kw-tag bullish">GROWING</span></td></tr>
+      <tr><td><strong>FoA 합계</strong></td><td class="mono">$559.3억</td><td class="mono positive">+33%</td><td><span class="kw-tag bullish">DOMINANT</span></td></tr>
+      <tr><td><strong>Reality Labs</strong></td><td class="mono">$4.0억</td><td class="mono negative">-2%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
+      <tr><td><strong>전체 매출</strong></td><td class="mono">$563.1억</td><td class="mono positive">+33%</td><td><span class="kw-tag bullish">33% — 최고 성장</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>손익 주요 항목</h3>
+  <table>
+    <thead><tr><th>항목</th><th>Q1 2026</th><th>전년비</th><th>비고</th></tr></thead>
+    <tbody>
+      <tr><td><strong>FoA 영업이익</strong></td><td class="mono positive">$271억</td><td class="mono positive">+36%</td><td>FoA 영업이익률 ~48%</td></tr>
+      <tr><td><strong>Reality Labs 영업손실</strong></td><td class="mono negative">-$40.3억</td><td class="mono negative">손실 확대</td><td>누적 손실 $700억+ 돌파</td></tr>
+      <tr><td><strong>전사 영업이익</strong></td><td class="mono positive">$229억</td><td class="mono positive">+27%</td><td>영업이익률 41%</td></tr>
+      <tr><td><strong>순이익 (보고)</strong></td><td class="mono positive">$268억</td><td class="mono positive">+35%</td><td>세금 환급 $80.3억 포함</td></tr>
+      <tr><td><strong>잉여현금흐름 (FCF)</strong></td><td class="mono positive">$124억</td><td class="mono negative">전분기比 감소</td><td>Q1 Capex $198.4억 반영</td></tr>
+      <tr><td><strong>Q1 Capex</strong></td><td class="mono negative">$198.4억</td><td class="mono negative">급증</td><td>연간 $1,250~1,450억 가이던스의 Q1분</td></tr>
+    </tbody>
+  </table>
+
+  <div class="next-q">
+    <h3>Q2 2026 가이던스 및 연간 전망</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">Q2 매출 가이던스</div><div class="nq-value">$580~610억</div></div>
+      <div class="next-q-item"><div class="nq-label">FY 영업비용 가이던스</div><div class="nq-value">$1,620~1,690억</div></div>
+      <div class="next-q-item"><div class="nq-label">FY Capex 가이던스</div><div class="nq-value">$1,250~1,450억</div></div>
+    </div>
+  </div>
+
+  <div class="kpi-note" style="margin-top:16px;">
+    <strong>Q2 가이던스 해석:</strong> 미드포인트 $595억은 컨센서스($596억)와 사실상 일치. 환율 효과 +2% 순풍 포함. 진짜 시장 반응 트리거는 가이던스가 아닌 <strong>Capex 상향 ($1,150~1,350억 → $1,250~1,450억, 상단 기준 +$100억)</strong>이었다.
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>이 회사를 읽는 숫자들</h2>
+
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; DAP와 광고 매출 성장률</span>
+    <span class="tier-desc">소셜플랫폼의 생명선 = 사람이 많아야 광고가 팔린다</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>DAP (Family Daily Active People)</strong></td>
+        <td class="mono positive" style="font-size:18px; font-weight:700;">35.6억명</td>
+        <td class="mono positive">+5.5% (vs Q1 2025 33.7억)</td>
+        <td>Facebook, Instagram, WhatsApp, Messenger 일일 사용자 합산. "Family"가 규모의 해자.</td>
+      </tr>
+      <tr>
+        <td><strong>광고 매출 성장률</strong></td>
+        <td class="mono positive" style="font-size:18px; font-weight:700;">+33%</td>
+        <td class="mono">&mdash;</td>
+        <td>2021년 이후 가장 빠른 분기 성장. AI 기반 타겟팅이 광고 효율을 끌어올린 직접 증거.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>왜 DAP가 MAU보다 중요한가:</strong> MAU는 "한 달에 한 번이라도 들어왔나"를 세지만, DAP는 "매일 들어오는 진성 사용자"를 센다. 35.6억 DAP = 세계 인구의 약 44%가 매일 Meta 제품을 사용한다는 뜻. 이 규모가 광고 단가 협상력이자 AI 학습 데이터의 원천이다.
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">광고 건강 &mdash; 노출수 vs 단가의 이중 엔진</span>
+    <span class="tier-desc">둘 다 올라가면 → 광고 사업 황금기</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>광고 노출 수</strong></td><td class="mono positive">+19% YoY</td><td class="mono">&mdash;</td><td>Reels, Stories 확장 + AI 피드 최적화로 노출 인벤토리 증가</td></tr>
+      <tr><td><strong>평균 광고 단가 (CPM)</strong></td><td class="mono positive">+12% YoY</td><td class="mono">&mdash;</td><td>노출이 19% 늘었는데 단가도 12% 상승 = 수요가 공급을 초과하는 상태</td></tr>
+      <tr><td><strong>ARPP (인당 평균 매출)</strong></td><td class="mono positive">$15.66</td><td class="mono positive">+27% (vs $12.36)</td><td>더 많은 사람에게서 더 많이 벌고 있다. AI 타겟팅 고도화의 결과.</td></tr>
+      <tr><td><strong>광고주 수</strong></td><td class="mono positive">1,000만+ 광고주</td><td class="mono positive">증가 추세</td><td>중소기업(SMB) AI 광고 도구 Advantage+ 확산이 주요 동인</td></tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>노출+단가 동시 상승의 의미:</strong> 광고 매출 = 노출 수 x 단가. 둘 다 올라가는 구간은 광고 사업의 황금기다. 이 구간이 지속되는 한 매출 성장의 멈춤은 없다. 단, 단가 상승은 경기 하강 시 가장 먼저 꺾이는 변수이므로 거시경제 모니터링이 필수.
+  </div>
+
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">수익성 &mdash; 규모의 경제 vs Capex의 전쟁</span>
+    <span class="tier-desc">AI 투자가 이익을 얼마나 잠식하는가</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>FoA 영업이익률</strong></td><td class="mono positive">~48%</td><td class="mono positive">개선</td><td>핵심 사업의 이익 기계. 광고 + AI 효율로 마진 방어</td></tr>
+      <tr><td><strong>전사 영업이익률</strong></td><td class="mono positive">41%</td><td class="mono positive">유지</td><td>Reality Labs 손실 흡수 후에도 41%. 핵심 사업 압도적 수익성</td></tr>
+      <tr><td><strong>잉여현금흐름 (FCF)</strong></td><td class="mono neutral">$124억</td><td class="mono negative">전분기比 감소</td><td>Capex $198.4억을 제하면 $124억. Capex가 쌓일수록 FCF 압박</td></tr>
+      <tr><td><strong>순이익 (조정)</strong></td><td class="mono positive">$187억</td><td class="mono positive">+실질 개선</td><td>세금 환급 제외 시 $187억. 비즈니스 실질 이익력.</td></tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>FCF vs Capex 문제:</strong> 연간 Capex $1,250~1,450억은 2025년 FCF(~$520억)의 약 2.5~2.8배. 즉 현금을 버는 속도보다 훨씬 빠르게 쓰고 있다. 이 격차를 채우는 건 수익 성장 + 채권 발행. Capex 회수가 지연되면 자본 구조가 부담받는다.
+  </div>
+
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">AI / 제품 &mdash; 미래 수익화의 씨앗</span>
+    <span class="tier-desc">지금 당장 돈이 되지 않지만 2~3년 뒤를 결정한다</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Meta AI 월간 활동 사용자</strong></td>
+        <td class="mono">공개 안 함 (2025년 10억 목표 달성 이후 묵묵부답)</td>
+        <td>비공개 자체가 시그널 — 숫자가 좋으면 발표한다. 다만 Zuckerberg가 "1조 명"을 목표로 언급</td>
+      </tr>
+      <tr>
+        <td><strong>AI 비즈니스 에이전트 대화</strong></td>
+        <td class="mono positive">주당 1,000만건 (연초 대비 10배)</td>
+        <td>기업 광고주가 WhatsApp/Messenger에서 AI 에이전트로 고객과 대화. 광고 → 구매 전환의 새 경로</td>
+      </tr>
+      <tr>
+        <td><strong>Llama 모델 현황</strong></td>
+        <td class="mono positive">Llama 4 계열 + Meta Superintelligence Labs 첫 모델 공개</td>
+        <td>개방형 AI 전략: 모델 공개 → 개발자 생태계 구축 → Meta 플랫폼 가치 상승</td>
+      </tr>
+      <tr>
+        <td><strong>Reels 광고 연환산 매출</strong></td>
+        <td class="mono positive">~$500억 런레이트</td>
+        <td>Reels 도입 초기 "광고 방해한다"던 우려 완전 반전. AI 추천이 Reels 참여도와 광고 효율 동시 향상</td>
+      </tr>
+      <tr>
+        <td><strong>Advantage+ AI 광고 플랫폼</strong></td>
+        <td class="mono positive">중소기업 광고 주요 성장 동인</td>
+        <td>광고주가 목표와 예산만 입력하면 AI가 크리에이티브·타겟·입찰을 자동화. SMB 진입장벽 제거</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">메타버스 / Reality Labs &mdash; 축소 중인 베팅</span>
+    <span class="tier-desc">$700억 손실 후 VR에서 AI 안경으로 피벗</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Reality Labs 매출</strong></td><td class="mono negative">$4.0억 (-2% YoY)</td><td>Quest 헤드셋 판매 부진. Ray-Ban AI 안경 성장으로 일부 상쇄</td></tr>
+      <tr><td><strong>Reality Labs 영업손실</strong></td><td class="mono negative">-$40.3억</td><td>누적 손실 $700억+. 분기당 $40억씩 계속 태우는 구조</td></tr>
+      <tr><td><strong>Ray-Ban Meta 스마트 안경</strong></td><td class="mono positive">수요 공급 초과 (국제 출시 지연)</td><td>$800 제품 수요가 재고를 앞질러 영국·프랑스·이탈리아 출시 연기. Reality Labs의 유일한 빛</td></tr>
+      <tr><td><strong>Horizon Worlds VR</strong></td><td class="mono negative">서비스 종료 결정</td><td>메타버스 비전의 상징이었던 Horizon이 Q1 중 종료. "VR 철수, AI 안경 집중"으로 전략 전환 공식화</td></tr>
+      <tr><td><strong>Reality Labs 인력 감축</strong></td><td class="mono negative">10% 감축 (~1,500명) + 게임 스튜디오 3곳 폐쇄</td><td>2026년 1월 단행. Horizon 종료와 함께 VR 사업 구조조정의 방향 명확</td></tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>Reality Labs의 역설:</strong> $700억을 쏟아 부었지만 메타버스는 실패했다. 그러나 그 과정에서 나온 Ray-Ban 스마트 안경은 시장에서 통하고 있다. Zuckerberg가 "AI 웨어러블"로 프레이밍을 바꾼 것은 솔직한 후퇴가 아니라 전략적 재명명. 투자자 관점에서는 손실을 줄이는 방향이므로 긍정적이지만, 도대체 얼마나 더 손실이 지속될지가 미지수다.
+  </div>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter">
+    <div class="tone-item">
+      <div class="tone-label">CEO 비전 강도</div>
+      <div class="tone-bar"><div class="fill" style="width:92%;background:var(--accent);"></div></div>
+      <div class="tone-score" style="color:var(--accent);">9.2<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:70%;background:var(--purple);"></div></div>
+      <div class="tone-score" style="color:var(--purple);">7.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 회의감</div>
+      <div class="tone-bar"><div class="fill" style="width:75%;background:var(--yellow);"></div></div>
+      <div class="tone-score" style="color:var(--yellow);">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">Capex ROI 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:30%;background:var(--red);"></div></div>
+      <div class="tone-score" style="color:var(--red);">3.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Mark Zuckerberg (회장 겸 CEO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 실적 Beat를 기정사실로 두고 AI 비전 판매에 집중. Capex 증액을 "기회 포착"으로 프레이밍. 메타버스 실패에 대한 언급 전무 — 이미 "AI 에이전트 시대"로 내러티브를 완전히 갈아엎었다.
+  </p>
+
+  <div class="keywords">
+    <span class="kw-tag bullish">SUPERINTELLIGENCE</span>
+    <span class="kw-tag bullish">PERSONAL AI</span>
+    <span class="kw-tag bullish">BUSINESS AI</span>
+    <span class="kw-tag bullish">BILLIONS OF PEOPLE</span>
+    <span class="kw-tag blue-tag">FIRST-PRINCIPLES</span>
+    <span class="kw-tag neutral-tag">LEANER ORGANIZATION</span>
+    <span class="kw-tag bearish">HORIZON WORLDS 종료</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Mark Zuckerberg &mdash; 오프닝 선언</div>
+    <blockquote>"We had a milestone quarter with strong momentum across our apps and the release of our first model from Meta Superintelligence Labs. We're on track to deliver personal superintelligence to billions of people."</blockquote>
+    <div class="analysis"><strong>"superintelligence"</strong> — 2023년까지는 "AI 도구"를 말했는데 이제는 "초지능"을 직접 선언한다. AGI 레이스에 Meta도 공식 참가했다는 신호. <strong>"Meta Superintelligence Labs"</strong>는 이번 분기 공개된 신설 조직 — Zuckerberg가 직접 R&amp;D를 챙기겠다는 구조 변화. "billions of people"은 Meta의 35억 사용자 네트워크가 곧 AI 배포 채널이라는 의미.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Mark Zuckerberg &mdash; AI의 철학적 선언</div>
+    <blockquote>"For the first time in Meta's history, we're going to be able to develop a first-principles understanding of what you care about and what each piece of content in our system is about."</blockquote>
+    <div class="analysis"><strong>"first-principles"</strong> — 추천 알고리즘의 패러다임 전환을 선언하는 표현. 기존 시스템은 "클릭 패턴으로 추측"했다면, AI는 "당신이 왜 그것을 좋아하는지의 근본 이유"를 이해한다는 주장. 이게 실현되면 광고 타겟팅 정밀도가 한 단계 도약하고 광고 단가 상승이 구조적으로 지속된다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Mark Zuckerberg &mdash; AI 에이전트 전략</div>
+    <blockquote>"AI agents get better when you fully optimize the stack. That is why we believe we need to be a company that builds frontier models in addition to building the agents."</blockquote>
+    <div class="analysis">핵심 전략 선언. <strong>"frontier model + agent"</strong> 이중 구조 — 최고의 기반 모델을 자체 개발해야 그 위에 올라서는 에이전트도 최고가 된다는 논리. 이것이 $1,250~1,450억 Capex를 정당화하는 기술적 근거다. OpenAI/Google에 모델 공급망을 의존하지 않겠다는 독립 선언이기도 하다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Mark Zuckerberg &mdash; Capex 정당화</div>
+    <blockquote>"The investments will support training needs for future models and provide the inference capacity necessary to deliver personal and business agents to billions of people around the world."</blockquote>
+    <div class="analysis">Capex 증액의 두 용도를 명시: <strong>훈련(Training)</strong>과 <strong>추론(Inference)</strong>. 훈련은 더 똑똑한 모델을 만드는 비용, 추론은 35억 사용자에게 실시간으로 AI를 제공하는 비용. 특히 추론 비용은 사용자 수에 비례해 증가하므로 사용자가 많은 Meta에게 구조적 부담이 있다. 반면 규모의 경제로 단위 비용을 낮출 수 있다는 반론도 있다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Mark Zuckerberg &mdash; 조직 효율화</div>
+    <blockquote>"We recently shared internally that we plan to reduce the size of our employee base in May, believing a leaner operating model will allow the company to move more quickly while also helping to offset the substantial infrastructure investments being made."</blockquote>
+    <div class="analysis"><strong>"leaner operating model"</strong> — IR 용어로는 정리해고를 "민첩성 향상"으로 프레이밍. 5월 감원이 예고된 상황(약 8,000명 추정). 흥미로운 점은 "Capex 상쇄를 위해"라고 솔직하게 인정했다는 것 — AI 인프라 비용을 인건비 절감으로 부분적으로 충당하겠다는 명시적 트레이드오프.</div>
+  </div>
+
+  <h3>Susan Li (CFO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 수치 중심의 체계적 방어. Capex 증액의 이유를 "부품 가격 상승 + 데이터센터 추가 비용"으로 구체화하여 "주먹구구식 지출"이 아님을 강조.
+  </p>
+
+  <div class="quote-block cfo">
+    <div class="speaker">Susan Li &mdash; Capex 증액 설명</div>
+    <blockquote>"The increase reflects higher component pricing this year and, to a lesser extent, additional data center costs to support future year capacity."</blockquote>
+    <div class="analysis">Capex 증액($100억) 원인을 두 가지로 분리: <strong>부품 가격 인상(주요 요인)</strong>과 <strong>미래 연도 용량 확보(부수 요인)</strong>. 전자는 AI 칩(특히 Nvidia) 공급망 가격 상승 — 즉 필연적 비용 증가. 후자는 전략적 선투자. 이 구분이 중요한 이유: 부품 가격 인상은 경쟁사도 동일하게 겪는 시장 조건이지만, 선투자는 Meta가 선택한 것이다.</div>
+  </div>
+
+  <div class="quote-block cfo">
+    <div class="speaker">Susan Li &mdash; Q2 가이던스</div>
+    <blockquote>"We expect second quarter 2026 revenue to be in the range of $58 billion to $61 billion. Our guidance assumes foreign currency will be an approximately 2% tailwind to year-over-year total revenue growth."</blockquote>
+    <div class="analysis">미드포인트 $595억은 컨센서스와 사실상 일치. 환율 순풍 2%를 제거하면 실질 성장률은 약 +29%. 인상적이지만 Q1의 33%보다는 낮아지는 추세. <strong>핵심 불확실성은 관세·무역 전쟁의 광고 지출 영향</strong> — 이 항목을 직접 언급하지 않은 것이 오히려 주목 포인트.</div>
+  </div>
+
+  <div class="quote-block cfo">
+    <div class="speaker">Susan Li &mdash; 실리콘 자립</div>
+    <blockquote>(Broadcom과 공동 개발한 Meta의 자체 AI 칩 MTIA 언급, AMD·Nvidia 보완)</blockquote>
+    <div class="analysis">Zuckerberg가 별도로 "Broadcom과 함께 개발한 커스텀 실리콘 1기가와트 이상 배포 중"을 언급. <strong>수직통합 전략:</strong> Nvidia 의존도를 낮추고 Meta 워크로드에 최적화된 자체 칩을 확보하면 장기적으로 Capex와 운영비용 모두 절감 가능. 다만 커스텀 실리콘 개발 자체도 막대한 선투자가 필요하다.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 실적 Beat는 인정, 하지만 "$1,450억 Capex의 ROI를 언제 어떻게 볼 수 있냐"는 단일 주제로 수렴. 메타버스 실패의 데자뷰를 걱정하는 기조.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; Capex ROI 정면 질문</div>
+    <blockquote>"Any way to think about dimensionalizing how we think about some of the returns or traction this year and how it might affect 2027 spend?"</blockquote>
+    <div class="analysis">"dimensionalize"는 "구체적인 숫자로 보여달라"는 완곡한 표현. 핵심은 <strong>"올해 ROI 신호가 없으면 2027 Capex는 더 커지냐 줄어드냐"</strong>. Zuckerberg의 답은 ROI 수치 대신 "비즈니스 에이전트 대화 10배 증가" 등 중간 지표로 우회. <strong>"That's a very technical question"이라는 말은 사실상 '지금은 답 못 한다'</strong>는 신호로 시장이 읽었다.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Fortune 분석 &mdash; 핵심 비판</div>
+    <blockquote>"Meta is spending up to $145 billion this year on AI. When asked about signs of ROI, Zuckerberg said 'that's a very technical question'."</blockquote>
+    <div class="analysis">이 한 문장이 장후 -6.5% 하락을 설명한다. 매출 Beat도, EPS Beat도, 강한 가이던스도 있었지만, <strong>$1,450억을 쓰는 이유를 "지금 설명하기 어렵다"고 했다는 것</strong>이 투자자들의 신뢰를 흔들었다. 메타버스에 $700억을 쏟아 부은 전례가 있기 때문에 이 우려는 근거 없는 것이 아니다.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">시장 반응 분석</div>
+    <blockquote>"Despite beating earnings expectations, Meta's stock declined 6.45% after hours — investors reacted to the higher spending forecast."</blockquote>
+    <div class="analysis">패턴 분석: 2024~2025년 Meta 실적 콜은 "비용 효율화"로 시장을 달랬다. 2026년 Q1은 "비용 급증"으로 시장이 실망. 구조는 단순하다: <strong>매출 성장(+33%) &lt; Capex 증가율</strong>. 성장이 지출을 못 따라가는 것처럼 보이는 한 주가 압박은 계속된다.</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr><td style="width:160px;font-weight:600;color:var(--accent);">Zuckerberg</td><td>"광고 사업은 33% 성장 중. 이제 $1,450억으로 초지능을 35억 사람에게 배달한다. 메타버스? 그건 이제 AI 안경이다."</td></tr>
+      <tr><td style="font-weight:600;color:var(--purple);">Susan Li</td><td>"Q2는 $58~61B. Capex 증액은 부품 가격 인상 탓이고, 전사 영업이익률 41%는 유지한다."</td></tr>
+      <tr><td style="font-weight:600;color:var(--yellow);">애널리스트</td><td>"Beat는 알겠다. 그런데 $1,450억 쓰는데 ROI는 언제 나오냐? 메타버스 때도 이러지 않았나?"</td></tr>
+      <tr><td style="font-weight:600;color:var(--red);">시장 반응</td><td>장후 -6.45% ($43/주). 실적은 좋았으나 Capex 기습 상향이 공포를 촉발. "성장이 지출을 못 따라간다"는 우려.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="highlight-box" style="margin-top:24px;">
+    <strong>투자자가 주목해야 할 핵심 구조:</strong> Meta는 광고 사업에서 창출한 이익(분기 영업이익 $229억)을 AI 인프라에 재투자하는 순환 구조를 만들려 한다. 광고 AI가 좋아질수록 광고 매출이 늘고 → 그 돈으로 더 좋은 AI를 만든다. 이 선순환이 작동하는지를 판단하는 선행지표는 <strong>광고 노출수 성장률 vs CPM 성장률</strong>의 지속 여부와 <strong>Business AI 대화 건수의 수익화 속도</strong>다. 2026년 하반기 실적이 이 가설을 검증한다.
+  </div>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid">
+    <a class="link-card" href="https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results/default.aspx" target="_blank">
+      <div class="link-icon">&#x1F4C4;</div>
+      <div class="link-text"><div class="link-title">IR 보도자료 (공식)</div><div class="link-url">investor.atmeta.com</div></div>
+    </a>
+    <a class="link-card" href="https://investor.atmeta.com/investor-events/event-details/2026/Q1-2026-Earnings-Call/default.aspx" target="_blank">
+      <div class="link-icon">&#x1F3AC;</div>
+      <div class="link-text"><div class="link-title">Q1 2026 컨퍼런스 콜 (공식)</div><div class="link-url">investor.atmeta.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.fool.com/earnings/call-transcripts/2026/04/29/meta-meta-q1-2026-earnings-call-transcript/" target="_blank">
+      <div class="link-icon">&#x1F4DD;</div>
+      <div class="link-text"><div class="link-title">컨콜 전문 트랜스크립트</div><div class="link-url">fool.com / Motley Fool</div></div>
+    </a>
+    <a class="link-card" href="https://www.cnbc.com/2026/04/29/meta-q1-earnings-report-2026.html" target="_blank">
+      <div class="link-icon">&#x1F4FA;</div>
+      <div class="link-text"><div class="link-title">CNBC 실적 리포트</div><div class="link-url">cnbc.com</div></div>
+    </a>
+    <a class="link-card" href="https://fortune.com/2026/04/29/meta-zuckerberg-145-billion-ai-spending-roi/" target="_blank">
+      <div class="link-icon">&#x1F50E;</div>
+      <div class="link-text"><div class="link-title">Fortune — $1,450억 Capex ROI 분석</div><div class="link-url">fortune.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.stocktitan.net/news/META/meta-reports-first-quarter-2026-q8s4s20oh4ah.html" target="_blank">
+      <div class="link-icon">&#x1F4CA;</div>
+      <div class="link-text"><div class="link-title">StockTitan — 수치 요약</div><div class="link-url">stocktitan.net</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-04-30 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>

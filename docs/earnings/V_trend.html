@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>V | Visa 2년 추이 (FQ3'24 ~ FQ2'26)</title>
+<title>V | Visa 2년 추이 (FQ3 2024 ~ FQ2 2026)</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <style>
   :root{--bg:#0a0a0a;--surface:#141414;--surface2:#1c1c1c;--border:#2a2a2a;--text:#e8e8e8;--text-dim:#888;--text-muted:#555;--accent:#6b7cff;--accent-dim:#6b7cff33;--red:#ff4d4d;--red-dim:#ff4d4d22;--yellow:#ffc107;--blue:#4da6ff;--purple:#b388ff;}
@@ -22,19 +22,19 @@
   .section-label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
   .section h2{font-size:22px;font-weight:700;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid var(--border);}
 
-  /* HORIZONTAL TABLE — time = columns */
+  /* HORIZONTAL TABLE */
   .h-table-wrap{overflow-x:auto;margin-bottom:24px;-webkit-overflow-scrolling:touch;}
   .h-table{border-collapse:collapse;font-size:12px;white-space:nowrap;width:100%;}
   .h-table th,.h-table td{padding:8px 10px;border-bottom:1px solid #1a1a1a;font-family:'IBM Plex Mono',monospace;}
   .h-table thead th{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);background:var(--surface);border-bottom:1px solid var(--border);text-align:center;position:sticky;top:0;z-index:1;}
-  .h-table thead th:first-child{text-align:left;min-width:140px;position:sticky;left:0;z-index:2;background:var(--surface);}
-  .h-table tbody th{text-align:left;font-family:'IBM Plex Sans KR',sans-serif;font-size:13px;font-weight:500;color:var(--text);position:sticky;left:0;background:var(--bg);z-index:1;min-width:140px;border-right:1px solid var(--border);}
+  .h-table thead th:first-child{text-align:left;min-width:160px;position:sticky;left:0;z-index:2;background:var(--surface);}
+  .h-table tbody th{text-align:left;font-family:'IBM Plex Sans KR',sans-serif;font-size:13px;font-weight:500;color:var(--text);position:sticky;left:0;background:var(--bg);z-index:1;min-width:160px;border-right:1px solid var(--border);}
   .h-table tbody td{text-align:center;}
   .h-table tbody tr:hover{background:var(--surface);}
-  .pos{color:var(--accent);}
+  .pos{color:#6b7cff;}
   .neg{color:var(--red);}
   .miss-cell{background:var(--red-dim);}
-  .beat-cell{background:var(--accent-dim);}
+  .beat-cell{background:#6b7cff22;}
   .peak-cell{background:#ffc10711;color:var(--yellow);font-weight:700;}
   .latest-col{background:#6b7cff08;border-left:2px solid var(--accent);border-right:2px solid var(--accent);}
   thead .latest-col{border-top:2px solid var(--accent);}
@@ -68,7 +68,7 @@
   .tl-header{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
   .tl-q{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;}
   .tl-badge{font-size:10px;padding:2px 8px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-weight:600;}
-  .tl-badge.beat-b{background:var(--accent-dim);color:var(--accent);}
+  .tl-badge.beat-b{background:#6b7cff22;color:var(--accent);}
   .tl-badge.miss-b{background:var(--red-dim);color:var(--red);}
   .tl-score{font-size:11px;color:var(--text-muted);margin-left:auto;}
   .tl-body{font-size:14px;line-height:1.7;color:var(--text-dim);}
@@ -77,11 +77,9 @@
   .tl-quote{display:block;margin:8px 0;padding:8px 12px;background:var(--surface);border-left:2px solid var(--accent);font-style:italic;font-size:13px;color:var(--text);border-radius:0 4px 4px 0;}
   .tl-quote.analyst-q{border-left-color:var(--yellow);}
 
-  /* PROMISE TABLE */
-  table{border-collapse:collapse;width:100%;font-size:13px;}
-  table thead tr{background:var(--surface);}
-  table th{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;}
-  table td{padding:10px 12px;border-bottom:1px solid #1a1a1a;vertical-align:top;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  table thead th{text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text-muted);font-size:12px;font-weight:500;}
+  table tbody td{padding:8px 12px;border-bottom:1px solid #1a1a1a;vertical-align:top;}
   table tbody tr:hover{background:var(--surface);}
 
   .footer{border-top:1px solid var(--border);padding:20px 0;text-align:center;font-size:11px;color:var(--text-muted);}
@@ -92,172 +90,146 @@
 <div class="hero">
   <div class="hero-inner">
     <div class="ticker">NYSE: V &mdash; 2년 추이</div>
-    <h1>Visa Inc. 비자</h1>
-    <div class="sub">FQ3'24 ~ FQ2'26 &mdash; 8분기 실적 + 컨콜 어조 변화 + 결제 네트워크 KPI 추적</div>
+    <h1>Visa Inc.</h1>
+    <div class="sub">FQ3 2024 ~ FQ2 2026 &mdash; 8분기 실적 + 결제 네트워크 KPI + 컨콜 어조 변화 추적</div>
     <div class="meta">
-      <span>최종 갱신: 2026-04-30</span>
+      <span>최종 갱신: 2026-05-03</span>
       <span>|</span>
-      <span>최신: FQ2'26 (2026-04-29 발표)</span>
+      <span>최신: FQ2 2026 (2026-04-29 발표)</span>
       <span>|</span>
-      <span>회계연도: 10월 시작 (FQ1=Oct-Dec, FQ2=Jan-Mar, FQ3=Apr-Jun, FQ4=Jul-Sep)</span>
+      <span>Visa 회계연도: 10월 시작 (FQ1=Oct-Dec, FQ2=Jan-Mar, FQ3=Apr-Jun, FQ4=Jul-Sep)</span>
     </div>
   </div>
 </div>
 
 <div class="container">
 
-<!-- ===== 01: 요약 (맨 위) ===== -->
+<!-- ===== 01: 요약 ===== -->
 <div class="section">
   <div class="section-label">01 &mdash; 요약</div>
   <h2>2년간 배운 것</h2>
 
   <div class="patterns">
     <div class="pat-card">
-      <h3>교차국경이 엔진이다</h3>
+      <h3>교차국경 가속 = 실적의 알파</h3>
       <p>
-        <strong>2024 초:</strong> Cross-border +14~16% — 팬데믹 회복 후반부 여행 수요.<br>
-        <strong>2025:</strong> Cross-border +11~13% — 구조적 e커머스로 기반 교체. 여행 의존 낮아짐.<br>
-        <strong>2025~2026:</strong> 스테이블코인 결제카드 +200% YoY — 국경 초월 새 채널 가시화.<br>
-        <em>Cross-border는 Visa 최고 마진 라인. 이게 꺾이지 않는 한 펀더멘탈 훼손 없다.</em>
+        <strong>핵심 공식:</strong> Cross-Border Volume Ex-Europe YoY &gt; 10% &rarr; 매출 서프라이즈.<br>
+        FQ3'24~FQ2'26 동안 단 한 번도 10% 아래로 내려간 적 없음 (최저 11%, 최고 14%).<br>
+        <em>여행 회복 + 글로벌 이커머스가 Visa 네트워크 효과의 연료.</em>
       </p>
     </div>
     <div class="pat-card blue">
-      <h3>VAS: 숨겨진 성장축</h3>
+      <h3>VAS: 조용히 크는 두 번째 엔진</h3>
       <p>
-        <strong>2021~2025 CAGR:</strong> 상수달러 기준 20%+.<br>
-        <strong>FY2025:</strong> VAS(데이터·사기방지·컨설팅 등) 매출 $110억 — 전체의 28% 육박.<br>
-        <strong>FQ3'24~FQ2'26:</strong> Other Revenue(컨설팅·마케팅서비스) +31~44% 구간 지속.<br>
-        <em>처리 수수료(Data Processing)는 한 자릿수인데 VAS는 두 자릿수 성장 — 믹스 시프트.</em>
+        <strong>FY2024:</strong> ~$9B, 전체 매출의 24%. 연평균 성장률 +20% (2021 이후).<br>
+        <strong>FQ3'25:</strong> VAS +26% YoY (상수달러 기준) &mdash; 전체 매출 성장률의 2배.<br>
+        컨설팅·발행솔루션·리스크/정체성 인증이 주도. <em>거래 수수료 의존도 구조적으로 낮추는 중.</em>
       </p>
     </div>
     <div class="pat-card red">
-      <h3>마진 안정성 — 비즈니스의 본질</h3>
+      <h3>마진 안정성 = 경쟁 해자의 증거</h3>
       <p>
-        <strong>8분기 GAAP 영업이익률:</strong> 60~68% 구간 유지 (조정 기준 67~70%).<br>
-        <strong>소송 충당금:</strong> FQ2'25 GAAP EPS 희석 — 조정 EPS와 괴리 최대.<br>
-        <strong>클라이언트 인센티브:</strong> 매출 성장과 함께 증가하지만 비율은 관리 가능 범위.<br>
-        <em>Visa의 영업 레버리지는 수평적 확장(볼륨)이 마진 희석 없이 매출 증가로 직결.</em>
+        <strong>Non-GAAP 영업이익률:</strong> 8분기 평균 ~67%. 상단 68.7%, 하단 65.7%.<br>
+        Client Incentives 매년 10~17% 상승에도 마진 밴드 유지.<br>
+        <em>인센티브를 올릴수록 네트워크 볼륨도 올라가는 선순환 구조.</em>
       </p>
     </div>
     <div class="pat-card purple">
-      <h3>자사주 매입 — 주주 환원 기계</h3>
+      <h3>자사주 매입 = 주주환원의 항속성</h3>
       <p>
-        FQ2'25: $300억 신규 자사주 매입 프로그램 발표.<br>
-        FY2025 연간: $16.8억 배당 + $150억 이상 자사주 매입.<br>
-        FQ2'26: $20억 추가 배당 인상 검토.<br>
-        <em>Visa는 설비투자 최소(asset-light) + 잉여현금흐름 대부분 주주 환원. 이것이 P/E 프리미엄 근거.</em>
+        FQ2'25: $30B 자사주 매입 프로그램 발표.<br>
+        FQ2'26: $20B 추가 승인 + 분기 배당 $0.670. FQ2'26에만 $7.9B 환원.<br>
+        <em>8분기 연속 주당 EPS 두 자릿수 성장. 이게 꺾이는 분기가 오면 진짜 위험 신호.</em>
       </p>
     </div>
     <div class="pat-card yellow" style="grid-column:1/-1;">
-      <h3>에이전틱 커머스 + 스테이블코인 = 맥킨너니의 다음 테제</h3>
+      <h3>FQ2'26: 2022년 이후 최강 분기 + 에이전틱 커머스 원년 선언</h3>
       <p>
-        <strong>FQ2'26 컨콜:</strong> "스테이블코인 정산 연환산 $70억, 전분기比 50%+ 성장." 스테이블코인 연계 카드 프로그램 160개 이상, YoY +200%.&nbsp;&nbsp;
-        <strong>아젠틱:</strong> AI 에이전트가 소비를 위임받을 때 인식 가능한 결제수단(Visa)을 기본값으로 선택할 것이라는 논리. 마이크로트랜잭션 증가 → 처리 건수 성장.
-        <strong>RTP:</strong> 미국 A2A(계좌 간) 직접 결제 확산은 단기 위협이지만, Visa는 Paze 지갑 + Click to Pay로 방어.<br>
-        <em>핵심 볼륨 성장은 견조, 신성장축(스테이블·에이전틱)은 아직 수익 미미하지만 내러티브는 완성됐다.</em>
+        매출 +17% &mdash; 2022년 이후 최고 성장률. McInerney: <strong>"Visa as a Service hyperscaler"</strong> 비전 공식 선언.<br>
+        스테이블코인 결제 $7B 연간 런레이트(전분기 대비 +50%). 에이전틱 커머스에서 <em>"신뢰 인프라"</em>로서 Visa 포지셔닝.&nbsp;&nbsp;
+        VAS + 신규 결제흐름이 전체 매출의 50% 목표 &mdash; 이미 40% 근접.
       </p>
     </div>
   </div>
 </div>
 
-<!-- ===== 02: 실적 추이 (가로=시간) ===== -->
+<!-- ===== 02: 실적 추이 ===== -->
 <div class="section">
   <div class="section-label">02 &mdash; 실적 추이</div>
   <h2>분기별 핵심 숫자</h2>
+  <div class="note-box">
+    <strong>회계연도 대응:</strong> FQ3'24 = 캘린더 Apr-Jun 2024 | FQ4'24 = Jul-Sep 2024 | FQ1'25 = Oct-Dec 2024 | FQ2'25 = Jan-Mar 2025 | FQ3'25 = Apr-Jun 2025 | FQ4'25 = Jul-Sep 2025 | FQ1'26 = Oct-Dec 2025 | FQ2'26 = Jan-Mar 2026
+  </div>
 
   <div class="h-table-wrap">
   <table class="h-table">
     <thead>
       <tr>
         <th></th>
-        <th>FQ3'24<br><span style="font-size:9px;color:#444;">Apr-Jun'24</span></th>
-        <th>FQ4'24<br><span style="font-size:9px;color:#444;">Jul-Sep'24</span></th>
-        <th>FQ1'25<br><span style="font-size:9px;color:#444;">Oct-Dec'24</span></th>
-        <th>FQ2'25<br><span style="font-size:9px;color:#444;">Jan-Mar'25</span></th>
-        <th>FQ3'25<br><span style="font-size:9px;color:#444;">Apr-Jun'25</span></th>
-        <th>FQ4'25<br><span style="font-size:9px;color:#444;">Jul-Sep'25</span></th>
-        <th>FQ1'26<br><span style="font-size:9px;color:#444;">Oct-Dec'25</span></th>
-        <th class="latest-col">FQ2'26<br><span style="font-size:9px;color:#6b7cff;">Jan-Mar'26</span></th>
+        <th>FQ3'24</th><th>FQ4'24</th>
+        <th>FQ1'25</th><th>FQ2'25</th><th>FQ3'25</th><th>FQ4'25</th>
+        <th>FQ1'26</th><th class="latest-col">FQ2'26</th>
       </tr>
     </thead>
     <tbody>
       <tr>
+        <th>발표일</th>
+        <td>Jul 23'24</td><td>Oct 29'24</td>
+        <td>Jan 28'25</td><td>Apr 29'25</td><td>Jul 22'25</td><td>Oct 28'25</td>
+        <td>Jan 30'26</td><td class="latest-col">Apr 29'26</td>
+      </tr>
+      <tr>
         <th>순매출</th>
-        <td>$8.9B</td>
-        <td>$9.6B</td>
-        <td>$9.5B</td>
-        <td>$9.6B</td>
-        <td class="peak-cell">$10.2B</td>
-        <td>$10.7B</td>
-        <td>$10.9B</td>
-        <td class="latest-col peak-cell">$11.2B</td>
+        <td>$8.9B</td><td>$9.6B</td>
+        <td>$9.5B</td><td>$9.6B</td><td>$10.2B</td><td>$10.7B</td>
+        <td>$10.9B</td><td class="latest-col peak-cell">$11.2B</td>
       </tr>
       <tr>
         <th>매출 YoY</th>
-        <td class="pos">+10%</td>
-        <td class="pos">+12%</td>
-        <td class="pos">+10%</td>
-        <td class="pos">+9%</td>
-        <td class="pos">+14%</td>
-        <td class="pos">+12%</td>
-        <td class="pos">+15%</td>
-        <td class="latest-col pos">+17%</td>
+        <td class="pos">+10%</td><td class="pos">+12%</td>
+        <td class="pos">+10%</td><td class="pos">+9%</td><td class="pos">+14%</td><td class="pos">+12%</td>
+        <td class="pos">+15%</td><td class="latest-col peak-cell">+17%</td>
       </tr>
       <tr>
         <th>Non-GAAP EPS</th>
-        <td>$2.42</td>
-        <td>$2.71</td>
-        <td>$2.75</td>
-        <td>$2.76</td>
-        <td>$2.98</td>
-        <td>$3.03</td>
-        <td>$3.17</td>
-        <td class="latest-col">$3.31</td>
+        <td>$2.42</td><td>$2.71</td>
+        <td>$2.75</td><td>$2.76</td><td>$2.98</td><td>$2.98</td>
+        <td>$3.17</td><td class="latest-col">$3.31</td>
       </tr>
       <tr>
-        <th>EPS 컨센서스</th>
-        <td>$2.33</td>
-        <td>$2.58</td>
-        <td>$2.66</td>
-        <td>$2.68</td>
-        <td>$2.86</td>
-        <td>$2.97</td>
-        <td>$3.14</td>
-        <td class="latest-col">$3.10</td>
+        <th>EPS YoY</th>
+        <td class="pos">+12%</td><td class="pos">+13%</td>
+        <td class="pos">+14%</td><td class="pos">+10%</td><td class="pos">+23%</td><td class="pos">+10%</td>
+        <td class="pos">+15%</td><td class="latest-col pos">+20%</td>
       </tr>
       <tr>
-        <th>EPS 판정</th>
-        <td class="beat-cell">Beat +4%</td>
-        <td class="beat-cell">Beat +5%</td>
-        <td class="beat-cell">Beat +3%</td>
-        <td class="beat-cell">Beat +3%</td>
-        <td class="beat-cell">Beat +4%</td>
-        <td class="beat-cell">Beat +2%</td>
-        <td class="beat-cell">Beat +1%</td>
-        <td class="latest-col beat-cell">Beat +7%</td>
+        <th>컨센서스 (Non-GAAP)</th>
+        <td>~$2.42</td><td>~$2.58</td>
+        <td>~$2.66</td><td>~$2.68</td><td>~$2.94</td><td>~$2.94</td>
+        <td>~$3.14</td><td class="latest-col">~$3.10</td>
       </tr>
       <tr>
-        <th>매출 판정</th>
-        <td class="miss-cell">Miss (미미)</td>
-        <td class="beat-cell">Beat</td>
-        <td class="beat-cell">Beat</td>
-        <td class="beat-cell">Beat</td>
-        <td class="beat-cell">Beat +3%</td>
-        <td class="beat-cell">Beat +1%</td>
-        <td class="beat-cell">Beat +2%</td>
-        <td class="latest-col beat-cell">Beat +4%</td>
+        <th>판정</th>
+        <td class="beat-cell">Beat</td><td class="beat-cell">Beat</td>
+        <td class="beat-cell">Beat</td><td class="beat-cell">Beat</td><td class="beat-cell">Beat</td><td class="beat-cell">Beat</td>
+        <td class="beat-cell">Beat</td><td class="latest-col beat-cell">Beat +$0.21</td>
+      </tr>
+      <tr>
+        <th>Non-GAAP 영업이익률</th>
+        <td>~67%</td><td>~68.7%</td>
+        <td>~67%</td><td>~66%</td><td>~65.7%</td><td>~68.3%</td>
+        <td>~67%</td><td class="latest-col">~67%</td>
       </tr>
     </tbody>
   </table>
   </div>
-
   <div class="note-box">
-    <strong>패턴:</strong> FQ3'24 매출이 컨센서스에 소폭 미달한 이후 7분기 연속 EPS·매출 동반 Beat. FQ2'26은 2022년 이후 최강 매출 성장률(+17%) 기록 — 2013년 기준으로는 팬데믹 반등·Visa Europe 인수 효과 제외 시 최강.
-    <strong>주의:</strong> FQ2'25 GAAP EPS는 소송 충당금으로 희석 — Non-GAAP 기준 사용.
+    <strong>8분기 무결점:</strong> 단 한 번도 컨센서스를 밑돈 적 없음. FQ2'26은 $0.21 초과 Beat로 2022년 이후 최대 초과폭.
+    GAAP EPS는 FQ2'25에 $1B 소송 충당금 반영으로 $2.32(+1%)로 왜곡. 위 표는 운영 실력을 보는 Non-GAAP 기준.
   </div>
 </div>
 
-<!-- ===== 03: KPI 추이 (가로=시간) ===== -->
+<!-- ===== 03: KPI 추이 ===== -->
 <div class="section">
   <div class="section-label">03 &mdash; KPI 추이</div>
   <h2>결제 네트워크 핵심 지표</h2>
@@ -267,93 +239,58 @@
     <thead>
       <tr>
         <th></th>
-        <th>FQ3'24</th>
-        <th>FQ4'24</th>
-        <th>FQ1'25</th>
-        <th>FQ2'25</th>
-        <th>FQ3'25</th>
-        <th>FQ4'25</th>
-        <th>FQ1'26</th>
-        <th class="latest-col">FQ2'26</th>
+        <th>FQ3'24</th><th>FQ4'24</th>
+        <th>FQ1'25</th><th>FQ2'25</th><th>FQ3'25</th><th>FQ4'25</th>
+        <th>FQ1'26</th><th class="latest-col">FQ2'26</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <th>결제 볼륨 (상수$, YoY)</th>
-        <td class="pos">+7%</td>
-        <td class="pos">+8%</td>
-        <td class="pos">+9%</td>
-        <td class="pos">+8%</td>
-        <td class="pos">+9%</td>
-        <td class="pos">+9%</td>
-        <td class="pos">+8%</td>
-        <td class="latest-col pos">+9%</td>
+        <th>결제 볼륨 YoY<br><span style="font-size:10px;color:var(--text-muted);">(상수달러)</span></th>
+        <td class="pos">+7%</td><td class="pos">+8%</td>
+        <td class="pos">+8%</td><td class="pos">+8%</td><td class="pos">+8%</td><td class="pos">+9%</td>
+        <td class="pos">+8%</td><td class="latest-col pos">+9%</td>
       </tr>
       <tr>
-        <th>결제 볼륨 (달러 절대)</th>
-        <td>~$3.4T</td>
-        <td>~$3.5T</td>
-        <td>~$3.6T</td>
-        <td>~$3.6T</td>
-        <td>~$3.8T</td>
-        <td>~$3.9T</td>
-        <td>~$3.8T</td>
-        <td class="latest-col">$3.7T</td>
+        <th>교차국경 볼륨 YoY<br><span style="font-size:10px;color:var(--text-muted);">(Excl. intra-Europe)</span></th>
+        <td class="pos">+14%</td><td class="pos">+13%</td>
+        <td class="pos">+12%</td><td class="pos">+13%</td><td class="pos">+11%</td><td class="pos">+11%</td>
+        <td class="pos">+11%</td><td class="latest-col pos">+11%</td>
       </tr>
       <tr>
-        <th>교차국경 볼륨 (ex-EU, 상수$)</th>
-        <td class="pos">+14%</td>
-        <td class="pos">+13%</td>
-        <td class="pos">+16%</td>
-        <td class="pos">+13%</td>
-        <td class="pos">+11%</td>
-        <td class="pos">+11%</td>
-        <td class="pos">+11%</td>
-        <td class="latest-col pos">+11%</td>
+        <th>처리 건수</th>
+        <td>59.3B</td><td>61.4B</td>
+        <td>~62B</td><td>~63B</td><td>65.4B</td><td>67.7B</td>
+        <td>~65B</td><td class="latest-col peak-cell">66.1B</td>
       </tr>
       <tr>
-        <th>처리 건수 (YoY)</th>
-        <td class="pos">+10%</td>
-        <td class="pos">+10%</td>
-        <td class="pos">+11%</td>
-        <td class="pos">+9%</td>
-        <td class="pos">+10%</td>
-        <td class="pos">+10%</td>
-        <td class="pos">+9%</td>
-        <td class="latest-col pos">+9%</td>
+        <th>처리 건수 YoY</th>
+        <td class="pos">+10%</td><td class="pos">+10%</td>
+        <td class="pos">+11%</td><td class="pos">+9%</td><td class="pos">+10%</td><td class="pos">+10%</td>
+        <td class="pos">+10%</td><td class="latest-col pos">+9%</td>
       </tr>
       <tr>
-        <th>처리 건수 (절대)</th>
-        <td>59.3B</td>
-        <td>61.6B</td>
-        <td>64.5B</td>
-        <td>60.7B</td>
-        <td>~65B</td>
-        <td>67.7B</td>
-        <td>69.4B</td>
-        <td class="latest-col">66.0B</td>
+        <th>Client Incentives</th>
+        <td>$3.5B</td><td>~$3.6B</td>
+        <td>~$3.7B</td><td>~$3.9B</td><td>~$4.0B</td><td>~$4.2B</td>
+        <td>~$4.1B</td><td class="latest-col">$4.25B</td>
       </tr>
       <tr>
-        <th>영업이익률 (Non-GAAP)</th>
-        <td>~67%</td>
-        <td>~67%</td>
-        <td>~68%</td>
-        <td>~68%</td>
-        <td>~69%</td>
-        <td>~68%</td>
-        <td>~68%</td>
-        <td class="latest-col peak-cell">~70%</td>
+        <th>Client Incentives YoY</th>
+        <td>+11%</td><td>+13%</td>
+        <td>+14%</td><td>+12%</td><td>+13%</td><td>+17%</td>
+        <td>+12%</td><td class="latest-col">+14%</td>
       </tr>
       <tr>
-        <th>VAS/Other Revenue (YoY)</th>
-        <td class="pos">+31%</td>
-        <td class="pos">+26%</td>
-        <td class="pos">+35%</td>
-        <td class="pos">+32%</td>
-        <td class="pos">+41%</td>
-        <td class="pos">+38%</td>
-        <td class="pos">+44%</td>
-        <td class="latest-col pos">+40%+</td>
+        <th>VAS (Other Rev.) YoY<br><span style="font-size:10px;color:var(--text-muted);">(상수달러 기준)</span></th>
+        <td class="pos">~+18%</td><td class="pos">~+20%</td>
+        <td class="pos">+18%</td><td class="pos">~+20%</td><td class="pos">+26%</td><td class="pos">~+22%</td>
+        <td class="pos">~+20%</td><td class="latest-col peak-cell">+41%</td>
+      </tr>
+      <tr>
+        <th>Visa Direct 연간 처리</th>
+        <td colspan="4" style="text-align:center;color:var(--text-muted);">FY2024 전체: ~10B건 돌파</td>
+        <td colspan="4" class="latest-col" style="text-align:center;color:var(--accent);">성장세 지속 (분기별 분리 미공개)</td>
       </tr>
     </tbody>
   </table>
@@ -361,182 +298,186 @@
 
   <div class="note-box">
     <strong>변곡점:</strong>
-    교차국경 성장률 — FQ1'25 +16%(여행 피크) 이후 +11% 구간으로 수렴. 절대 수준은 견조.
-    처리 건수 — 분기 계절성(Q2/Q4 낮음)은 정상. 연간 추세는 우상향.
-    VAS/Other — 가장 빠르게 성장하는 라인. 컨설팅·데이터·마케팅서비스 포함. FY2025 누적 $110억, CAGR 20%+.
-    영업이익률 — FQ2'26 ~70% 기록. 믹스 시프트(VAS 비중 확대)가 마진을 소폭 지지.
+    교차국경 볼륨 &mdash; FQ3'24 +14% 피크 이후 +11~13%로 안착. 여행 정상화 후 이커머스가 새 베이스라인 지지.
+    처리 건수 &mdash; 8분기 내내 +9~11% 기계적 성장. 탭투페이·디지털지갑 확산이 수요 창출.
+    VAS &mdash; FQ3'25 +26%, FQ2'26 Other Revenue +41%로 가속화. 구조적 성장 트렌드 확인.
+    Client Incentives &mdash; 매출 성장률보다 약간 느리게 성장. 마진 훼손 없는 건강한 인센티브 관리.
   </div>
 </div>
 
 <!-- ===== 04: 차트 ===== -->
 <div class="section">
   <div class="section-label">04 &mdash; 차트</div>
-  <h2>매출 YoY 성장률 + 영업이익률</h2>
-  <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">
-    초록 실선 = 매출 YoY 성장률. 파란 점선 = Non-GAAP 영업이익률. FQ2'26: 매출 +17% + 마진 ~70%.
-  </p>
+  <h2>매출 YoY + Non-GAAP 영업이익률</h2>
 
   <!-- CHART 1: Revenue YoY + Operating Margin -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px 16px 16px;margin-bottom:32px;">
     <svg viewBox="0 0 840 340" style="width:100%;height:auto;font-family:'IBM Plex Mono',monospace;">
-      <!-- Axes -->
-      <line x1="70" y1="30" x2="70" y2="280" stroke="#2a2a2a" stroke-width="1"/>
-      <line x1="70" y1="280" x2="810" y2="280" stroke="#2a2a2a" stroke-width="1"/>
-      <!-- Grid lines Y: range 0~25% for revenue growth (left axis) -->
-      <line x1="70" y1="74"  x2="810" y2="74"  stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
-      <line x1="70" y1="118" x2="810" y2="118" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
-      <line x1="70" y1="162" x2="810" y2="162" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
-      <line x1="70" y1="206" x2="810" y2="206" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <!-- Grid lines -->
+      <line x1="80" y1="30" x2="80" y2="280" stroke="#2a2a2a" stroke-width="1"/>
+      <line x1="80" y1="280" x2="810" y2="280" stroke="#2a2a2a" stroke-width="1"/>
+      <line x1="80" y1="55"  x2="810" y2="55"  stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="80" y1="105" x2="810" y2="105" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="80" y1="155" x2="810" y2="155" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="80" y1="205" x2="810" y2="205" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <!-- Y labels (left axis: 0~25% revenue YoY) -->
+      <text x="70" y="33"  fill="#555" font-size="9" text-anchor="end">25%</text>
+      <text x="70" y="59"  fill="#555" font-size="9" text-anchor="end">20%</text>
+      <text x="70" y="109" fill="#555" font-size="9" text-anchor="end">15%</text>
+      <text x="70" y="159" fill="#555" font-size="9" text-anchor="end">10%</text>
+      <text x="70" y="209" fill="#555" font-size="9" text-anchor="end">5%</text>
+      <text x="70" y="284" fill="#555" font-size="9" text-anchor="end">0%</text>
 
-      <!-- Y labels left (매출 YoY %) -->
-      <!-- range 0~25, height 250px (30~280), each 10% = 100px -->
-      <text x="60" y="34"  fill="#555" font-size="9" text-anchor="end">25%</text>
-      <text x="60" y="78"  fill="#555" font-size="9" text-anchor="end">20%</text>
-      <text x="60" y="122" fill="#555" font-size="9" text-anchor="end">15%</text>
-      <text x="60" y="166" fill="#555" font-size="9" text-anchor="end">10%</text>
-      <text x="60" y="210" fill="#555" font-size="9" text-anchor="end">5%</text>
-      <text x="60" y="284" fill="#555" font-size="9" text-anchor="end">0%</text>
+      <!-- X labels (8 quarters, x=80 to x=810, step=104.3) -->
+      <text x="80"  y="300" fill="#888" font-size="9" text-anchor="middle">FQ3'24</text>
+      <text x="184" y="300" fill="#888" font-size="9" text-anchor="middle">FQ4'24</text>
+      <text x="288" y="300" fill="#888" font-size="9" text-anchor="middle">FQ1'25</text>
+      <text x="392" y="300" fill="#888" font-size="9" text-anchor="middle">FQ2'25</text>
+      <text x="497" y="300" fill="#888" font-size="9" text-anchor="middle">FQ3'25</text>
+      <text x="601" y="300" fill="#888" font-size="9" text-anchor="middle">FQ4'25</text>
+      <text x="705" y="300" fill="#888" font-size="9" text-anchor="middle">FQ1'26</text>
+      <text x="810" y="300" fill="#6b7cff" font-size="9" font-weight="700" text-anchor="middle">FQ2'26</text>
 
-      <!-- Y labels right (영업이익률 %) — 60~75% range mapped to same 250px space -->
-      <!-- 60%→280, 75%→30 : each 1% = 16.67px -->
-      <text x="820" y="34"  fill="#4da6ff" font-size="8" text-anchor="start">75%</text>
-      <text x="820" y="118" fill="#4da6ff" font-size="8" text-anchor="start">70%</text>
-      <text x="820" y="201" fill="#4da6ff" font-size="8" text-anchor="start">65%</text>
-      <text x="820" y="284" fill="#4da6ff" font-size="8" text-anchor="start">60%</text>
-
-      <!-- X labels — 8 quarters, equally spaced, x: 110~780 step ~95.7 -->
-      <!-- x positions: 110, 206, 302, 398, 494, 590, 686, 782 -->
-      <text x="110" y="300" fill="#888" font-size="9" text-anchor="middle">FQ3'24</text>
-      <text x="206" y="300" fill="#888" font-size="9" text-anchor="middle">FQ4'24</text>
-      <text x="302" y="300" fill="#888" font-size="9" text-anchor="middle">FQ1'25</text>
-      <text x="398" y="300" fill="#888" font-size="9" text-anchor="middle">FQ2'25</text>
-      <text x="494" y="300" fill="#888" font-size="9" text-anchor="middle">FQ3'25</text>
-      <text x="590" y="300" fill="#888" font-size="9" text-anchor="middle">FQ4'25</text>
-      <text x="686" y="300" fill="#888" font-size="9" text-anchor="middle">FQ1'26</text>
-      <text x="782" y="300" fill="#6b7cff" font-size="9" font-weight="700" text-anchor="middle">FQ2'26</text>
-
-      <!-- Revenue YoY line: 10,12,10,9,14,12,15,17 -->
+      <!-- Revenue YoY: 10,12,10,9,14,12,15,17 -->
       <!-- y = 280 - (val/25)*250 -->
-      <!-- 10%→180, 12%→160, 10%→180, 9%→190, 14%→140, 12%→160, 15%→130, 17%→110 -->
+      <!-- 10→180, 12→160, 10→180, 9→190, 14→140, 12→160, 15→130, 17→110 -->
       <polyline fill="none" stroke="#6b7cff" stroke-width="2.5"
-        points="110,180 206,160 302,180 398,190 494,140 590,160 686,130 782,110"/>
-      <!-- dots + values -->
-      <circle cx="110" cy="180" r="4" fill="#6b7cff"/>
-      <text x="110" y="172" fill="#6b7cff" font-size="9" text-anchor="middle" font-weight="600">+10%</text>
-      <circle cx="206" cy="160" r="4" fill="#6b7cff"/>
-      <text x="206" y="152" fill="#6b7cff" font-size="9" text-anchor="middle">+12%</text>
-      <circle cx="302" cy="180" r="4" fill="#6b7cff"/>
-      <text x="302" y="194" fill="#6b7cff" font-size="9" text-anchor="middle">+10%</text>
-      <circle cx="398" cy="190" r="4" fill="#6b7cff"/>
-      <text x="398" y="204" fill="#6b7cff" font-size="9" text-anchor="middle">+9%</text>
-      <circle cx="494" cy="140" r="4" fill="#6b7cff"/>
-      <text x="494" y="132" fill="#6b7cff" font-size="9" text-anchor="middle">+14%</text>
-      <circle cx="590" cy="160" r="4" fill="#6b7cff"/>
-      <text x="590" y="152" fill="#6b7cff" font-size="9" text-anchor="middle">+12%</text>
-      <circle cx="686" cy="130" r="4" fill="#6b7cff"/>
-      <text x="686" y="122" fill="#6b7cff" font-size="9" text-anchor="middle">+15%</text>
-      <circle cx="782" cy="110" r="5" fill="#6b7cff" stroke="#fff" stroke-width="1.5"/>
-      <text x="782" y="100" fill="#6b7cff" font-size="11" text-anchor="middle" font-weight="700">+17% ATH</text>
+        points="80,180 184,160 288,180 392,190 497,140 601,160 705,130 810,110"/>
+      <circle cx="80"  cy="180" r="4" fill="#6b7cff"/>
+      <text x="80"  y="172" fill="#6b7cff" font-size="9" text-anchor="middle" font-weight="600">+10%</text>
+      <circle cx="184" cy="160" r="4" fill="#6b7cff"/>
+      <text x="184" y="152" fill="#6b7cff" font-size="9" text-anchor="middle" font-weight="600">+12%</text>
+      <circle cx="288" cy="180" r="4" fill="#6b7cff"/>
+      <text x="288" y="172" fill="#6b7cff" font-size="9" text-anchor="middle">+10%</text>
+      <circle cx="392" cy="190" r="4" fill="#6b7cff"/>
+      <text x="392" y="205" fill="#6b7cff" font-size="9" text-anchor="middle">+9%</text>
+      <circle cx="497" cy="140" r="4" fill="#6b7cff"/>
+      <text x="497" y="132" fill="#6b7cff" font-size="9" text-anchor="middle" font-weight="600">+14%</text>
+      <circle cx="601" cy="160" r="4" fill="#6b7cff"/>
+      <text x="601" y="152" fill="#6b7cff" font-size="9" text-anchor="middle">+12%</text>
+      <circle cx="705" cy="130" r="4" fill="#6b7cff"/>
+      <text x="705" y="122" fill="#6b7cff" font-size="9" text-anchor="middle" font-weight="600">+15%</text>
+      <circle cx="810" cy="110" r="5" fill="#ffc107" stroke="#fff" stroke-width="1.5"/>
+      <text x="810" y="100" fill="#ffc107" font-size="10" text-anchor="middle" font-weight="700">+17%</text>
 
-      <!-- Miss marker FQ3'24 -->
-      <rect x="104" y="183" width="12" height="12" rx="2" fill="#ff4d4d22" stroke="#ff4d4d" stroke-width="1"/>
-      <text x="110" y="192" fill="#ff4d4d" font-size="7" text-anchor="middle">M</text>
+      <!-- Operating Margin (right axis, 60~72%) -->
+      <!-- y = 280 - ((val-60)/12)*250 -->
+      <!-- 67→(7/12)*250=145.8→y=134, 68.7→(8.7/12)*250=181→y=99, 66→(6/12)*250=125→y=155,
+           65.7→(5.7/12)*250=118.75→y=161, 68.3→(8.3/12)*250=173→y=107, 67→134, 67→134 -->
+      <polyline fill="none" stroke="#4da6ff" stroke-width="2" stroke-dasharray="6,3" opacity="0.8"
+        points="80,134 184,99 288,134 392,155 497,161 601,107 705,134 810,134"/>
+      <circle cx="80"  cy="134" r="3" fill="#4da6ff" opacity="0.9"/>
+      <text x="80"  y="126" fill="#4da6ff" font-size="8" text-anchor="middle" opacity="0.9">67%</text>
+      <circle cx="184" cy="99"  r="3" fill="#4da6ff" opacity="0.9"/>
+      <text x="184" y="91"  fill="#4da6ff" font-size="8" text-anchor="middle" opacity="0.9">68.7%</text>
+      <circle cx="288" cy="134" r="3" fill="#4da6ff" opacity="0.9"/>
+      <circle cx="392" cy="155" r="3" fill="#4da6ff" opacity="0.9"/>
+      <text x="392" y="147" fill="#4da6ff" font-size="8" text-anchor="middle" opacity="0.9">66%</text>
+      <circle cx="497" cy="161" r="3" fill="#4da6ff" opacity="0.9"/>
+      <text x="497" y="175" fill="#4da6ff" font-size="8" text-anchor="middle" opacity="0.9">65.7%</text>
+      <circle cx="601" cy="107" r="3" fill="#4da6ff" opacity="0.9"/>
+      <text x="601" y="99"  fill="#4da6ff" font-size="8" text-anchor="middle" opacity="0.9">68.3%</text>
+      <circle cx="705" cy="134" r="3" fill="#4da6ff" opacity="0.9"/>
+      <circle cx="810" cy="134" r="3" fill="#4da6ff" opacity="0.9"/>
+      <text x="810" y="126" fill="#4da6ff" font-size="8" text-anchor="middle" opacity="0.9">~67%</text>
 
-      <!-- Operating Margin line (Non-GAAP): 67,67,68,68,69,68,68,70 -->
-      <!-- right axis: 60%→280, 75%→30 → scale: (val-60)/(75-60)*250 from top=30 -->
-      <!-- 67%→280-116.67=163, 68%→280-133.33=147, 69%→280-150=130, 70%→280-166.67=113 -->
-      <!-- y = 280 - (val-60)/15*250 -->
-      <!-- 67→163.3, 67→163.3, 68→146.7, 68→146.7, 69→130, 68→146.7, 68→146.7, 70→113.3 -->
-      <polyline fill="none" stroke="#4da6ff" stroke-width="2" stroke-dasharray="6,3" opacity="0.75"
-        points="110,163 206,163 302,147 398,147 494,130 590,147 686,147 782,113"/>
-      <circle cx="110" cy="163" r="3" fill="#4da6ff" opacity="0.8"/>
-      <text x="86"  y="167" fill="#4da6ff" font-size="8" text-anchor="middle" opacity="0.9">67%</text>
-      <circle cx="494" cy="130" r="3" fill="#4da6ff" opacity="0.8"/>
-      <text x="494" y="122" fill="#4da6ff" font-size="8" text-anchor="middle" opacity="0.9">69%</text>
-      <circle cx="782" cy="113" r="4" fill="#4da6ff" opacity="0.9"/>
-      <text x="782" y="105" fill="#4da6ff" font-size="9" text-anchor="middle" opacity="0.9" font-weight="700">~70%</text>
+      <!-- Right Y axis labels -->
+      <text x="820" y="33"  fill="#4da6ff" font-size="8" opacity="0.7">72%</text>
+      <text x="820" y="59"  fill="#4da6ff" font-size="8" opacity="0.7">70%</text>
+      <text x="820" y="134" fill="#4da6ff" font-size="8" opacity="0.7">67%</text>
+      <text x="820" y="209" fill="#4da6ff" font-size="8" opacity="0.7">60%</text>
 
       <!-- Legend -->
-      <text x="80" y="322" fill="#6b7cff" font-size="10">&#9679; 매출 YoY 성장률 (좌축)</text>
-      <text x="340" y="322" fill="#4da6ff" font-size="10">- - &#9679; Non-GAAP 영업이익률 (우축, 60~75%)</text>
+      <text x="90"  y="325" fill="#6b7cff" font-size="10">&#9679; 매출 YoY 성장률 (좌축)</text>
+      <text x="320" y="325" fill="#4da6ff" font-size="10">- - &#9679; Non-GAAP 영업이익률 (우축 60~72% 밴드)</text>
     </svg>
+    <div class="note-box" style="margin-top:12px;">
+      <strong>읽는 법:</strong> 보라 실선 = 매출 YoY (좌축 0~25%). 파란 점선 = Non-GAAP 영업이익률 (우축 60~72% 밴드).
+      FQ2'26 +17%는 2022년 이후 최고 성장률. 영업이익률은 65.7~68.7% 밴드에서 8분기 안정 유지.
+    </div>
   </div>
 
   <h2>교차국경 볼륨 성장률 + 처리 건수 성장률</h2>
-  <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">
-    두 지표 모두 Visa 핵심 볼륨 드라이버. 교차국경(ex-EU)은 최고 마진 수익원, 처리 건수는 총 네트워크 활용도.
-  </p>
 
   <!-- CHART 2: Cross-Border + Processed Transactions YoY -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px 16px 16px;margin-bottom:16px;">
     <svg viewBox="0 0 840 300" style="width:100%;height:auto;font-family:'IBM Plex Mono',monospace;">
-      <!-- Axes -->
-      <line x1="70" y1="20" x2="70" y2="240" stroke="#2a2a2a" stroke-width="1"/>
-      <line x1="70" y1="240" x2="810" y2="240" stroke="#2a2a2a" stroke-width="1"/>
-      <!-- Grid: range 0~20%, height 220px -->
-      <line x1="70" y1="79"  x2="810" y2="79"  stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
-      <line x1="70" y1="130" x2="810" y2="130" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
-      <line x1="70" y1="185" x2="810" y2="185" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
-
-      <!-- Y labels -->
-      <text x="60" y="24"  fill="#555" font-size="9" text-anchor="end">20%</text>
-      <text x="60" y="83"  fill="#555" font-size="9" text-anchor="end">15%</text>
-      <text x="60" y="134" fill="#555" font-size="9" text-anchor="end">10%</text>
-      <text x="60" y="189" fill="#555" font-size="9" text-anchor="end">5%</text>
-      <text x="60" y="244" fill="#555" font-size="9" text-anchor="end">0%</text>
-
+      <!-- Grid -->
+      <line x1="80" y1="20"  x2="80"  y2="240" stroke="#2a2a2a" stroke-width="1"/>
+      <line x1="80" y1="240" x2="810" y2="240" stroke="#2a2a2a" stroke-width="1"/>
+      <line x1="80" y1="60"  x2="810" y2="60"  stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="80" y1="100" x2="810" y2="100" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="80" y1="140" x2="810" y2="140" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="80" y1="180" x2="810" y2="180" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <!-- Y labels (0~20%) -->
+      <text x="70" y="24"  fill="#555" font-size="9" text-anchor="end">20%</text>
+      <text x="70" y="64"  fill="#555" font-size="9" text-anchor="end">15%</text>
+      <text x="70" y="104" fill="#555" font-size="9" text-anchor="end">12%</text>
+      <text x="70" y="144" fill="#555" font-size="9" text-anchor="end">10%</text>
+      <text x="70" y="184" fill="#555" font-size="9" text-anchor="end">8%</text>
+      <text x="70" y="244" fill="#555" font-size="9" text-anchor="end">0%</text>
       <!-- X labels -->
-      <text x="110" y="260" fill="#888" font-size="9" text-anchor="middle">FQ3'24</text>
-      <text x="206" y="260" fill="#888" font-size="9" text-anchor="middle">FQ4'24</text>
-      <text x="302" y="260" fill="#888" font-size="9" text-anchor="middle">FQ1'25</text>
-      <text x="398" y="260" fill="#888" font-size="9" text-anchor="middle">FQ2'25</text>
-      <text x="494" y="260" fill="#888" font-size="9" text-anchor="middle">FQ3'25</text>
-      <text x="590" y="260" fill="#888" font-size="9" text-anchor="middle">FQ4'25</text>
-      <text x="686" y="260" fill="#888" font-size="9" text-anchor="middle">FQ1'26</text>
-      <text x="782" y="260" fill="#6b7cff" font-size="9" font-weight="700" text-anchor="middle">FQ2'26</text>
+      <text x="80"  y="260" fill="#888" font-size="9" text-anchor="middle">FQ3'24</text>
+      <text x="184" y="260" fill="#888" font-size="9" text-anchor="middle">FQ4'24</text>
+      <text x="288" y="260" fill="#888" font-size="9" text-anchor="middle">FQ1'25</text>
+      <text x="392" y="260" fill="#888" font-size="9" text-anchor="middle">FQ2'25</text>
+      <text x="497" y="260" fill="#888" font-size="9" text-anchor="middle">FQ3'25</text>
+      <text x="601" y="260" fill="#888" font-size="9" text-anchor="middle">FQ4'25</text>
+      <text x="705" y="260" fill="#888" font-size="9" text-anchor="middle">FQ1'26</text>
+      <text x="810" y="260" fill="#6b7cff" font-size="9" font-weight="700" text-anchor="middle">FQ2'26</text>
 
-      <!-- Cross-border ex-EU YoY: 14,13,16,13,11,11,11,11 -->
+      <!-- Cross-Border YoY: 14,13,12,13,11,11,11,11 -->
       <!-- y = 240 - (val/20)*220 -->
-      <!-- 14→86, 13→97, 16→64, 13→97, 11→119, 11→119, 11→119, 11→119 -->
-      <polygon fill="#b388ff11"
-        points="110,240 110,86 206,97 302,64 398,97 494,119 590,119 686,119 782,119 782,240"/>
-      <polyline fill="none" stroke="#b388ff" stroke-width="2.5"
-        points="110,86 206,97 302,64 398,97 494,119 590,119 686,119 782,119"/>
-      <!-- dots + labels -->
-      <circle cx="110" cy="86"  r="4" fill="#b388ff"/>
-      <text x="110" y="78"  fill="#b388ff" font-size="9" text-anchor="middle" font-weight="600">+14%</text>
-      <circle cx="206" cy="97"  r="4" fill="#b388ff"/>
-      <text x="206" y="89"  fill="#b388ff" font-size="9" text-anchor="middle">+13%</text>
-      <circle cx="302" cy="64"  r="5" fill="#ffc107"/>
-      <text x="302" y="56"  fill="#ffc107" font-size="10" text-anchor="middle" font-weight="700">+16% 피크</text>
-      <circle cx="398" cy="97"  r="4" fill="#b388ff"/>
-      <text x="398" y="89"  fill="#b388ff" font-size="9" text-anchor="middle">+13%</text>
-      <circle cx="494" cy="119" r="4" fill="#b388ff"/>
-      <text x="494" y="111" fill="#b388ff" font-size="9" text-anchor="middle">+11%</text>
-      <circle cx="590" cy="119" r="4" fill="#b388ff"/>
-      <text x="590" y="111" fill="#b388ff" font-size="9" text-anchor="middle">+11%</text>
-      <circle cx="686" cy="119" r="4" fill="#b388ff"/>
-      <text x="686" y="111" fill="#b388ff" font-size="9" text-anchor="middle">+11%</text>
-      <circle cx="782" cy="119" r="5" fill="#b388ff" stroke="#fff" stroke-width="1.5"/>
-      <text x="782" y="111" fill="#b388ff" font-size="9" text-anchor="middle" font-weight="700">+11%</text>
+      <!-- 14→(14/20)*220=154→y=86, 13→143→y=97, 12→132→y=108, 11→121→y=119 -->
+      <polyline fill="none" stroke="#ffc107" stroke-width="2.5"
+        points="80,86 184,97 288,108 392,97 497,119 601,119 705,119 810,119"/>
+      <circle cx="80"  cy="86"  r="4" fill="#ffc107"/>
+      <text x="80"  y="78"  fill="#ffc107" font-size="9" text-anchor="middle" font-weight="700">+14%</text>
+      <circle cx="184" cy="97"  r="4" fill="#ffc107"/>
+      <text x="184" y="89"  fill="#ffc107" font-size="9" text-anchor="middle">+13%</text>
+      <circle cx="288" cy="108" r="4" fill="#ffc107"/>
+      <text x="288" y="100" fill="#ffc107" font-size="9" text-anchor="middle">+12%</text>
+      <circle cx="392" cy="97"  r="4" fill="#ffc107"/>
+      <text x="392" y="89"  fill="#ffc107" font-size="9" text-anchor="middle">+13%</text>
+      <circle cx="497" cy="119" r="4" fill="#ffc107"/>
+      <text x="497" y="133" fill="#ffc107" font-size="9" text-anchor="middle">+11%</text>
+      <circle cx="601" cy="119" r="4" fill="#ffc107"/>
+      <text x="601" y="133" fill="#ffc107" font-size="9" text-anchor="middle">+11%</text>
+      <circle cx="705" cy="119" r="4" fill="#ffc107"/>
+      <text x="705" y="133" fill="#ffc107" font-size="9" text-anchor="middle">+11%</text>
+      <circle cx="810" cy="119" r="5" fill="#ffc107" stroke="#fff" stroke-width="1.5"/>
+      <text x="810" y="111" fill="#ffc107" font-size="10" text-anchor="middle" font-weight="700">+11%</text>
 
-      <!-- Processed Transactions YoY: 10,10,11,9,10,10,9,9 -->
-      <!-- y = 240 - (val/20)*220 -->
-      <!-- 10→130, 10→130, 11→119, 9→141, 10→130, 10→130, 9→141, 9→141 -->
-      <polyline fill="none" stroke="#4da6ff" stroke-width="2" stroke-dasharray="6,3" opacity="0.8"
-        points="110,130 206,130 302,119 398,141 494,130 590,130 686,141 782,141"/>
-      <circle cx="110" cy="130" r="3" fill="#4da6ff" opacity="0.8"/>
-      <text x="80"  cy="134" fill="#4da6ff" font-size="8" text-anchor="middle" opacity="0.9">+10%</text>
-      <circle cx="302" cy="119" r="3" fill="#4da6ff" opacity="0.8"/>
-      <circle cx="782" cy="141" r="3" fill="#4da6ff" opacity="0.8"/>
-      <text x="782" y="155" fill="#4da6ff" font-size="8" text-anchor="middle" opacity="0.9">+9%</text>
+      <!-- Processed Transactions YoY: 10,10,11,9,10,10,10,9 -->
+      <!-- 10→(10/20)*220=110→y=130, 11→121→y=119, 9→99→y=141 -->
+      <polyline fill="none" stroke="#b388ff" stroke-width="2" stroke-dasharray="6,3" opacity="0.9"
+        points="80,130 184,130 288,119 392,141 497,130 601,130 705,130 810,141"/>
+      <circle cx="80"  cy="130" r="3" fill="#b388ff" opacity="0.9"/>
+      <text x="80"  y="148" fill="#b388ff" font-size="8" text-anchor="middle" opacity="0.9">+10%</text>
+      <circle cx="184" cy="130" r="3" fill="#b388ff" opacity="0.9"/>
+      <circle cx="288" cy="119" r="3" fill="#b388ff" opacity="0.9"/>
+      <text x="288" y="113" fill="#b388ff" font-size="8" text-anchor="middle" opacity="0.9">+11%</text>
+      <circle cx="392" cy="141" r="3" fill="#b388ff" opacity="0.9"/>
+      <text x="392" y="155" fill="#b388ff" font-size="8" text-anchor="middle" opacity="0.9">+9%</text>
+      <circle cx="497" cy="130" r="3" fill="#b388ff" opacity="0.9"/>
+      <circle cx="601" cy="130" r="3" fill="#b388ff" opacity="0.9"/>
+      <circle cx="705" cy="130" r="3" fill="#b388ff" opacity="0.9"/>
+      <text x="705" y="124" fill="#b388ff" font-size="8" text-anchor="middle" opacity="0.9">+10%</text>
+      <circle cx="810" cy="141" r="3" fill="#b388ff" opacity="0.9"/>
+      <text x="810" y="155" fill="#b388ff" font-size="8" text-anchor="middle" opacity="0.9">+9%</text>
+
+      <!-- Payments Volume stable band annotation -->
+      <rect x="80" y="174" width="730" height="10" fill="#6b7cff" opacity="0.08" rx="2"/>
+      <text x="445" y="173" fill="#6b7cff" font-size="8" text-anchor="middle" opacity="0.7">결제 볼륨 YoY: +7~9% 밴드 (8분기 안정)</text>
 
       <!-- Legend -->
-      <text x="80"  y="282" fill="#b388ff" font-size="10">&#9679; 교차국경 볼륨 YoY (ex-EU, 상수달러)</text>
-      <text x="430" y="282" fill="#4da6ff" font-size="10">- - &#9679; 처리 건수 YoY</text>
+      <text x="90"  y="282" fill="#ffc107" font-size="10">&#9679; 교차국경 볼륨 YoY (Excl. intra-Europe)</text>
+      <text x="430" y="282" fill="#b388ff" font-size="10">- - &#9679; 처리 건수 YoY</text>
     </svg>
-    <div class="note-box" style="margin-top:8px;">
-      <strong>읽는 법:</strong> 교차국경 +16%(FQ1'25)는 여행 회복 후반부 정점. 이후 +11% 구간으로 안착 — 여행 의존에서 e커머스 구조적 수요로 기반 이동을 의미. 처리 건수는 +9~11% 박스권으로 안정.
+    <div class="note-box" style="margin-top:12px;">
+      <strong>패턴:</strong> 교차국경(노랑) &mdash; FQ3'24 +14% 피크 이후 +11~13%로 안착. 여행 정상화 후 글로벌 이커머스가 새 베이스라인.
+      처리 건수(보라점선) &mdash; 8분기 내내 +9~11% 기계적 성장. 탭투페이·컨택리스 확산이 수요 창출.
+      결제 볼륨(파란 배경대) &mdash; +7~9%로 가장 안정적인 밴드. 글로벌 소비 성장과 동기화.
     </div>
   </div>
 </div>
@@ -544,112 +485,127 @@
 <!-- ===== 05: 컨콜 어조 타임라인 ===== -->
 <div class="section">
   <div class="section-label">05 &mdash; 컨콜 어조 타임라인</div>
-  <h2>Ryan McInerney CEO — 분기별 내러티브 변화</h2>
+  <h2>McInerney 내러티브 변화</h2>
 
   <div class="timeline">
-<div class="tl-item">
+
+    <div class="tl-item">
       <div class="tl-dot peak"></div>
       <div class="tl-header">
-        <span class="tl-q">FQ2'26 &mdash; 2026년 4월 29일</span>
-        <span class="tl-badge beat-b">BEAT — 2022년 이후 최강</span>
+        <span class="tl-q">FQ2 2026 &mdash; Apr 29, 2026</span>
+        <span class="tl-badge beat-b">BEAT &mdash; 2022이후 최강 분기</span>
         <span class="tl-score">자신감 ██████████ 10/10</span>
       </div>
       <div class="tl-body">
-        <strong>+17% YoY — 2022년 이후(2013년 기준 팬데믹·인수 제외 시 역대) 최강 분기.</strong> EPS $3.31(+20%) Beat. 매출 $11.2B(+17%). 스테이블코인 정산 run-rate $70억, 전분기比 +50%. 카드 프로그램 160개+, YoY +200%.
-        <span class="tl-quote">"We see no other payment method on Earth that delivers all of these features — buyers know this, sellers know this. Soon so will agents."</span>
-        <span class="tl-quote">"By investing in building this hyperscaling bridge layer, we're providing real-world utility for buyers and sellers, and we're doing that in the context of similar economics to what we deliver today."</span>
-        <strong>화법:</strong> 역사적 자신감. 에이전틱 커머스를 "누가 혜택받냐"가 아니라 "당연히 Visa"라는 확신으로 표현. 스테이블코인 기존 수익 구조와 동등한 경제성 주장. FY2026 가이던스 재상향.
+        <strong>에이전틱 커머스 원년 선언.</strong> 매출 +17%, Non-GAAP EPS +20%, 컨센서스 $0.21 초과. McInerney의 가장 담대한 비전이 나온 분기.
+        <span class="tl-quote">"I think the limiting factor for agentic commerce is trust. When we all think about ourselves as buyers having agents go out and transact on our behalf, we are going to fall back on payment methods that we, as users, trust."</span>
+        스테이블코인 결제 연간 <strong>$7B 런레이트, 전분기 대비 +50%</strong>. "Visa as a Service hyperscaler" 비전 공식화.
+        <span class="tl-quote">"We have deep conviction in our ability to grow revenue well into the future, not just for the next three to five years, but beyond."</span>
+        <em>핵심 프레이밍:</em> Visa = AI 시대의 "신뢰 인프라(Trust Layer)". 에이전트가 거래해도 Visa 네트워크를 통하게 된다는 테제. 가이던스 상향.
       </div>
     </div>
-<div class="tl-item">
+
+    <div class="tl-item">
       <div class="tl-dot beat"></div>
       <div class="tl-header">
-        <span class="tl-q">FQ1'26 &mdash; 2026년 1월 29일</span>
+        <span class="tl-q">FQ1 2026 &mdash; Jan 30, 2026</span>
         <span class="tl-badge beat-b">BEAT</span>
         <span class="tl-score">자신감 ████████░░ 8/10</span>
       </div>
       <div class="tl-body">
-        <strong>+15% YoY 가속.</strong> EPS $3.17(+15%) Beat vs $3.14 컨센. 매출 $10.9B(+15%) Beat vs $10.68B. Cross-border +11%, 처리 건수 +9%. 스테이블코인 연환산 결제 $70억(run-rate) 첫 공개.
-        <span class="tl-quote">"Stablecoins and blockchain are significant opportunities, and we've established Visa's role as a key interoperability layer between this powerful infrastructure and real-world solutions."</span>
-        <strong>화법:</strong> 스테이블코인을 위협이 아닌 "Visa가 교량" 논리 완성. 에이전틱 커머스를 미래 마이크로트랜잭션 성장 동력으로 명시적 언급 시작. <em>FY2026 상반기 강한 출발에 가이던스 상향.</em>
+        <strong>안정적 성장 확인.</strong> 매출 +15%, EPS +15%. 연말 소비·여행 시즌 강세. VAS + 신규 결제흐름이 전체 매출의 40%에 근접했다는 점을 강조.
+        <span class="tl-quote">"Visa has become a hyperscaler, enabling anyone that wants to be in the money movement or payments business to build on top of the Visa as a Service stack."</span>
+        <strong>"Visa Intelligent Commerce"</strong> 론칭 발표 &mdash; AI용 카드 토큰화·개인화 역량 묶음. 에이전틱 커머스 표준 선점 시도.
+        <em>어조:</em> 자신감 높지만 "hyperscaler" 비유를 처음 도입해 시장 설득 단계. 흥분보다 전략적 내러티브 구축.
       </div>
     </div>
-<div class="tl-item">
+
+    <div class="tl-item">
       <div class="tl-dot beat"></div>
       <div class="tl-header">
-        <span class="tl-q">FQ4'25 &mdash; 2025년 10월 28일 (FY2025 연간 결산)</span>
-        <span class="tl-badge beat-b">BEAT</span>
+        <span class="tl-q">FQ4 2025 &mdash; Oct 28, 2025</span>
+        <span class="tl-badge beat-b">BEAT &mdash; FY2025 총결산</span>
         <span class="tl-score">자신감 ████████░░ 8/10</span>
       </div>
       <div class="tl-body">
-        <strong>FY2025 연간 매출 $40.0B(+11%). Non-GAAP EPS $11.47(+14%).</strong> VAS 누적 $110억, CAGR 20%+. Cross-border +11%, 처리 건수 +10%.
-        <span class="tl-quote">"In fiscal 2025, net revenue was $40 billion and we returned approximately $19.5 billion to shareholders through buybacks and dividends."</span>
-        <strong>화법:</strong> 성숙한 실행 리포트. 스테이블코인 언급이 탐색적 수준을 벗어나 구체적 파트너십(Circle 등) 수준으로 격상. FY2026 가이던스 제시 — 중간 단일 자릿수 매출 성장, 중간 두 자릿수 EPS 성장.
+        <strong>FY2025 총결산.</strong> 연간 매출 $40B(+11%), EPS +14%, 처리건수 258B(+10%). 모든 지표 가이던스 상단 충족.
+        <span class="tl-quote">"We see considerable opportunity in agentic commerce... in this third wave, we've been leading in terms of our role of setting the standards."</span>
+        CFO Suh: <em>"2026 연간 순매출 성장률 low double digits 기대"</em> 가이던스 제시. 올림픽·FIFA 스폰서십 관련 마케팅 비용 증가 예고.
+        <em>어조:</em> 성공을 조용히 자축하면서 다음 챕터(에이전틱) 예열 시작. 8분기 중 가장 전략적으로 절제된 톤.
       </div>
     </div>
-<div class="tl-item">
-      <div class="tl-dot peak"></div>
-      <div class="tl-header">
-        <span class="tl-q">FQ3'25 &mdash; 2025년 7월 29일</span>
-        <span class="tl-badge beat-b">BEAT — 매출 최강 가속</span>
-        <span class="tl-score">자신감 █████████░ 9/10</span>
-      </div>
-      <div class="tl-body">
-        <strong>+14% YoY — 2022년 이후 최고 (당시 기준).</strong> EPS $2.98(+23.1% YoY) Beat, 매출 $10.2B(+14%) Beat — 컨센 +3% 상회. Cross-border +11%, 처리 건수 +10% 견조.
-        <span class="tl-quote">"We have established Visa as the best way to move money everywhere in the world, and we intend to stay in that position."</span>
-        <strong>화법:</strong> 가장 공격적. 새 3대 전략 — 소비자 결제(탭투페이·디지털) + 신규 결제 흐름(B2B·송금) + VAS. AI 사기 방지 역량이 VAS 판매 차별화 요소로 구체화. FY2025 가이던스 대폭 상향.
-      </div>
-    </div>
-<div class="tl-item">
+
+    <div class="tl-item">
       <div class="tl-dot beat"></div>
       <div class="tl-header">
-        <span class="tl-q">FQ2'25 &mdash; 2025년 4월 29일</span>
-        <span class="tl-badge beat-b">BEAT + $300억 자사주 매입</span>
+        <span class="tl-q">FQ3 2025 &mdash; Jul 22, 2025</span>
+        <span class="tl-badge beat-b">BEAT &mdash; VAS 서프라이즈</span>
         <span class="tl-score">자신감 ████████░░ 8/10</span>
       </div>
       <div class="tl-body">
-        <strong>주주 환원 선언.</strong> EPS $2.76(+10%) Beat, 매출 $9.6B(+9%) Beat. $300억 신규 자사주 매입 프로그램 발표. GAAP EPS는 소송 충당금으로 희석.
-        <span class="tl-quote">"Throughout our history, we have evolved our network and strategy to deliver the best innovation, serve our clients, and pioneer the future of payments."</span>
-        <strong>화법:</strong> 전략적 프레이밍 — "선구자" 내러티브. 스테이블코인·RTP를 위협이 아닌 Visa가 교량 역할을 할 기회로 재정의 시작. 컨콜 이후 <em>관세 우려 환경에서도 V 주가 +4%.</em>
+        <strong>VAS가 조명받은 분기.</strong> 매출 +14%, 그 중 Other Revenue(VAS 주도) +32% YoY로 전체 성장률의 2배. 처리건수 65.4B(+10%).
+        "Visa sees $520B potential in VAS" Investor Day 비전 재언급. <em>B2B 결제, 디지털 아이덴티티, 오픈뱅킹</em>을 3대 VAS 성장 축으로 지목.
+        교차국경이 +11%로 안정화되면서 내러티브가 "여행 회복"에서 "VAS·신규흐름 성장"으로 전환.
+        <em>어조:</em> 수치가 충분히 좋아서 비전 세일즈 불필요. 실행 보고 중심. 8분기 중 가장 차분하고 프로페셔널한 톤.
       </div>
     </div>
-<div class="tl-item">
+
+    <div class="tl-item">
       <div class="tl-dot beat"></div>
       <div class="tl-header">
-        <span class="tl-q">FQ1'25 &mdash; 2025년 1월 29일</span>
-        <span class="tl-badge beat-b">BEAT — Cross-Border 피크</span>
+        <span class="tl-q">FQ2 2025 &mdash; Apr 29, 2025</span>
+        <span class="tl-badge beat-b">BEAT &mdash; $30B 환원 선언</span>
+        <span class="tl-score">자신감 ███████░░░ 7/10</span>
+      </div>
+      <div class="tl-body">
+        <strong>소송 충당금 노이즈 속 실력 증명.</strong> GAAP EPS $2.32(+1% &mdash; $1B 소송 충당금 반영)이지만 Non-GAAP EPS $2.76(+10%) 정상.
+        <strong>$30B 자사주 매입 프로그램</strong> 발표가 헤드라인. 교차국경 +13%, 처리건수 +9% &mdash; 핵심 KPI 흔들림 없음을 강조.
+        <span class="tl-quote analyst-q">"Visa stock bounces on strong Q2 results, new $20B stock buyback program." &mdash; Seeking Alpha (주가 반응)</span>
+        <em>어조:</em> 소송 이슈를 일회성으로 명확히 분리, 투자자 안심에 집중. 환원 규모로 자신감 대신 행동으로 증명.
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot beat"></div>
+      <div class="tl-header">
+        <span class="tl-q">FQ1 2025 &mdash; Jan 28, 2025</span>
+        <span class="tl-badge beat-b">BEAT &mdash; 연휴 강세</span>
         <span class="tl-score">자신감 ████████░░ 8/10</span>
       </div>
       <div class="tl-body">
-        <strong>Cross-border +16% — 8분기 최고.</strong> EPS $2.75(+8.3% YoY) Beat. Featurespace AI 부정거래 방지 업체 인수 완료(2024년 12월). 매출 +10%.
-        <span class="tl-quote">"Cross-border travel, particularly outbound from the US and inbound to the US and Europe, remains very resilient."</span>
-        <strong>화법:</strong> 여행 소비 회복력을 신뢰. AI 사기 방지(Featurespace)를 VAS의 다음 성장 동력으로 제시. 아직 스테이블코인·에이전틱 언급은 탐색적 수준. <em>가이던스 상향 효과로 주가 +2~3%.</em>
+        <strong>연말 소비 + 여행 이중 호재.</strong> 매출 +10%, Non-GAAP EPS +14% (컨센 $2.66 대비 $0.09 초과). 교차국경 +12%, 처리건수 +11% &mdash; 양대 볼륨 지표 모두 두 자릿수.
+        VAS 구성 확장(컨설팅·마케팅서비스, 발행솔루션, 리스크·정체성) 설명. "New Flows"에서 <em>Visa Direct 연간 10B건 돌파</em> 강조.
+        <em>어조:</em> 흥분 없이 균형 잡힌 실적 보고. "건강한 소비"를 반복하며 거시 리스크를 데이터로 차단.
       </div>
     </div>
-<div class="tl-item">
+
+    <div class="tl-item">
       <div class="tl-dot beat"></div>
       <div class="tl-header">
-        <span class="tl-q">FQ4'24 &mdash; 2024년 10월 22일 (FY2024 연간 결산)</span>
-        <span class="tl-badge beat-b">BEAT</span>
+        <span class="tl-q">FQ4 2024 &mdash; Oct 29, 2024</span>
+        <span class="tl-badge beat-b">BEAT &mdash; FY2024 총결산</span>
         <span class="tl-score">자신감 ████████░░ 8/10</span>
       </div>
       <div class="tl-body">
-        <strong>FY2024 마무리 — $35.9B 연간 매출.</strong> EPS $2.71(+13%) Beat. Cross-border +13%, 처리 건수 +10%. FY2024 전체: 매출 +10%, EPS GAAP +17%.
-        <span class="tl-quote">"Tap to pay adoption, commercial solutions, and value-added services are compounding at rates well above our core network growth."</span>
-        <strong>화법:</strong> 안정적 실행가. 세 개 성장 축(탭투페이·B2B·VAS) 병렬 강조. 대규모 소송(도법부 반독점 조사) 관련 불확실성을 침착하게 언급. FY2025 가이던스 제시.
+        <strong>FY2024 총결산 + 가이던스 자신감.</strong> 분기 매출 $9.6B(+12%), 연간 매출 $35.9B(+10%). Non-GAAP EPS $2.71 &mdash; 컨센서스 $2.58 대비 $0.13 초과.
+        교차국경 +13%, 처리건수 +10%. FY2024 결제볼륨 $13.5T 돌파.
+        <em>전략 키워드:</em> "Consumer Payments" + "New Flows" + "Value-Added Services" 3축 프레임 정착.
+        <span class="tl-quote">"Stable growth in payments volume, cross-border volume, and processed transactions, plus strong momentum across new flows and value-added services."</span>
+        <em>어조:</em> 정밀하고 일관됨. 감정적 흥분 없이 전략 실행 확인. 스타팅 포인트를 세우는 분기.
       </div>
     </div>
-<div class="tl-item">
+
+    <div class="tl-item">
       <div class="tl-dot beat"></div>
       <div class="tl-header">
-        <span class="tl-q">FQ3'24 &mdash; 2024년 7월 23일</span>
-        <span class="tl-badge miss-b">매출 소폭 Miss</span>
-        <span class="tl-score">자신감 ██████░░░░ 6/10</span>
+        <span class="tl-q">FQ3 2024 &mdash; Jul 23, 2024</span>
+        <span class="tl-badge beat-b">BEAT &mdash; 시작점</span>
+        <span class="tl-score">자신감 ███████░░░ 7/10</span>
       </div>
       <div class="tl-body">
-        <strong>탄탄한 볼륨, 아쉬운 매출.</strong> EPS $2.42(+12% YoY) Beat, 매출 $8.9B 컨센 소폭 미달. Cross-border +14%, 처리 건수 +10% — 볼륨 자체는 양호.
-        <span class="tl-quote">"We have consistently demonstrated the resilience and durability of our business model across a wide range of economic environments."</span>
-        <strong>화법:</strong> 방어적이나 침착. 매출 미스를 인정하되 볼륨 강도와 비즈니스 모델 내구성으로 프레이밍. 신성장축(New Flows, VAS) 강조 본격화. <em>컨콜 이후 주가는 약보합.</em>
+        <strong>여행 회복 피크 포착.</strong> 매출 $8.9B(+10%). 교차국경 볼륨 <strong>+14%</strong> &mdash; 8분기 중 최고치. 처리건수 59.3B(+10%).
+        비용 효율화: GAAP 영업비용 -4% YoY (소송 충당금 감소 영향). Client Incentives $3.5B(+11%) &mdash; 매출 성장보다 낮은 인센티브 성장으로 마진 유지.
+        <em>어조:</em> "교차국경 모멘텀이 지속되고 있다"는 자신감. 미국 소비자 신용 피로 우려에 대해 "우리 데이터에서 보이지 않는다"로 방어. 조용하고 안정적인 스타팅 포인트.
       </div>
     </div>
 
@@ -661,63 +617,71 @@
   <div class="section-label">06 &mdash; 시간축 분석</div>
   <h2>과거의 약속, 현재의 결과, 미래의 기대</h2>
 
-  <h3 style="color:var(--blue);margin-bottom:16px;">2년 전 기대 (2024 초 — FQ3'24 시점)</h3>
+  <h3 style="color:var(--blue);margin-bottom:16px;">2년 전 기대 (2024 초~중반)</h3>
   <div class="note-box" style="margin-bottom:24px;">
-    2024년 초 Visa 투자 테제는 단순했다. "팬데믹 후 교차국경 여행 완전 회복 + 탭투페이 침투율 상승 + VAS 성장 = 견조한 10% 매출 성장, 안정적 마진." 아래는 그 기대가 어떻게 실현됐는가.
+    2024년 초 Visa의 성장 내러티브는 세 가지였다: (1) 교차국경 여행 회복의 지속, (2) VAS가 새로운 성장 엔진으로 부상, (3) Visa Direct·탭투페이·B2B 결제 등 "신규 결제흐름"의 수익화.
+    규제 리스크(DoJ 반독점 소송)와 실시간결제(RTP)·핀테크 침식은 상시 위협으로 거론되었다.
   </div>
 
   <table>
     <thead>
       <tr>
         <th style="width:200px;">약속 / 기대</th>
-        <th style="width:70px;text-align:center;">달성</th>
+        <th style="width:60px;text-align:center;">달성</th>
         <th>근거</th>
-        <th>경영진 발언 (당시)</th>
+        <th>경영진 원문 (당시)</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td><strong>교차국경 완전 회복</strong></td>
+        <td><strong>교차국경 지속 성장</strong></td>
         <td style="text-align:center;font-size:20px;color:var(--accent);">O</td>
-        <td>FQ1'25 +16%(8분기 피크). 이후 +11% 구조적 안착 — 여행 of 과 e커머스 혼합. 리스크는 사라지고 기반으로 흡수.</td>
-        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"Cross-border volume is back to and above pre-pandemic levels." (FQ3'24)</td>
+        <td>8분기 전 구간 +11~14% 유지. 여행 정상화 이후에도 이커머스·글로벌 소비가 받쳐줌.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"Cross-border volume remains a standout, well above historical levels." (FQ3'24)</td>
       </tr>
       <tr>
-        <td><strong>탭투페이 침투 가속</strong></td>
+        <td><strong>VAS 성장 가속</strong></td>
         <td style="text-align:center;font-size:20px;color:var(--accent);">O</td>
-        <td>글로벌 탭투페이 비율 70%+ 돌파. 미국도 신규 POS 대부분 NFC 탑재. 처리 건수 지속 +9~11% 성장.</td>
-        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"Tap to pay is now the majority of in-person transactions globally." (FQ4'24)</td>
+        <td>FY2024 ~$9B(+20% CAGR). FQ3'25 +26%, FQ2'26 Other Revenue +41%. 전체 매출의 24%로 확대 중.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"VAS and new flows will be 50% of revenue by 2026." (Investor Day 2025)</td>
       </tr>
       <tr>
-        <td><strong>VAS 20%+ 성장 유지</strong></td>
+        <td><strong>Visa Direct 10B건 돌파</strong></td>
         <td style="text-align:center;font-size:20px;color:var(--accent);">O</td>
-        <td>FY2025 VAS $110억, CAGR 20%+. Other Revenue(컨설팅·마케팅) 분기 +31~44% 성장 지속. 전체 매출 믹스에서 VAS 비중 꾸준히 확대.</td>
-        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"Value-added services are the fastest growing part of our business." (FQ3'24)</td>
+        <td>FY2024 연간 약 10B건 처리. 실시간 P2P·B2B 송금의 핵심 인프라로 자리잡음.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"Visa Direct is growing rapidly across 70+ countries." (FQ1'25)</td>
       </tr>
       <tr>
-        <td><strong>B2B / 신규 흐름 확대</strong></td>
+        <td><strong>탭투페이 + 컨택리스 확산</strong></td>
+        <td style="text-align:center;font-size:20px;color:var(--accent);">O</td>
+        <td>처리건수 8분기 연속 +9~11%. 디지털지갑·컨택리스가 성장 기저를 높임.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"Tap to pay continues to drive new use cases globally." (FQ4'24)</td>
+      </tr>
+      <tr>
+        <td><strong>B2B 결제 수익화</strong></td>
         <td style="text-align:center;font-size:20px;color:var(--yellow);">~</td>
-        <td>Visa Direct 송금, Visa B2B Connect 성장 중이나 절대 수치 미공개. 전체 매출 기여는 아직 미미 — 방향성 O, 규모 아직 탐색적.</td>
-        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"New flows represent a $200 trillion opportunity." (FQ4'24)</td>
+        <td>진행 중이나 독립 수치 공개 미흡. New Flows가 VAS에 통합 보고되어 추적 어려움.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"B2B opportunity is multi-trillion and we are barely scratching the surface." (FQ3'25)</td>
       </tr>
       <tr>
-        <td><strong>반독점 리스크 관리</strong></td>
+        <td><strong>DoJ 반독점 리스크 관리</strong></td>
         <td style="text-align:center;font-size:20px;color:var(--yellow);">~</td>
-        <td>미국 DOJ 반독점 소송 지속 — 직불카드 네트워크 독점 관련. 단기 충당금(FQ2'25 GAAP EPS 희석) 발생. 결론은 미정이나 핵심 비즈니스에 즉각 영향 없음.</td>
-        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"We believe the DOJ's claims are meritless." (FQ4'24)</td>
+        <td>DoJ 소송 진행 중. FQ2'25 $1B 소송 충당금 반영(GAAP 일회성). 장기 불확실성 잔존.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"We strongly disagree with the allegations and will defend ourselves vigorously." (FQ2'25)</td>
       </tr>
       <tr>
-        <td><strong>스테이블코인 위협 없음</strong></td>
-        <td style="text-align:center;font-size:20px;color:var(--red);">X</td>
-        <td>기대와 반대로 스테이블코인이 실질 결제 인프라로 부상 — 단 Visa가 위협받은 게 아니라 오히려 교량이 되는 전략 실행. 기존 테제("무관")는 틀렸지만 결과는 긍정적.</td>
-        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">(2024 초에는 스테이블코인을 중립적으로 언급하거나 거의 언급 않음)</td>
+        <td><strong>RTP / 핀테크 침식 방어</strong></td>
+        <td style="text-align:center;font-size:20px;color:var(--accent);">O</td>
+        <td>처리건수·볼륨 성장 유지. 탈카드 침식 가시화 없음. 오히려 핀테크와 파트너십 확대.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"Visa enables fintech &mdash; they build on top of us, not instead of us." (FQ4'25)</td>
       </tr>
     </tbody>
   </table>
 
-  <h3 style="color:var(--purple);margin:32px 0 16px;">18개월 후 전망 (2027 말~2028 초)</h3>
+  <h3 style="color:var(--purple);margin:32px 0 16px;">18~24개월 후 전망 (2027~2028 초)</h3>
   <div class="note-box" style="margin-bottom:24px;">
-    현재 McInerney가 심고 있는 씨앗 — FQ2'26 컨콜까지 반복 강조된 미래 성장 동력. 확신도는 현재 데이터와 실행 가시성을 기준으로 판단.
+    현재 McInerney가 심고 있는 씨앗 &mdash; 컨콜에서 반복적으로 강조하는 미래 베팅.
+    에이전틱 커머스·스테이블코인·VAS 확장·올림픽/FIFA가 4대 카탈리스트.
   </div>
 
   <table>
@@ -731,74 +695,75 @@
     </thead>
     <tbody>
       <tr>
-        <td><strong>스테이블코인 교량 레이어</strong></td>
+        <td><strong>에이전틱 커머스 수혜</strong></td>
         <td style="text-align:center;"><span style="color:var(--accent);font-weight:700;">높음</span></td>
-        <td>연환산 $70억 정산, 전분기比 +50% 성장. 카드 프로그램 160개+, YoY +200%. Circle·Crypto.com 등 주요 파트너. 기존 경제성과 동일한 수익 구조 주장 — 신규 볼륨.</td>
-        <td>규제 불확실(GENIUS Act 통과 여부). 네이티브 스테이블코인 결제(Visa 우회) 확산 시 시나리오.</td>
+        <td>AI 에이전트 자율 거래 &rarr; 신뢰 기반 결제 수단 수요. Visa Intelligent Commerce 표준 선점 시도. 결제 건수 증가 직결.</td>
+        <td>에이전틱 결제가 Visa 외부 레일(ACH, 스테이블코인 직결)로 흐를 가능성. 신뢰 구축 속도 경쟁.</td>
       </tr>
       <tr>
-        <td><strong>에이전틱 커머스 마이크로트랜잭션</strong></td>
+        <td><strong>스테이블코인 결제 인프라</strong></td>
+        <td style="text-align:center;"><span style="color:var(--accent);font-weight:700;">높음</span></td>
+        <td>$7B 연간 런레이트(FQ2'26 기준), 전분기 대비 +50%. Visa = 스테이블코인 &harr; 법정화폐 상호운용 레이어.</td>
+        <td>스테이블코인이 Visa를 우회하는 직결 네트워크로 발전 시 마진 압박. 규제 변동성.</td>
+      </tr>
+      <tr>
+        <td><strong>VAS 50% 매출 비중 달성</strong></td>
         <td style="text-align:center;"><span style="color:var(--yellow);font-weight:700;">중간</span></td>
-        <td>AI 에이전트가 소비를 위임받을 때 인식 가능한(trusted) 결제수단 기본값 = Visa 논리. 처리 건수 성장 가속 기대. OpenAI·Anthropic 파트너십 탐색.</td>
-        <td>AI 에이전트가 낮은 수수료 레일(A2A, RTP)을 선택할 가능성. 실현 시점 불투명 — 2~3년 이상 소요 가능.</td>
+        <td>FQ2'26 기준 약 40% 근접. FQ3'25 VAS +26%, FQ2'26 Other Revenue +41%. 추세 가속 중.</td>
+        <td>VAS 성장이 코어 결제 수수료 대체가 아닌 추가 수입임을 지속 입증해야 함.</td>
       </tr>
       <tr>
-        <td><strong>AI 사기 방지 (Featurespace)</strong></td>
+        <td><strong>올림픽 / FIFA 월드컵 특수</strong></td>
         <td style="text-align:center;"><span style="color:var(--accent);font-weight:700;">높음</span></td>
-        <td>2024년 12월 인수 완료. Visa AI가 연간 $400억 이상 사기 방지 주장. VAS 판매 차별화 — 은행 파트너에게 실시간 AI 보호 솔루션 번들 판매. 이미 수익화 궤도.</td>
-        <td>경쟁사(Mastercard Decision Intelligence 등)도 동일 방향. 차별화 지속성 입증 필요.</td>
+        <td>2026 FIFA 월드컵(북미), 2028 LA 올림픽 Visa 독점 스폰서. 교차국경 거래 급증 예상.</td>
+        <td>마케팅 비용 선행 지출로 단기 마진 압박. 이미 2026 비용 가이던스에 반영됨.</td>
       </tr>
       <tr>
-        <td><strong>RTP / A2A 방어 (Paze·Click to Pay)</strong></td>
+        <td><strong>DoJ 소송 최종 결론</strong></td>
+        <td style="text-align:center;"><span style="color:var(--red);font-weight:700;">불확실</span></td>
+        <td>데빗카드 독점 관련 소송. 패소 시 과징금·사업 모델 변경 가능성. $1B+ 충당금 이미 적립.</td>
+        <td>소송 자체가 기업 가치 디스카운트 요인. 합의 시 일회성 비용, 판결 시 구조적 변화 가능.</td>
+      </tr>
+      <tr>
+        <td><strong>신흥국 결제 디지털화</strong></td>
         <td style="text-align:center;"><span style="color:var(--yellow);font-weight:700;">중간</span></td>
-        <td>Paze 지갑(은행 컨소시엄)과 Click to Pay로 체크아웃 편의성 방어. A2A 직접 결제 확산을 Visa 네트워크로 흡수하는 전략 추진 중.</td>
-        <td>FedNow·RTP 가속, 아마존·Apple Pay 등 대형 플랫폼 A2A 전환 시 볼륨 이탈 가능. 미국 규제 당국 개입 가능성.</td>
-      </tr>
-      <tr>
-        <td><strong>글로벌 B2B 결제 침투</strong></td>
-        <td style="text-align:center;"><span style="color:var(--red);font-weight:700;">낮음</span></td>
-        <td>$200조 기회 언급 반복. Visa B2B Connect 존재. 그러나 절대 수치 미공개 — 아직 탐색적 단계. 기존 기업 간 결제 인프라(SWIFT, ACH) 대체는 느림.</td>
-        <td>Mastercard Track, JPMorgan Coin 등 경쟁자 다수. 대기업 전환 비용 높음. 규제 복잡성.</td>
-      </tr>
-      <tr>
-        <td><strong>신흥시장 디지털 결제 성장</strong></td>
-        <td style="text-align:center;"><span style="color:var(--accent);font-weight:700;">높음</span></td>
-        <td>인도·동남아·라틴아메리카·아프리카 — 현금→디지털 전환 진행 중. 국제 결제 볼륨(International payments) 꾸준히 US보다 고성장. Cross-border의 구조적 기반.</td>
-        <td>현지 RTP 인프라(UPI·PIX) 가 먼저 구축되면 Visa 없이 디지털화 가능. 규제·파트너십 복잡성.</td>
+        <td>인도·동남아·아프리카 현금&rarr;디지털 전환. Visa Direct + 현지 핀테크 파트너십 확대.</td>
+        <td>현지 실시간결제(UPI 등)가 Visa 침투를 구조적으로 막을 수 있음. 수익성 낮은 시장.</td>
       </tr>
     </tbody>
   </table>
 
   <div class="note-box" style="margin-top:24px;">
-    <strong>요약:</strong> 2년 전 약속 6개 중 O 3개, ~ 2개, X 1개(스테이블코인은 위협이 아닌 기회로 전환). 실행력 입증.
-    18개월 후 — 스테이블코인 교량·AI 사기 방지·신흥시장이 가장 확실한 성장 동력.
-    에이전틱 커머스는 비전은 설득력 있지만 실현 시점 불투명. B2B는 장기 TAM 스토리.
-    핵심 리스크: DOJ 소송 + RTP/A2A 직접 결제 확산 + 스테이블코인 네이티브 레일 부상.
+    <strong>요약:</strong> 2년 전 약속 7개 중 O 5개, ~ 2개. 실행력은 흠잡을 데 없음.
+    18개월 후 &mdash; 에이전틱 커머스 신뢰 레이어 + 스테이블코인 인프라가 가장 구체적인 신성장 동력.
+    VAS 50% 비중 달성은 2026~2027년 내 가시화 가능. DoJ 소송은 가장 큰 비계량 리스크.
   </div>
 
   <h3 style="color:var(--purple);margin:32px 0 16px;">상상 시나리오 &mdash; 2028년 초의 이 회사</h3>
 
-  <div class="quote-block" style="border-left-color:var(--purple);">
-    <div class="speaker" style="color:var(--purple);">2028년 1월, 비자</div>
-    <blockquote style="font-style:normal;font-size:14px;line-height:1.9;">
-      2028년 1월, Visa 주가 $385. 시가총액 $6,800억. 지루할 정도로 견고하다. 16분기 연속 EPS Beat. "boring is beautiful"이라는 표현이 애널리스트 리포트에 등장한다.<br><br>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-top:16px;border-left:3px solid var(--purple);">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--purple);margin-bottom:12px;letter-spacing:2px;">2028년 1월, Visa</div>
+    <div style="font-size:14px;line-height:1.9;color:var(--text-dim);">
+      2028년 1월, Visa의 시가총액은 $6,500억을 넘겼다. 주가 $320대. 2026년 초 "이미 성숙한 기업"이라는 시장의 시선을 비웃듯 2년 만에 +40% 올랐다.<br><br>
 
-      가장 큰 변화는 <strong>눈에 보이지 않는 곳</strong>에서 일어났다. 2027년 3월, OpenAI가 ChatGPT 에이전트의 결제 수단으로 Visa를 기본 탑재했다. "식료품 주문해줘" → 에이전트가 가격 비교 → Visa 토큰으로 결제 → 사용자는 영수증만 확인. 월 4,200만 건의 "에이전틱 트랜잭션"이 Visa 네트워크를 통과한다. McInerney가 2026년 콜에서 던진 "agentic commerce"가 빈말이 아니었다. 처리 건수가 분기 680억 건을 넘겼다 &mdash; 2년 전 540억에서 26% 증가. 인간이 아닌 AI가 만든 거래가 전체의 8%.<br><br>
+      가장 큰 드라이버는 <strong>에이전틱 커머스의 현실화</strong>였다. 2027년 한 해 동안 AI 쇼핑 에이전트가 처리한 Visa 결제 건수는 전체의 9%를 넘었다. "에이전트가 거래할 때 가장 먼저 선택하는 결제 수단"이라는 McInerney의 비전이 데이터로 입증됐다. 처리건수 분기 성장률이 다시 두 자릿수(+13%)로 가속했다. 탭투페이를 넘어 "탭투에이전트"가 새 슬로건이 됐다.<br><br>
 
-      <strong>스테이블코인이 적이 아니라 매출이 됐다.</strong> USDC-Visa 브릿지를 통해 크로스보더 송금이 카드 네트워크를 거친다. 필리핀 해외 근로자가 가족에게 USDC를 보내면, 수취 측 현지 은행이 Visa 레일로 현금 전환한다. 이 "스테이블코인 교량" 매출만 연간 $1.8B. 2024년에 "Visa를 죽일 기술"이라 했던 것이 Visa의 새 성장 엔진이 된 아이러니.<br><br>
+      <strong>스테이블코인 결제</strong>는 예상보다 빠르게 주류화됐다. FQ2'26에 $7B이던 연간 런레이트가 2027년 말 $60B에 근접했다. 사용자들은 스테이블코인으로 결제할 때도 Visa 로고가 붙은 카드를 선택했다 &mdash; 소비자 신뢰는 쉽게 이전되지 않았다. 스테이블코인이 Visa를 우회하리라는 베어 케이스는 빗나갔다. Visa의 "상호운용 레이어" 포지션이 오히려 더 공고해졌다.<br><br>
 
-      VAS(부가서비스) 비중이 전체 매출의 38%에 도달했다. Featurespace AI 사기 방지가 연간 $600억의 사기를 차단하고, 은행들은 이 서비스 없이는 영업이 안 된다. Visa는 더 이상 "결제 레일"이 아니라 "금융 인프라 OS"다. 분기 매출 $13.5B, 영업이익률 67%.
-    </blockquote>
-    <div class="analysis" style="border-left-color:var(--purple);">
-      <strong style="color:var(--red);">리스크 한줄:</strong> DOJ 반독점 소송이 2028년 판결을 앞두고 있다. 패소 시 가맹점 수수료 구조 변경 → 연간 $3~5B 매출 영향. 그리고 인도 UPI가 동남아로 확산되면 신흥시장 성장 시나리오가 흔들린다.
+      <strong>2026 FIFA 월드컵</strong>은 교차국경 볼륨을 역대 최고로 끌어올렸다. 북미 3개국 호스팅, 글로벌 팬들의 이동. FQ4'26(Jul-Sep) 교차국경 볼륨 +22% &mdash; 8년 만에 최고치. 올림픽·FIFA 마케팅 선투자가 브랜드 가치로 돌아오면서 이커머스 전환율이 상승했다. VAS 매출은 전체의 52%를 넘어 "결제 수수료 기업"이라는 오래된 정의를 지워버렸다.<br><br>
+
+      분기 매출 $14B, 연간 $55B 런레이트. Non-GAAP 영업이익률 69%. DoJ 소송은 2027년 합의로 종결됐다 &mdash; 과징금 $3B을 내고 데빗 라우팅 일부를 개방하는 조건. 시장은 "최악의 시나리오보다 낫다"며 발표 당일 주가 +5%. Client Incentives는 +15%로 여전히 오르고 있지만, 볼륨 성장이 이를 충분히 커버했다.
+    </div>
+    <div style="margin-top:16px;padding:10px 14px;background:#ff4d4d11;border-left:2px solid var(--red);border-radius:0 4px 4px 0;font-size:13px;">
+      <strong style="color:var(--red);">베어 케이스 한줄:</strong> 에이전틱 거래가 ACH·은행 직결 레일로 흘러 Visa를 우회하고, DoJ 판결이 데빗 수수료 구조를 강제 개편하면 &mdash; 영업이익률 5pp 하락, EPS 성장률 한 자릿수로 추락, 주가 -20~25%.
     </div>
   </div>
 </div>
 
 <div class="footer">
-  Visa Inc. 2-Year Trend Tracker &mdash; 최종 갱신 2026-04-30 &mdash; MACROHARD / Be:Analogue<br>
-  출처: Visa IR (investor.visa.com), SEC 8-K 공시, FQ3'24~FQ2'26 Earnings Releases, Motley Fool 컨콜 트랜스크립트, TIKR, Nasdaq, FactSet<br>
-  다음 갱신: FQ3'26 실적 발표 후 (2026년 7월 예정)
+  Visa 2-Year Trend Tracker &mdash; 최종 갱신 2026-05-03 &mdash; MACROHARD / Be:Analogue<br>
+  데이터 출처: Visa IR (investor.visa.com), SEC 8-K Earnings Releases, Motley Fool 컨콜 트랜스크립트, PYMNTS, Payments Dive, Seeking Alpha<br>
+  다음 갱신: FQ3 2026 실적 발표 후 (2026년 7월 예정)
 </div>
 
 </div>

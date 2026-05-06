@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GOOGL | 알파벳 Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #4285F4; --accent-dim: #4285F433;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #6ba3ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+    --green: #00d632; --green-dim: #00d63222;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#4285F415,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #4285F444; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  /* CARDS */
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--green); font-weight:600; }
+  .num-card .compare .note-tag { color:var(--yellow); font-weight:600; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--green); }
+  .negative { color:var(--red); }
+  .neutral { color:var(--yellow); }
+
+  /* KPI TIER */
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#4285F422; color:var(--accent); }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  /* QUOTE */
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block.cfo { border-left-color:var(--purple); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block.cfo .speaker { color:var(--purple); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  /* TONE METER */
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  /* NEXT Q */
+  .next-q { background:linear-gradient(135deg,#4da6ff10,var(--surface)); border:1px solid #4da6ff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--blue); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--blue); }
+  .next-q-item .nq-note { font-size:11px; color:var(--text-muted); margin-top:4px; }
+
+  /* LINKS */
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  /* TAGS */
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--green-dim); color:var(--green); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+  .kw-tag.accent { background:var(--accent-dim); color:var(--accent); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  /* KPI NOTE */
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+  /* HIGHLIGHT BOX */
+  .highlight-box { background:linear-gradient(135deg,#4285F410,var(--surface)); border:1px solid #4285F433; border-radius:8px; padding:20px 24px; margin:20px 0; }
+  .highlight-box .hb-title { font-size:13px; font-weight:700; color:var(--accent); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px; }
+  .highlight-box p { font-size:14px; color:var(--text-dim); line-height:1.7; }
+
+  /* DEPRECIATION WARNING */
+  .dep-warning { background:linear-gradient(135deg,#ff4d4d10,var(--surface)); border:1px solid #ff4d4d33; border-radius:8px; padding:20px 24px; margin:20px 0; }
+  .dep-warning .dw-title { font-size:13px; font-weight:700; color:var(--red); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px; }
+
+  /* TWO COL */
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin:20px 0; }
+  @media (max-width:700px) {
+    .numbers-grid { grid-template-columns:1fr; }
+    .two-col { grid-template-columns:1fr; }
+    .next-q-grid { grid-template-columns:1fr 1fr; }
+    .tone-meter { flex-direction:column; }
+    .hero { padding:40px 20px 28px; }
+    .container { padding:24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NASDAQ: GOOGL / GOOG</div>
+    <h1>Alphabet Inc.</h1>
+    <div class="company-kr">알파벳 (구글 모기업)</div>
+    <div class="subtitle">Q1 FY2026 실적 딥다이브 &mdash; 2026.04.29 장후 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-04-29</span>
+      <span>|</span>
+      <span>섹터: 통신서비스 / 검색·클라우드·광고</span>
+      <span>|</span>
+      <span>시가총액: ~$4.5조</span>
+      <span>|</span>
+      <span>Cloud 백로그: $4,600억</span>
+    </div>
+    <div class="verdict beat">BEAT &mdash; 매출 +$2.8B vs 컨센서스 / Cloud 63% 성장 완전히 폭발</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">총 매출</div>
+      <div class="value" style="color:var(--green);">$109.9B</div>
+      <div class="compare">컨센서스: $107.1B <span class="beat-tag">BEAT +$2.8B</span></div>
+      <div class="compare">전년비: +22% (Q1 2025: $90.2B)</div>
+    </div>
+    <div class="num-card">
+      <div class="label">희석 EPS (GAAP)</div>
+      <div class="value" style="color:var(--green);">$5.11</div>
+      <div class="compare">컨센서스: $2.62~2.64 <span class="beat-tag">BEAT +94%</span></div>
+      <div class="compare"><span class="note-tag">주의: $36.9B 투자 평가익 포함 (+$2.35 EPS 효과)</span></div>
+    </div>
+    <div class="num-card">
+      <div class="label">영업이익</div>
+      <div class="value" style="color:var(--green);">$39.7B</div>
+      <div class="compare">컨센서스: $36.2B <span class="beat-tag">BEAT +10%</span></div>
+      <div class="compare">영업이익률: 36.1% (전년: 31.6%)</div>
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <div class="hb-title">EPS 해부 — $5.11의 진짜 의미</div>
+    <p>
+      GAAP EPS $5.11은 지분 투자 평가익 $36.9B (세후 EPS 기여 +$2.35)를 포함한다. 일회성 제거 시 실질 영업 EPS는 약 <strong>$2.76</strong> 수준 — 전년 동기 $2.81에서 소폭 하락. 이 하락의 원인이 바로 AI Capex에 따른 감가상각 가속이다. Cloud가 63% 성장하면서도 EPS가 눌리는 구조 — 지금은 투자 사이클의 정점이다.
+    </p>
+  </div>
+
+  <h3>매출 구성 분해</h3>
+  <table>
+    <thead><tr><th>수익원</th><th>Q1 2026</th><th>Q1 2025</th><th>YoY</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Google Search &amp; Other</strong></td>
+        <td class="mono">$60.4B</td>
+        <td class="mono">$50.7B</td>
+        <td class="mono positive">+19%</td>
+        <td><span class="kw-tag bullish">RESILIENT</span></td>
+      </tr>
+      <tr>
+        <td><strong>YouTube Ads</strong></td>
+        <td class="mono">$9.88B</td>
+        <td class="mono">$8.93B</td>
+        <td class="mono positive">+11%</td>
+        <td><span class="kw-tag neutral-tag">SLIGHT MISS</span></td>
+      </tr>
+      <tr>
+        <td><strong>Google Network</strong></td>
+        <td class="mono">$6.97B</td>
+        <td class="mono">$7.48B</td>
+        <td class="mono negative">-7%</td>
+        <td><span class="kw-tag bearish">STRUCTURAL DECLINE</span></td>
+      </tr>
+      <tr>
+        <td><strong>Google Subscriptions, Platforms &amp; Devices</strong></td>
+        <td class="mono">$12.38B</td>
+        <td class="mono">$10.38B</td>
+        <td class="mono positive">+19%</td>
+        <td><span class="kw-tag bullish">STRONG</span></td>
+      </tr>
+      <tr>
+        <td><strong>Google Cloud</strong></td>
+        <td class="mono">$20.02B</td>
+        <td class="mono">$12.26B</td>
+        <td class="mono positive" style="font-size:15px;font-weight:700;">+63%</td>
+        <td><span class="kw-tag bullish">EXPLOSIVE</span></td>
+      </tr>
+      <tr>
+        <td><strong>Other Bets (Waymo 등)</strong></td>
+        <td class="mono">$0.41B</td>
+        <td class="mono">$0.45B</td>
+        <td class="mono negative">-9%</td>
+        <td><span class="kw-tag neutral-tag">MARGINAL</span></td>
+      </tr>
+      <tr style="background:var(--surface2);">
+        <td><strong>총 매출</strong></td>
+        <td class="mono" style="font-weight:700;">$109.9B</td>
+        <td class="mono">$90.2B</td>
+        <td class="mono positive" style="font-weight:700;">+22%</td>
+        <td><span class="kw-tag bullish">4년 만에 최고 성장</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="kpi-note">
+    <strong>TAC (트래픽 확보 비용):</strong> $15.22B — 컨센서스 $15.3B 하회. TAC율이 소폭 하락한 것은 Gemini 기반 AI Overviews가 유기적 검색 트래픽을 늘리고 외부 파트너 의존도를 낮추고 있다는 긍정 시그널.
+  </div>
+
+  <div class="dep-warning">
+    <div class="dw-title">감가상각 가속 경보 — AI Capex의 그림자</div>
+    <p style="font-size:14px;color:var(--text-dim);line-height:1.7;">
+      Q1 2026 Capex: <strong>$35.7B</strong> (분기 기준 사상 최대). 연간 가이던스 $180B~$190B으로 재상향 (기존 $175~185B). 2027년은 "significant increase" 예고.<br><br>
+      2025년 감가상각: $21.1B (2024년 $15.3B에서 +38%). 2026년은 Q1부터 가속화. 이 구조가 영업 EPS를 누르는 핵심 원인. 하지만 Cloud 영업이익률이 17.8% → 32.9%로 배증하며 손익분기점 돌파 확인.
+    </p>
+  </div>
+
+  <div class="next-q">
+    <h3>Capex / 가이던스 / 주주환원</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item">
+        <div class="nq-label">2026 Capex 가이던스</div>
+        <div class="nq-value">$180~190B</div>
+        <div class="nq-note">기존 $175~185B에서 재상향</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">2027 Capex</div>
+        <div class="nq-value">대폭 증가</div>
+        <div class="nq-note">CFO "significantly increase" 발언</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">Q2 2026 참고 지표</div>
+        <div class="nq-value">가이던스 없음</div>
+        <div class="nq-note">Alphabet은 분기 가이던스 미제공 관행</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>이 회사를 읽는 숫자들</h2>
+
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; Cloud 가속 여부 + Search 방어력</span>
+    <span class="tier-desc">AI 모멘텀의 핵심 검증 지표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전분기 비교</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Google Cloud 성장률 (YoY)</strong></td>
+        <td class="mono positive" style="font-size:18px;font-weight:700;">+63%</td>
+        <td class="mono positive">Q4 2025: +30%</td>
+        <td>분기마다 가속. $20B 첫 돌파. AI 수요가 인프라 공급을 초과 — 공급 제약이 병목</td>
+      </tr>
+      <tr>
+        <td><strong>Google Search 성장률 (YoY)</strong></td>
+        <td class="mono positive" style="font-size:18px;font-weight:700;">+19%</td>
+        <td class="mono positive">Q4 2025: +13%</td>
+        <td>AI 검색 대체론 반박. AI Overviews·AI Mode가 쿼리량 자체를 늘림</td>
+      </tr>
+      <tr>
+        <td><strong>Cloud 백로그</strong></td>
+        <td class="mono positive" style="font-size:18px;font-weight:700;">$4,600억+</td>
+        <td class="mono positive">QoQ 거의 2배</td>
+        <td>수주 잔고가 분기 매출의 23배. 향후 수년치 성장이 잠겨 있다</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>Cloud 63% — 이 숫자의 함의:</strong> AWS는 약 17%, Azure는 약 35% 성장. Alphabet Cloud가 두 경쟁자를 압도하는 성장세. 단, Sundar Pichai가 직접 "compute constrained"를 언급 — 수요를 따라가지 못하고 있다. 공급이 따라잡히면 성장률은 더 높아질 수도 있다.
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">광고 엔진 &mdash; 매출의 78%를 책임지는 핵심</span>
+    <span class="tier-desc">검색 + YouTube + 네트워크</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>YoY</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>총 광고 매출</strong></td>
+        <td class="mono">$77.25B</td>
+        <td class="mono positive">+15.5%</td>
+        <td>광고 시장 전체 성장률을 상회. 매크로 역풍(관세·경기) 영향 제한적</td>
+      </tr>
+      <tr>
+        <td><strong>Search &amp; Other 광고</strong></td>
+        <td class="mono">$60.4B</td>
+        <td class="mono positive">+19%</td>
+        <td>소매·금융 버티컬 주도. AI Overviews가 상업 쿼리를 늘리고 있음</td>
+      </tr>
+      <tr>
+        <td><strong>YouTube 광고</strong></td>
+        <td class="mono">$9.88B</td>
+        <td class="mono positive">+11%</td>
+        <td>컨센서스 $9.99B 소폭 미달. YouTube TV·Shorts 광고 전환이 성장을 뒷받침</td>
+      </tr>
+      <tr>
+        <td><strong>Google Network (AdMob·DV360)</strong></td>
+        <td class="mono">$6.97B</td>
+        <td class="mono negative">-7%</td>
+        <td>제3자 광고 네트워크 구조적 축소. 쿠키 없는 세계로의 이행 영향 지속</td>
+      </tr>
+      <tr>
+        <td><strong>Performance Max (AI 광고)</strong></td>
+        <td class="mono">언급 있음</td>
+        <td class="mono positive">핵심 드라이버</td>
+        <td>경영진: AI 광고가 광고 효과·ROI 개선 주도. 구체 수치 미공개</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>YouTube 광고 vs 구독의 역전:</strong> YouTube 광고 성장률(+11%)보다 구독 성장이 더 빠르다. Subscriptions/Platforms/Devices 라인 +19%. 유료 구독자 3억5천만 돌파. 경영진은 "구독이 광고보다 빠르게 성장 중"이라며 수익 다변화를 강조.
+  </div>
+
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">수익성 &mdash; Cloud 영업이익의 구조적 도약</span>
+    <span class="tier-desc">마진 확장 + 감가상각 충돌</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>Q1 2025</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>전사 영업이익률</strong></td>
+        <td class="mono positive" style="font-weight:700;">36.1%</td>
+        <td class="mono">31.6%</td>
+        <td>+450bp 마진 확장. AI 투자에도 불구하고 레버리지 실현</td>
+      </tr>
+      <tr>
+        <td><strong>Google Cloud 영업이익</strong></td>
+        <td class="mono positive" style="font-weight:700;">$6.6B</td>
+        <td class="mono">$2.2B</td>
+        <td>3배 성장. Cloud 영업이익률 32.9% (전년 17.8%)</td>
+      </tr>
+      <tr>
+        <td><strong>Google Services 영업이익</strong></td>
+        <td class="mono">$36.7B</td>
+        <td class="mono">$27.8B</td>
+        <td>광고 엔진의 현금 창출력. 이 현금이 Cloud 투자를 지탱</td>
+      </tr>
+      <tr>
+        <td><strong>순이익 (GAAP)</strong></td>
+        <td class="mono">$62.57B</td>
+        <td class="mono">$34.54B</td>
+        <td>+81%. 단, $36.9B 투자 평가익 포함. 실질 영업 순이익은 ~$26B 수준</td>
+      </tr>
+      <tr>
+        <td><strong>Q1 Capex</strong></td>
+        <td class="mono negative">$35.7B</td>
+        <td class="mono">$17.2B</td>
+        <td>+107% YoY. 분기 기준 역대 최고. 데이터센터·TPU·AI 인프라 집중 투자</td>
+      </tr>
+      <tr>
+        <td><strong>연간 감가상각 전망</strong></td>
+        <td class="mono negative">가속화</td>
+        <td class="mono">$21.1B (FY2025)</td>
+        <td>CFO: "Q1부터 성장률 가속, 연간으로 의미 있게 증가". EPS 압박 지속 전망</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>Cloud 영업이익률 32.9% — 이게 왜 중요한가:</strong> AWS 영업이익률 ~38% 수준에 빠르게 수렴하고 있다. 1년 전 17.8%에서 이 수치가 가능했던 이유: 인프라 고정비는 올라갔지만 Cloud 매출이 더 빠르게 올라가며 레버리지가 발생. 규모의 경제가 실현되고 있다는 증거.
+  </div>
+
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">AI 생태계 &mdash; Gemini·AI Overviews·Waymo</span>
+    <span class="tier-desc">미래 테제의 현재 좌표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>AI Overviews 사용자</strong></td>
+        <td class="mono">수십억 (전분기 대비 확대)</td>
+        <td>Search 페이지 내 AI 요약. 쿼리량 증가를 주도하며 Search +19% 방어의 핵심 원동력</td>
+      </tr>
+      <tr>
+        <td><strong>Gemini API 토큰 처리량</strong></td>
+        <td class="mono positive" style="font-weight:700;">분당 160억 토큰+</td>
+        <td>1분기 전 대비 "40배" 증가 발언. 기업용 API 수요 폭증을 반영</td>
+      </tr>
+      <tr>
+        <td><strong>Gemini Enterprise MAU (QoQ)</strong></td>
+        <td class="mono positive">+40% QoQ</td>
+        <td>기업 유료 고객 급증. Cloud AI 수익화의 가장 직접적 지표</td>
+      </tr>
+      <tr>
+        <td><strong>유료 구독자 총계</strong></td>
+        <td class="mono positive">3억 5천만</td>
+        <td>Google One·YouTube Premium 포함. 구독 경제로의 전환 속도 측정</td>
+      </tr>
+      <tr>
+        <td><strong>Waymo 자율주행 라이드</strong></td>
+        <td class="mono positive">주당 50만회+</td>
+        <td>달라스·휴스턴·샌안토니오·올랜도 확장 발표. 자율주행 상업화 단계 진입</td>
+      </tr>
+      <tr>
+        <td><strong>Search 쿼리량</strong></td>
+        <td class="mono positive">사상 최고</td>
+        <td>"AI가 Search를 죽인다"는 통념 반박. AI Overviews·AI Mode가 오히려 쿼리를 늘림</td>
+      </tr>
+      <tr>
+        <td><strong>Search 지연시간 개선</strong></td>
+        <td class="mono">5년간 -35%</td>
+        <td>AI 기능 추가에도 속도 개선. Gemini 3 기반 AI Overviews 비용 -30% 절감</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>분당 160억 토큰의 의미:</strong> 이 트래픽이 전부 Cloud AI 수익으로 전환되는 것은 아니지만, 인프라 선점의 필요성을 정당화한다. Capex $35.7B이 아깝지 않은 이유. Pichai는 "compute constrained"라고 했다 — 공급이 부족해서 매출이 제한되고 있다는 뜻이다.
+  </div>
+
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">리스크 &mdash; 반독점·경쟁·EPS 구조</span>
+    <span class="tier-desc">밸류에이션 할인 요인</span>
+  </div>
+  <table>
+    <thead><tr><th>리스크 항목</th><th>현황</th><th>투자자 시각</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>DOJ 반독점 소송 (검색)</strong></td>
+        <td class="mono negative">진행 중</td>
+        <td>구제책 심리 지속. 최악의 경우 검색 독점 해소 명령 가능. 컨콜에서 경영진 회피</td>
+      </tr>
+      <tr>
+        <td><strong>AI 검색 대체 위협 (Perplexity·ChatGPT)</strong></td>
+        <td class="mono neutral">제한적</td>
+        <td>Search +19%가 현재의 답. 쿼리량 사상 최고치 — 단기 위협 미실현</td>
+      </tr>
+      <tr>
+        <td><strong>EPS 감가상각 압박</strong></td>
+        <td class="mono negative">가속화</td>
+        <td>2027 Capex "대폭 증가" 예고. 향후 2~3년 EPS 성장이 이익 성장보다 느릴 수 있음</td>
+      </tr>
+      <tr>
+        <td><strong>YouTube 광고 경쟁 (TikTok·Meta)</strong></td>
+        <td class="mono neutral">소폭 영향</td>
+        <td>YouTube 광고 +11%로 선방. 단, Shorts 수익화 완성도에 따라 성장률 달라짐</td>
+      </tr>
+      <tr>
+        <td><strong>광고 매크로 (관세·경기 둔화)</strong></td>
+        <td class="mono neutral">관리 가능</td>
+        <td>Q1에는 광고 시장 영향 제한적. Q2부터 관세 효과 본격화 가능성 — 경영진 언급 없음</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter">
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:92%;background:var(--accent);"></div></div>
+      <div class="tone-score" style="color:var(--accent);">9.2<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:75%;background:var(--purple);"></div></div>
+      <div class="tone-score" style="color:var(--purple);">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 회의감</div>
+      <div class="tone-bar"><div class="fill" style="width:45%;background:var(--yellow);"></div></div>
+      <div class="tone-score" style="color:var(--yellow);">4.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">전망 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:70%;background:var(--blue);"></div></div>
+      <div class="tone-score" style="color:var(--blue);">7.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Sundar Pichai (CEO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 확신에 찬 AI 전도사. 숫자가 좋으니 방어할 필요가 없다. "전체 스택"이 빛나고 있다고 선언. 공급 제약 솔직히 인정 — 수요 확신의 역설적 표현.
+  </p>
+
+  <div class="keywords">
+    <span class="kw-tag accent">FULL-STACK AI</span>
+    <span class="kw-tag bullish">COMPUTE CONSTRAINED</span>
+    <span class="kw-tag bullish">BACKLOG NEARLY DOUBLED</span>
+    <span class="kw-tag bullish">QUERIES ALL-TIME HIGH</span>
+    <span class="kw-tag accent">GEMINI 3</span>
+    <span class="kw-tag bullish">AI OVERVIEWS</span>
+    <span class="kw-tag neutral-tag">ANTITRUST (무언급)</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Sundar Pichai &mdash; 오프닝 / 전략</div>
+    <blockquote>"Our full-stack AI approach is lighting up every part of the business. This was our strongest quarter of revenue growth in four years."</blockquote>
+    <div class="analysis"><strong>"full-stack"</strong> — Pichai의 핵심 프레이밍. 칩(TPU)→모델(Gemini)→플랫폼(GCP)→서비스(Search/YouTube)까지 수직통합한 AI 기업이라는 포지셔닝. "lighting up every part" — 모든 세그먼트에 AI 기여를 귀인시키는 내러티브 구조. 실제로 Search +19%, Cloud +63%가 이를 뒷받침한다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Sundar Pichai &mdash; Search와 AI의 공존</div>
+    <blockquote>"People love our AI experiences like AI Mode and AI Overviews, and they're coming back to Search more. Queries continue to grow and are at an all-time high, including in commercial queries."</blockquote>
+    <div class="analysis"><strong>"coming back to Search more"</strong> — AI가 Search를 잠식한다는 공포를 정면으로 반박. "commercial queries"를 구분해서 언급 — 광고 수익과 직결되는 쿼리가 늘고 있다는 뜻. "all-time high"는 사실이며 이것이 Search +19%의 근거다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Sundar Pichai &mdash; Cloud 공급 제약</div>
+    <blockquote>"We are compute constrained in the near term. Our cloud revenue would have been higher if we were able to meet the demand."</blockquote>
+    <div class="analysis"><strong>이 발언이 컨콜에서 가장 중요한 신호.</strong> 63% 성장이 "공급이 따라갔을 때의 최대"가 아니라는 뜻 — 실제 수요는 63%보다 크다. Capex $35.7B + 2027 추가 증가 예고의 배경. 단기적으로는 EPS 압박이지만, 장기적으로는 수요 확신의 증거로 읽힌다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Sundar Pichai &mdash; Gemini 효율성</div>
+    <blockquote>"Since upgrading AI Overviews and AI Mode to Gemini 3, we've reduced the cost of core AI responses by more than 30% thanks to continued hardware and engineering breakthroughs."</blockquote>
+    <div class="analysis">AI 기능 확대와 비용 절감을 동시에 달성하고 있음. 분당 160억 토큰의 스케일에서 30% 비용 절감이면 절대 금액이 막대하다. Google의 TPU 내재화가 외부 GPU 대비 원가 우위를 만들고 있다는 증거.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Sundar Pichai &mdash; Waymo</div>
+    <blockquote>"Waymo surpassed 500,000 fully autonomous rides a week — and is ready to expand to Dallas, Houston, San Antonio, and Orlando."</blockquote>
+    <div class="analysis">Other Bets 매출이 $0.41B으로 줄었음에도 Waymo를 자랑스럽게 언급 — 매출보다 기술 성숙도로 프레이밍. 4개 도시 추가 = 상업화 단계 본격 진입. 단, Other Bets 영업손실은 여전하며 수익화 타임라인은 불명확.</div>
+  </div>
+
+  <h3>Anat Ashkenazi (CFO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 정밀한 숫자 관리자. 감가상각 압박을 선제적으로 경고하면서도 레버리지 스토리를 유지. Capex 급증을 "수요가 있으니 투자한다"로 프레이밍.
+  </p>
+
+  <div class="quote-block cfo">
+    <div class="speaker">Anat Ashkenazi &mdash; 감가상각 경고</div>
+    <blockquote>"Given the increase in our CapEx investments in recent years, we expect the growth rate in 2026 depreciation to accelerate in Q1, and meaningfully increase for the full year."</blockquote>
+    <div class="analysis">투자자에게 선제 경고. 2025년 감가상각 $21.1B이 2026년엔 더 큰 폭으로 증가. "accelerate in Q1" — 이미 시작됐다는 뜻. 이 구조가 영업 EPS를 억제하지만, 동시에 Cloud 영업이익률이 32.9%로 올라왔으니 상쇄 가능하다는 메시지도 내포.</div>
+  </div>
+
+  <div class="quote-block cfo">
+    <div class="speaker">Anat Ashkenazi &mdash; 2027 Capex</div>
+    <blockquote>"We expect our 2027 CapEx to significantly increase compared to 2026."</blockquote>
+    <div class="analysis"><strong>가장 도발적인 발언.</strong> 2026년이 $180~190B인데 2027년이 더 크다면 $200B+를 상정. 이 발언 직후 애널리스트들이 수익성 지속 가능성을 집중 질문. Ashkenazi의 답: "Cloud 레버리지가 증가함에 따라 수익성도 함께 올라온다." — Capex를 비용이 아닌 수익 창출 장치로 재정의하는 시도.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 강력한 숫자 앞에서 공격성이 약했다. Capex 지속 가능성과 반독점 리스크가 주된 질문.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; Capex 수익화 타임라인</div>
+    <blockquote>"With capex accelerating to $190B this year and more in 2027, when does the market start to see the returns on these infrastructure investments?"</blockquote>
+    <div class="analysis">핵심 질문. Ashkenazi의 답: Cloud 영업이익이 이미 증명하고 있다. 백로그 $4,600억이 가시적 타임라인. 하지만 "significantly increase in 2027"에 대한 구체적 수익화 로드맵은 제시되지 않았다.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; Search AI 잠식 재질문</div>
+    <blockquote>"Are you seeing any cannibalization from AI Mode on traditional Search ad clicks, and how should we think about monetization of AI Overviews vs. standard results?"</blockquote>
+    <div class="analysis">AI 검색이 광고 단가를 낮추는지에 대한 질문. Pichai 답: "commercial queries at all-time high" — 광고 관련 쿼리가 늘고 있으니 잠식 없다. 하지만 구체적 eCPM 변화 데이터는 미공개 — 향후 공개 여부가 관건.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Seeking Alpha 커버리지 코멘트</div>
+    <blockquote>"Alphabet's Q1 was a rare combination: top-line beat, margin expansion, AND a bullish setup into the next quarter. The compute-constrained comment is either the biggest excuse in tech earnings history, or the most powerful demand signal."</blockquote>
+    <div class="analysis"><strong>"수요 신호냐 변명이냐"</strong> — 시장의 양분. 강세론자: "수요 초과 = 성장 잠재력". 약세론자: "공급 투자는 적자 구조를 심화시킨다." Q2 Cloud 성장률이 가속·유지되면 전자가 맞다.</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 읽기 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+
+  <div class="highlight-box" style="margin-bottom:20px;">
+    <div class="hb-title">이번 실적의 핵심 테제</div>
+    <p>
+      Google Cloud가 처음으로 분기 $20B을 돌파하고 63% 성장했다. 이것이 이번 분기의 전부다. Search +19%는 AI 검색 대체론을 반박했고, 광고 +15.5%는 매크로 역풍을 흡수했다. 문제는 하나: Capex $35.7B이 감가상각을 가속화하며 영업 EPS를 누른다. 하지만 Cloud 영업이익률이 17.8% → 32.9%로 도약했다는 것은, 지금의 투자가 이미 수익을 만들어내고 있다는 증거다.
+    </p>
+  </div>
+
+  <table>
+    <tbody>
+      <tr><td style="width:160px;font-weight:600;color:var(--accent);">Sundar Pichai</td><td>"전체 스택이 작동하고 있다. 수요가 공급을 초과한다. 투자는 계속된다."</td></tr>
+      <tr><td style="font-weight:600;color:var(--purple);">Anat Ashkenazi</td><td>"감가상각 가속 경고했다. Cloud 레버리지가 그것을 덮는다. 2027 Capex는 더 크다."</td></tr>
+      <tr><td style="font-weight:600;color:var(--yellow);">애널리스트</td><td>"숫자가 좋다. 그런데 $190B 쓰고 2027년엔 더 쓴다고? Capex 수익화 타임라인을 달라."</td></tr>
+      <tr><td style="font-weight:600;color:var(--green);">주가 반응</td><td>장후 +4~6% 급등, 신고가 $373 근방. Mag7 중 4월 한 달 최고 수익률 (+21%).</td></tr>
+      <tr><td style="font-weight:600;color:var(--red);">핵심 리스크</td><td>DOJ 반독점 구제책 심리 + 2027년 Capex 폭증 → EPS 감가상각 압박 구조화.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="two-col" style="margin-top:24px;">
+    <div class="num-card">
+      <div class="label">강세 시나리오</div>
+      <div style="font-size:14px;color:var(--text-dim);line-height:1.7;margin-top:8px;">
+        Cloud 공급 증가 → 성장률 70%+ 유지 → 백로그 $4,600억 매출화 → Cloud 영업이익률 40%대 진입 → EPS 감가상각 압박 해소. Search 쿼리 사상 최고 유지 → AI 대체론 완전 소멸.
+      </div>
+    </div>
+    <div class="num-card">
+      <div class="label">약세 시나리오</div>
+      <div style="font-size:14px;color:var(--text-dim);line-height:1.7;margin-top:8px;">
+        DOJ 반독점 구제책 → 기본 검색 계약(Apple 등) 해지 명령 → Search 매출 타격. Capex $200B+ 투자에도 Cloud 성장률 둔화 → 수익화 지연. 감가상각 가속으로 2~3년간 영업 EPS 정체.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid">
+    <a class="link-card" href="https://abc.xyz/investor/" target="_blank">
+      <div class="link-icon">&#x1F4C4;</div>
+      <div class="link-text"><div class="link-title">Alphabet IR 공식 페이지</div><div class="link-url">abc.xyz/investor</div></div>
+    </a>
+    <a class="link-card" href="https://blog.google/company-news/inside-google/message-ceo/alphabet-earnings-q1-2026/" target="_blank">
+      <div class="link-icon">&#x1F4AC;</div>
+      <div class="link-text"><div class="link-title">CEO Sundar Pichai 공식 발언 (Google Blog)</div><div class="link-url">blog.google</div></div>
+    </a>
+    <a class="link-card" href="https://www.fool.com/earnings/call-transcripts/2026/04/29/alphabet-googl-q1-2026-earnings-call-transcript/" target="_blank">
+      <div class="link-icon">&#x1F4DD;</div>
+      <div class="link-text"><div class="link-title">Q1 2026 컨퍼런스 콜 전문 (Motley Fool)</div><div class="link-url">fool.com/earnings</div></div>
+    </a>
+    <a class="link-card" href="https://www.cnbc.com/2026/04/29/alphabet-googl-q1-2026-earnings.html" target="_blank">
+      <div class="link-icon">&#x1F4CA;</div>
+      <div class="link-text"><div class="link-title">CNBC 실적 분석 + Capex 코멘트</div><div class="link-url">cnbc.com</div></div>
+    </a>
+    <a class="link-card" href="https://9to5google.com/2026/04/29/alphabet-q1-2026-earnings/" target="_blank">
+      <div class="link-icon">&#x1F50D;</div>
+      <div class="link-text"><div class="link-title">9to5Google 세그먼트 분해</div><div class="link-url">9to5google.com</div></div>
+    </a>
+    <a class="link-card" href="https://seekingalpha.com/news/4582091-alphabet-stock-rises-on-strong-financial-growth-and-quarterly-beat-key-takeaways" target="_blank">
+      <div class="link-icon">&#x1F4C8;</div>
+      <div class="link-text"><div class="link-title">Seeking Alpha 핵심 요약</div><div class="link-url">seekingalpha.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.investing.com/news/transcripts/earnings-call-transcript-alphabet-q1-2026-earnings-soar-stock-dips-93CH-4647252" target="_blank">
+      <div class="link-icon">&#x1F3AC;</div>
+      <div class="link-text"><div class="link-title">Investing.com 컨콜 트랜스크립트</div><div class="link-url">investing.com</div></div>
+    </a>
+    <a class="link-card" href="https://finance.yahoo.com/markets/stocks/articles/alphabet-q1-2026-earnings-google-202101883.html" target="_blank">
+      <div class="link-icon">&#x2601;&#xFE0F;</div>
+      <div class="link-text"><div class="link-title">Yahoo Finance — Cloud 63% 분석</div><div class="link-url">finance.yahoo.com</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-04-30 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>

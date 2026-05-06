@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBUX | 스타벅스 2년 추이 (FQ3 2024 ~ FQ2 2026)</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0a0a;--surface:#141414;--surface2:#1c1c1c;--border:#2a2a2a;--text:#e8e8e8;--text-dim:#888;--text-muted:#555;--accent:#00b36b;--accent-dim:#00b36b33;--red:#ff4d4d;--red-dim:#ff4d4d22;--yellow:#ffc107;--blue:#4da6ff;--purple:#b388ff;--ceo-line:#ffc10755;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans KR',-apple-system,sans-serif;font-size:15px;line-height:1.7;}
+
+  .hero{background:linear-gradient(135deg,#00b36b12,#0a0a0a 70%);border-bottom:1px solid var(--border);padding:48px 40px 36px;}
+  .hero-inner{max-width:1300px;margin:0 auto;}
+  .hero .ticker{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+  .hero h1{font-family:'Playfair Display',serif;font-size:36px;font-weight:900;line-height:1.2;margin-bottom:4px;}
+  .hero .sub{font-size:16px;color:var(--text-dim);font-weight:300;}
+  .hero .meta{display:flex;gap:20px;margin-top:16px;font-size:12px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;flex-wrap:wrap;}
+
+  .container{max-width:1300px;margin:0 auto;padding:40px;}
+  .section{margin-bottom:56px;}
+  .section-label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+  .section h2{font-size:22px;font-weight:700;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+
+  /* HORIZONTAL TABLE */
+  .h-table-wrap{overflow-x:auto;margin-bottom:24px;-webkit-overflow-scrolling:touch;}
+  .h-table{border-collapse:collapse;font-size:12px;white-space:nowrap;width:100%;}
+  .h-table th,.h-table td{padding:8px 10px;border-bottom:1px solid #1a1a1a;font-family:'IBM Plex Mono',monospace;}
+  .h-table thead th{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);background:var(--surface);border-bottom:1px solid var(--border);text-align:center;position:sticky;top:0;z-index:1;}
+  .h-table thead th:first-child{text-align:left;min-width:140px;position:sticky;left:0;z-index:2;background:var(--surface);}
+  .h-table tbody th{text-align:left;font-family:'IBM Plex Sans KR',sans-serif;font-size:13px;font-weight:500;color:var(--text);position:sticky;left:0;background:var(--bg);z-index:1;min-width:140px;border-right:1px solid var(--border);}
+  .h-table tbody td{text-align:center;}
+  .h-table tbody tr:hover{background:var(--surface);}
+  .pos{color:var(--accent);}
+  .neg{color:var(--red);}
+  .miss-cell{background:var(--red-dim);}
+  .beat-cell{background:var(--accent-dim);}
+  .peak-cell{background:#ffc10711;color:var(--yellow);font-weight:700;}
+  .latest-col{background:#00b36b08;border-left:2px solid var(--accent);border-right:2px solid var(--accent);}
+  thead .latest-col{border-top:2px solid var(--accent);}
+  /* CEO 교체 분기 강조 */
+  .ceo-col{background:#ffc10709;border-left:2px solid var(--yellow);border-right:2px solid var(--yellow);}
+  thead .ceo-col{border-top:2px solid var(--yellow);}
+  .ceo-label{font-size:9px;color:var(--yellow);display:block;margin-top:2px;}
+
+  /* NOTE BOX */
+  .note-box{font-size:12px;color:var(--text-dim);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px 16px;margin:16px 0;line-height:1.6;}
+  .note-box strong{color:var(--yellow);}
+  .note-box.green strong{color:var(--accent);}
+
+  /* PATTERN CARDS */
+  .patterns{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+  .pat-card{background:var(--surface);border-radius:8px;padding:20px;border-left:3px solid var(--accent);}
+  .pat-card.blue{border-left-color:var(--blue);}
+  .pat-card.red{border-left-color:var(--red);}
+  .pat-card.purple{border-left-color:var(--purple);}
+  .pat-card.yellow{border-left-color:var(--yellow);}
+  .pat-card h3{font-size:14px;font-weight:700;margin-bottom:8px;}
+  .pat-card p{font-size:13px;color:var(--text-dim);line-height:1.6;}
+  .pat-card em{color:var(--yellow);font-style:normal;font-weight:600;}
+
+  /* SVG CHART */
+  svg text{user-select:none;}
+
+  /* TIMELINE */
+  .timeline{position:relative;padding-left:32px;}
+  .timeline::before{content:'';position:absolute;left:12px;top:0;bottom:0;width:2px;background:var(--border);}
+  .tl-item{position:relative;margin-bottom:32px;}
+  .tl-dot{position:absolute;left:-26px;top:6px;width:12px;height:12px;border-radius:50%;border:2px solid var(--border);background:var(--bg);}
+  .tl-dot.beat{border-color:var(--accent);background:var(--accent);}
+  .tl-dot.miss{border-color:var(--red);background:var(--red);}
+  .tl-dot.pivot{border-color:var(--yellow);background:var(--yellow);}
+  .tl-dot.rise{border-color:var(--blue);background:var(--blue);}
+  .tl-header{display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap;}
+  .tl-q{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;}
+  .tl-badge{font-size:10px;padding:2px 8px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-weight:600;}
+  .tl-badge.beat-b{background:var(--accent-dim);color:var(--accent);}
+  .tl-badge.miss-b{background:var(--red-dim);color:var(--red);}
+  .tl-badge.pivot-b{background:#ffc10722;color:var(--yellow);}
+  .tl-score{font-size:11px;color:var(--text-muted);margin-left:auto;}
+  .tl-body{font-size:14px;line-height:1.7;color:var(--text-dim);}
+  .tl-body strong{color:var(--text);}
+  .tl-body em{color:var(--yellow);font-style:normal;}
+  .tl-quote{display:block;margin:8px 0;padding:8px 12px;background:var(--surface);border-left:2px solid var(--accent);font-style:italic;font-size:13px;color:var(--text);border-radius:0 4px 4px 0;}
+  .tl-quote.red-q{border-left-color:var(--red);}
+  .tl-quote.yellow-q{border-left-color:var(--yellow);}
+
+  /* CEO banner */
+  .ceo-banner{display:flex;gap:0;margin-bottom:24px;border-radius:8px;overflow:hidden;border:1px solid var(--border);}
+  .ceo-era{flex:1;padding:16px 20px;}
+  .ceo-era.narasimhan{background:linear-gradient(135deg,#ff4d4d08,#141414);border-right:1px solid var(--border);}
+  .ceo-era.niccol{background:linear-gradient(135deg,#00b36b10,#141414);}
+  .ceo-era h4{font-size:11px;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;}
+  .ceo-era.narasimhan h4{color:var(--red);}
+  .ceo-era.niccol h4{color:var(--accent);}
+  .ceo-era p{font-size:13px;color:var(--text-dim);}
+  .ceo-era strong{color:var(--text);}
+
+  /* Promise table */
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:24px;}
+  table thead th{text-align:left;padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;}
+  table tbody td{padding:10px 12px;border-bottom:1px solid #1a1a1a;vertical-align:top;}
+  table tbody tr:hover{background:var(--surface);}
+
+  .footer{border-top:1px solid var(--border);padding:20px 0;text-align:center;font-size:11px;color:var(--text-muted);}
+  h3.sub-section{font-size:16px;font-weight:700;margin:28px 0 12px;color:var(--text-dim);}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NASDAQ: SBUX &mdash; 2년 추이</div>
+    <h1>Starbucks 스타벅스</h1>
+    <div class="sub">FQ3 2024 ~ FQ2 2026 &mdash; 8분기 실적 + CEO 교체 전환점 분석</div>
+    <div class="meta">
+      <span>최종 갱신: 2026-04-30</span>
+      <span>|</span>
+      <span>최신: FQ2 FY2026 (2026-04-29 발표)</span>
+      <span>|</span>
+      <span>회계연도: 10월 시작 (FQ3 = Apr-Jun, FQ4 = Jul-Sep, FQ1 = Oct-Dec, FQ2 = Jan-Mar)</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== CEO 교체 배너 ===== -->
+<div class="ceo-banner">
+  <div class="ceo-era narasimhan">
+    <h4>Narasimhan 시대</h4>
+    <p><strong>2023.03 ~ 2024.08</strong><br>
+    재임 17개월. 연속 comp 하락, 중국 최대 -14% comp. 전략: 메뉴 혁신 + 디지털 + 매장 확대. 결국 이사회의 전격 해임.</p>
+  </div>
+  <div class="ceo-era niccol">
+    <h4>Niccol 시대 &mdash; "Back to Starbucks"</h4>
+    <p><strong>2024.09.09 ~</strong><br>
+    Chipotle 출신. 첫 100일 = 운영 단순화. FQ4'25에 7분기 만에 첫 글로벌 comp 플러스. FQ2'26 comp +6.2%, 가이던스 상향. 중국은 Boyu JV(60% 매각, $4B 밸류에이션)로 구조 변경.</p>
+  </div>
+</div>
+
+<!-- ===== 01: 요약 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 요약</div>
+  <h2>2년간 배운 것</h2>
+
+  <div class="patterns">
+    <div class="pat-card yellow">
+      <h3>CEO 교체 = 완전한 전략 리셋</h3>
+      <p>
+        <strong>Narasimhan:</strong> "글로벌 성장 + 메뉴 혁신 + 디지털화" &mdash; 7분기 연속 comp 하락으로 실패 판정.<br>
+        <strong>Niccol:</strong> "Back to Starbucks" &mdash; 마케팅 과잉 제거, 바리스타 인력 강화, 대기시간 단축. 전략 자체를 교체.<br>
+        <em>FQ4'24 = 변곡점. 이 열이 노란색인 이유.</em>
+      </p>
+    </div>
+    <div class="pat-card red">
+      <h3>중국 침체 &mdash; 구조적 문제</h3>
+      <p>
+        <strong>FQ2'24:</strong> -11% comp &rarr; <strong>FQ3'24:</strong> -14% &rarr; <strong>FQ4'24:</strong> -14%.<br>
+        Luckin Coffee 저가 공세, 로컬 브랜드 급성장. 단순 운영 개선으론 해결 불가.<br>
+        결론: Boyu Capital에 60% 지분 매각($4B 밸류), JV로 구조 전환 (FQ2'26 마감).<br>
+        <em>자국 관리 포기 = 솔직한 인정.</em>
+      </p>
+    </div>
+    <div class="pat-card">
+      <h3>미국 Traffic 반등 = 진짜 신호</h3>
+      <p>
+        Ticket(단가) 상승은 가격 인상으로 언제든 가능. 진짜 건강의 척도는 Transaction(방문 빈도).<br>
+        <strong>FQ1'25:</strong> 미국 comp -6%(트랜잭션 주도) &rarr; <strong>FQ2'26:</strong> 글로벌 comp +6.2%(트랜잭션 +3.8%).<br>
+        <em>트랜잭션이 플러스로 돌아섰다 = 고객이 돌아왔다.</em>
+      </p>
+    </div>
+    <div class="pat-card blue">
+      <h3>마진 U턴 &mdash; 아직 진행 중</h3>
+      <p>
+        영업이익률: FQ3'24 <strong>16.7%</strong> &rarr; FQ2'25 <strong>8.2%</strong>(바닥) &rarr; FQ4'25 <strong>9.9%</strong> &rarr; FQ2'26 <strong>9.4%</strong>.<br>
+        Niccol의 투자(인력, 운영 단순화)가 단기 마진 압박. 장기 목표 13.5~15%.<br>
+        <em>회복 중이나 아직 반환점 못 찾음.</em>
+      </p>
+    </div>
+    <div class="pat-card purple" style="grid-column:1/-1;">
+      <h3>Rewards = 꾸준한 증가, 단 침체기에도 성장</h3>
+      <p>
+        <strong>FQ3'24:</strong> 33.8M &rarr; <strong>FQ1'25:</strong> 34.6M &rarr; <strong>FQ4'25:</strong> 34.2M &rarr; <strong>FQ1'26:</strong> 35.5M(기록) &rarr; <strong>FQ2'26:</strong> 35.6M.<br>
+        실적이 추락하던 Narasimhan 시대에도 멤버 수는 완만하게 증가. Niccol의 3월 로열티 개편 이후 가속화.&nbsp;&nbsp;
+        <em>회원이 매출의 57%+ 기여 &mdash; 이 숫자가 꺾이면 진짜 위험.</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 02: 실적 추이 ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 실적 추이</div>
+  <h2>분기별 핵심 숫자</h2>
+
+  <div class="h-table-wrap">
+  <table class="h-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>FQ3'24<br><span style="font-size:9px;color:#555;">Apr-Jun'24</span></th>
+        <th class="ceo-col">FQ4'24<br><span class="ceo-label">CEO 교체 &darr;</span></th>
+        <th>FQ1'25<br><span style="font-size:9px;color:#555;">Oct-Dec'24</span></th>
+        <th>FQ2'25<br><span style="font-size:9px;color:#555;">Jan-Mar'25</span></th>
+        <th>FQ3'25<br><span style="font-size:9px;color:#555;">Apr-Jun'25</span></th>
+        <th>FQ4'25<br><span style="font-size:9px;color:#555;">Jul-Sep'25</span></th>
+        <th>FQ1'26<br><span style="font-size:9px;color:#555;">Oct-Dec'25</span></th>
+        <th class="latest-col">FQ2'26<br><span style="font-size:9px;color:var(--accent);">Jan-Mar'26</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>매출</th>
+        <td>$9.1B</td>
+        <td class="ceo-col">$9.1B</td>
+        <td>$9.4B</td>
+        <td>$8.8B</td>
+        <td>$9.5B</td>
+        <td>$9.6B</td>
+        <td>$9.9B</td>
+        <td class="latest-col peak-cell">$9.5B</td>
+      </tr>
+      <tr>
+        <th>매출 YoY</th>
+        <td class="neg">-1%</td>
+        <td class="ceo-col neg">-3%</td>
+        <td>&mdash;</td>
+        <td class="pos">+2%</td>
+        <td class="pos">+4%</td>
+        <td class="pos">+5%</td>
+        <td class="pos">+6%</td>
+        <td class="latest-col pos">+9%</td>
+      </tr>
+      <tr>
+        <th>GAAP EPS</th>
+        <td>$0.93</td>
+        <td class="ceo-col">$0.80</td>
+        <td>$0.69</td>
+        <td>$0.34</td>
+        <td>$0.49</td>
+        <td>$0.12</td>
+        <td>$0.26</td>
+        <td class="latest-col">$0.45</td>
+      </tr>
+      <tr>
+        <th>Non-GAAP EPS</th>
+        <td>$0.93</td>
+        <td class="ceo-col">$0.80</td>
+        <td>$0.69</td>
+        <td>$0.41</td>
+        <td>$0.50</td>
+        <td>$0.52</td>
+        <td>$0.56</td>
+        <td class="latest-col">$0.50</td>
+      </tr>
+      <tr>
+        <th>컨센서스 (Non-GAAP)</th>
+        <td>~$0.93</td>
+        <td class="ceo-col">~$0.81</td>
+        <td>~$0.67</td>
+        <td>~$0.49</td>
+        <td>~$0.53</td>
+        <td>~$0.46</td>
+        <td>~$0.59</td>
+        <td class="latest-col">~$0.49</td>
+      </tr>
+      <tr>
+        <th>판정</th>
+        <td class="beat-cell">Beat</td>
+        <td class="ceo-col miss-cell">Miss</td>
+        <td class="beat-cell">Beat</td>
+        <td class="miss-cell">Miss</td>
+        <td class="miss-cell">Miss</td>
+        <td class="beat-cell">Beat</td>
+        <td class="miss-cell">EPS Miss</td>
+        <td class="latest-col beat-cell">Beat</td>
+      </tr>
+      <tr>
+        <th>영업이익률 (Non-GAAP)</th>
+        <td>16.7%</td>
+        <td class="ceo-col">11.9%</td>
+        <td>~11.1%</td>
+        <td>8.2%</td>
+        <td>9.9%</td>
+        <td>9.9%</td>
+        <td>10.1%</td>
+        <td class="latest-col pos">9.4%</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note-box">
+    <strong>FQ4'24 노란 열:</strong> Niccol이 9월 9일 취임했으나 분기 대부분(Jul-Aug)은 Narasimhan 시대. 첫 실적 발표(10월)에서 Niccol이 처음으로 컨콜을 주재.
+    FQ1'25부터 완전한 "Back to Starbucks" 시대. FQ2'26은 3년여 만에 처음으로 <strong>매출 + EPS 동반 성장</strong>(Niccol 선언).
+  </div>
+</div>
+
+<!-- ===== 03: KPI 추이 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; KPI 추이</div>
+  <h2>동일매장 매출 + 회원 + 매장 수</h2>
+
+  <div class="h-table-wrap">
+  <table class="h-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>FQ3'24</th>
+        <th class="ceo-col">FQ4'24<br><span class="ceo-label">CEO 교체</span></th>
+        <th>FQ1'25</th>
+        <th>FQ2'25</th>
+        <th>FQ3'25</th>
+        <th>FQ4'25</th>
+        <th>FQ1'26</th>
+        <th class="latest-col">FQ2'26</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>글로벌 comp</th>
+        <td class="neg">-3%</td>
+        <td class="ceo-col neg">-7%</td>
+        <td class="neg">-4%</td>
+        <td class="neg">-1%</td>
+        <td class="neg">-2%</td>
+        <td class="pos peak-cell">+1%</td>
+        <td class="pos">+4%</td>
+        <td class="latest-col pos peak-cell">+6.2%</td>
+      </tr>
+      <tr>
+        <th>&nbsp;&nbsp;traffic (트랜잭션)</th>
+        <td class="neg">-5%</td>
+        <td class="ceo-col neg">-8%</td>
+        <td class="neg">-6%</td>
+        <td class="neg">-2%</td>
+        <td class="neg">-2%</td>
+        <td class="pos">+1%</td>
+        <td class="pos">+3%</td>
+        <td class="latest-col pos">+3.8%</td>
+      </tr>
+      <tr>
+        <th>&nbsp;&nbsp;ticket (단가)</th>
+        <td class="pos">+2%</td>
+        <td class="ceo-col pos">+2%</td>
+        <td class="pos">+3%</td>
+        <td class="pos">+1%</td>
+        <td class="pos">+1%</td>
+        <td class="pos">flat</td>
+        <td class="pos">+1%</td>
+        <td class="latest-col pos">+2.3%</td>
+      </tr>
+      <tr>
+        <th>미국 comp</th>
+        <td class="neg">-2%</td>
+        <td class="ceo-col neg">-6%</td>
+        <td class="neg">-4%</td>
+        <td class="neg">-2%</td>
+        <td class="neg">-2%</td>
+        <td>flat</td>
+        <td class="pos">+4%</td>
+        <td class="latest-col pos peak-cell">+5%+</td>
+      </tr>
+      <tr>
+        <th>중국 comp</th>
+        <td class="neg">-14%</td>
+        <td class="ceo-col neg">-14%</td>
+        <td class="neg">-6%</td>
+        <td class="neg">-8%</td>
+        <td class="pos">+flat~+1%</td>
+        <td class="pos">+2%</td>
+        <td class="pos peak-cell">+7%</td>
+        <td class="latest-col pos">+0.5%</td>
+      </tr>
+      <tr>
+        <th>Rewards 90일 활성 (미국)</th>
+        <td>33.8M</td>
+        <td class="ceo-col">~33.5M</td>
+        <td>34.6M</td>
+        <td>~34.0M</td>
+        <td>~34.0M</td>
+        <td>34.2M</td>
+        <td class="peak-cell">35.5M ATH</td>
+        <td class="latest-col peak-cell">35.6M ATH</td>
+      </tr>
+      <tr>
+        <th>글로벌 매장 수</th>
+        <td>39,477</td>
+        <td class="ceo-col">40,199</td>
+        <td>~40,500</td>
+        <td>~40,700</td>
+        <td>~40,800</td>
+        <td>~40,576</td>
+        <td>~40,500</td>
+        <td class="latest-col">~40,400</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note-box">
+    <strong>변곡점 정리:</strong>
+    글로벌 comp &mdash; FQ4'25(+1%)에 7분기 만에 플러스 전환. FQ2'26 +6.2%로 가속.
+    중국 comp &mdash; FQ3'25에 바닥 이후 반등 시작, FQ1'26 +7% 급등(Boyu JV 발표 전 마지막 완전 소유 분기).
+    Rewards &mdash; 침체기에도 꾸준 성장, FQ1'26·FQ2'26 연속 역대 최고치.
+    매장 수 &mdash; Niccol이 신규 오픈을 줄이고 기존점 품질 집중으로 정책 전환.
+  </div>
+</div>
+
+<!-- ===== 04: 차트 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 차트</div>
+  <h2>매출 YoY + 영업이익률 / 글로벌·미국·중국 comp</h2>
+
+  <!-- CHART 1: Revenue YoY + Operating Margin -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px 16px 16px;margin-bottom:32px;">
+    <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--text-dim);">매출 YoY 성장률 &amp; 비 GAAP 영업이익률</div>
+    <svg viewBox="0 0 840 360" style="width:100%;height:auto;font-family:'IBM Plex Mono',monospace;">
+      <!-- Y축: -10% ~ +20% (매출YoY), 영업이익률 0~20% 별도 우측 -->
+      <!-- 공통 그리드: 주 Y = 매출 YoY (선), 우 Y = 영업이익률 (점선) -->
+      <!-- X 간격: 8분기 → 70부터 800까지 = 730px / 7 = 104.3px 간격 -->
+      <!-- x좌표: Q0=70, Q1=174, Q2=278, Q3=383, Q4=487, Q5=591, Q6=696, Q7=800 -->
+
+      <!-- 배경: CEO 교체 분기 강조 (Q1=FQ4'24) -->
+      <rect x="122" y="20" width="104" height="270" fill="#ffc10708" rx="0"/>
+      <text x="174" y="16" fill="#ffc107" font-size="9" text-anchor="middle" opacity="0.8">CEO 교체</text>
+      <line x1="174" y1="20" x2="174" y2="290" stroke="#ffc107" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+
+      <!-- Grid lines -->
+      <line x1="70" y1="20" x2="70" y2="290" stroke="#2a2a2a" stroke-width="1"/>
+      <line x1="70" y1="290" x2="800" y2="290" stroke="#2a2a2a" stroke-width="1"/>
+
+      <!-- Y grid (좌: 매출YoY, -5%~+15%, 기준선 0% = y=220) -->
+      <!-- 스케일: 범위 -10%~+20% → 300px, 1% = 300/30 = 10px -->
+      <!-- y = 290 - (val + 10) * 10 -->
+      <!-- -10% → 290, 0% → 190, +10% → 90, +20% → -10(clamp) -->
+      <!-- 범위: -10% ~ +20%, 높이 290px, scale=290/30=9.67px/% -->
+      <!-- y = 290 - (val + 10) * 9.67 -->
+      <line x1="70" y1="193" x2="800" y2="193" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="70" y1="290" x2="800" y2="290" stroke="#2a2a2a" stroke-width="1"/>
+      <!-- 0% 기준선 -->
+      <line x1="70" y1="193" x2="800" y2="193" stroke="#555" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.7"/>
+      <text x="62" y="197" fill="#888" font-size="9" text-anchor="end">0%</text>
+      <line x1="70" y1="96" x2="800" y2="96" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <text x="62" y="100" fill="#555" font-size="9" text-anchor="end">+10%</text>
+      <line x1="70" y1="48" x2="800" y2="48" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <text x="62" y="52" fill="#555" font-size="9" text-anchor="end">+15%</text>
+      <line x1="70" y1="241" x2="800" y2="241" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <text x="62" y="245" fill="#555" font-size="9" text-anchor="end">-5%</text>
+      <text x="62" y="294" fill="#555" font-size="9" text-anchor="end">-10%</text>
+
+      <!-- X labels -->
+      <text x="70" y="310" fill="#888" font-size="9" text-anchor="middle">FQ3'24</text>
+      <text x="174" y="310" fill="#ffc107" font-size="9" font-weight="700" text-anchor="middle">FQ4'24</text>
+      <text x="278" y="310" fill="#888" font-size="9" text-anchor="middle">FQ1'25</text>
+      <text x="383" y="310" fill="#888" font-size="9" text-anchor="middle">FQ2'25</text>
+      <text x="487" y="310" fill="#888" font-size="9" text-anchor="middle">FQ3'25</text>
+      <text x="591" y="310" fill="#888" font-size="9" text-anchor="middle">FQ4'25</text>
+      <text x="696" y="310" fill="#888" font-size="9" text-anchor="middle">FQ1'26</text>
+      <text x="800" y="310" fill="#00b36b" font-size="9" font-weight="700" text-anchor="middle">FQ2'26</text>
+
+      <!-- Revenue YoY line: -1,-3,0,+2,+4,+5,+6,+9 -->
+      <!-- y = 290 - (val + 10) * 9.67 -->
+      <!-- -1 → 290-87=203, -3→261, 0→193, +2→174, +4→154, +5→145, +6→135, +9→106 -->
+      <polyline fill="none" stroke="#00b36b" stroke-width="2.5"
+        points="70,203 174,261 278,193 383,174 487,154 591,145 696,135 800,106"/>
+      <!-- dots -->
+      <circle cx="70" cy="203" r="4" fill="#00b36b"/>
+      <text x="70" y="197" fill="#888" font-size="9" text-anchor="middle">-1%</text>
+      <circle cx="174" cy="261" r="5" fill="#ffc107" stroke="#ffc107" stroke-width="1"/>
+      <text x="174" y="275" fill="#ffc107" font-size="9" text-anchor="middle" font-weight="700">-3%</text>
+      <circle cx="278" cy="193" r="4" fill="#00b36b"/>
+      <text x="278" y="187" fill="#888" font-size="9" text-anchor="middle">0%</text>
+      <circle cx="383" cy="174" r="4" fill="#00b36b"/>
+      <text x="383" y="168" fill="#00b36b" font-size="9" text-anchor="middle">+2%</text>
+      <circle cx="487" cy="154" r="4" fill="#00b36b"/>
+      <text x="487" y="148" fill="#00b36b" font-size="9" text-anchor="middle">+4%</text>
+      <circle cx="591" cy="145" r="4" fill="#00b36b"/>
+      <text x="591" y="139" fill="#00b36b" font-size="9" text-anchor="middle">+5%</text>
+      <circle cx="696" cy="135" r="4" fill="#00b36b"/>
+      <text x="696" y="129" fill="#00b36b" font-size="9" text-anchor="middle">+6%</text>
+      <circle cx="800" cy="106" r="5" fill="#00b36b" stroke="#fff" stroke-width="1.5"/>
+      <text x="800" y="98" fill="#00b36b" font-size="11" text-anchor="middle" font-weight="700">+9%</text>
+
+      <!-- Operating Margin line (우측 Y축): 16.7, 11.9, 11.1, 8.2, 9.9, 9.9, 10.1, 9.4 -->
+      <!-- 마진 스케일: 0%~20%, y = 290 - val * (270/20) = 290 - val * 13.5 -->
+      <!-- 16.7→64, 11.9→129, 11.1→140, 8.2→179, 9.9→157, 9.9→157, 10.1→154, 9.4→163 -->
+      <polyline fill="none" stroke="#4da6ff" stroke-width="2" stroke-dasharray="6,3" opacity="0.8"
+        points="70,64 174,129 278,140 383,179 487,157 591,157 696,154 800,163"/>
+      <circle cx="70" cy="64" r="4" fill="#4da6ff" opacity="0.9"/>
+      <text x="70" y="56" fill="#4da6ff" font-size="9" text-anchor="middle" opacity="0.9">16.7%</text>
+      <circle cx="174" cy="129" r="4" fill="#4da6ff" opacity="0.9"/>
+      <text x="174" y="123" fill="#4da6ff" font-size="9" text-anchor="middle" opacity="0.9">11.9%</text>
+      <circle cx="383" cy="179" r="5" fill="#ff4d4d" opacity="0.9"/>
+      <text x="383" y="195" fill="#ff4d4d" font-size="9" text-anchor="middle" font-weight="700">8.2% 바닥</text>
+      <circle cx="591" cy="157" r="3" fill="#4da6ff" opacity="0.9"/>
+      <circle cx="696" cy="154" r="3" fill="#4da6ff" opacity="0.9"/>
+      <circle cx="800" cy="163" r="4" fill="#4da6ff" opacity="0.9"/>
+      <text x="800" y="156" fill="#4da6ff" font-size="9" text-anchor="middle" opacity="0.9">9.4%</text>
+
+      <!-- 우측 Y 레이블 -->
+      <text x="810" y="64" fill="#4da6ff" font-size="8" opacity="0.7">20%</text>
+      <text x="810" y="145" fill="#4da6ff" font-size="8" opacity="0.7">10%</text>
+      <text x="810" y="224" fill="#4da6ff" font-size="8" opacity="0.7">5%</text>
+
+      <!-- 15% 마진 목표선 -->
+      <line x1="70" y1="88" x2="800" y2="88" stroke="#b388ff" stroke-width="1" stroke-dasharray="6,4" opacity="0.4"/>
+      <text x="808" y="92" fill="#b388ff" font-size="8" opacity="0.6">목표 15%</text>
+
+      <!-- Legend -->
+      <text x="80" y="335" fill="#00b36b" font-size="10">&#9679; 매출 YoY 성장률 (좌 Y)</text>
+      <text x="300" y="335" fill="#4da6ff" font-size="10">- - &#9679; Non-GAAP 영업이익률 (우 Y)</text>
+      <text x="580" y="335" fill="#b388ff" font-size="10">--- 장기 목표 마진 (13.5~15%)</text>
+    </svg>
+    <div class="note-box" style="margin-top:12px;">
+      <strong>읽는 법:</strong> 초록 실선 = 매출 YoY 성장률. 파란 점선 = 영업이익률. 노란 열 = CEO 교체 분기.
+      마진은 FQ2'25 8.2%에서 바닥을 찍고 완만히 회복 중. 장기 목표 13.5~15%까지는 여전히 거리 있음.
+    </div>
+  </div>
+
+  <!-- CHART 2: Global / US / China Comp -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px 16px 16px;margin-bottom:16px;">
+    <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--text-dim);">동일매장 매출 (comp) 추이 &mdash; 글로벌 / 미국 / 중국</div>
+    <svg viewBox="0 0 840 380" style="width:100%;height:auto;font-family:'IBM Plex Mono',monospace;">
+      <!-- Y 범위: -16% ~ +10%, 스케일: 260px / 26% = 10px/% -->
+      <!-- y = 300 - (val + 16) * 10 -->
+      <!-- -16→300, -14→280, -10→240, -8→220, -6→200, -4→180, -2→160, 0→140, +1→130, +2→120, +4→100, +5→90, +6→80, +7→70, +9→50 -->
+      <!-- x좌표: 70,174,278,383,487,591,696,800 -->
+
+      <!-- CEO 교체 배경 -->
+      <rect x="122" y="30" width="104" height="280" fill="#ffc10706" rx="0"/>
+      <line x1="174" y1="30" x2="174" y2="310" stroke="#ffc107" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+      <text x="174" y="26" fill="#ffc107" font-size="9" text-anchor="middle" opacity="0.8">CEO 교체</text>
+
+      <!-- Grid -->
+      <line x1="70" y1="30" x2="70" y2="310" stroke="#2a2a2a" stroke-width="1"/>
+      <line x1="70" y1="310" x2="800" y2="310" stroke="#2a2a2a" stroke-width="1"/>
+      <!-- 0% 기준선 -->
+      <line x1="70" y1="140" x2="800" y2="140" stroke="#555" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.7"/>
+      <text x="62" y="144" fill="#888" font-size="9" text-anchor="end">0%</text>
+      <line x1="70" y1="90" x2="800" y2="90" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <text x="62" y="94" fill="#555" font-size="9" text-anchor="end">+5%</text>
+      <line x1="70" y1="40" x2="800" y2="40" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <text x="62" y="44" fill="#555" font-size="9" text-anchor="end">+10%</text>
+      <line x1="70" y1="190" x2="800" y2="190" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <text x="62" y="194" fill="#555" font-size="9" text-anchor="end">-5%</text>
+      <line x1="70" y1="240" x2="800" y2="240" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <text x="62" y="244" fill="#555" font-size="9" text-anchor="end">-10%</text>
+      <line x1="70" y1="280" x2="800" y2="280" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4"/>
+      <text x="62" y="284" fill="#555" font-size="9" text-anchor="end">-14%</text>
+
+      <!-- X labels -->
+      <text x="70" y="328" fill="#888" font-size="9" text-anchor="middle">FQ3'24</text>
+      <text x="174" y="328" fill="#ffc107" font-size="9" font-weight="700" text-anchor="middle">FQ4'24</text>
+      <text x="278" y="328" fill="#888" font-size="9" text-anchor="middle">FQ1'25</text>
+      <text x="383" y="328" fill="#888" font-size="9" text-anchor="middle">FQ2'25</text>
+      <text x="487" y="328" fill="#888" font-size="9" text-anchor="middle">FQ3'25</text>
+      <text x="591" y="328" fill="#888" font-size="9" text-anchor="middle">FQ4'25</text>
+      <text x="696" y="328" fill="#888" font-size="9" text-anchor="middle">FQ1'26</text>
+      <text x="800" y="328" fill="#00b36b" font-size="9" font-weight="700" text-anchor="middle">FQ2'26</text>
+
+      <!-- 글로벌 comp: -3,-7,-4,-1,-2,+1,+4,+6.2 -->
+      <!-- y = 300 - (val + 16) * 10 -->
+      <!-- -3→170, -7→210, -4→180, -1→150, -2→160, +1→130, +4→100, +6.2→78 -->
+      <polyline fill="none" stroke="#00b36b" stroke-width="2.5"
+        points="70,170 174,210 278,180 383,150 487,160 591,130 696,100 800,78"/>
+      <circle cx="70" cy="170" r="4" fill="#00b36b"/>
+      <text x="70" y="164" fill="#00b36b" font-size="9" text-anchor="middle">-3%</text>
+      <circle cx="174" cy="210" r="5" fill="#ffc107"/>
+      <text x="174" y="225" fill="#ffc107" font-size="9" text-anchor="middle" font-weight="700">-7%</text>
+      <circle cx="278" cy="180" r="4" fill="#00b36b"/>
+      <text x="278" y="174" fill="#888" font-size="9" text-anchor="middle">-4%</text>
+      <circle cx="383" cy="150" r="4" fill="#00b36b"/>
+      <text x="383" y="144" fill="#888" font-size="9" text-anchor="middle">-1%</text>
+      <circle cx="487" cy="160" r="4" fill="#00b36b"/>
+      <text x="487" y="154" fill="#888" font-size="9" text-anchor="middle">-2%</text>
+      <circle cx="591" cy="130" r="5" fill="#00b36b" stroke="#fff" stroke-width="1"/>
+      <text x="591" y="122" fill="#00b36b" font-size="10" text-anchor="middle" font-weight="700">+1% &#x2191;</text>
+      <circle cx="696" cy="100" r="4" fill="#00b36b"/>
+      <text x="696" y="94" fill="#00b36b" font-size="9" text-anchor="middle">+4%</text>
+      <circle cx="800" cy="78" r="5" fill="#00b36b" stroke="#fff" stroke-width="1.5"/>
+      <text x="800" y="70" fill="#00b36b" font-size="11" text-anchor="middle" font-weight="700">+6.2%</text>
+
+      <!-- 미국 comp: -2,-6,-4,-2,-2,0,+4,+5 -->
+      <!-- y: -2→180, -6→220, -4→200, -2→180, -2→180, 0→140, +4→100, +5→90 -->
+      <polyline fill="none" stroke="#4da6ff" stroke-width="2" stroke-dasharray="6,3"
+        points="70,180 174,220 278,200 383,180 487,180 591,140 696,100 800,90"/>
+      <circle cx="70" cy="180" r="3" fill="#4da6ff"/>
+      <text x="70" y="192" fill="#4da6ff" font-size="8" text-anchor="middle">-2%(US)</text>
+      <circle cx="174" cy="220" r="4" fill="#4da6ff"/>
+      <circle cx="591" cy="140" r="4" fill="#4da6ff"/>
+      <text x="591" y="134" fill="#4da6ff" font-size="8" text-anchor="middle">flat(US)</text>
+      <circle cx="800" cy="90" r="4" fill="#4da6ff"/>
+      <text x="800" y="84" fill="#4da6ff" font-size="8" text-anchor="middle">+5%(US)</text>
+
+      <!-- 중국 comp: -14,-14,-6,-8,+1,+2,+7,+0.5 -->
+      <!-- y: -14→280, -14→280, -6→200, -8→220, +1→130, +2→120, +7→70, +0.5→135 -->
+      <polyline fill="none" stroke="#ff4d4d" stroke-width="2" stroke-dasharray="3,3"
+        points="70,280 174,280 278,200 383,220 487,130 591,120 696,70 800,135"/>
+      <circle cx="70" cy="280" r="4" fill="#ff4d4d"/>
+      <text x="70" y="292" fill="#ff4d4d" font-size="9" text-anchor="middle">-14%(中)</text>
+      <circle cx="174" cy="280" r="4" fill="#ff4d4d"/>
+      <circle cx="278" cy="200" r="3" fill="#ff4d4d"/>
+      <text x="278" y="208" fill="#ff4d4d" font-size="8" text-anchor="middle">-6%(中)</text>
+      <circle cx="383" cy="220" r="3" fill="#ff4d4d"/>
+      <circle cx="487" cy="130" r="5" fill="#ff4d4d" stroke="#fff" stroke-width="1"/>
+      <text x="487" y="122" fill="#ff4d4d" font-size="10" text-anchor="middle" font-weight="700">+1% &#x2191;</text>
+      <circle cx="591" cy="120" r="3" fill="#ff4d4d"/>
+      <circle cx="696" cy="70" r="5" fill="#ff4d4d" stroke="#fff" stroke-width="1.5"/>
+      <text x="696" y="62" fill="#ff4d4d" font-size="11" text-anchor="middle" font-weight="700">+7%(中)</text>
+      <circle cx="800" cy="135" r="4" fill="#ff4d4d"/>
+      <text x="800" y="148" fill="#ff4d4d" font-size="8" text-anchor="middle">+0.5%(中)</text>
+
+      <!-- Legend -->
+      <text x="80" y="355" fill="#00b36b" font-size="10">&#9679; 글로벌 comp</text>
+      <text x="230" y="355" fill="#4da6ff" font-size="10">- - &#9679; 미국 comp</text>
+      <text x="380" y="355" fill="#ff4d4d" font-size="10">... &#9679; 중국 comp</text>
+      <text x="510" y="355" fill="#ffc107" font-size="10">|  CEO 교체 분기 (FQ4'24)</text>
+    </svg>
+    <div class="note-box" style="margin-top:12px;">
+      <strong>중국 패턴:</strong> -14%에서 Niccol 취임 후 빠르게 회복. FQ1'26 +7% 급반등은 Boyu JV 발표 전 마지막 완전 소유 분기. FQ2'26 +0.5%로 다시 주춤 &mdash; JV 전환 과정의 일시적 혼선 가능성.
+      <br><strong>미국 패턴:</strong> 트랜잭션 주도 comp 회복이 핵심. Ticket 인상 의존에서 Traffic 회복으로 질적 전환.
+    </div>
+  </div>
+</div>
+
+<!-- ===== 05: 컨콜 어조 타임라인 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 컨콜 어조 타임라인</div>
+  <h2>경영진 내러티브 변화 &mdash; Narasimhan vs Niccol</h2>
+
+  <div class="timeline">
+<div class="tl-item">
+      <div class="tl-dot beat"></div>
+      <div class="tl-header">
+        <span class="tl-q">FQ2 2026 &mdash; Apr 29, 2026</span>
+        <span class="tl-badge beat-b">BEAT &mdash; 3년여 만에 매출+EPS 동반 성장</span>
+        <span class="tl-score">자신감 ██████████ 10/10</span>
+      </div>
+      <div class="tl-body">
+        <strong>턴어라운드 선언 분기.</strong> 매출 $9.5B YoY +9%, Non-GAAP EPS $0.50 Beat. 글로벌 comp +6.2%(트랜잭션 +3.8%). 10개 주요 시장 모두 플러스 comp &mdash; 9분기 만에 처음.<br>
+        Rewards 35.6M 연속 역대 최고. 3월 로열티 개편(Siren Order 확대) 효과 가시화.<br>
+        가이던스 상향: FY2026 글로벌 comp 5% 이상, EPS $2.25~$2.45(기존 $2.00~$2.30).<br>
+        <span class="tl-quote">"For the first time in more than two years, we grew both the top and bottom line. The Back to Starbucks strategy is working." &mdash; Niccol</span>
+        <span class="tl-quote yellow-q">"A little touch of luxury, it goes a long way." &mdash; Niccol (Fortune 인터뷰)</span>
+        <strong>핵심:</strong> 미국 트랜잭션 3년 내 최고 성장률. Boyu JV FQ2'26 중 마감(중국 분리 완료).
+      </div>
+    </div>
+<div class="tl-item">
+      <div class="tl-dot rise"></div>
+      <div class="tl-header">
+        <span class="tl-q">FQ1 2026 &mdash; Jan 28, 2026</span>
+        <span class="tl-badge miss-b">EPS MISS (매출 Beat) / comp 가속</span>
+        <span class="tl-score">자신감 █████████░ 9/10</span>
+      </div>
+      <div class="tl-body">
+        <strong>가속 구간 진입.</strong> 글로벌 comp +4%, 중국 +7%(트랜잭션 +5%), 미국 comp +4%. Rewards 35.5M 역대 최고.<br>
+        Non-GAAP EPS $0.56 vs 컨센 $0.59 소폭 Miss. 영업이익률 10.1%(개선 추세).<br>
+        <span class="tl-quote">"We delivered our second consecutive quarter of global comparable store sales growth and our fourth consecutive quarter of U.S. comparable store sales improvement." &mdash; Niccol</span>
+        <em>연속 개선 프레이밍:</em> 절댓값보다 모멘텀을 강조. Boyu JV 마감 FQ2'26 예정.
+      </div>
+    </div>
+<div class="tl-item">
+      <div class="tl-dot rise"></div>
+      <div class="tl-header">
+        <span class="tl-q">FQ4 2025 &mdash; Oct 29, 2025</span>
+        <span class="tl-badge beat-b">BEAT &mdash; 7분기 만의 첫 플러스 comp</span>
+        <span class="tl-score">자신감 █████████░ 9/10</span>
+      </div>
+      <div class="tl-body">
+        <strong>이정표 분기.</strong> 글로벌 comp +1% &mdash; 7분기(약 2년) 만의 첫 플러스. 미국 comp flat이지만 중국 +2%가 이끌었다.<br>
+        Boyu Capital에 중국 법인 60% 지분 매각 발표(11월 3일, $4B 밸류에이션). 중국 독자 경영 포기 &mdash; 솔직한 전략 수정.<br>
+        신임 CFO Cathy Smith 첫 실적 발표:
+        <span class="tl-quote">"Q4 was a milestone quarter in getting 'Back to Starbucks', having delivered global comp growth for the first time in seven quarters." &mdash; Cathy Smith, CFO</span>
+        <strong>분석:</strong> 매출 $9.6B(+5%), GAAP EPS $0.12(일회성 비용 포함)지만 Non-GAAP $0.52로 Beat.
+      </div>
+    </div>
+<div class="tl-item">
+      <div class="tl-dot miss"></div>
+      <div class="tl-header">
+        <span class="tl-q">FQ3 2025 &mdash; Jul 29, 2025</span>
+        <span class="tl-badge miss-b">EPS MISS / 매출 Beat</span>
+        <span class="tl-score">자신감 ████████░░ 8/10</span>
+      </div>
+      <div class="tl-body">
+        <strong>매출 $9.5B YoY +4% &mdash; 가속.</strong> 중국 comp 처음으로 플러스 전환. 글로벌 -2%지만 개선 추세 명확.<br>
+        영업이익률 9.9% &mdash; "Leadership Experience 2025" 비용이 마진 680bp 압박.<br>
+        <span class="tl-quote">"We've fixed a lot and done the hard work on the hard things to build a strong operating foundation. Based on my experience of turnarounds, we are ahead of schedule." &mdash; Niccol</span>
+        <em>"ahead of schedule"</em> &mdash; 가장 강한 자신감 표현. Chipotle 턴어라운드 경험을 근거로 제시. 이 분기 직후 Boyu JV 발표(11월).
+      </div>
+    </div>
+<div class="tl-item">
+      <div class="tl-dot miss"></div>
+      <div class="tl-header">
+        <span class="tl-q">FQ2 2025 &mdash; Apr 29, 2025</span>
+        <span class="tl-badge miss-b">EPS MISS / 매진 압박 최고조</span>
+        <span class="tl-score">자신감 ███████░░░ 7/10 (전략에는 확신)</span>
+      </div>
+      <div class="tl-body">
+        <strong>영업이익률 8.2% &mdash; 2년 저점.</strong> Non-GAAP EPS $0.41, 컨센 $0.49 대비 -17% 미스. Niccol의 인력 투자(임금, 시간제 증원)가 마진을 짓눌렀다.<br>
+        글로벌 comp -1%로 바닥 접근 신호. 중국 -8%로 아직 부진.<br>
+        <span class="tl-quote">"My optimism has turned into confidence that our 'Back to Starbucks' plan is the right strategy to turn the business around and to unlock opportunities ahead." &mdash; Niccol</span>
+        <strong>화법 전환:</strong> "optimism → confidence" &mdash; 불확실성에서 확신으로. 마진 미스에도 흔들리지 않는 페르소나.
+      </div>
+    </div>
+<div class="tl-item">
+      <div class="tl-dot miss"></div>
+      <div class="tl-header">
+        <span class="tl-q">FQ1 2025 &mdash; Jan 28, 2025</span>
+        <span class="tl-badge beat-b">BEAT (매출/EPS) / comp 여전히 부진</span>
+        <span class="tl-score">자신감 ███████░░░ 7/10</span>
+      </div>
+      <div class="tl-body">
+        <strong>첫 공식 "Back to Starbucks" 분기.</strong> comp -4%로 아직 하락이지만 방향은 개선 중. 매출/EPS 컨센 Beat.<br>
+        중국 -6%로 QoQ 개선. 1,100명 서포트 인력 감축 예고(2월). Cathy Smith 신임 CFO 임명(3월).<br>
+        <span class="tl-quote">"While we're only one quarter into our turnaround, we're moving quickly to act on 'Back to Starbucks' efforts and we've seen a positive response." &mdash; Niccol</span>
+        <em>화법 변화:</em> Narasimhan의 "resilient"에서 Niccol의 "moving quickly", "taking action"으로. 방어에서 공세로.
+      </div>
+    </div>
+<div class="tl-item">
+      <div class="tl-dot pivot"></div>
+      <div class="tl-header">
+        <span class="tl-q">FQ4 2024 &mdash; Oct 30, 2024</span>
+        <span class="tl-badge pivot-b">CEO 교체 / 첫 Niccol 컨콜</span>
+        <span class="tl-score">자신감 ██████░░░░ 6/10 (현실 직시)</span>
+      </div>
+      <div class="tl-body">
+        <strong>역사적 전환점.</strong> 글로벌 comp -7%, 중국 -14%, 미국 -6%. 최악의 분기지만 CEO가 바뀌었다.<br>
+        Niccol 취임 100일 후 첫 실적 발표. "Back to Starbucks" 전략 공식 선언 &mdash; 복잡한 메뉴 단순화, 바리스타 인력 강화, 대기 시간 단축, customization 문화 되살리기.<br>
+        <span class="tl-quote yellow-q">"Back to Starbucks is about getting back to what makes Starbucks, Starbucks — warm, welcoming, handcrafted." &mdash; Brian Niccol</span>
+        <strong>시장 반응:</strong> 숫자는 최악이었지만 주가는 이미 Niccol 취임 발표일(+25%) 급등 선반영. CEO 교체 자체가 카탈리스트였음.
+      </div>
+    </div>
+<div class="tl-item">
+      <div class="tl-dot miss"></div>
+      <div class="tl-header">
+        <span class="tl-q">FQ3 2024 &mdash; Jul 30, 2024</span>
+        <span class="tl-badge miss-b">NARASIMHAN / 3연속 MISS</span>
+        <span class="tl-score">자신감 ████░░░░░░ 4/10</span>
+      </div>
+      <div class="tl-body">
+        <strong>3분기 연속 comp 하락.</strong> 글로벌 -3%, 중국 -14%. 매출 $9.1B YoY -1%.<br>
+        Narasimhan은 "challenging macro environment"를 반복하며 방어적 화법. 중국 문제를 "경쟁 심화"로 설명하며 "resilient" 강조.<br>
+        <span class="tl-quote red-q">"In a highly challenged environment, we understand the specific challenges and opportunities immediately in front of us." &mdash; Narasimhan</span>
+        <strong>신호:</strong> 이사회 내부에서 CEO 교체 논의 시작됐을 것으로 추정. 불과 2주 후(8월 13일) 전격 해임.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== 06: 시간축 분석 ===== -->
+<div class="section">
+  <div class="section-label">06 &mdash; 시간축 분석</div>
+  <h2>과거의 약속, 현재의 결과, 미래의 기대</h2>
+
+  <h3 class="sub-section" style="color:var(--red);">2년 전 기대 (2024 초 &mdash; Narasimhan 시대)</h3>
+  <div class="note-box" style="margin-bottom:20px;border-left:2px solid var(--red);">
+    2024년 Narasimhan 체제의 공약: 중국 회복, 메뉴 혁신(드링크 + 푸드), 디지털 전환(모바일 주문), 글로벌 매장 확대(신규 오픈 가속). "Starbucks Reinvention Plan"의 완성.
+    이 약속들은 CEO 교체로 상당 부분 전략 자체가 리셋됨을 감안해 평가한다.
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:200px;">약속 / 기대</th>
+        <th style="width:80px;text-align:center;">달성</th>
+        <th>결과 및 근거</th>
+        <th>당시 경영진 발언</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>중국 시장 회복</strong></td>
+        <td style="text-align:center;font-size:20px;color:var(--red);">X</td>
+        <td>Narasimhan 임기 중 -14%까지 하락. 결국 Niccol이 Boyu JV(60% 매각)로 구조 자체를 변경. "회복"이 아닌 "분리"로 귀결.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"We remain optimistic about China's long-term potential." (FQ2'24 Narasimhan)</td>
+      </tr>
+      <tr>
+        <td><strong>글로벌 comp 성장 재개</strong></td>
+        <td style="text-align:center;font-size:20px;color:var(--yellow);">~</td>
+        <td>Narasimhan 임기 내 실패. Niccol 취임 후 4분기 만에(FQ4'25) +1% 달성. 약속은 지켜졌지만 CEO가 바뀐 후의 일.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"We expect to return to positive comps in fiscal 2025." (FQ4'24 초기 전망)</td>
+      </tr>
+      <tr>
+        <td><strong>영업이익률 개선</strong></td>
+        <td style="text-align:center;font-size:20px;color:var(--red);">X</td>
+        <td>16.7%(FQ3'24) → 8.2%(FQ2'25)로 하락. Niccol의 투자 단계로 단기 압박 지속. 장기 목표 13.5~15%는 아직 미달.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"We expect to expand margins through operational efficiency." (FY2024 가이던스)</td>
+      </tr>
+      <tr>
+        <td><strong>메뉴 혁신 + 드라이브스루 강화</strong></td>
+        <td style="text-align:center;font-size:20px;color:var(--yellow);">~</td>
+        <td>Niccol이 메뉴를 오히려 단순화(복잡성 제거). 드라이브스루 대기시간 단축에 집중. 방향이 역전됨.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"Menu innovation and customization are core to our growth." (Narasimhan FQ1'24)</td>
+      </tr>
+      <tr>
+        <td><strong>Rewards 성장 + 디지털화</strong></td>
+        <td style="text-align:center;font-size:20px;color:var(--accent);">O</td>
+        <td>33.8M(FQ3'24) → 35.6M(FQ2'26). 침체기에도 성장. FQ2'26 매출의 57%+ 기여. Niccol이 3월 로열티 개편으로 가속.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"Starbucks Rewards is the foundation of our digital flywheel." (Narasimhan)</td>
+      </tr>
+      <tr>
+        <td><strong>글로벌 매장 8,000+ 신규 오픈</strong></td>
+        <td style="text-align:center;font-size:20px;color:var(--red);">X</td>
+        <td>Niccol이 신규 오픈보다 기존점 품질에 집중하는 전략으로 전환. 매장 수 정체(~40,000). 속도보다 수익성 우선.</td>
+        <td style="font-size:12px;color:var(--text-dim);font-style:italic;">"We plan to operate approximately 55,000 stores by 2030." (FY2023 목표)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note-box" style="margin-bottom:32px;">
+    <strong>총평:</strong> Narasimhan 시대 6개 약속 중 O 1개, ~ 2개, X 3개. 단, CEO 교체로 전략 자체가 리셋되었으므로 단순 실패로만 보기 어렵다.
+    Niccol 전략은 Narasimhan이 약속한 것(규모 확대, 복잡성 혁신)과 반대 방향(단순화, 품질 집중)으로 가고 있으며, 2년 후 결과가 이를 옳다고 증명하고 있다.
+  </div>
+
+  <h3 class="sub-section" style="color:var(--accent);">18개월 후 전망 (2027 말 &mdash; Niccol 전략 완전 실행)</h3>
+  <div class="note-box" style="margin-bottom:20px;border-left:2px solid var(--accent);">
+    현재 Niccol이 심고 있는 씨앗. 컨콜에서 반복적으로 강조하는 미래 베팅과 회사의 공식 가이던스.
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:200px;">카탈리스트</th>
+        <th style="width:80px;text-align:center;">확신도</th>
+        <th>근거 및 현황</th>
+        <th>리스크</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>영업이익률 13.5~15% 회복</strong></td>
+        <td style="text-align:center;"><span style="color:var(--yellow);font-weight:700;">중간</span></td>
+        <td>현재 9.4%(FQ2'26). 인력 투자 완료 후 레버리지 단계 진입 예상. FY2026 가이던스: 소폭 YoY 개선. 장기 목표까지 4~6%p 갭.</td>
+        <td>인플레이션 지속, 인건비 압박, 투자 과잉 가능성.</td>
+      </tr>
+      <tr>
+        <td><strong>미국 트랜잭션 지속 성장</strong></td>
+        <td style="text-align:center;"><span style="color:var(--accent);font-weight:700;">높음</span></td>
+        <td>FQ2'26 미국 comp +5%+(트랜잭션 주도) &mdash; 3년 내 최강. 모바일 주문 비중 확대, 대기시간 단축 효과 가시화. 신규 매장 적고 기존점 개선에 집중.</td>
+        <td>경기 둔화 시 소비자 재량 지출 삭감. 경쟁사(Dunkin', 로컬 카페) 공세.</td>
+      </tr>
+      <tr>
+        <td><strong>중국 Boyu JV 성과</strong></td>
+        <td style="text-align:center;"><span style="color:var(--yellow);font-weight:700;">중간</span></td>
+        <td>FQ2'26 중 JV 마감. 8,000 매장 → 20,000+ 장기 목표. Boyu의 부동산 네트워크 활용. 라이선스 수익으로 안정적 현금흐름. 스타벅스는 중국 리스크를 파트너에게 이전.</td>
+        <td>Luckin 등 로컬 경쟁 지속. 중국 소비 심리 불확실. JV 통제력 약화.</td>
+      </tr>
+      <tr>
+        <td><strong>FY2026 EPS $2.25~$2.45</strong></td>
+        <td style="text-align:center;"><span style="color:var(--accent);font-weight:700;">높음</span></td>
+        <td>FQ2'26 결과 후 상향 가이던스. comp +5% 이상 유지 시 달성 가능. H2는 계절성 유리(FQ3=여름 음료 성수기).</td>
+        <td>관세 영향(커피 원자재), 달러 강세(해외 환산 손실), 미국 소비 둔화.</td>
+      </tr>
+      <tr>
+        <td><strong>Rewards 로열티 개편 효과</strong></td>
+        <td style="text-align:center;"><span style="color:var(--accent);font-weight:700;">높음</span></td>
+        <td>FQ2'26 이후 새 로열티 프로그램(Siren Order, 방문 빈도 인센티브) 완전 적용. FQ2'26 35.6M 역대 최고. 매출 57%+ 기여 구조 강화.</td>
+        <td>멤버 리텐션 감소 가능성. 리워드 비용 증가.</td>
+      </tr>
+      <tr>
+        <td><strong>국제 시장(미국 외) 회복</strong></td>
+        <td style="text-align:center;"><span style="color:var(--red);font-weight:700;">낮음</span></td>
+        <td>FQ2'26에 10개 주요 시장 모두 플러스 comp는 이정표. 그러나 국제 매출 비중과 각국 세부 수치는 미공개.</td>
+        <td>각국 경기 상황 상이. 환율 리스크. 중동 불안, 유럽 소비 부진.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note-box" style="margin-top:24px;">
+    <strong>요약:</strong> Niccol의 "Back to Starbucks" 전략은 2년 추이를 보면 <em>전략 방향이 맞았음</em>이 입증됐다.
+    미국 트랜잭션 회복 + Rewards 성장 + 중국 구조 변경(JV) + 가이던스 상향까지. 남은 과제는 영업이익률 회복(현재 9.4% → 목표 13.5~15%).
+    이 갭이 좁혀지는 분기가 진짜 "턴어라운드 완성"의 신호가 될 것이다.
+  </div>
+
+  <h3 style="color:var(--purple);margin:32px 0 16px;">상상 시나리오 &mdash; 2028년 초의 이 회사</h3>
+
+  <div class="quote-block" style="border-left-color:var(--purple);">
+    <div class="speaker" style="color:var(--purple);">2028년 1월, 스타벅스</div>
+    <blockquote style="font-style:normal;font-size:14px;line-height:1.9;">
+      2028년 1월, 스타벅스 주가 $142. 시가총액 $1,600억. Niccol이 취임한 2024년 9월 $76에서 87% 상승. "역대 최고의 CEO 영입"이라는 평가가 굳어졌다.<br><br>
+
+      <strong>"4분 약속"이 진짜였다.</strong> Niccol이 2025년에 던진 "주문 후 4분 내 수령" 목표가 미국 직영점 92%에서 달성됐다. 비결은 단순했다 &mdash; 메뉴를 30% 줄였다. "시즌 한정 피치 코코넛 오트밀크 프라프치노"는 사라졌고, 매장 뒤에서 바리스타가 숨 쉴 공간이 생겼다. Rewards 앱에서 "예상 대기 시간"이 실시간으로 뜨고, 4분을 넘기면 별(Star) 보상이 자동 적립된다. 고객 만족도가 NPS 67로 10년 만에 최고.<br><br>
+
+      <strong>중국는 더 이상 스타벅스 문제가 아니다.</strong> 2026년 Boyu Capital JV가 클로즈된 후, 중국 7,200개 매장은 별도 사업체로 운영된다. 스타벅스 본사는 로열티 수입만 받는다 &mdash; 분기 $180M, 마진 거의 100%. Luckin과의 가격 전쟁은 JV 파트너가 알아서 하고, 본사 P&L은 깨끗해졌다. 이 구조 변경 하나가 미국 영업이익률을 2.5%p 끌어올렸다.<br><br>
+
+      영업이익률 14.2% &mdash; Niccol의 FY2028 목표 13.5~15% 범위 안에 정확히 들어왔다. 분기 매출 $10.8B, 글로벌 comp +4%, Rewards 회원 4,200만 명. 화려하진 않지만, "매 분기 예측 가능한 성장"이 스타벅스의 새 정체성이 됐다. Niccol이 치폴레에서 가져온 것: 복잡함을 제거하면 실행이 따라온다.
+    </blockquote>
+    <div class="analysis" style="border-left-color:var(--purple);">
+      <strong style="color:var(--red);">리스크 한줄:</strong> 미국 소비 침체가 오면 $7 라떼는 가장 먼저 삭감되는 지출이다. 그리고 Niccol이 떠나면 &mdash; 치폴레처럼 다시 "방향을 잃는" 스타벅스가 돌아올 수 있다.
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Starbucks 2-Year Trend Tracker &mdash; 최종 갱신 2026-04-30 &mdash; MACROHARD / Be:Analogue<br>
+  데이터 출처: Starbucks IR (investor.starbucks.com), SEC EDGAR, 실적 발표 컨콜 트랜스크립트<br>
+  다음 갱신: FQ3 FY2026 실적 발표 후 (2026년 7월 예정)
+</div>
+
+</div>
+</body>
+</html>

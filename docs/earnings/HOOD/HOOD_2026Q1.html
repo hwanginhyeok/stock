@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HOOD | 로빈후드 Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #00d632; --accent-dim: #00d63233;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#00d63215,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #00d63244; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  /* CARDS */
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--accent); }
+  .negative { color:var(--red); }
+
+  /* KPI TIER */
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#00d63222; color:var(--accent); }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  /* QUOTE */
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  /* TONE METER */
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  /* NEXT Q */
+  .next-q { background:linear-gradient(135deg,#4da6ff10,var(--surface)); border:1px solid #4da6ff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--blue); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--blue); }
+
+  /* LINKS */
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  /* TAGS */
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  /* KPI NOTE */
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NASDAQ: HOOD</div>
+    <h1>Robinhood Markets</h1>
+    <div class="company-kr">로빈후드 마켓츠</div>
+    <div class="subtitle">Q1 FY2026 실적 딥다이브 &mdash; 2026.04.28 장후 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-04-28</span>
+      <span>|</span>
+      <span>섹터: 금융 / 자본시장</span>
+      <span>|</span>
+      <span>시가총액: ~$700억</span>
+      <span>|</span>
+      <span>Rule of 40: 98%</span>
+    </div>
+    <div class="verdict miss">MISS &mdash; 매출 -5.3% vs 컨센서스 / EPS 소폭 미달</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">매출</div>
+      <div class="value">$10.7억</div>
+      <div class="compare">컨센서스: $11.3억 <span class="miss-tag">MISS -5.3%</span></div>
+      <div class="compare">전년비: +15%</div>
+    </div>
+    <div class="num-card">
+      <div class="label">희석 EPS</div>
+      <div class="value">$0.38</div>
+      <div class="compare">컨센서스: $0.39~0.41 <span class="miss-tag">MISS</span></div>
+      <div class="compare">전년비: +3%</div>
+    </div>
+    <div class="num-card">
+      <div class="label">조정 EBITDA</div>
+      <div class="value">$5.34억</div>
+      <div class="compare">마진: 50%</div>
+      <div class="compare">전년비: +14%</div>
+    </div>
+  </div>
+
+  <h3>매출 구성</h3>
+  <table>
+    <thead><tr><th>수익원</th><th>Q1 2026</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td>이벤트 컨트랙트</td><td class="mono">$1.47억</td><td class="mono positive">+320%</td><td><span class="kw-tag bullish">BREAKOUT</span></td></tr>
+      <tr><td>옵션</td><td class="mono">$2.60억</td><td class="mono positive">+8%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+      <tr><td>암호화폐</td><td class="mono">$1.34억</td><td class="mono negative">-47%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
+      <tr><td>주식</td><td class="mono">$0.82억</td><td class="mono positive">+46%</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
+      <tr><td>순이자수익</td><td class="mono">$3.59억</td><td class="mono positive">+24%</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
+      <tr><td>기타 (골드 구독 등)</td><td class="mono">$0.85억</td><td class="mono positive">+57%</td><td><span class="kw-tag bullish">GOLD</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="next-q">
+    <h3>다음 분기 가이던스 / 컨센서스</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">Q2 EPS 가이던스</div><div class="nq-value">$0.45</div></div>
+      <div class="next-q-item"><div class="nq-label">Q3 EPS 가이던스</div><div class="nq-value">$0.50</div></div>
+      <div class="next-q-item"><div class="nq-label">FY 운영비+SBC</div><div class="nq-value">$27~28.3억</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>이 회사를 읽는 숫자들</h2>
+
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 경영진이 직접 선언한 최우선 지표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>순예탁 성장률 (ann.)</strong></td>
+        <td class="mono positive" style="font-size:18px; font-weight:700;">22%</td>
+        <td class="mono">&mdash;</td>
+        <td>CFO가 컨콜에서 "North Star KPI"라고 직접 선언. 돈이 들어오고 있냐 = 플랫폼 신뢰</td>
+      </tr>
+      <tr>
+        <td><strong>Rule of 40</strong></td>
+        <td class="mono positive" style="font-size:18px; font-weight:700;">98%</td>
+        <td class="mono">&mdash;</td>
+        <td>매출성장 42% + EBITDA마진 56%. SaaS 황금 기준(40)의 2.5배. 미친 수준</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>왜 이 두 개가 중요한가:</strong> 매출 미스(-5.3%)에도 순예탁이 22% 성장 = 유저가 돈을 계속 넣고 있다는 뜻. Rule of 40이 98이면 성장과 수익성을 동시에 잡고 있다는 의미. 이 숫자가 무너지면 진짜 걱정해야 함.
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">사용자 건강 &mdash; 이게 무너지면 끝</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Funded Customers</strong> (실제 입금 유저)</td><td class="mono">2,740만명</td><td class="mono positive">+6%</td><td>계좌에 돈 넣은 유저만 집계. 가입만 한 유저 제외</td></tr>
+      <tr><td><strong>골드 구독자</strong></td><td class="mono">430만명</td><td class="mono positive">+36% (최고치)</td><td>월 $5 유료 구독 = 충성도 최상위. 전체의 15.8%</td></tr>
+      <tr><td><strong>ARPU</strong> (유저당 매출)</td><td class="mono">$157</td><td class="mono positive">+8%</td><td>올라감 = 같은 유저에서 더 많이 벌고 있다</td></tr>
+      <tr>
+        <td><strong>일평균 거래 (DARTs)</strong></td>
+        <td class="mono">주식 280만 / 옵션 120만 / 크립토 40만</td>
+        <td class="mono">주식 +22% / 옵션 +9% / <span class="negative">크립토 -33%</span></td>
+        <td><strong>MAU 대용 지표.</strong> 로빈후드가 MAU를 안 공개하니 이걸로 활동량을 봐야 함</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>MAU를 왜 안 공개하나:</strong> 2021년 밈주식 열풍 때 MAU 2,250만 찍고 이후 하락. 2022년부터 "Funded Customers"로 교체 &mdash; 항상 올라가는 지표로 바꾼 것. 진짜 활동 유저를 보려면 <strong>DARTs(일평균 거래 건수)</strong>를 봐야 한다. 크립토 DARTs -33%인데 경영진이 언급 안 한 게 회피 시그널.
+  </div>
+
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">자산 규모 &mdash; 밸류에이션의 근거</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>총 수탁자산 (AUC)</strong></td><td class="mono">$3,073억</td><td class="mono positive">+39%</td><td>JP모건 $4조 대비 1/13이지만 성장률이 핵심</td></tr>
+      <tr><td><strong>마진 잔고</strong></td><td class="mono">$170억</td><td class="mono positive">+93%</td><td>신용거래 잔고 = 이자수익 원천. 2배 가까이 폭증</td></tr>
+      <tr><td><strong>은퇴계좌 AUC</strong></td><td class="mono">$274억</td><td class="mono positive">+90%</td><td>장기 sticky money. 은퇴자금은 안 빼감 = 이탈 방지</td></tr>
+      <tr><td><strong>현금예치금</strong></td><td class="mono">$167억</td><td class="mono positive">+70%</td><td>이자수익 기반. 금리 환경에 민감</td></tr>
+      <tr><td><strong>캐시 스윕</strong></td><td class="mono">$260억</td><td class="mono negative">-8%</td><td>줄어든 건 투자로 이동한 것 (긍정적 해석 가능)</td></tr>
+      <tr><td><strong>순예탁금</strong></td><td class="mono">$177억</td><td class="mono">&mdash;</td><td>분기 유입액. 연환산 22% 성장률</td></tr>
+    </tbody>
+  </table>
+
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">거래량 &mdash; 수수료 매출의 선행지표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td><strong>주식 명목거래량</strong></td><td class="mono">$6,380억</td><td class="mono positive">+54%</td><td><span class="kw-tag bullish">PDT 폐지 수혜</span></td></tr>
+      <tr><td><strong>옵션 계약 수</strong></td><td class="mono">5.86억 계약</td><td class="mono positive">+17%</td><td><span class="kw-tag neutral-tag">안정 성장</span></td></tr>
+      <tr><td><strong>이벤트 컨트랙트</strong></td><td class="mono">88억 계약</td><td class="mono">&mdash;</td><td><span class="kw-tag bullish">역대 최고 (신규)</span></td></tr>
+      <tr><td><strong>크립토 (앱)</strong></td><td class="mono">$57억/월</td><td class="mono negative">전월비 -39%</td><td><span class="kw-tag bearish">급락</span></td></tr>
+      <tr><td><strong>크립토 (Bitstamp)</strong></td><td class="mono">$121억/월</td><td class="mono negative">전월비 -22%</td><td><span class="kw-tag bearish">동반 하락</span></td></tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>3월 일평균 거래량 (ADV):</strong> 주식 $98억/일 | 옵션 940만 계약/일 | 크립토 $5.74억/일. 크립토 ADV가 전월비 -36%로 가장 가파르게 하락 중.
+  </div>
+
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">신규 사업 &mdash; 미래 베팅</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>골드 신용카드</strong></td><td class="mono">80만+ 유저 / 연 $150억 구매량</td><td>카드 사업 자체가 수익원. 뱅킹 진출 교두보</td></tr>
+      <tr><td><strong>Cortex AI 사용자</strong></td><td class="mono">~100만명</td><td>"nearly 1M" = 아직 초기. 골드 전용으로 풀림</td></tr>
+      <tr><td><strong>뱅킹</strong></td><td class="mono">전분기 대비 5배</td><td>절대 수치 미공개 = 아직 작다는 뜻</td></tr>
+      <tr><td><strong>Trump Accounts</strong></td><td class="mono">550만 어린이 등록 (6,000만 대상)</td><td>정부 수탁 프로젝트. $1억 추가 투자. cost-plus 구조</td></tr>
+      <tr><td><strong>AI 효율성</strong></td><td class="mono">9자리수($1억+) 절감</td><td>직원 90%+ AI 사용 / 엔지니어당 커밋 +50%</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter">
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:85%;background:var(--accent);"></div></div>
+      <div class="tone-score">8.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:60%;background:var(--yellow);"></div></div>
+      <div class="tone-score">6.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 회의감</div>
+      <div class="tone-bar"><div class="fill" style="width:70%;background:var(--red);"></div></div>
+      <div class="tone-score">7.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">전망 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:75%;background:var(--blue);"></div></div>
+      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Vlad Tenev (회장 겸 CEO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 공격적 비전 세일즈맨. 실적 미스에 대한 방어 제로. 숫자 대신 Trump Accounts로 콜을 열어 내러티브를 선점.
+  </p>
+
+  <div class="keywords">
+    <span class="kw-tag bullish">GREAT WEALTH TRANSFER</span>
+    <span class="kw-tag bullish">EARLY INNINGS</span>
+    <span class="kw-tag bullish">RELENTLESS VELOCITY</span>
+    <span class="kw-tag bullish">NUMBER ONE</span>
+    <span class="kw-tag neutral-tag">FULL STACK</span>
+    <span class="kw-tag bearish">VESTIGIAL (PDT 규칙)</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Vlad Tenev &mdash; 오프닝</div>
+    <blockquote>"Driven by our relentless product velocity and innovation, Robinhood is increasingly positioned at the center of our customers' financial lives, just as we enter the early innings of the Great Wealth Transfer."</blockquote>
+    <div class="analysis"><strong>"early innings"</strong> &mdash; 실리콘밸리 클래식. $70조 부의 이전을 걸고 이번 분기 미스는 노이즈라는 프레이밍. <strong>"relentless"</strong> 반복 사용 &mdash; "빠르다"가 아니라 "가차없이 빠르다". 방어가 아닌 공격.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Vlad Tenev &mdash; Trump Accounts</div>
+    <blockquote>"The broker and sole initial trustee for the Trump Accounts under the direction of the U.S. Department of the Treasury. Over 5.5 million American children are already signed up... a new way to extend Robinhood's mission beyond just retail and institutional to helping governments."</blockquote>
+    <div class="analysis">실적 미스를 알면서도 <strong>숫자 리뷰가 아닌 정부 프로젝트로 콜을 열었다.</strong> "나쁜 숫자 전에 더 큰 그림을 보여주겠다." 6,000만 eligible children = TAM 프레이밍. "sole initial trustee" = 독점 강조.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Vlad Tenev &mdash; 전략 3축</div>
+    <blockquote>"Number one in active traders. Number one in wallet share for the next generation. Number one global financial ecosystem."</blockquote>
+    <div class="analysis">목표 3개 동시 선언, 겸손 제로. Satya Nadella("we're learning")와 정반대, Tenev는 "we're winning" 류. 현재&rarr;미래&rarr;장기를 커버하는 3단 구조.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Vlad Tenev &mdash; 규제</div>
+    <blockquote>"The pattern day trader rule is vestigial and kind of outdated."</blockquote>
+    <div class="analysis">"outdated"면 충분한데 <strong>"vestigial"(꼬리뼈 같은 퇴화 기관)</strong>을 택함. 물리학 전공 배경이 드러나는 학술적 단어. 규제를 진화적으로 도태된 것으로 격하.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Vlad Tenev &mdash; AI &amp; 제품</div>
+    <blockquote>"Robinhood Cortex has been used by nearly 1 million customers so far."<br>"Users absolutely love verified profiles and verified returns and trades."</blockquote>
+    <div class="analysis">"absolutely love" &mdash; IR에서 이례적인 감성 언어. Cortex 100만 사용자는 구체적 수치로 AI 투자를 정당화.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Vlad Tenev &mdash; 크립토 침묵</div>
+    <blockquote>(크립토 수익 -47% 하락에 대한 적극적 방어 발언 없음)</blockquote>
+    <div class="analysis"><strong>가장 큰 시그널.</strong> 수익 반토막인데 적극 방어 안 함. 이벤트 컨트랙트(+320%), 은퇴계좌(+90%), 골드(+36%)로 화제 전환. 메시지: <em>"우리는 크립토 회사가 아니다. 다각화된 금융 플랫폼이다."</em></div>
+  </div>
+
+  <h3>Shiv Verma (CFO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 침착한 수비수. KPI 재설정 전문가. 숫자가 말해주지 않으면 어떤 숫자를 볼지를 바꾼다.
+  </p>
+
+  <div class="quote-block">
+    <div class="speaker">Shiv Verma &mdash; North Star</div>
+    <blockquote>"Annualized net deposit growth is our North Star KPI... 20-percent-plus annualized net deposit growth."</blockquote>
+    <div class="analysis">매출이 아닌 <strong>순예탁 성장률을 최우선 지표로 재설정.</strong> "우리가 보는 건 그게 아니야"로 기준 자체를 바꿈. "20%+"에서 정확한 22% 대신 "+" 부호 &mdash; 살짝 과장해서 임팩트를 높이는 IR 화법.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Shiv Verma &mdash; Trump Accounts 비용</div>
+    <blockquote>"Contracted on a cost-plus basis with a small margin. We expect revenues to exceed costs for this project."</blockquote>
+    <div class="analysis">"small margin"이 핵심. $1억 투자 ROI 우려에 선제 대응: "적자는 아니다." 하지만 "small"을 굳이 붙인 건 마진이 매우 박하다는 고백.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Shiv Verma &mdash; AI 효율성</div>
+    <blockquote>"9-figure efficiency benefits in engineering and customer support. Over 90% of our employees are already using AI tooling. Commits per engineer up 50% since the start of last year."</blockquote>
+    <div class="analysis">"9-figure" = $1억+ 절감인데 구체적 숫자 대신 자릿수로 말함 &mdash; 정확히 밝히기 어려울 때의 테크. "커밋 +50%"는 구체적이고 강력한 수치. AI 생산성 증명 시도.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 존중하되 회의적. "증명해봐" 모드 가동.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">David Bartosiak, Zacks &mdash; 가장 날카로운 코멘트</div>
+    <blockquote>
+      "This is a classic case of top-line strength, bottom-line pressure."<br><br>
+      "They're running faster... but not getting much further."<br><br>
+      "This is no longer just a growth story, it's now a prove-it story."
+    </blockquote>
+    <div class="analysis"><strong>"prove-it story"</strong> &mdash; 핵심 키워드. 월가가 더 이상 성장 프리미엄으로 봐주지 않겠다는 시그널. 매출 +15%인데 순이익 +3% &mdash; 이 괴리에 집중. "트레드밀 비유"는 상당히 부정적.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; 크립토 교차매매 질문</div>
+    <blockquote>"Are you seeing a lot of cross currents between those active traders using crypto, or is that really a separate class of traders?"</blockquote>
+    <div class="analysis">중립적 표현이지만 진짜 의도: <em>"크립토 트레이더 잃으면 주식도 같이 빠지냐?"</em> &mdash; 유저 이탈 우려.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">시장 심리</div>
+    <blockquote>"Market patience wearing thin."</blockquote>
+    <div class="analysis">"patience wearing thin" &mdash; 상당히 부정적. 다음 분기도 미스하면 레이팅 하향 경고.</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr><td style="width:140px;font-weight:600;color:var(--accent);">Vlad Tenev</td><td>"크립토는 지나가는 바람. 우리는 $70조 부의 이전 + 정부 프로젝트의 문 앞에 서 있다"</td></tr>
+      <tr><td style="font-weight:600;color:var(--accent);">Shiv Verma</td><td>"매출 미스? North Star는 순예탁 성장이고 거기는 22% 건재"</td></tr>
+      <tr><td style="font-weight:600;color:var(--yellow);">애널리스트</td><td>"좋은 회사, 좋은 이야기. 그런데 이제 숫자로 증명해 (prove-it story)"</td></tr>
+      <tr><td style="font-weight:600;color:var(--red);">시장 반응</td><td>장후 -2.3% &rarr; 프리마켓 추가 -3.1%. 실망은 했지만 공포는 아님.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid">
+    <a class="link-card" href="https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-first-quarter-2026-results" target="_blank">
+      <div class="link-icon">&#x1F4C4;</div>
+      <div class="link-text"><div class="link-title">IR 보도자료</div><div class="link-url">investors.robinhood.com</div></div>
+    </a>
+    <a class="link-card" href="https://investors.robinhood.com/static-files/15576d76-2d02-4aea-a40d-48e694c04a4b" target="_blank">
+      <div class="link-icon">&#x1F4CA;</div>
+      <div class="link-text"><div class="link-title">Q1 2026 실적 슬라이드 (PDF)</div><div class="link-url">Exhibit 99.1</div></div>
+    </a>
+    <a class="link-card" href="https://investors.robinhood.com/static-files/8c874cb3-825e-4796-8f1c-07cd162e6e10" target="_blank">
+      <div class="link-icon">&#x1F4C8;</div>
+      <div class="link-text"><div class="link-title">월간 메트릭스 (Excel)</div><div class="link-url">investors.robinhood.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.youtube.com/watch?v=DtUSZ7vi_u4" target="_blank">
+      <div class="link-icon">&#x1F3AC;</div>
+      <div class="link-text"><div class="link-title">컨퍼런스 콜 영상 (YouTube)</div><div class="link-url">youtube.com</div></div>
+    </a>
+    <a class="link-card" href="https://investors.robinhood.com/financials/quarterly-results" target="_blank">
+      <div class="link-icon">&#x1F4C1;</div>
+      <div class="link-text"><div class="link-title">분기 실적 페이지</div><div class="link-url">investors.robinhood.com/financials</div></div>
+    </a>
+    <a class="link-card" href="https://seekingalpha.com/pr/20491386-robinhood-reports-first-quarter-2026-results" target="_blank">
+      <div class="link-icon">&#x1F50E;</div>
+      <div class="link-text"><div class="link-title">Seeking Alpha 커버리지</div><div class="link-url">seekingalpha.com</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-04-29 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOW | 서비스나우 Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #81b732; --accent-dim: #81b73233;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#81b73215,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #81b73244; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  /* CARDS */
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--accent); }
+  .negative { color:var(--red); }
+
+  /* KPI TIER */
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#81b73222; color:var(--accent); }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  /* QUOTE */
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  /* TONE METER */
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  /* NEXT Q */
+  .next-q { background:linear-gradient(135deg,#4da6ff10,var(--surface)); border:1px solid #4da6ff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--blue); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--blue); }
+
+  /* LINKS */
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  /* TAGS */
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  /* KPI NOTE */
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+  /* WARNING BOX */
+  .warn-box { background:#ff4d4d0a; border:1px solid #ff4d4d33; border-radius:8px; padding:16px 20px; margin:16px 0; font-size:13px; color:var(--text-dim); }
+  .warn-box strong { color:var(--red); }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NYSE: NOW</div>
+    <h1>ServiceNow</h1>
+    <div class="company-kr">서비스나우</div>
+    <div class="subtitle">Q1 FY2026 실적 딥다이브 &mdash; 2026.04.22 장후 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-04-22</span>
+      <span>|</span>
+      <span>섹터: 소프트웨어 / Enterprise SaaS</span>
+      <span>|</span>
+      <span>시가총액: ~$1,140억 (장후 급락 후)</span>
+      <span>|</span>
+      <span>Rule of 40: 54%</span>
+    </div>
+    <div class="verdict beat">BEAT &mdash; EPS $0.97 vs 컨센서스 $0.95 (+$0.02) / 매출 전 항목 어퍼 가이던스 초과</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">총 매출</div>
+      <div class="value">$37.7억</div>
+      <div class="compare">컨센서스: ~$36.5억 <span class="beat-tag">BEAT +3.3%</span></div>
+      <div class="compare">전년비: +22%</div>
+    </div>
+    <div class="num-card">
+      <div class="label">구독 매출</div>
+      <div class="value">$36.7억</div>
+      <div class="compare">어퍼 가이던스 초과 <span class="beat-tag">BEAT</span></div>
+      <div class="compare">전년비: +22% (CC: +19%)</div>
+    </div>
+    <div class="num-card">
+      <div class="label">Non-GAAP EPS</div>
+      <div class="value">$0.97</div>
+      <div class="compare">컨센서스: $0.95 <span class="beat-tag">BEAT +$0.02</span></div>
+      <div class="compare">전년비: +21.3%</div>
+    </div>
+  </div>
+
+  <h3>매출 구성</h3>
+  <table>
+    <thead><tr><th>항목</th><th>Q1 2026</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td>구독 매출 (Subscription Revenue)</td><td class="mono">$3,671M</td><td class="mono positive">+22% (+19% CC)</td><td><span class="kw-tag bullish">CORE ENGINE</span></td></tr>
+      <tr><td>전문서비스 & 기타 (Professional Services)</td><td class="mono">$99M</td><td class="mono positive">+18.5%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+      <tr><td><strong>총 매출</strong></td><td class="mono"><strong>$3,770M</strong></td><td class="mono positive"><strong>+22%</strong></td><td><span class="kw-tag bullish">ALL-BEAT</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="warn-box">
+    <strong>주가는 왜 -14% 폭락했나?</strong> 실적은 모든 항목을 비트했다. 그런데 주가는 장후 -12~14% 폭락. 이유: (1) Armis 인수 효과 제외 시 연간 가이던스 유기적 상향 없음, (2) 이란 전쟁으로 인한 중동 대형 딜 75bp 헤드윈드, (3) Armis 통합으로 마진 가이던스 하향 (영업이익률 32%→31.5%, FCF 마진 36%→35%). 숫자가 좋아도 시장은 "다음 분기"를 산다.
+  </div>
+
+  <div class="next-q">
+    <h3>가이던스 &mdash; Q2 2026 & FY2026 (상향)</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">Q2 구독 매출 가이던스</div><div class="nq-value">$3,815~3,820M</div></div>
+      <div class="next-q-item"><div class="nq-label">Q2 cRPO 성장률 (CC)</div><div class="nq-value">~19.5%</div></div>
+      <div class="next-q-item"><div class="nq-label">FY2026 구독 매출 (상향)</div><div class="nq-value">$15.74~15.78B</div></div>
+    </div>
+  </div>
+
+  <div class="kpi-note" style="margin-top:16px;">
+    <strong>가이던스 해석 주의:</strong> FY2026 구독 매출 가이던스 상향($205M 미드포인트)에는 Armis 인수 기여분 약 125bp가 포함. 유기적 가이던스는 사실상 플랫(ServiceNow의 전통적 보수 가이던스 스타일). Q2 CC 성장률 21~21.5% 가이던스에도 Armis 125bp 포함.
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>이 회사를 읽는 숫자들</h2>
+
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; SaaS 기업의 진짜 성장 척도</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>cRPO (향후 12개월 계약 잔고)</strong></td>
+        <td class="mono positive" style="font-size:18px; font-weight:700;">$126.4억</td>
+        <td class="mono positive">+22.5% (+21% CC)</td>
+        <td>SaaS 기업의 선행 지표. 이미 계약한 매출의 파이프라인 = 미래 1년 매출이 확정됐다는 의미. 이 숫자가 꺾이면 성장 둔화의 진짜 신호.</td>
+      </tr>
+      <tr>
+        <td><strong>구독 매출 성장률</strong></td>
+        <td class="mono positive" style="font-size:18px; font-weight:700;">+22% YoY</td>
+        <td class="mono">&mdash;</td>
+        <td>$37억 베이스에서 22% 성장. $1B+ 매출 SaaS 기업이 이 속도를 유지하는 것 자체가 이례적. AI 덕에 가속.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>cRPO가 핵심인 이유:</strong> 매출은 과거 숫자, cRPO는 미래 숫자. 고객이 계약했지만 아직 인식 안 된 매출. "21% CC 성장"이면 환율을 제거한 진짜 비즈니스 모멘텀. 투자자들이 cRPO 둔화 우려로 팔았지만, 절대 수치($126.4B)는 최고치.
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">고객 건강 &mdash; 락인의 강도</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>총 고객 수 ($5M+ ACV)</strong></td><td class="mono">630개사</td><td class="mono positive">+22%</td><td>연간 $500만 이상 쓰는 초대형 고객. 기업 예산의 핵심 부분을 ServiceNow가 차지했다는 뜻.</td></tr>
+      <tr><td><strong>$5M+ ACV 신규 대형 딜</strong></td><td class="mono">16건</td><td class="mono positive">+80%</td><td>분기 내 신규 체결 대형 딜. 80% 성장 = 세일즈 모멘텀 최고조.</td></tr>
+      <tr><td><strong>Now Assist $1M+ 고객</strong></td><td class="mono">공개 안 함 (고속 성장)</td><td class="mono positive">+130% YoY</td><td>AI 제품의 첫 번째 결제 지표. 130% 성장은 실험 단계를 지나 실제 예산 배정 단계로 진입.</td></tr>
+      <tr><td><strong>Now Assist 3개+ 번들 딜</strong></td><td class="mono">+70% YoY</td><td class="mono">&mdash;</td><td>AI 제품을 묶어 파는 번들 전략 성공. 3개 이상 = 깊은 통합 = 이탈 비용 폭증.</td></tr>
+      <tr><td><strong>$1M 이상 전체 딜</strong></td><td class="mono">+30% YoY</td><td class="mono">&mdash;</td><td>대형 기업 침투율 확대. 소형 딜이 아닌 코어 예산 공략.</td></tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>NRR(순 매출 유지율) 미공개 정책:</strong> ServiceNow는 NRR을 공식 지표로 발표하지 않음. 대신 $5M+ 고객 수(+22%)와 대형 딜 성장으로 간접 측정. $5M 고객 22% 성장 = 기존 고객이 지갑을 계속 열고 있다는 강력한 신호. 추산 NRR ~120%+.
+  </div>
+
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">수익성 &mdash; 성장과 이익의 균형</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비 / 가이던스</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Non-GAAP 영업이익률</strong></td><td class="mono positive">32%</td><td class="mono positive">+100bp YoY</td><td>$37억 매출에서 32% 영업이익. 스케일 효과 실현 중.</td></tr>
+      <tr><td><strong>FCF (잉여현금흐름)</strong></td><td class="mono positive">$16.7억</td><td class="mono positive">44% 마진</td><td>"진짜 돈 버는 회사" 증명. 44% FCF 마진은 소프트웨어 업계 최상위권.</td></tr>
+      <tr><td><strong>Rule of 40</strong></td><td class="mono positive">54%</td><td class="mono">&mdash;</td><td>성장률 22% + 영업이익률 32% = 54. 황금 기준(40)을 35% 초과.</td></tr>
+      <tr><td><strong>구독 총이익률</strong></td><td class="mono positive">~81.5%</td><td class="mono">FY 가이던스 81.5%</td><td>소프트웨어 특유의 고마진. 고객이 늘수록 이익률 유지.</td></tr>
+      <tr><td><strong>FY2026 Non-GAAP 영업이익률 가이던스</strong></td><td class="mono negative">31.5%</td><td class="mono negative">Armis로 -50bp 하향</td><td>이전 32%에서 31.5%로 하향. Armis 통합 비용 반영. 단기 마진 희생 = 장기 TAM 확대 베팅.</td></tr>
+      <tr><td><strong>FY2026 FCF 마진 가이던스</strong></td><td class="mono negative">35%</td><td class="mono negative">Armis로 -100bp 하향</td><td>이전 36%에서 35%로 하향. Armis -200bp 헤드윈드 일부 상쇄 시도.</td></tr>
+      <tr><td><strong>자사주 매입</strong></td><td class="mono">$22억 (2,020만주)</td><td class="mono">잔여 승인액 $42억</td><td>이익의 적극적 주주환원. $42억 잔여 = 향후 매입 여력 충분.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">AI / 혁신 &mdash; 미래 성장의 근거</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Now Assist ACV 목표 상향</strong></td>
+        <td class="mono positive" style="font-size:16px; font-weight:700;">$15억 (기존 $10억 → +50%)</td>
+        <td>AI 제품 ACV 목표를 분기 하나 만에 50% 상향. 컨콜 중간에 McDermott가 직접 발표. 이 정도 상향은 이례적.</td>
+      </tr>
+      <tr><td><strong>AI 관련 ACV 성장 가속</strong></td><td class="mono positive">고속 성장 (수치 미공개)</td><td>McDermott: "We're already talking about $1.5B now, and it's on a run." 이미 $1B을 넘어섰다는 뉘앙스.</td></tr>
+      <tr><td><strong>Now Assist 5개+ 번들 딜</strong></td><td class="mono">36건 (단일 분기)</td><td>AI 제품 5개 이상을 묶어 계약. 깊은 제품 통합 = 최강의 락인.</td></tr>
+      <tr><td><strong>AI Control Tower 포지셔닝</strong></td><td class="mono">$6,000억+ TAM 선언</td><td>McDermott가 "AI Control Tower" 컨셉으로 포지셔닝. 단순 ITSM이 아닌 기업 전체 AI 오케스트레이션 플랫폼.</td></tr>
+      <tr><td><strong>Armis 인수 (사이버보안)</strong></td><td class="mono">$77.5억 완료</td><td>사이버보안 스타트업 인수로 TAM 확장. 보안+AI+워크플로우 통합. 단기 마진 희생, 장기 TAM 확대.</td></tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>AI 수익화 속도 vs 시장 기대:</strong> TIKR 분석 제목이 "Revenue Beats, But AI Inflection Still Coming"임. 시장은 AI 매출의 계단식 폭발을 원하지만 아직 그 정도는 아님. 그러나 $1.5B 목표 상향은 "곧 온다"는 시그널. <strong>Now Assist가 진짜 $1.5B을 달성하면 밸류에이션 리레이팅 트리거.</strong>
+  </div>
+
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">밸류에이션 &mdash; 가격이 합리적인가</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>수치</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>시가총액 (장후 급락 후)</strong></td><td class="mono">~$1,140억</td><td>14% 폭락으로 고점 대비 약 51% 하락. 고점은 $320억달러 시총이었으나 금리/AI 기대 조정으로 대폭 압축.</td></tr>
+      <tr><td><strong>EV/FY2026 구독 매출</strong></td><td class="mono">~6.4x</td><td>$1,140억 EV / $15.75B 구독 매출. 고성장 SaaS치고 역사적 밸류 저점에 근접. 성장 둔화 우려 반영.</td></tr>
+      <tr><td><strong>P/FCF (주가/잉여현금흐름)</strong></td><td class="mono">~40x</td><td>FCF 마진 44%를 22% 성장과 결합하면 비싸지 않음. Rule of 40 기업 평균 대비 합리적.</td></tr>
+      <tr><td><strong>Rule of 40 스코어</strong></td><td class="mono positive">54%</td><td>성장 22% + 영업이익 32% = 54. "양호"를 넘어 "탁월" 영역. 이 레벨에서 EV/매출 6x는 역사적으로 저렴.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter">
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:95%;background:var(--accent);"></div></div>
+      <div class="tone-score">9.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:65%;background:var(--yellow);"></div></div>
+      <div class="tone-score">6.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 회의감</div>
+      <div class="tone-bar"><div class="fill" style="width:75%;background:var(--red);"></div></div>
+      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">전망 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:70%;background:var(--blue);"></div></div>
+      <div class="tone-score">7.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Bill McDermott (회장 겸 CEO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 극도의 낙관주의 세일즈맨. 매 분기 "역사적 순간"을 선언하는 CEO. 주가 폭락에도 흔들림 없이 AI 비전을 쏟아냄. Tenev(로빈후드)가 팩트로 상상력을 자극한다면, McDermott는 <strong>언어로 현실을 창조한다.</strong>
+  </p>
+
+  <div class="keywords">
+    <span class="kw-tag bullish">AI CONTROL TOWER</span>
+    <span class="kw-tag bullish">INTELLIGENCE ENGINE</span>
+    <span class="kw-tag bullish">CONTROL AND COMPOUND</span>
+    <span class="kw-tag bullish">$600B TAM</span>
+    <span class="kw-tag bullish">NEVER BEEN A TAILWIND LIKE AI</span>
+    <span class="kw-tag neutral-tag">AGENTIC ORCHESTRATION</span>
+    <span class="kw-tag bearish">IRAN WAR HEADWIND</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Bill McDermott &mdash; 오프닝 선언</div>
+    <blockquote>"There has never been a tailwind for ServiceNow like AI."</blockquote>
+    <div class="analysis">단 12단어로 콜 전체 내러티브를 압축. "There has never been" &mdash; 40년 역사를 다 뒤져봐도 지금만한 순간은 없다는 최상급 선언. "tailwind"는 그냥 바람이 아닌 30m/s 이상의 추진력. 세일즈맨의 언어: 불안을 제거하고 흥분을 주입하는 오프닝.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Bill McDermott &mdash; 플랫폼 비전 전환 선언</div>
+    <blockquote>"Our platform has gone from land-and-expand to control-and-compound. AI that thinks, workflows that act, all production-grade, enterprise-scaled."</blockquote>
+    <div class="analysis"><strong>"land-and-expand"에서 "control-and-compound"로의 전환</strong>은 전략적 모멘텀의 질적 변화를 의미. 단순히 더 많은 고객을 얻는 것(land)이 아니라, 이미 들어온 고객의 예산을 장악(control)하고 복리로 키운다(compound)는 뜻. "AI that thinks, workflows that act" &mdash; 짧고 강력한 대구. 기술 설명이 아니라 시를 쓴다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Bill McDermott &mdash; AI Control Tower 포지셔닝</div>
+    <blockquote>"The AI control tower for business reinvention in the center of a growing $600 billion plus total addressable market."</blockquote>
+    <div class="analysis">"AI Control Tower" &mdash; 공항 관제탑 은유. 수백 개의 AI 에이전트가 날아다니는 기업 환경에서 ServiceNow가 중앙 통제권을 쥔다는 포지셔닝. $600B TAM은 기존 ITSM($50B)에서 기업 전체 AI 오케스트레이션으로 TAM을 12배 확장하는 리프레이밍. 현실이 될지 미지수지만 이 언어 자체가 브랜드 자산.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Bill McDermott &mdash; AI 제품 ACV 목표 상향 (컨콜 최대 서프라이즈)</div>
+    <blockquote>"We're already talking about $1.5 billion now, and it's on a run."</blockquote>
+    <div class="analysis">직전 가이던스는 "$1B AI ACV 목표". 한 분기 만에 50% 상향을 <strong>기자발표 형식이 아닌 Q&A 중 자연스럽게 흘렸다.</strong> "it's on a run" &mdash; 달리기 중이다. 멈출 생각 없다. 이 발언이 나온 순간 기관 투자자들은 수주 안에 AI ACV 진행률 검증에 들어갈 것.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Bill McDermott &mdash; AI & 보안 통합</div>
+    <blockquote>"AI, data, security and governance are now built into every product and package, not a separate purchase."</blockquote>
+    <div class="analysis">Armis 인수($77.5억)의 전략적 근거를 한 문장으로 정당화. "not a separate purchase" = 기존 경쟁사는 보안을 추가 구매로 파는데 ServiceNow는 기본 탑재. 이는 번들 ARPU를 높이는 동시에 경쟁사의 틈새 진입을 차단. 그러나 마진 압박의 근원이기도 함.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Bill McDermott &mdash; 세일즈 스타일의 정수</div>
+    <blockquote>"Now Assist net new ACV continues to outperform even our expectations... The number of customers spending $1 million or more grew over 130% year-over-year."</blockquote>
+    <div class="analysis">"outperform even our expectations" &mdash; 자기 예측도 넘어섰다는 겸손의 역설. 실은 <strong>더 강한 자신감의 표현</strong>. "130% 성장"을 비교 기준 없이 낭독 &mdash; 애널리스트들은 이 숫자의 절대 베이스가 얼마인지 모름. 숫자는 강렬하지만 검증 불가. 세일즈맨의 언어가 CFO 발표를 압도.</div>
+  </div>
+
+  <h3>Gina Mastantuono (사장 겸 CFO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 냉철한 수치 관리인. McDermott의 비전 폭탄을 숫자로 다듬는 역할. 중동 헤드윈드와 Armis 마진 압박을 선제적으로 공개하며 투명성을 확보하려 했지만, 시장은 그 정직함에 오히려 더 팔았다.
+  </p>
+
+  <div class="quote-block">
+    <div class="speaker">Gina Mastantuono &mdash; 분기 요약</div>
+    <blockquote>"In Q1, we exceeded the high end of our topline and profitability guidance metrics, grew free cash flow, and returned capital to shareholders. The early close of our Armis acquisition meaningfully expands our TAM and accelerates our subscription revenue growth trajectory."</blockquote>
+    <div class="analysis">완벽한 CFO 언어. 5개 성과를 5문장에 압축. "exceeded the high end" = 가이던스 상단 초과. "returned capital" = 자사주 $22억. 그러나 이어지는 마진 가이던스 하향 발표와의 낙차가 시장의 불신을 키움. <strong>좋은 소식 먼저, 나쁜 소식 나중이라는 구성 자체가 방어적.</strong></div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Gina Mastantuono &mdash; 중동 헤드윈드 (가장 결정적 발언)</div>
+    <blockquote>"Subscription revenue included about a 75 basis point headwind from delayed closings of several large on-premise deals in the Middle East due to the ongoing conflict in the region."</blockquote>
+    <div class="analysis">이 75bp 공개가 주가 -14%의 방아쇠. $37억 매출 기준 75bp = 약 $2,800만의 미실현 매출. 이란 전쟁으로 중동 대형 온프레미스 딜이 지연됐다는 고백. <strong>CFO가 지정학적 리스크를 실적 헤드윈드로 명시한 것은 이례적.</strong> "delayed"라는 표현이 "lost"가 아님을 강조했지만, 시장은 "다음 분기도 지연될 수 있다"를 가격에 반영.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Gina Mastantuono &mdash; Armis 통합 비용</div>
+    <blockquote>"We expect near-term headwinds to margins as we integrate the business this year... approximately 200 basis points to free cash flow margin, 75 basis points to operating margin."</blockquote>
+    <div class="analysis">투명성의 역설. 마진 압박을 솔직하게 공개했지만 시장은 이걸 "컨트롤 불가능한 비용 증가"로 해석. <strong>"near-term"이 얼마나 짧은지 아무도 모른다는 것이 핵심 리스크.</strong> Armis 통합이 예상보다 길어지면 마진 회복 스케줄 전체가 뒤로 밀린다.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> "숫자는 좋은데 왜 유기적 가이던스는 안 올렸냐" 모드. Armis 포함 가이던스의 순도 문제 집중.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">TIKR 분석 &mdash; 핵심 우려 요약</div>
+    <blockquote>"Revenue Beats, But AI Inflection Still Coming."<br><br>"The organic full-year guide held flat after Q1 on a $15B revenue base &mdash; consistent with how management has always guided, as ServiceNow rarely raises the full-year after the smallest quarter."</blockquote>
+    <div class="analysis"><strong>가장 냉정한 독해.</strong> 가이던스 상향이 전부 Armis 효과라는 해부. "smallest quarter" = Q1은 ServiceNow에서 계절적으로 가장 약한 분기. 전통적으로 Q1 후 연간 가이던스를 크게 올리지 않음. 시장의 패닉이 과하다는 합리적 반론도 가능.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Fortune 분석 &mdash; "anti-SaaS vibes"</div>
+    <blockquote>"ServiceNow's strong earnings fail to shift AI-driven anti-SaaS vibes."</blockquote>
+    <div class="analysis">2026년 시장의 분위기를 꿰뚫는 한마디. AI가 SaaS를 대체할 것이라는 불안이 기관 투자자에게 퍼져 있다. <strong>실적이 좋아도 "그래서 AI에 대체 안 당하냐?"</strong>는 근본적 회의감이 멀티플을 압박. McDermott가 "AI Control Tower" 포지셔닝으로 대응하지만 시장의 불안은 아직 해소 안 됨.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Alphastreet 분석 &mdash; 마진 리셋 우려</div>
+    <blockquote>"ServiceNow (NOW) Posts 22% Growth but Stock Drops on Iran War Headwind and Margin Reset."</blockquote>
+    <div class="analysis">"Margin Reset" &mdash; 핵심 키워드. 시장이 보는 리스크는 단순 한 분기 마진 압박이 아니라 구조적 마진 리셋 가능성. Armis 통합 비용 + AI 인프라 투자 + 중동 지정학 = 복합 압박. Q2에서 이 세 가지가 동시에 개선 안 되면 추가 하락 가능성.</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 읽기 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr><td style="width:160px;font-weight:600;color:var(--accent);">Bill McDermott</td><td>"AI는 이제 실험이 아닌 예산이다. $1.5B AI ACV는 시작에 불과하고, 우리는 기업 AI의 관제탑(Control Tower)이다. $600B TAM의 중심에 서 있다."</td></tr>
+      <tr><td style="font-weight:600;color:var(--accent);">Gina Mastantuono</td><td>"모든 가이던스 상단을 초과했다. 중동 딜 지연 75bp는 지연이지 손실이 아니다. Armis는 단기 마진을 희생하지만 TAM을 대폭 확장한다."</td></tr>
+      <tr><td style="font-weight:600;color:var(--yellow);">애널리스트 시장</td><td>"Beat는 맞다. 그런데 유기적 가이던스 상향 없고, Armis 마진 압박, 중동 리스크 &mdash; AI 인플렉션 포인트가 아직 안 왔다. 증명하라."</td></tr>
+      <tr><td style="font-weight:600;color:var(--red);">주가 반응</td><td>장후 -12~14%. 익일 추가 하락. 고점 대비 누적 -51% 구간. 실적 비트에도 시장은 "다음 분기 유기적 가속"을 요구 중.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="kpi-note" style="margin-top:16px;">
+    <strong>투자자를 위한 핵심 판단 기준:</strong> Q2 2026에서 확인할 것 3가지 — (1) cRPO 성장률이 21% CC를 유지/가속하는가, (2) Now Assist ACV가 $1.5B 궤도에 있다는 증거 (고객수, 딜 크기), (3) Armis 통합 비용이 가이던스 내에서 통제되는가. 이 세 가지 중 두 개 이상 충족하면 밸류에이션 리레이팅 재개 가능.
+  </div>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid">
+    <a class="link-card" href="https://investor.servicenow.com/news/news-details/2026/ServiceNow-Reports-First-Quarter-2026-Financial-Results/default.aspx" target="_blank">
+      <div class="link-icon">&#x1F4C4;</div>
+      <div class="link-text"><div class="link-title">IR 보도자료 (공식)</div><div class="link-url">investor.servicenow.com</div></div>
+    </a>
+    <a class="link-card" href="https://s205.q4cdn.com/916135447/files/doc_financials/2026/q1/Q1-2026-Fact-Sheet.pdf" target="_blank">
+      <div class="link-icon">&#x1F4CA;</div>
+      <div class="link-text"><div class="link-title">Q1 2026 Fact Sheet (PDF)</div><div class="link-url">q4cdn.com — 공식 팩트시트</div></div>
+    </a>
+    <a class="link-card" href="https://s205.q4cdn.com/916135447/files/doc_financials/2026/q1/ER-Q1-FY26.pdf" target="_blank">
+      <div class="link-icon">&#x1F4C8;</div>
+      <div class="link-text"><div class="link-title">실적 발표 원문 (PDF)</div><div class="link-url">q4cdn.com — ER-Q1-FY26</div></div>
+    </a>
+    <a class="link-card" href="https://www.fool.com/earnings/call-transcripts/2026/04/22/servicenow-now-q1-2026-earnings-transcript/" target="_blank">
+      <div class="link-icon">&#x1F3AC;</div>
+      <div class="link-text"><div class="link-title">컨콜 전문 트랜스크립트</div><div class="link-url">fool.com — Motley Fool</div></div>
+    </a>
+    <a class="link-card" href="https://www.cnbc.com/2026/04/22/servicenow-now-earnings-q1-2026.html" target="_blank">
+      <div class="link-icon">&#x1F4FA;</div>
+      <div class="link-text"><div class="link-title">CNBC 주가 반응 분석</div><div class="link-url">cnbc.com — "stock sinks 14%"</div></div>
+    </a>
+    <a class="link-card" href="https://www.tikr.com/blog/servicenow-q1-2026-revenue-beats-but-ai-inflection-still-coming" target="_blank">
+      <div class="link-icon">&#x1F50E;</div>
+      <div class="link-text"><div class="link-title">TIKR 심층 분석</div><div class="link-url">tikr.com — AI Inflection 분석</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-04-29 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>

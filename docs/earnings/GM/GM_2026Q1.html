@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GM | 제너럴 모터스 Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #5b8def; --accent-dim: #5b8def33;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#1d428a18,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #5b8def44; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  /* WARNING BOX */
+  .warning-box { background:#ffc10710; border:1px solid #ffc10744; border-left:3px solid var(--yellow); border-radius:0 8px 8px 0; padding:16px 20px; margin:16px 0 24px; font-size:13px; line-height:1.7; }
+  .warning-box .warn-title { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--yellow); margin-bottom:8px; font-weight:700; }
+  .warning-box ul { padding-left:16px; color:var(--text-dim); }
+  .warning-box ul li { margin-bottom:4px; }
+  .warning-box strong { color:var(--yellow); }
+
+  /* CARDS */
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--accent); }
+  .negative { color:var(--red); }
+
+  /* KPI TIER */
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#5b8def22; color:var(--accent); }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  /* QUOTE */
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  /* TONE METER */
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  /* NEXT Q */
+  .next-q { background:linear-gradient(135deg,#5b8def10,var(--surface)); border:1px solid #5b8def33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--accent); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--accent); }
+
+  /* LINKS */
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  /* TAGS */
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  /* KPI NOTE */
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NYSE: GM</div>
+    <h1>General Motors</h1>
+    <div class="company-kr">제너럴 모터스</div>
+    <div class="subtitle">Q1 FY2026 실적 딥다이브 &mdash; 2026.04.28 장전 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-04-28</span>
+      <span>|</span>
+      <span>섹터: 자동차 / 이동성</span>
+      <span>|</span>
+      <span>시가총액: ~$450억</span>
+      <span>|</span>
+      <span>주가 반응: +1.3% (장중 +4%)</span>
+    </div>
+    <div class="verdict beat">BEAT &mdash; EPS adj. $3.70 vs 컨센 $2.62 (+41.2%) / 매출 $43.62B vs $43.54B (+0.2%)</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 일회성 항목 경고 ===== -->
+<div class="warning-box">
+  <div class="warn-title">일회성 항목 경고 &mdash; Adj. EPS 해석 주의</div>
+  <ul>
+    <li><strong>관세 환급 +$500M</strong> &mdash; 대법원 IEEPA 관세 판결에 따른 회계 조정. GMNA 마진에 1.5%p 순효과. 제거 시 underlying EBIT 마진은 8.6%</li>
+    <li><strong>EV 구조조정 -$1.1B</strong> &mdash; 전기차 생산 축소에 따른 공급업체 계약 해지 비용 (특별 항목). GAAP EPS에 반영, adj. EPS에서 제외</li>
+    <li>두 항목 합산 순효과는 약 -$0.6B (관세 +$500M - EV 구조조정 $1.1B). <strong>adj. EPS 비교 시 관세 환급분을 항상 보정해서 볼 것.</strong></li>
+  </ul>
+</div>
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">총 매출</div>
+      <div class="value">$43.62B</div>
+      <div class="compare">컨센서스: $43.54B <span class="beat-tag">BEAT +0.2%</span></div>
+      <div class="compare">전년비: -0.9% (Q1 2025: $44.0B)</div>
+    </div>
+    <div class="num-card">
+      <div class="label">Adj. EPS (희석)</div>
+      <div class="value" style="color:var(--accent);">$3.70</div>
+      <div class="compare">컨센서스: $2.62 <span class="beat-tag">BEAT +41.2%</span></div>
+      <div class="compare">GAAP EPS: $2.82 (vs 컨센 $2.54)</div>
+    </div>
+    <div class="num-card">
+      <div class="label">Adj. EBIT</div>
+      <div class="value">$3.49B</div>
+      <div class="compare">EBIT 마진: 8.0%</div>
+      <div class="compare">전년비: +4.8%</div>
+    </div>
+  </div>
+
+  <h3>세그먼트별 매출 분해</h3>
+  <table>
+    <thead><tr><th>세그먼트</th><th>Q1 2026 매출</th><th>EBIT adj.</th><th>전년비 / 시그널</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>GM North America (GMNA)</strong></td>
+        <td class="mono">$36.4B</td>
+        <td class="mono positive">$3,661M (마진 10.1%)</td>
+        <td><span class="kw-tag bullish">관세 환급 +1.5%p 포함</span></td>
+      </tr>
+      <tr>
+        <td><strong>GM International (GMI)</strong></td>
+        <td class="mono">$2.9B</td>
+        <td class="mono positive">$123M</td>
+        <td><span class="kw-tag bullish">6분기 연속 중국 흑자</span></td>
+      </tr>
+      <tr>
+        <td><strong>GM Financial (GMF)</strong></td>
+        <td class="mono">$4.27B</td>
+        <td class="mono positive">EBT $835M</td>
+        <td><span class="kw-tag neutral-tag">+2.6% YoY 안정</span></td>
+      </tr>
+      <tr>
+        <td><strong>Cruise (AV)</strong></td>
+        <td class="mono">&mdash;</td>
+        <td class="mono negative">GMNA에 통합</td>
+        <td><span class="kw-tag bearish">로보택시 종료, AV팀 통합</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="next-q">
+    <h3>FY2026 가이던스 (상향)</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">Adj. EBIT 가이던스</div><div class="nq-value">$13.5~15.5B</div></div>
+      <div class="next-q-item"><div class="nq-label">Adj. EPS 가이던스</div><div class="nq-value">$11.50~13.50</div></div>
+      <div class="next-q-item"><div class="nq-label">Auto FCF 가이던스</div><div class="nq-value">$9~11B</div></div>
+    </div>
+  </div>
+
+  <div class="kpi-note" style="margin-top:16px;">
+    <strong>가이던스 해석:</strong> FY2026 가이던스는 Q1 관세 환급 $500M을 반영해 이전 대비 $500M 상향한 것. 관세 환급 제거 시 실질 가이던스 상향폭은 0. 단, 잔여 관세 비용 가이던스가 $3~4B에서 $2.5~3.5B으로 축소된 점은 실질 개선이다.
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>자동차 회사를 읽는 숫자들</h2>
+
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 총 인도량 + EBIT 마진</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>GMNA 도매 인도량</strong></td>
+        <td class="mono">793,000대</td>
+        <td class="mono negative">-4.1% (Q1 2025: 827,000대)</td>
+        <td>북미 볼륨이 수익의 90%+를 결정. 가격×볼륨 = 매출 방정식</td>
+      </tr>
+      <tr>
+        <td><strong>GMI 도매 인도량</strong></td>
+        <td class="mono">106,000대</td>
+        <td class="mono positive">+24.7% (Q1 2025: 85,000대)</td>
+        <td>중국 외 신흥시장 회복 시그널. 중국은 JV 구조라 별도</td>
+      </tr>
+      <tr>
+        <td><strong>GMNA Adj. EBIT 마진</strong></td>
+        <td class="mono positive" style="font-size:18px; font-weight:700;">10.1%</td>
+        <td class="mono positive">(underlying 8.6%)</td>
+        <td>GM 경영진이 선언한 FY 목표 8~10%. 관세 환급 포함이지만 달성 궤도</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>Underlying 마진 계산:</strong> GMNA EBIT 마진 10.1% - 관세 환급 1.5%p = 8.6%. 목표 하단(8%)은 상회하지만 관세 환급 없이도 유지될지가 핵심 질문. 볼륨이 -4%인데 마진이 유지된 것은 트럭/SUV 믹스 덕분.
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">EV 전환 &mdash; 이 회사의 미래 베팅</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>EV 총 인도량</strong></td>
+        <td class="mono">25,900대</td>
+        <td>Q4 2025 대비 소폭 증가. 목표 대비 축소 궤도. EV 시장 6% 정체</td>
+      </tr>
+      <tr>
+        <td><strong>Equinox EV</strong></td>
+        <td class="mono positive">9,589대 (EV 중 37%)</td>
+        <td>GM EV의 볼륨 엔진. 가성비 포지셔닝. Ultium 배터리 채택</td>
+      </tr>
+      <tr>
+        <td><strong>Silverado EV</strong></td>
+        <td class="mono negative">1,406대 (-41% YoY)</td>
+        <td>트럭 EV 수요 부진. 기존 ICE 실버라도와 내부 경쟁 중</td>
+      </tr>
+      <tr>
+        <td><strong>EV 구조조정 비용</strong></td>
+        <td class="mono negative">-$1.1B (특별 항목)</td>
+        <td>공급업체 계약 해지 비용. 2025년 전체 $7.6B에 추가. EV 감속의 대가</td>
+      </tr>
+      <tr>
+        <td><strong>EV 손익</strong></td>
+        <td class="mono">적자 지속, 축소 중</td>
+        <td>볼륨 감소 + 비용 절감으로 단위 손실 개선. 정확한 수치 미공개</td>
+      </tr>
+      <tr>
+        <td><strong>미국 EV 시장 점유율</strong></td>
+        <td class="mono positive">13% (3월 기준)</td>
+        <td>12월 10%에서 상승. 테슬라에 이은 2위권 경쟁</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>EV 전략 전환:</strong> GM은 전기차 전량 전환 대신 "시장이 준비될 때까지 ICE+하이브리드 병행" 전략으로 선회. EV 볼륨 목표를 하향하면서 수익성을 먼저 확보하는 방향. 신형 Bolt EV는 Ultium 원가로 "첫날부터 흑자" 구조라고 경영진이 언급.
+  </div>
+
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">ICE 사업 &mdash; 현재 수익의 엔진</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>픽업트럭 시장 점유율</strong></td>
+        <td class="mono positive">42% (Full-size)</td>
+        <td>미국 대형 픽업 1위. Chevy Silverado + GMC Sierra. 고ASP + 고마진</td>
+      </tr>
+      <tr>
+        <td><strong>크로스오버 믹스</strong></td>
+        <td class="mono positive">46%+ (매출 내 비중)</td>
+        <td>2023년 40%에서 확대. Trax, Equinox가 볼륨 기여. 실버라도급은 아니지만 성장 중</td>
+      </tr>
+      <tr>
+        <td><strong>재고 일수 (Dealer Days)</strong></td>
+        <td class="mono">약 47일 (Q2 초)</td>
+        <td>경영진 목표 50~60일. 현재 하단에 근접. 타이트한 재고 = 할인 억제 = ATP 방어</td>
+      </tr>
+      <tr>
+        <td><strong>플릿 / 상업용 판매</strong></td>
+        <td class="mono positive">#1 (미국 내)</td>
+        <td>렌터카·정부·기업 수요. 안정적 볼륨 기반이지만 마진은 소매보다 낮음</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>ATP(평균 거래가격):</strong> 정확한 Q1 수치 미공개. 단, 재고 47일로 타이트하게 유지 중 → 딜러 인센티브 최소화 → ATP 방어 가능 환경. 관세 불확실성으로 소비자 선구매 수요가 2분기까지 이어질 수 있음.
+  </div>
+
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">재무 건전성 &mdash; 현금흐름 + 자본배분</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Auto FCF (Adj.)</strong></td>
+        <td class="mono positive">$1.27B</td>
+        <td class="mono positive">+56.4% (Q1 2025: $811M)</td>
+        <td>FY 가이던스 $9~11B의 하반기 집중. Q1은 계절적 약세임에도 개선</td>
+      </tr>
+      <tr>
+        <td><strong>자사주 매입</strong></td>
+        <td class="mono">$800M (약 1,100만주)</td>
+        <td class="mono">&mdash;</td>
+        <td>평균 매입가 $75.02. "현재 밸류에이션에서 자사주 매입이 최선의 자본 배분"</td>
+      </tr>
+      <tr>
+        <td><strong>배당금</strong></td>
+        <td class="mono">$164M ($0.18/주)</td>
+        <td class="mono">&mdash;</td>
+        <td>분기 배당 유지. 배당 수익률 낮지만 안정적</td>
+      </tr>
+      <tr>
+        <td><strong>순이익 (GAAP)</strong></td>
+        <td class="mono">$2.6B</td>
+        <td class="mono positive">GAAP EPS $2.82 vs 컨센 $2.54</td>
+        <td>EV 구조조정 비용 $1.1B 포함한 GAAP 기준으로도 Beat</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">리스크 &mdash; 숨어있는 지뢰</span>
+  </div>
+  <table>
+    <thead><tr><th>리스크 항목</th><th>현황</th><th>등급</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>관세 영향 (FY2026)</strong></td>
+        <td>그로스 비용 $2.5~3.5B 예상. Q1 환급 $500M 제외한 순 비용. 미국산 비중 확대로 부분 완충</td>
+        <td><span class="kw-tag bearish">HIGH</span></td>
+      </tr>
+      <tr>
+        <td><strong>EV 구조조정 비용 누적</strong></td>
+        <td>2025 $7.6B + 2026 Q1 $1.1B. 전기차 감속의 누적 대가. 향후 추가 가능성</td>
+        <td><span class="kw-tag bearish">HIGH</span></td>
+      </tr>
+      <tr>
+        <td><strong>중국 시장</strong></td>
+        <td>6분기 연속 흑자 유지. "2025 수준 유지" 가이던스. 경쟁 심화 + 지정학 리스크 상존</td>
+        <td><span class="kw-tag neutral-tag">MEDIUM</span></td>
+      </tr>
+      <tr>
+        <td><strong>Cruise 자율주행</strong></td>
+        <td>로보택시 사업 종료. GM/Cruise AV팀 통합. 향후 방향성 불투명. 자율주행 지연 위험</td>
+        <td><span class="kw-tag neutral-tag">MEDIUM</span></td>
+      </tr>
+      <tr>
+        <td><strong>가이던스 불확실성</strong></td>
+        <td>"관세 정책에 따라 조정 가능" 단서 조항. 관세 재변동 시 가이던스 의미 희석</td>
+        <td><span class="kw-tag neutral-tag">MEDIUM</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter">
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:88%;background:var(--accent);"></div></div>
+      <div class="tone-score">8.8<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:65%;background:var(--yellow);"></div></div>
+      <div class="tone-score">6.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 회의감</div>
+      <div class="tone-bar"><div class="fill" style="width:72%;background:var(--red);"></div></div>
+      <div class="tone-score">7.2<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">전망 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:60%;background:var(--blue);"></div></div>
+      <div class="tone-score">6.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Mary Barra (회장 겸 CEO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 실적 자신감 + 관세 불확실성에 대한 절제된 낙관. "훌륭한 팀이 훌륭한 분기를 만들었다" 서사. 구조조정 비용은 언급하되 미래 수익성 서사로 빠르게 전환.
+  </p>
+
+  <div class="keywords">
+    <span class="kw-tag bullish">OUTSTANDING QUARTER</span>
+    <span class="kw-tag bullish">STEADFAST EXECUTION</span>
+    <span class="kw-tag bullish">MOMENTUM</span>
+    <span class="kw-tag bullish">DIGITAL SERVICES</span>
+    <span class="kw-tag neutral-tag">TARIFF UNCERTAINTY</span>
+    <span class="kw-tag bearish">EV RESET</span>
+    <span class="kw-tag neutral-tag">CHINA PROFITABLE</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Mary Barra &mdash; 오프닝</div>
+    <blockquote>"Once again, thanks to our strategic product portfolio and great execution by the GM team, including our dealers and suppliers, we delivered an outstanding quarter. I couldn't be more proud of the team's efforts and our results."</blockquote>
+    <div class="analysis"><strong>"Once again"</strong> &mdash; 1분기만의 이야기가 아니라 연속성을 강조. "team, dealers, suppliers" 3자 동시 언급은 공급망 리스크를 분산시키는 레토릭. "outstanding"은 과장처럼 보이지만 EPS +41% Beat를 감안하면 방어 가능한 표현.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Mary Barra &mdash; 관세 전략</div>
+    <blockquote>"We remain steadfast in our desire to get these claims resolved quickly and fairly for our business partners and our shareholders. Our gross tariff costs are now expected to be $2.5B to $3.5B for the year, down from $3B to $4B."</blockquote>
+    <div class="analysis"><strong>"steadfast"</strong> &mdash; 관세 협상에서 GM이 수동적 피해자가 아닌 능동적 협상 주체임을 선언. 그로스 비용 범위 하향은 Q1 환급 $500M의 수학적 조정이므로 실질 관세 부담이 줄었다는 의미는 아님. 가이던스의 관세 가정 불확실성을 인정하면서도 "수치화"해서 제어 가능한 것처럼 보이게 함.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Mary Barra &mdash; EV 전략</div>
+    <blockquote>"For EVs, we expect volumes to be lower as the market shows early signs of stabilizing around 6% of US industry sales... The new Bolt will make money from day one on a production cost basis since the Ultium battery and drivetrain are much lower cost."</blockquote>
+    <div class="analysis">EV 볼륨 목표 하향을 <strong>"시장이 6%에서 안정화"</strong>라는 외부 요인으로 프레이밍 &mdash; GM의 전략 실패가 아닌 시장 탓. "make money from day one"은 강력한 언약. 2023~2025년 EV 손실에 지쳐있는 투자자에게 Bolt EV를 수익 전환점으로 포지셔닝.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Mary Barra &mdash; 중국 + 디지털 서비스</div>
+    <blockquote>"Complementing GM North America's performance was the sixth consecutive profitable quarter in China and higher year-over-year results in GMI excluding China... digital services are playing an increasingly important role in our success."</blockquote>
+    <div class="analysis">6분기 연속 흑자를 <strong>구체적 숫자(6회)</strong>로 고정 &mdash; 투자자가 기억하도록 설계. "digital services"는 OnStar, 구독 소프트웨어. 하드웨어 마진 압박을 소프트웨어로 보완하는 장기 서사의 시작점 제시.</div>
+  </div>
+
+  <h3>Paul Jacobson (CFO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 수치 방어 전문가. 일회성 항목 분리 + "underlying" 강조로 노이즈와 신호를 분리. 가이던스 신중 유지.
+  </p>
+
+  <div class="quote-block">
+    <div class="speaker">Paul Jacobson &mdash; 관세 환급 설명</div>
+    <blockquote>"The first quarter achieved an EBIT-adjusted margin of 10.1%, including 1.5 points of benefit from the accounting adjustment resulting from the recent Supreme Court tariff decision. Excluding that adjustment, our underlying EBIT margin was approximately 8.6%."</blockquote>
+    <div class="analysis">CFO가 직접 <strong>"excluding that adjustment, underlying margin 8.6%"</strong>라고 명시한 것은 드문 투명성. 10.1%로 헤드라인을 잡으면서도 8.6%를 동시 제시 &mdash; 월가가 혼동하지 않도록. 8.6%는 FY 목표 8~10%의 하단. 관세 없이도 목표 달성 가능하다는 자신감 표현.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Paul Jacobson &mdash; FCF + 자본 배분</div>
+    <blockquote>"Adjusted automotive free cash flow rose to $1.269B, up 56.4% year-over-year... We repurchased approximately 11 million shares at an average price of $75.02 per share for approximately $800M... We believe repurchasing GM stock at the current valuation remains one of the most effective ways to deploy capital."</blockquote>
+    <div class="analysis">"at the current valuation" &mdash; CFO의 밸류에이션 판단 내포. $75 주가에 자사주 매입 = "우리 주식이 싸다"는 내부 시그널. FCF 56% YoY 성장은 인상적이지만 하반기 집중 패턴을 고려하면 FY $9~11B 목표의 1Q 기여는 약 12% 수준으로 낮음.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> "좋은 숫자지만 관세 환급 빼면 얼마냐?" 반복 질문. 가이던스 신뢰성에 집중.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 (복수) &mdash; 핵심 질문</div>
+    <blockquote>
+      "Can you walk us through what the underlying EBIT margin looks like excluding the tariff adjustment?"<br><br>
+      "How should we think about tariff exposure in the back half if policy changes again?"<br><br>
+      "Given the $1.1B EV restructuring, when does GM's EV segment reach breakeven?"
+    </blockquote>
+    <div class="analysis"><strong>3개 질문 모두 같은 방향:</strong> "일회성 제거 후 진짜 숫자가 뭐냐." 관세 환급 $500M과 EV 비용 $1.1B의 net은 -$600M이므로 숫자가 보이는 것보다 나쁠 수 있다는 의심. CFO가 8.6% underlying을 먼저 밝혔지만 질문이 반복된 것은 시장이 추가 설명을 원했다는 뜻.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">시장 반응 &mdash; 주가 +1.3% (장중 +4%)</div>
+    <blockquote>"GM raises 2026 guidance amid $500M tariff refund, topping Wall Street earnings expectations — stock briefly surged 4% before paring gains." (CNBC, 2026-04-28)</blockquote>
+    <div class="analysis">장중 +4%가 +1.3%로 축소된 것이 핵심 시그널. 헤드라인 Beat에 먼저 반응했다가 <strong>관세 환급 $500M이 일회성임을 인식하면서 차익실현.</strong> 시장이 adj. EPS $3.70을 액면 그대로 받아들이지 않았다는 증거. 연간 가이던스가 실질 상향이 아니라 환급 반영이라는 걸 투자자들이 파악한 것.</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr><td style="width:160px;font-weight:600;color:var(--accent);">Mary Barra</td><td>"트럭이 돈 벌고, 관세 환급받고, 중국도 흑자. EV는 재설정 중이지만 Bolt는 처음부터 돈 번다"</td></tr>
+      <tr><td style="font-weight:600;color:var(--accent);">Paul Jacobson</td><td>"관세 환급 빼도 8.6% 마진. FCF +56%. 우리 주식 싸서 자사주 더 샀다"</td></tr>
+      <tr><td style="font-weight:600;color:var(--yellow);">애널리스트</td><td>"숫자는 좋은데 관세 환급 빼면? EV 구조조정 비용 더 나올 거냐? 가이던스 믿어도 되냐?"</td></tr>
+      <tr><td style="font-weight:600;color:var(--red);">시장 반응</td><td>장중 +4% &rarr; 마감 +1.3%. 환급 일회성 인식 + 차익실현. 낙관이지만 온전한 신뢰는 아님.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid">
+    <a class="link-card" href="https://investor.gm.com/news-releases/news-release-details/q1-2026-letter-shareholders" target="_blank">
+      <div class="link-icon">&#x1F4C4;</div>
+      <div class="link-text"><div class="link-title">Q1 2026 주주서한</div><div class="link-url">investor.gm.com</div></div>
+    </a>
+    <a class="link-card" href="https://investor.gm.com/static-files/fa689555-e0aa-4c5c-be5c-fba9c1d9049f" target="_blank">
+      <div class="link-icon">&#x1F4CA;</div>
+      <div class="link-text"><div class="link-title">Q1 2026 실적 슬라이드 (PDF)</div><div class="link-url">investor.gm.com &mdash; Earnings Deck</div></div>
+    </a>
+    <a class="link-card" href="https://investor.gm.com/static-files/ad646529-cae6-43b3-9502-848ba44f8ea9" target="_blank">
+      <div class="link-icon">&#x1F4C8;</div>
+      <div class="link-text"><div class="link-title">Q1 2026 보도자료 + 재무제표</div><div class="link-url">investor.gm.com &mdash; Press Release</div></div>
+    </a>
+    <a class="link-card" href="https://www.fool.com/earnings/call-transcripts/2026/04/28/gm-q1-2026-earnings-call-transcript/" target="_blank">
+      <div class="link-icon">&#x1F3AC;</div>
+      <div class="link-text"><div class="link-title">컨콜 트랜스크립트 (Motley Fool)</div><div class="link-url">fool.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.cnbc.com/2026/04/28/general-motors-gm-earnings-q1-2026.html" target="_blank">
+      <div class="link-icon">&#x1F4F0;</div>
+      <div class="link-text"><div class="link-title">CNBC 실적 커버리지</div><div class="link-url">cnbc.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.tikr.com/blog/general-motors-q1-2026-earnings-eps-beats-by-40-as-ev-losses-shrink" target="_blank">
+      <div class="link-icon">&#x1F50E;</div>
+      <div class="link-text"><div class="link-title">TIKR 딥다이브 (EV 손실 분석)</div><div class="link-url">tikr.com</div></div>
+    </a>
+    <a class="link-card" href="https://gmauthority.com/blog/2026/04/gm-ev-sales-numbers-figures-results-first-quarter-2026-q1/" target="_blank">
+      <div class="link-icon">&#x26A1;</div>
+      <div class="link-text"><div class="link-title">GM EV 판매 상세 (GM Authority)</div><div class="link-url">gmauthority.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.investing.com/news/transcripts/earnings-call-transcript-gm-q1-2026-earnings-beat-forecasts-stock-dips-93CH-4641851" target="_blank">
+      <div class="link-icon">&#x1F4DD;</div>
+      <div class="link-text"><div class="link-title">컨콜 트랜스크립트 (Investing.com)</div><div class="link-url">investing.com</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-04-30 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>

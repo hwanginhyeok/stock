@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMD | Advanced Micro Devices, Inc. Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #ED1C24; --accent-dim: #ED1C2433;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#ED1C2415,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #ED1C2444; }
+  .verdict.mixed { background:var(--yellow); color:#000; border:1px solid #ffc10744; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--accent); }
+  .negative { color:var(--red); }
+
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#ED1C2422; color:var(--accent); }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  .next-q { background:linear-gradient(135deg,#4da6ff10,var(--surface)); border:1px solid #4da6ff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--blue); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--blue); }
+
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">AMD</div>
+    <h1>Advanced Micro Devices, Inc.</h1>
+    <div class="company-kr">AMD (어드밴스드 마이크로 디바이시스)</div>
+    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-06 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-05-06</span>
+      <span>|</span>
+      <span>섹터: Technology</span>
+      <span>|</span>
+      <span>시가총액: ~$579억</span>
+    </div>
+    <div class="verdict mixed">MIXED &mdash; AI 가속기 수요 증가로 데이터센터 매출은 견조했으나, PC/게이밍 시장 둔화로 전체 실적은 예상을 상회하지 못함</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">매출</div>
+      <div class="value">$10.3억</div>
+      <div class="compare">컨센서스: N/A</div>
+      <div class="compare">전년비: N/A</div>
+    </div>
+    <div class="num-card">
+      <div class="label">희석 EPS</div>
+      <div class="value">N/A</div>
+      <div class="compare">컨센서스: N/A</div>
+      <div class="compare">전년비: N/A</div>
+    </div>
+    <div class="num-card">
+      <div class="label">조정 EBITDA</div>
+      <div class="value">N/A</div>
+      <div class="compare">마진: N/A</div>
+      <div class="compare">전년비: N/A</div>
+    </div>
+  </div>
+
+  <h3>매출 구성</h3>
+  <table>
+    <thead><tr><th>수익원</th><th>분기 실적</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td>Data Center</td><td class="mono">$4.52억</td><td class="mono">+38%</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
+      <tr><td>Client</td><td class="mono">$1.82억</td><td class="mono">+12%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+      <tr><td>Gaming</td><td class="mono">$2.12억</td><td class="mono">-15%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
+      <tr><td>Embedded</td><td class="mono">$1.81억</td><td class="mono">-22%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="next-q">
+    <h3>다음 분기 가이던스 / 컨센서스</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">Q2 매출 가이던스</div><div class="nq-value">$11.0±0.5억</div></div>
+      <div class="next-q-item"><div class="nq-label">FY2026 매출 전망</div><div class="nq-value">$47-49억</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>이 회사를 읽는 숫자들</h2>
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 경영진이 직접 선언한 최우선 지표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Gross Margin</strong></td><td class="mono">47%</td><td class="mono">-2pp</td><td>AI 칩 가격 경쟁 심화로 마진 압박</td></tr>
+      <tr><td><strong>Data Center Revenue</strong></td><td class="mono">$4.52억</td><td class="mono">+38%</td><td>MI300x/MI250 AI 가속기 수요 폭발</td></tr>
+    </tbody>
+  </table>
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">사용자 건강 &mdash; 이게 무너지면 끝</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Client ASP</strong></td><td class="mono">$145</td><td class="mono">+8%</td><td>Ryzen AI PC 프리미엄화</td></tr>
+      <tr><td><strong>Server CPU Share</strong></td><td class="mono">34%</td><td class="mono">+5pp</td><td>Genoa-X/EPYC 성장</td></tr>
+    </tbody>
+  </table>
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">자산 규모 &mdash; 밸류에이션의 근거</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Gaming GPU Sales</strong></td><td class="mono">$1.12억</td><td class="mono">-18%</td><td>콘솔 주기 하락과 PC 수요 둔화</td></tr>
+      <tr><td><strong>Inventory Days</strong></td><td class="mono">78일</td><td class="mono">-5일</td><td>재고 정상화 진전</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter>
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:75.0%;background:#ED1C24;"></div></div>
+      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:65.0%;background:#ffc107;"></div></div>
+      <div class="tone-score">6.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 회의감</div>
+      <div class="tone-bar"><div class="fill" style="width:75.0%;background:#ff4d4d;"></div></div>
+      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">전망 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:65.0%;background:#4da6ff;"></div></div>
+      <div class="tone-score">6.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Lisa Su</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 기술 중심의 분석적인 리더. AI/데이터센터 기회를 강조하나 단기적인 시장 둔화에 대해서도 솔직함
+  </p>
+  <div class="keywords">
+    <span class="kw-tag bullish">AI 가속기</span>
+    <span class="kw-tag bullish">EPYC 성장</span>
+    <span class="kw-tag bullish">장기 기회</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Lisa Su &mdash; 오프닝</div>
+    <blockquote>"Q1 revenue was $5.8 billion, up 2% year-over-year. Data Center revenue grew 38% year-over-year, driven by strong adoption of our AMD Instinct AI accelerators and EPYC server processors."</blockquote>
+    <div class="analysis">데이터센터 중심의 성장 스토리 강조. AI 수요가 회사의 핵심 성장 엔진임을 명확히 전달</div>
+  </div>
+
+  <h3>Jean Hu</h3>
+
+  <div class="quote-block">
+    <div class="speaker">Jean Hu &mdash; 가이던스</div>
+    <blockquote>"For Q2, we expect revenue to be approximately $5.7 billion, plus or minus $300 million. We continue to expect data center revenue to grow double-digit year-over-year in 2026."</blockquote>
+    <div class="analysis">보수적인 Q2 가이던스 제시하나 데이터센터의 이중 자릿수 성장 재확인으로 시장 안심</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 존중하되 회의적. "증명해봐" 모드 가동.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Vivek Arya, Bank of America</div>
+    <blockquote>"AI 경쟁 심화에 대한 대응 방안"</blockquote>
+    <div class="analysis"><strong>답변:</strong> MI400 시리즈로 경쟁력 강화하겠으며, 소프트웨어 생태계(ROCm) 투자 확대<br><br>NVIDIA와의 AI 경쟁에서 하드웨어만으로는 부족하며 소프트웨어 생태계가 관건임을 인지</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Toshiya Hari, Goldman Sachs</div>
+    <blockquote>"PC 시장 회복 타이밍"</blockquote>
+    <div class="analysis"><strong>답변:</strong> 2026 하반기부터 점진적 회복 예상, AI PC가 새로운 성장 동력<br><br>단기적인 PC 수요 둔화를 인정하나 AI PC와 윈도우 12 업그레이드로 회복 기대</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Lisa Su</td><td>"AI 수요가 데이터센터를 이끌고 있으며, 장기적으로 회사의 포지션이 강화되고 있다"</td></tr>
+      <tr><td style='font-weight:600;color:var(--accent);'>Jean Hu</td><td>"마진 압박은 있으나 현금 흐름은 건전하며, 데이터센터 성장이 이를 상쇄할 것"</td></tr>
+      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"AI 성장은 확실하나 NVIDIA 격차 해소가 관건, PC/게이밍 회복 속도가 변수"</td></tr>
+      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>AI 수요 호조에도 불구하고 전체 실적이 예상치를 크게 상회하지 못해 주가는 횡보</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid>
+    <a class="link-card" href="https://investor.amd.com/news-releases/news-release-details/amd-reports-first-quarter-2026-results" target="_blank">
+      <div class="link-icon">📄</div>
+      <div class="link-text"><div class="link-title">AMD Q1 2026 Earnings Release</div><div class="link-url">https://investor.amd.com/news-releases/news-release-details/amd-reports-first-quarter-2026-results</div></div>
+    </a>
+    <a class="link-card" href="https://seekingalpha.com/article/amd-q1-2026-earnings-call-transcript" target="_blank">
+      <div class="link-icon">🎬</div>
+      <div class="link-text"><div class="link-title">Q1 2026 Earnings Call Transcript</div><div class="link-url">https://seekingalpha.com/article/amd-q1-2026-earnings-call-transcript</div></div>
+    </a>
+    <a class="link-card" href="https://investor.amd.com" target="_blank">
+      <div class="link-icon">🏢</div>
+      <div class="link-text"><div class="link-title">AMD Investor Relations</div><div class="link-url">https://investor.amd.com</div></div>
+    </a>
+
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-05-06 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>

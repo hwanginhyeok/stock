@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BKNG | 부킹홀딩스 Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #4da6ff; --accent-dim: #4da6ff33;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#4da6ff15,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #4da6ff44; }
+  .verdict.mixed { background:#ffc10722; color:var(--yellow); border:1px solid #ffc10744; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  /* CARDS */
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--accent); }
+  .negative { color:var(--red); }
+
+  /* KPI TIER */
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#4da6ff22; color:var(--accent); }
+  .tier-badge.t2 { background:#00d63222; color:#00d632; }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  /* QUOTE */
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block.cfo { border-left-color:#b388ff; }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block.cfo .speaker { color:#b388ff; }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  /* TONE METER */
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  /* NEXT Q */
+  .next-q { background:linear-gradient(135deg,#4da6ff10,var(--surface)); border:1px solid #4da6ff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--blue); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--blue); }
+
+  /* LINKS */
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  /* TAGS */
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  /* KPI NOTE */
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+  /* REGION GRID */
+  .region-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:16px 0; }
+  .region-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; }
+  .region-card .region-name { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  .region-card .region-val { font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:700; }
+  .region-card .region-note { font-size:11px; color:var(--text-muted); margin-top:4px; }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NASDAQ: BKNG</div>
+    <h1>Booking Holdings</h1>
+    <div class="company-kr">부킹홀딩스</div>
+    <div class="subtitle">Q1 FY2026 실적 딥다이브 &mdash; 2026.04.28 장후 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-04-28</span>
+      <span>|</span>
+      <span>섹터: 소비재 / 온라인 여행 (OTA)</span>
+      <span>|</span>
+      <span>시가총액: ~$740억 (split-adjusted)</span>
+      <span>|</span>
+      <span>주식 분할: 25:1 (2026-04-02 발효)</span>
+    </div>
+    <div class="verdict beat">BEAT &mdash; 매출 +0.4% vs 컨센서스 / Adj. EPS +5.6% 상회</div>
+    <div class="verdict mixed" style="margin-left:8px;">GUIDANCE CUT &mdash; Q2 Room Night +2~4% / 중동 헤드윈드 하반기까지</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">매출</div>
+      <div class="value">$55.3억</div>
+      <div class="compare">컨센서스: $55.1억 <span class="beat-tag">BEAT +0.4%</span></div>
+      <div class="compare">전년비: +16.2% YoY</div>
+    </div>
+    <div class="num-card">
+      <div class="label">Adj. EPS (25:1 분할 반영)</div>
+      <div class="value">$1.14</div>
+      <div class="compare">컨센서스: $1.08 <span class="beat-tag">BEAT +5.6%</span></div>
+      <div class="compare">전년비: +14% YoY</div>
+    </div>
+    <div class="num-card">
+      <div class="label">Adj. EBITDA</div>
+      <div class="value">$13.0억</div>
+      <div class="compare">컨센서스: $12.5억 <span class="beat-tag">BEAT</span></div>
+      <div class="compare">마진: 23.5% / 전년비: +19%</div>
+    </div>
+  </div>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">Gross Bookings (총 예약액)</div>
+      <div class="value">$538억</div>
+      <div class="compare">전년비: +15% YoY</div>
+      <div class="compare">매출/GBV 비율: 10.3%</div>
+    </div>
+    <div class="num-card">
+      <div class="label">영업이익</div>
+      <div class="value">$13.0억</div>
+      <div class="compare">영업이익률: 23.5%</div>
+      <div class="compare">전년비: +19.7% YoY</div>
+    </div>
+    <div class="num-card">
+      <div class="label">주주환원 (역대 최대)</div>
+      <div class="value">$40억</div>
+      <div class="compare">자사주 매입: $36억</div>
+      <div class="compare">배당: $3억 / 주식 수 -4% YoY</div>
+    </div>
+  </div>
+
+  <h3>매출 구성 (Revenue Mix)</h3>
+  <table>
+    <thead><tr><th>수익원</th><th>Q1 2026</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Merchant Revenue</strong><br><span style="font-size:12px;color:var(--text-muted)">직접 결제 수취 모델</span></td>
+        <td class="mono">$36.98억</td>
+        <td class="mono positive">+24% YoY</td>
+        <td><span class="kw-tag bullish">HIGH GROWTH</span></td>
+      </tr>
+      <tr>
+        <td><strong>Agency Revenue</strong><br><span style="font-size:12px;color:var(--text-muted)">수수료 중개 모델</span></td>
+        <td class="mono">$15.28억</td>
+        <td class="mono">저성장</td>
+        <td><span class="kw-tag neutral-tag">MIX SHIFT</span></td>
+      </tr>
+      <tr>
+        <td><strong>Advertising &amp; Other</strong><br><span style="font-size:12px;color:var(--text-muted)">OpenTable, Kayak 등</span></td>
+        <td class="mono">$3.0억 (추정)</td>
+        <td class="mono">안정</td>
+        <td><span class="kw-tag neutral-tag">STEADY</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>Merchant Mix 확대:</strong> 머천트 GBV가 총 GBV의 약 72%를 차지 — 전년비 +5%p. 머천트 모델은 Booking.com이 결제를 직접 받고 숙박 시설에 정산하는 구조. Agency(전통 OTA)보다 취소율 관리·번들링·업셀 여지가 크다. 전략적으로 의도된 믹스 이동.
+  </div>
+
+  <div class="next-q" style="margin-top:32px;">
+    <h3>Q2 2026 가이던스 (보수적 제시)</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item">
+        <div class="nq-label">Room Night 성장률</div>
+        <div class="nq-value">+2~4%</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">Gross Bookings 성장률</div>
+        <div class="nq-value">+4~6%</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">매출 성장률</div>
+        <div class="nq-value">+4~6%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="next-q" style="margin-top:16px; background:linear-gradient(135deg,#ffc10710,var(--surface)); border-color:#ffc10733;">
+    <h3 style="color:var(--yellow);">FY2026 연간 가이던스</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item">
+        <div class="nq-label">Gross Bookings 성장</div>
+        <div class="nq-value" style="color:var(--yellow);font-size:17px;">High single ~ low double digits</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">매출 성장</div>
+        <div class="nq-value" style="color:var(--yellow);font-size:17px;">High single digits</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">Adj. EPS 성장</div>
+        <div class="nq-value" style="color:var(--yellow);font-size:17px;">Low~mid teens</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;font-size:12px;color:var(--text-muted);">
+      가정: 중동 갈등 영향 2026년 6월 말까지 지속 &rarr; 하반기 회복. AI 투자 $7억 집행 예정.
+    </div>
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>OTA를 읽는 숫자들</h2>
+
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; Gross Bookings &amp; Room Nights</span>
+    <span class="tier-desc">여행 플랫폼의 실질 규모</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Gross Bookings (GBV)</strong></td>
+        <td class="mono positive" style="font-size:18px;font-weight:700;">$538억</td>
+        <td class="mono positive">+15%</td>
+        <td>실제 여행자가 결제한 총액. 매출의 모 수(母數). GBV 성장 없으면 매출 성장도 없음</td>
+      </tr>
+      <tr>
+        <td><strong>Room Nights Booked</strong></td>
+        <td class="mono positive" style="font-size:18px;font-weight:700;">3.38억 박</td>
+        <td class="mono positive">+5.9%</td>
+        <td>숙박 예약 건수 = 플랫폼 이용량의 핵심 지표. Q2 가이던스는 +2~4%로 둔화 예고</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>왜 이 두 개가 중요한가:</strong> OTA의 본질은 여행자를 공급자에게 연결하는 규모의 게임. Room Night가 늘어야 숙박 수수료(Take Rate)가 쌓이고, GBV가 커야 머천트 결제 수수료가 늘어난다. 이 두 지표가 동시에 둔화하면 매출 성장 전망을 재검토해야 한다.
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">플랫폼 건강 &mdash; 멀티버티컬 성장</span>
+    <span class="tier-desc">호텔 이상의 여행 생태계</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>항공 티켓 판매</strong></td>
+        <td class="mono">2,100만 장</td>
+        <td class="mono positive" style="font-weight:700;">+28.5%</td>
+        <td>호텔보다 빠른 성장 = Connected Trip 전략의 실행 증거. 항공은 번들 앵커</td>
+      </tr>
+      <tr>
+        <td><strong>Merchant GBV 비중</strong></td>
+        <td class="mono">72% of total GBV</td>
+        <td class="mono positive">+5%p YoY</td>
+        <td>머천트 비중 상승 = 업셀·번들·AI 개인화 공간 확대. Agency는 취소 손실 위험 분산</td>
+      </tr>
+      <tr>
+        <td><strong>B2C 직접 채널 비중</strong></td>
+        <td class="mono">mid-60%대</td>
+        <td class="mono">4분기 연속 안정</td>
+        <td>구글 의존도 하락 = 마케팅 레버리지 개선 가능성. 직접 채널이 높을수록 CAC 절감</td>
+      </tr>
+      <tr>
+        <td><strong>미국 Room Night 성장</strong></td>
+        <td class="mono positive">Low teens</td>
+        <td class="mono positive">4분기 연속 가속</td>
+        <td>미국이 글로벌 성장을 이끄는 구조. 가장 수익성 높은 시장에서 점유율 확대 중</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>Connected Trip 전략의 핵심:</strong> 항공 +28.5%가 숙박 +5.9%를 크게 앞선다. 이것은 플랫폼이 단순 호텔 예약을 넘어 여정 전체(항공+숙박+렌터카+경험)를 커버하는 방향으로 이동 중이라는 증거. 번들 예약자는 이탈률이 낮고 LTV가 높다.
+  </div>
+
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">수익성 &mdash; 마진과 자본 효율</span>
+    <span class="tier-desc">성장보다 빠른 수익 개선</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Adj. EBITDA 마진</strong></td>
+        <td class="mono positive">23.5%</td>
+        <td class="mono positive">+50bp YoY</td>
+        <td>매출 성장보다 EBITDA 성장(+19%)이 빠름 = 운영 레버리지 실현</td>
+      </tr>
+      <tr>
+        <td><strong>매출 대비 GBV (Take Rate)</strong></td>
+        <td class="mono">10.3%</td>
+        <td class="mono">안정</td>
+        <td>100달러 예약에서 10.3달러를 수익으로 인식. 머천트 비중 증가가 Take Rate를 지지</td>
+      </tr>
+      <tr>
+        <td><strong>주주환원 총액</strong></td>
+        <td class="mono positive">$40억 (역대 최대)</td>
+        <td class="mono positive">기록 경신</td>
+        <td>자사주 $36억 + 배당 $3억. 4분기 연속 자사주 매입 = 주당 가치 방어 의지</td>
+      </tr>
+      <tr>
+        <td><strong>순이익 (GAAP)</strong></td>
+        <td class="mono positive">$11억</td>
+        <td class="mono positive">+225%</td>
+        <td>전년도 일회성 손실 제거 효과. 기저 효과 크지만 절대 레벨도 견조</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>AI 투자 $7억 vs 수익성:</strong> FY2026에 생성형 AI·에이전틱 여행 도구에 $7억 재투자 계획. 단기 마진 압박 요인이지만, 경영진은 "EBITDA가 매출보다 빠르게 성장"을 가이던스로 유지. AI 투자가 마케팅 효율화(B2C 직접 채널)로 상쇄한다는 논리.
+  </div>
+
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">AI / 혁신 &mdash; Connected Trip &amp; Generative AI</span>
+    <span class="tier-desc">미래 경쟁력의 씨앗</span>
+  </div>
+  <table>
+    <thead><tr><th>지표 / 이니셔티브</th><th>현황</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>AI 여행 도우미 (Trip Planner)</strong></td>
+        <td class="mono">베타 확장 중</td>
+        <td>자연어로 일정 기획 → 숙박+항공 즉시 예약. 구글/Perplexity 방어막이자 공세 도구</td>
+      </tr>
+      <tr>
+        <td><strong>Agentic Service Flows</strong></td>
+        <td class="mono">자동 취소·수정 처리</td>
+        <td>AI가 예약 후 변경·불만·취소를 자동 처리 = CS 비용 절감 + 고객 만족도 향상 동시 달성</td>
+      </tr>
+      <tr>
+        <td><strong>Penny (Priceline AI)</strong></td>
+        <td class="mono">멀티프로덕트 AI 어시스턴트</td>
+        <td>항공+호텔+렌터카를 대화형으로 동시 예약. OTA 번들 전환율 높이는 핵심 도구</td>
+      </tr>
+      <tr>
+        <td><strong>FY2026 AI 투자 예산</strong></td>
+        <td class="mono positive">$7억</td>
+        <td>생성형 AI + 에이전틱 투자 총액. 매출의 약 3%를 AI에 재투자. 경쟁 선점 의도</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>AI 디스럽션 vs AI 디펜스:</strong> OpenAI/Google/Perplexity의 AI 검색이 OTA 중개를 우회할 수 있다는 공포가 BKNG 밸류에이션을 누르는 주요 리스크. 이에 Booking은 자체 AI로 "내가 AI다"를 주장. 중요한 건 <strong>플랫폼 재고(3.3억 부동산, 140개국) + 리뷰 데이터</strong>는 AI 검색이 단기 복제 불가능한 해자.
+  </div>
+
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">매크로 &amp; 지정학 &mdash; 여행 수요 트렌드</span>
+    <span class="tier-desc">외생 변수가 가장 큰 리스크</span>
+  </div>
+
+  <h3>지역별 Room Night 성장 (Q1 2026)</h3>
+  <div class="region-grid">
+    <div class="region-card">
+      <div class="region-name">미국</div>
+      <div class="region-val positive">Low Teens</div>
+      <div class="region-note">4분기 연속 가속. 국내 여행 강세</div>
+    </div>
+    <div class="region-card">
+      <div class="region-name">유럽 (핵심)</div>
+      <div class="region-val">Mid single digits</div>
+      <div class="region-note">Booking.com 홈 시장. 안정적</div>
+    </div>
+    <div class="region-card">
+      <div class="region-name">아시아</div>
+      <div class="region-val">High single digits</div>
+      <div class="region-note">역내 수요 Low double digits. 중동 영향 일부 반영</div>
+    </div>
+    <div class="region-card">
+      <div class="region-name">중동/기타</div>
+      <div class="region-val negative">Low single (-)</div>
+      <div class="region-note">갈등 직격. 글로벌 -2%p 영향 추정</div>
+    </div>
+  </div>
+
+  <table style="margin-top:16px;">
+    <thead><tr><th>매크로 요인</th><th>영향</th><th>평가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>중동 갈등</strong></td>
+        <td class="mono negative">Room Night -2%p 영향 추정</td>
+        <td>Q1 말 3월에 집중 발생. Q2는 전 분기 영향이라 더 크게 반영 예정</td>
+      </tr>
+      <tr>
+        <td><strong>유럽-아시아 환승 차질</strong></td>
+        <td class="mono negative">간접 경로 우회 비용↑</td>
+        <td>중동 영공 폐쇄로 장거리 노선 비용 상승 → 여행 수요 억제 효과</td>
+      </tr>
+      <tr>
+        <td><strong>FX (달러 강세)</strong></td>
+        <td class="mono">실적에 중립~소폭 불리</td>
+        <td>유럽 매출 비중이 높아 달러 강세 시 달러 환산 매출 감소 가능</td>
+      </tr>
+      <tr>
+        <td><strong>미국 경제 연착륙</strong></td>
+        <td class="mono positive">미국 OTA 수혜</td>
+        <td>미국 소비자 여행 지출 견조. 국내 여행 + 해외여행 모두 강세</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter">
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:80%;background:var(--accent);"></div></div>
+      <div class="tone-score">8.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:65%;background:#b388ff;"></div></div>
+      <div class="tone-score">6.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">가이던스 보수성</div>
+      <div class="tone-bar"><div class="fill" style="width:85%;background:var(--red);"></div></div>
+      <div class="tone-score">8.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">AI 내러티브 강도</div>
+      <div class="tone-bar"><div class="fill" style="width:75%;background:var(--yellow);"></div></div>
+      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Glenn Fogel (CEO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 안정적 실행자. 실적 비트를 조용히 확인하고 중동 헤드윈드를 솔직히 인정하면서, Connected Trip 비전으로 장기 방어선을 구축. 과도한 낙관도, 과도한 비관도 없는 "관리된 현실주의".
+  </p>
+
+  <div class="keywords">
+    <span class="kw-tag bullish">CONNECTED TRIP</span>
+    <span class="kw-tag bullish">GENERATIVE AI</span>
+    <span class="kw-tag bullish">US ACCELERATION</span>
+    <span class="kw-tag bullish">AGENTIC FLOWS</span>
+    <span class="kw-tag neutral-tag">SOLID EXECUTION</span>
+    <span class="kw-tag bearish">MIDDLE EAST IMPACT</span>
+    <span class="kw-tag bearish">CONSERVATIVE GUIDANCE</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Glenn Fogel &mdash; 오프닝</div>
+    <blockquote>"Booking began 2026 with solid execution across its global business, with results reflecting the continued momentum of our long-term strategy and progress in advancing our mission to make it easier for everyone to experience the world."</blockquote>
+    <div class="analysis"><strong>"solid execution"</strong> &mdash; 공격적 성장 언어가 아닌 실행 안정성 강조. 이미 글로벌 지배적 위치를 가진 기업의 CEO 화법. "make it easier"는 OTA 본원적 가치 선언. 장기 전략 일관성을 강조하며 단기 헤드윈드를 노이즈로 치환하는 프레이밍.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Glenn Fogel &mdash; Connected Trip & AI</div>
+    <blockquote>"Despite significant challenges, we delivered strong results and continue to see opportunities for growth through our connected trip vision and AI-driven innovations. Personalization through the Connected Trip using AI would make it an even better place for travel — AI and proprietary data increase conversion, with scale helping enable personalization."</blockquote>
+    <div class="analysis"><strong>"proprietary data"</strong> 강조가 핵심. 3.3억 숙박 시설 재고 + 수십억 건 예약 데이터 = AI 검색이 단기에 복제 불가능한 해자. "scale helping enable personalization"은 규모의 경제가 AI 효과를 배가시킨다는 선순환 논리. AI 디스럽션 공포에 대한 가장 강력한 방어 논리.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Glenn Fogel &mdash; 중동 헤드윈드 인정</div>
+    <blockquote>"The impact of the situation in the Middle East affected our results, particularly in March, with elevated cancellations and a moderation in new bookings. We assume this impact continues through the end of June, followed by a recovery in the second half."</blockquote>
+    <div class="analysis">회피 없이 직접 인정. <strong>"elevated cancellations"</strong> &mdash; 3월에 집중 발생. Q2 가이던스를 +2~4%로 낮춘 이유를 명확히 설명. "recovery in second half"라고 했지만 이 회복 가정이 빗나갈 경우 FY 가이던스 전체 재조정이 필요하다는 점이 핵심 리스크.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Glenn Fogel &mdash; 미국 시장 가속</div>
+    <blockquote>"The U.S. accelerated for the fourth consecutive quarter to low teens growth. We were encouraged by the acceleration seen in our U.S. direct channel."</blockquote>
+    <div class="analysis"><strong>4분기 연속 가속</strong>이 강조 포인트. 미국은 Booking이 전통적으로 약했던 시장 (Expedia/Airbnb 강세). 여기서 직접 채널(앱·웹 직접 방문)이 강화된다는 것은 브랜드 인지도 상승 + 마케팅 효율화 동시 진행. 미국 성장이 지속되면 글로벌 믹스가 개선된다.</div>
+  </div>
+
+  <h3>Ewout Steenbergen (CFO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 정밀한 수치 중심. 가이던스 보수화의 논리를 수학적으로 설명. "보수적이지만 우리는 통제하고 있다"는 메시지.
+  </p>
+
+  <div class="quote-block cfo">
+    <div class="speaker">Ewout Steenbergen &mdash; 가이던스 논리</div>
+    <blockquote>"We expect the impact of the situation in the Middle East will be higher in Q2 than it was in Q1, as the conflict spans the full quarter — though this is partially offset by the expectation that March had the highest concentration of cancellations, which drove Q1 marketing deleverage."</blockquote>
+    <div class="analysis"><strong>Q2가 Q1보다 나쁘다</strong>는 이유 두 가지: (1) Q1은 3월 후반만 영향받았지만 Q2는 4~6월 전체. (2) 취소 집중이 3월이었으니 반작용 회복은 Q3로 밀릴 가능성. 반면 "마케팅 디레버리지 해소" 언급은 Q2 수익성이 반드시 나쁜 것만은 아니라는 여지를 남김.</div>
+  </div>
+
+  <div class="quote-block cfo">
+    <div class="speaker">Ewout Steenbergen &mdash; 머천트 믹스 & EBITDA</div>
+    <blockquote>"Merchant gross bookings represented approximately 72% of total gross bookings, up 5 percentage points versus prior year. We expect adjusted EBITDA to grow slightly faster than revenue for the full year."</blockquote>
+    <div class="analysis">머천트 비중 5%p 상승 = 경영진이 의도적으로 밀고 있는 전략. 머천트는 결제를 직접 수취하므로 현금 흐름이 좋고 번들링이 쉬움. <strong>"EBITDA가 매출보다 빠르게 성장"</strong>이라는 FY 가이던스는 AI 투자 $7억에도 불구한 마진 개선 자신감 표명.</div>
+  </div>
+
+  <div class="quote-block cfo">
+    <div class="speaker">Ewout Steenbergen &mdash; 주주환원</div>
+    <blockquote>"We returned a record $4.0 billion to shareholders in Q1 2026, including $3.6 billion in share repurchases and approximately $0.3 billion in dividends. Diluted share count declined 4% year-over-year."</blockquote>
+    <div class="analysis"><strong>역대 최대 $40억</strong>. 단일 분기 기준 S&P500 내에서도 상위권 규모. 주식 수 4% 감소 = EPS +14% 성장의 약 1/3이 바이백 효과. 영업 성장(+16%)과 바이백이 결합해 EPS 성장을 극대화하는 재무 공학. 현금이 넘쳐서 쓸 곳이 자사주밖에 없다는 시그널이기도 함.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 실적 비트는 인정하되 Q2 가이던스 컷에 집중. "중동 말고 다른 약점은 없냐" 탐색.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; AI 디스럽션 리스크</div>
+    <blockquote>"There are growing concerns that generative AI search engines could disintermediate OTAs by allowing travelers to book directly. How does Booking think about this risk?"</blockquote>
+    <div class="analysis">OTA 섹터 전체를 짓누르는 핵심 리스크 질문. Fogel 답변 요지: "우리의 재고(3.3억 숙소)와 리뷰 데이터는 AI 검색이 단기에 대체 불가. 오히려 우리가 AI를 써서 전환율을 높이고 있다." — 설득력 있는 반론이지만, 장기 디스인터미디에이션 리스크는 완전 해소되지 않음.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; 미국 여행 둔화 우려</div>
+    <blockquote>"U.S. consumer sentiment has been softening with tariff uncertainty. Are you seeing any softness in U.S. booking trends in April?"</blockquote>
+    <div class="analysis">관세 불확실성이 소비 심리를 누르는 상황에서 미국 여행 수요가 버텨주느냐가 핵심. Fogel은 "현재까지는 견조"라고 답했지만 4월 데이터가 완전히 반영된 컨콜이 아닌 만큼, Q2 실적 발표 때 미국 트렌드 급변 가능성은 남아있음.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">시장 평가 종합</div>
+    <blockquote>"Booking delivered a solid beat, but the Q2 guidance cut spooked investors. The Middle East headwind is manageable if it stays contained — the bigger risk is whether the conflict spreads or U.S. travel softens. BKNG remains a high-quality compounder, but near-term catalysts are limited."</blockquote>
+    <div class="analysis"><strong>"high-quality compounder"</strong> — 장기 보유형 우량주로 인정하지만 단기 촉매가 부재하다는 평가. 실적 비트임에도 주가가 하락한 이유: 시장은 현재 숫자보다 가이던스를 더 중시하고, Q2 가이던스 +4~6%는 기대치 하회.</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr>
+        <td style="width:160px;font-weight:600;color:var(--accent);">Glenn Fogel (CEO)</td>
+        <td>"Q1은 잘 했다. 중동이 발목을 잡지만 하반기 회복을 믿고, AI + Connected Trip으로 해자를 넓히는 중이다"</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:#b388ff;">Ewout Steenbergen (CFO)</td>
+        <td>"머천트 믹스 72%, EBITDA 마진 개선, 역대 최대 자사주. 수익 기계는 돌아가고 있다. Q2는 조심하자"</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--yellow);">애널리스트</td>
+        <td>"비트는 좋다. 그런데 Q2 가이던스 +4~6%가 실망스럽다. 중동이 확산되면 FY 전체를 다시 봐야 한다"</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--red);">주가 반응</td>
+        <td>장후 -2.33% ($180.27 &rarr; $177.47). EPS 비트에도 불구, 보수적 Q2 가이던스 + 중동 불확실성에 투자자 실망 반응</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--accent);">핵심 리스크</td>
+        <td>(1) 중동 갈등 장기화 / 확산 &nbsp;(2) 미국 여행 수요 둔화 &nbsp;(3) AI 디스인터미디에이션 &nbsp;(4) FX 헤드윈드</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--accent);">핵심 기회</td>
+        <td>(1) 미국 4분기 연속 가속 &nbsp;(2) 항공 +28.5% Connected Trip 확장 &nbsp;(3) AI 기반 전환율 개선 &nbsp;(4) 바이백 EPS 부스트</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid">
+    <a class="link-card" href="https://ir.bookingholdings.com/news-releases/news-release-details/booking-holdings-inc-reports-first-quarter-2026-results" target="_blank">
+      <div class="link-icon">&#x1F4C4;</div>
+      <div class="link-text"><div class="link-title">IR 보도자료</div><div class="link-url">ir.bookingholdings.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.fool.com/earnings/call-transcripts/2026/04/28/booking-bkng-q1-2026-earnings-transcript/" target="_blank">
+      <div class="link-icon">&#x1F4DD;</div>
+      <div class="link-text"><div class="link-title">컨퍼런스 콜 트랜스크립트</div><div class="link-url">fool.com / Motley Fool</div></div>
+    </a>
+    <a class="link-card" href="https://news.alphastreet.com/booking-holdings-inc-bkng-q1-2026-earnings-call-transcript/" target="_blank">
+      <div class="link-icon">&#x1F4CA;</div>
+      <div class="link-text"><div class="link-title">컨콜 트랜스크립트 (Alphastreet)</div><div class="link-url">news.alphastreet.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.investing.com/news/company-news/booking-holdings-q1-2026-slides-earnings-beat-amid-middle-east-headwinds-93CH-4643276" target="_blank">
+      <div class="link-icon">&#x1F4C8;</div>
+      <div class="link-text"><div class="link-title">Q1 2026 실적 슬라이드 (Investing.com)</div><div class="link-url">investing.com</div></div>
+    </a>
+    <a class="link-card" href="https://finance.yahoo.com/markets/stocks/articles/compared-estimates-booking-holdings-bkng-213001670.html" target="_blank">
+      <div class="link-icon">&#x1F50E;</div>
+      <div class="link-text"><div class="link-title">핵심 메트릭 vs 컨센서스</div><div class="link-url">finance.yahoo.com</div></div>
+    </a>
+    <a class="link-card" href="https://skift.com/2026/04/28/booking-holdings-saw-u-s-strength-in-q1-but-middle-east-weighs-on-outlook/" target="_blank">
+      <div class="link-icon">&#x2708;&#xFE0F;</div>
+      <div class="link-text"><div class="link-title">Skift 산업 분석</div><div class="link-url">skift.com &mdash; 여행 전문 미디어</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-04-29 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>
