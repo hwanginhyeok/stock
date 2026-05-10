@@ -453,8 +453,8 @@ def analyze_with_glm(ticker: str, data: dict[str, Any]) -> dict[str, Any] | None
     "accent_color": "#hex (기업 브랜드 색상, 다크모드용. 예: #00d632 for green, #ff4d4d for red, #0066cc for blue)",
 
     "financials": {{
-        "revenue_actual": 숫자 (단위: 억달러 USD, float. 예: 1118.0),
-        "revenue_estimate": 숫자 (단위: 억달러 USD, float),
+        "revenue_actual": 숫자 (단위: 십억달러(B) USD, float. 예: 111.8 for $111.8B),
+        "revenue_estimate": 숫자 (단위: 십억달러(B) USD, float. 예: 107.5 for $107.5B),
         "revenue_yoy_pct": 숫자 (YoY %, float. 예: 17.2),
         "eps_actual": 숫자 (달러, float. 예: 2.01),
         "eps_estimate": 숫자 (달러, float. 예: 1.94),
