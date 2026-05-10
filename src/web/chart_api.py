@@ -1003,7 +1003,7 @@ def get_trend_strategy(
                 "price": round(curr_close, 2),
                 "touched_ma": touched_ma,
                 "ma_value": round(ma_value, 2),
-                "color": "#3fb950",
+                "color": "#3b82f6",
                 "text": "PB",
             })
 

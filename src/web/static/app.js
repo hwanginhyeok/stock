@@ -683,6 +683,24 @@ async function loadChartData(period) {
         const stateHtml = `<span style="color:${stateColors[state]};font-weight:700">${stateLabels[state]}</span>`;
         trendEl.innerHTML = trendEl.innerHTML.replace(/· ST [▲▼]/, `· ${stateHtml}`);
       }
+
+      // 차트 상단 정배열/역배열 배지 업데이트
+      const badgeEl = document.getElementById('alignment-badge');
+      if (badgeEl) {
+        const badgeConf = {
+          PERFECT_ORDER: { text: '🟢 정배열', color: '#26a69a', bg: 'rgba(38,166,154,0.15)', border: '#26a69a' },
+          REVERSE_ORDER: { text: '🔴 역배열', color: '#ef5350', bg: 'rgba(239,83,80,0.15)', border: '#ef5350' },
+          TRANSITION:    { text: '⚪ 과도기', color: '#f59e0b', bg: 'rgba(245,158,11,0.15)', border: '#f59e0b' },
+        };
+        const conf = badgeConf[state];
+        if (conf) {
+          badgeEl.textContent = conf.text;
+          badgeEl.style.display = 'inline-block';
+          badgeEl.style.color = conf.color;
+          badgeEl.style.background = conf.bg;
+          badgeEl.style.borderColor = conf.border;
+        }
+      }
     }
 
     // fitContent: 2단계 지연 — chart 내부 렌더 완전 종료 후 range 설정
