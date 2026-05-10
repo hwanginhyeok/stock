@@ -451,7 +451,16 @@ def analyze_with_glm(ticker: str, data: dict[str, Any]) -> dict[str, Any] | None
     "verdict": "BEAT" | "MISS" | "MIXED",
     "verdict_detail": "한줄 판정 이유",
     "accent_color": "#hex (기업 브랜드 색상, 다크모드용. 예: #00d632 for green, #ff4d4d for red, #0066cc for blue)",
-    
+
+    "financials": {{
+        "revenue_actual": 숫자 (단위: 억달러 USD, float. 예: 1118.0),
+        "revenue_estimate": 숫자 (단위: 억달러 USD, float),
+        "revenue_yoy_pct": 숫자 (YoY %, float. 예: 17.2),
+        "eps_actual": 숫자 (달러, float. 예: 2.01),
+        "eps_estimate": 숫자 (달러, float. 예: 1.94),
+        "eps_yoy_pct": 숫자 (YoY %, float. 예: 22.0)
+    }},
+
     "revenue_breakdown": [
         {{"name": "세그먼트명", "value": "$XX억", "yoy": "+XX%", "signal": "STRONG|STEADY|HEADWIND"}}
     ],
@@ -565,11 +574,17 @@ def generate_html(data: dict[str, Any], glm_result: dict[str, Any] | None) -> st
     # CSS 삽입 (.replace로 중괄호 충돌 회피)
     css = CSS_TEMPLATE.replace("{accent_color}", accent_color)
     
-    # 실적 숫자
-    revenue = data.get("revenue")
-    revenue_estimate = data.get("revenue_estimate")
+    # 실적 숫자 (yfinance 우선, 없으면 GLM financials 보완)
+    glm_fin = glm_result.get("financials", {}) if glm_result else {}
+    revenue = data.get("revenue") or glm_fin.get("revenue_actual")
+    revenue_estimate = data.get("revenue_estimate") or glm_fin.get("revenue_estimate")
+    revenue_yoy = data.get("revenue_yoy") or glm_fin.get("revenue_yoy_pct")
+    eps = data.get("eps") or glm_fin.get("eps_actual")
+    eps_estimate = data.get("eps_estimate") or glm_fin.get("eps_estimate")
+    eps_yoy = data.get("eps_yoy") or glm_fin.get("eps_yoy_pct")
+
     revenue_str = f"${revenue:.1f}억" if revenue else "N/A"
-    
+
     if revenue and revenue_estimate:
         revenue_surprise = (revenue / revenue_estimate - 1) * 100
         revenue_tag = "BEAT" if revenue_surprise > 0 else "MISS"
@@ -577,14 +592,11 @@ def generate_html(data: dict[str, Any], glm_result: dict[str, Any] | None) -> st
         revenue_compare = f"컨센서스: ${revenue_estimate:.1f}억 <span class=\"{revenue_tag_class}\">{revenue_tag} {revenue_surprise:+.1f}%</span>"
     else:
         revenue_compare = "컨센서스: N/A"
-    
-    revenue_yoy = data.get("revenue_yoy")
+
     revenue_yoy_str = f"전년비: {revenue_yoy:+.0f}%" if revenue_yoy else "전년비: N/A"
-    
-    eps = data.get("eps")
-    eps_estimate = data.get("eps_estimate")
+
     eps_str = f"${eps:.2f}" if eps else "N/A"
-    
+
     if eps and eps_estimate:
         eps_surprise = (eps / eps_estimate - 1) * 100
         eps_tag = "BEAT" if eps_surprise > 0 else "MISS"
@@ -592,7 +604,9 @@ def generate_html(data: dict[str, Any], glm_result: dict[str, Any] | None) -> st
         eps_compare = f"컨센서스: ${eps_estimate:.2f} <span class=\"{eps_tag_class}\">{eps_tag}</span>"
     else:
         eps_compare = "컨센서스: N/A"
-    
+
+    eps_yoy_str = f"전년비: {eps_yoy:+.0f}%" if eps_yoy else "전년비: N/A"
+
     # EBITDA (Placeholder)
     ebitda_str = "N/A"
     ebitda_margin = "N/A"
@@ -674,7 +688,7 @@ def generate_html(data: dict[str, Any], glm_result: dict[str, Any] | None) -> st
       <div class="label">희석 EPS</div>
       <div class="value">{eps_str}</div>
       <div class="compare">{eps_compare}</div>
-      <div class="compare">전년비: N/A</div>
+      <div class="compare">{eps_yoy_str}</div>
     </div>
     <div class="num-card">
       <div class="label">조정 EBITDA</div>
