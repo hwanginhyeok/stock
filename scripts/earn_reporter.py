@@ -574,14 +574,20 @@ def generate_html(data: dict[str, Any], glm_result: dict[str, Any] | None) -> st
     # CSS 삽입 (.replace로 중괄호 충돌 회피)
     css = CSS_TEMPLATE.replace("{accent_color}", accent_color)
     
-    # 실적 숫자 (yfinance 우선, 없으면 GLM financials 보완)
+    # 실적 숫자 (yfinance 우선, NaN/None이면 GLM financials 보완)
+    def _pick(yf_val, glm_val):
+        """NaN/None 안전 fallback — nan은 truthy라 or로 처리 불가."""
+        if yf_val is not None and not (isinstance(yf_val, float) and yf_val != yf_val):
+            return yf_val
+        return glm_val
+
     glm_fin = glm_result.get("financials", {}) if glm_result else {}
-    revenue = data.get("revenue") or glm_fin.get("revenue_actual")
-    revenue_estimate = data.get("revenue_estimate") or glm_fin.get("revenue_estimate")
-    revenue_yoy = data.get("revenue_yoy") or glm_fin.get("revenue_yoy_pct")
-    eps = data.get("eps") or glm_fin.get("eps_actual")
-    eps_estimate = data.get("eps_estimate") or glm_fin.get("eps_estimate")
-    eps_yoy = data.get("eps_yoy") or glm_fin.get("eps_yoy_pct")
+    revenue = _pick(data.get("revenue"), glm_fin.get("revenue_actual"))
+    revenue_estimate = _pick(data.get("revenue_estimate"), glm_fin.get("revenue_estimate"))
+    revenue_yoy = _pick(data.get("revenue_yoy"), glm_fin.get("revenue_yoy_pct"))
+    eps = _pick(data.get("eps"), glm_fin.get("eps_actual"))
+    eps_estimate = _pick(data.get("eps_estimate"), glm_fin.get("eps_estimate"))
+    eps_yoy = _pick(data.get("eps_yoy"), glm_fin.get("eps_yoy_pct"))
 
     revenue_str = f"${revenue:.1f}억" if revenue else "N/A"
 
