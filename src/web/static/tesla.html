@@ -291,6 +291,9 @@ const fmtK = n => { if (!n) return '--'; if (n >= 1e12) return (n/1e12).toFixed(
 const pct = n => n != null ? (n*100).toFixed(2)+'%' : '--';
 const iv = n => n != null ? (n*100).toFixed(1)+'%' : '--';
 const OI = n => n != null ? Number(n).toLocaleString() : '--';
+/* XSS 방지: 외부 데이터 이스케이프 */
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const safeUrl = u => (typeof u === 'string' && /^https?:\/\//i.test(u)) ? u : '#';
 
 async function api(path) { try { const r = await fetch(path); return await r.json(); } catch { return null; } }
 
@@ -450,10 +453,10 @@ async function loadThesis() {
       const delta = it.delta || 0;
       const cls = delta >= 0 ? 'pos' : 'neg';
       return `<div class="thesis-card ${side === 'bull' ? 'bull' : 'bear'}">
-        <div class="tc-title">${it.title || it.name || '--'}</div>
-        ${it.detail ? `<div class="tc-detail">${it.detail}</div>` : ''}
+        <div class="tc-title">${esc(it.title || it.name || '--')}</div>
+        ${it.detail ? `<div class="tc-detail">${esc(it.detail)}</div>` : ''}
         <div class="tc-meta">
-          <span style="font-size:10px;color:var(--dim);">${it.occurred_at || ''}</span>
+          <span style="font-size:10px;color:var(--dim);">${esc(it.occurred_at || '')}</span>
           <span class="delta-badge ${cls}">${delta >= 0 ? '+' : ''}${delta}</span>
         </div>
       </div>`;
@@ -514,9 +517,9 @@ async function loadEssence() {
       deltaHtml = `<span style="color:${isPos ? 'var(--green)' : 'var(--red)'};font-size:11px;">${isPos ? '↑' : '↓'} ${delta}</span>`;
     }
     return `<div class="ecard">
-      <div class="ecard-score" style="color:${c.color || 'var(--white)'};">${c.score || 0}</div>
+      <div class="ecard-score" style="color:${esc(c.color || 'var(--white)')};">${c.score || 0}</div>
       <div class="ecard-info">
-        <div class="ecard-name">${c.label_ko || c.name}</div>
+        <div class="ecard-name">${esc(c.label_ko || c.name)}</div>
         <div class="ecard-delta">${deltaHtml}</div>
       </div>
     </div>`;
@@ -536,9 +539,9 @@ async function loadTimeline() {
     const title = ev.title || '';
     const desc = ev.summary || ev.description || '';
     return `<div class="tl-entry ${statusCls}">
-      <div class="tl-date">${dateStr}</div>
-      <div class="tl-title">${title}</div>
-      ${desc ? `<div class="tl-desc">${desc.slice(0, 150)}</div>` : ''}
+      <div class="tl-date">${esc(dateStr)}</div>
+      <div class="tl-title">${esc(title)}</div>
+      ${desc ? `<div class="tl-desc">${esc(desc.slice(0, 150))}</div>` : ''}
     </div>`;
   }).join('');
 }
@@ -551,11 +554,11 @@ async function loadNews() {
   const el = document.getElementById('news-grid');
   el.innerHTML = d.articles.map(a => {
     const pub = a.published ? a.published.slice(0, 16).replace('T', ' ') : '';
-    return `<a class="news-card" href="${a.url}" target="_blank" rel="noopener">
-      <div class="nc-source">${a.source}</div>
-      <div class="nc-title">${a.title}</div>
-      <div class="nc-summary">${a.summary || ''}</div>
-      <div class="nc-footer">${pub}</div>
+    return `<a class="news-card" href="${safeUrl(a.url)}" target="_blank" rel="noopener noreferrer">
+      <div class="nc-source">${esc(a.source)}</div>
+      <div class="nc-title">${esc(a.title)}</div>
+      <div class="nc-summary">${esc(a.summary || '')}</div>
+      <div class="nc-footer">${esc(pub)}</div>
     </a>`;
   }).join('');
 }

@@ -7,8 +7,10 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
+from time import mktime
 from typing import Any
 
 from fastapi import APIRouter, Query
@@ -889,16 +891,14 @@ def get_news(
                 for entry in feed.entries:
                     published = ""
                     if hasattr(entry, "published_parsed") and entry.published_parsed:
-                        from time import mktime
                         published = datetime.fromtimestamp(mktime(entry.published_parsed)).isoformat(timespec="seconds")
                     elif hasattr(entry, "published"):
                         published = entry.published
 
                     summary = ""
                     if hasattr(entry, "summary"):
-                        import re as _re
-                        clean = _re.sub(r'<[^>]+>', '', entry.summary)
-                        clean = _re.sub(r'\s+', ' ', clean).strip()
+                        clean = re.sub(r'<[^>]+>', '', entry.summary)
+                        clean = re.sub(r'\s+', ' ', clean).strip()
                         summary = clean[:200]
 
                     articles.append({
