@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EMR | Emerson Electric Co. Q1 2026 실적 딥다이브</title>
+<title>UBER | Uber Technologies, Inc. Q1 2026 실적 딥다이브</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
     --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
-    --accent: #0066cc; --accent-dim: #0066cc33;
+    --accent: #000000; --accent-dim: #00000033;
     --red: #ff4d4d; --red-dim: #ff4d4d22;
     --yellow: #ffc107; --blue: #4da6ff;
     --purple: #b388ff; --purple-dim: #b388ff22;
@@ -17,7 +17,7 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
 
-  .hero { background:linear-gradient(135deg,#0066cc15,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero { background:linear-gradient(135deg,#00000015,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
   .hero-inner { max-width:1100px; margin:0 auto; }
   .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
   .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
@@ -26,7 +26,7 @@
   .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
   .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
   .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
-  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #0066cc44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #00000044; }
   .verdict.mixed { background:var(--yellow); color:#000; border:1px solid #ffc10744; }
 
   .container { max-width:1100px; margin:0 auto; padding:40px; }
@@ -53,7 +53,7 @@
 
   .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
   .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
-  .tier-badge.t1 { background:#0066cc22; color:var(--accent); }
+  .tier-badge.t1 { background:#00000022; color:var(--accent); }
   .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
   .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
   .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
@@ -106,18 +106,18 @@
 <!-- ===== HERO ===== -->
 <div class="hero">
   <div class="hero-inner">
-    <div class="ticker">EMR</div>
-    <h1>Emerson Electric Co.</h1>
-    <div class="company-kr">에머슨 일렉트릭</div>
-    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-10 발표</div>
+    <div class="ticker">UBER</div>
+    <h1>Uber Technologies, Inc.</h1>
+    <div class="company-kr">우버 테크놀로지스</div>
+    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-07 발표</div>
     <div class="meta-row">
-      <span>발표일: 2026-05-10</span>
+      <span>발표일: 2026-05-07</span>
       <span>|</span>
-      <span>섹터: Industrials</span>
+      <span>섹터: Technology</span>
       <span>|</span>
-      <span>시가총액: ~$79억</span>
+      <span>시가총액: ~$163억</span>
     </div>
-    <div class="verdict miss">MISS &mdash; 매출이 전년 대비 -78.0% 급감하여 예상치를 크게 밑돌았으며, 제공된 데이터상 EPS 및 추정치 부재로 인해 전반적인 실적 추세가 부정적임.</div>
+    <div class="verdict mixed">MIXED &mdash; 데이터 오류로 인한 신뢰할 수 없는 실적 (매출 YoY -1176.2%는 불가능한 수치)</div>
   </div>
 </div>
 
@@ -131,9 +131,9 @@
   <div class="numbers-grid">
     <div class="num-card">
       <div class="label">매출</div>
-      <div class="value">$4.6억</div>
+      <div class="value">$14.4억</div>
       <div class="compare">컨센서스: N/A</div>
-      <div class="compare">전년비: -78%</div>
+      <div class="compare">전년비: -1176%</div>
     </div>
     <div class="num-card">
       <div class="label">희석 EPS</div>
@@ -153,15 +153,35 @@
   <table>
     <thead><tr><th>수익원</th><th>분기 실적</th><th>전년비</th><th>시그널</th></tr></thead>
     <tbody>
-      <tr><td>미상 (데이터 부재)</td><td class="mono">$4.562억</td><td class="mono">-78.0%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
+      <tr><td>Mobility (리딩)</td><td class="mono">데이터 없음</td><td class="mono">N/A</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+      <tr><td>Delivery (딜리버리)</td><td class="mono">데이터 없음</td><td class="mono">N/A</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+      <tr><td>Freight (프라이트)</td><td class="mono">데이터 없음</td><td class="mono">N/A</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
     </tbody>
   </table>
+
+  <div class="next-q">
+    <h3>다음 분기 가이던스 / 컨센서스</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">데이터 가용성</div><div class="nq-value">Q1 2026 실적 데이터 확인 불가 - 웹 접근 제한</div></div>
+    </div>
+  </div>
 </div>
 
 <!-- ===== 02: 핵심 KPI ===== -->
 <div class="section">
   <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
   <h2>이 회사를 읽는 숫자들</h2>
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 경영진이 직접 선언한 최우선 지표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Gross Bookings</strong></td><td class="mono">데이터 없음</td><td class="mono">N/A</td><td>우버의 핵심 성장 지표</td></tr>
+    </tbody>
+  </table>
 </div>
 
 <!-- ===== 03: 컨퍼런스 콜 ===== -->
@@ -172,7 +192,7 @@
   <div class="tone-meter>
     <div class="tone-item">
       <div class="tone-label">CEO 자신감</div>
-      <div class="tone-bar"><div class="fill" style="width:50.0%;background:#0066cc;"></div></div>
+      <div class="tone-bar"><div class="fill" style="width:50.0%;background:#000000;"></div></div>
       <div class="tone-score">5.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
     <div class="tone-item">
@@ -187,17 +207,22 @@
     </div>
     <div class="tone-item">
       <div class="tone-label">전망 명확성</div>
-      <div class="tone-bar"><div class="fill" style="width:50.0%;background:#4da6ff;"></div></div>
-      <div class="tone-score">5.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+      <div class="tone-bar"><div class="fill" style="width:20.0%;background:#4da6ff;"></div></div>
+      <div class="tone-score">2.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
   </div>
 
-  <h3>Data N/A</h3>
+  <h3>Dara Khosrowshahi</h3>
   <p style="color:var(--text-dim);margin-bottom:20px;">
-    <strong>어조:</strong> 정보 없음
+    <strong>어조:</strong> 데이터 없음 - 실적 트랜스크립트 미확인
   </p>
+  <div class="keywords">
+    <span class="kw-tag bullish">OPERATIONAL</span>
+    <span class="kw-tag bullish">EFFICIENCY</span>
+    <span class="kw-tag bullish">GROWTH</span>
+  </div>
 
-  <h3>Data N/A</h3>
+  <h3>Prashanth Mahendra-Rajah</h3>
 </div>
 
 <!-- ===== 04: 한줄 요약 ===== -->
@@ -206,10 +231,10 @@
   <h2>요약</h2>
   <table>
     <tbody>
-      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Data N/A</td><td>"정보 없음"</td></tr>
-      <tr><td style='font-weight:600;color:var(--accent);'>Data N/A</td><td>"정보 없음"</td></tr>
-      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"정보 없음"</td></tr>
-      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>매출 급감으로 인해 시장 반응은 부정적일 것으로 예상됨.</td></tr>
+      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Dara Khosrowshahi</td><td>"데이터 없음"</td></tr>
+      <tr><td style='font-weight:600;color:var(--accent);'>Prashanth Mahendra-Rajah</td><td>"데이터 없음"</td></tr>
+      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"데이터 오류로 인한 분석 불가"</td></tr>
+      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>제공된 데이터가 신뢰할 수 없음 (매출 $14.366억, YoY -1176.2%는 오류)</td></tr>
     </tbody>
   </table>
 </div>
@@ -219,12 +244,20 @@
   <div class="section-label">05 &mdash; 자료 링크</div>
   <h2>원본 자료</h2>
   <div class="links-grid>
+    <a class="link-card" href="" target="_blank">
+      <div class="link-icon">🚫</div>
+      <div class="link-text"><div class="link-title">⚠️ 데이터 오류</div><div class="link-url"></div></div>
+    </a>
+    <a class="link-card" href="" target="_blank">
+      <div class="link-icon">⚠️</div>
+      <div class="link-text"><div class="link-title">제공된 매출 YoY -1176.2%는 불가능한 수치</div><div class="link-url"></div></div>
+    </a>
 
   </div>
 </div>
 
 <div class="footer">
-  Generated by Earnings Call Analyzer &mdash; 2026-05-10 &mdash; MACROHARD / Be:Analogue
+  Generated by Earnings Call Analyzer &mdash; 2026-05-07 &mdash; MACROHARD / Be:Analogue
 </div>
 
 </div>

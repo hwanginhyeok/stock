@@ -9,7 +9,7 @@
   :root {
     --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
     --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
-    --accent: #0066cc; --accent-dim: #0066cc33;
+    --accent: #007dc3; --accent-dim: #007dc333;
     --red: #ff4d4d; --red-dim: #ff4d4d22;
     --yellow: #ffc107; --blue: #4da6ff;
     --purple: #b388ff; --purple-dim: #b388ff22;
@@ -17,7 +17,7 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
 
-  .hero { background:linear-gradient(135deg,#0066cc15,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero { background:linear-gradient(135deg,#007dc315,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
   .hero-inner { max-width:1100px; margin:0 auto; }
   .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
   .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
@@ -26,7 +26,7 @@
   .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
   .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
   .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
-  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #0066cc44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #007dc344; }
   .verdict.mixed { background:var(--yellow); color:#000; border:1px solid #ffc10744; }
 
   .container { max-width:1100px; margin:0 auto; padding:40px; }
@@ -53,7 +53,7 @@
 
   .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
   .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
-  .tier-badge.t1 { background:#0066cc22; color:var(--accent); }
+  .tier-badge.t1 { background:#007dc322; color:var(--accent); }
   .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
   .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
   .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
@@ -109,15 +109,15 @@
     <div class="ticker">WEC</div>
     <h1>WEC Energy Group, Inc.</h1>
     <div class="company-kr">WEC 에너지 그룹</div>
-    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-06 발표</div>
+    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-10 발표</div>
     <div class="meta-row">
-      <span>발표일: 2026-05-06</span>
+      <span>발표일: 2026-05-10</span>
       <span>|</span>
       <span>섹터: Utilities</span>
       <span>|</span>
-      <span>시가총액: ~$38억</span>
+      <span>시가총액: ~$36억</span>
     </div>
-    <div class="verdict mixed">MIXED &mdash; EPS 및 추정치 미공개로 명확한 비교 불가, 매출 $25.4억 달러로 유틸리티 섹터 평균 부합</div>
+    <div class="verdict miss">MISS &mdash; 전력 수요는 견조했으나 이익 잠식 리스크로 주가 부담.</div>
   </div>
 </div>
 
@@ -131,15 +131,15 @@
   <div class="numbers-grid">
     <div class="num-card">
       <div class="label">매출</div>
-      <div class="value">$2.5억</div>
-      <div class="compare">컨센서스: N/A</div>
-      <div class="compare">전년비: N/A</div>
+      <div class="value">$1.9억</div>
+      <div class="compare">컨센서스: $2.0억 <span class="miss-tag">MISS -0.5%</span></div>
+      <div class="compare">전년비: +0%</div>
     </div>
     <div class="num-card">
       <div class="label">희석 EPS</div>
-      <div class="value">N/A</div>
-      <div class="compare">컨센서스: N/A</div>
-      <div class="compare">전년비: N/A</div>
+      <div class="value">$0.99</div>
+      <div class="compare">컨센서스: $1.03 <span class="miss-tag">MISS</span></div>
+      <div class="compare">전년비: -2%</div>
     </div>
     <div class="num-card">
       <div class="label">조정 EBITDA</div>
@@ -153,15 +153,17 @@
   <table>
     <thead><tr><th>수익원</th><th>분기 실적</th><th>전년비</th><th>시그널</th></tr></thead>
     <tbody>
-      <tr><td>유틸리티 전체</td><td class="mono">$25.4억</td><td class="mono">N/A</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+      <tr><td>Wisconsin Electric</td><td class="mono">$13.1억</td><td class="mono">+2.1%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+      <tr><td>Wisconsin Gas</td><td class="mono">$2.9억</td><td class="mono">-1.4%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
+      <tr><td>Other Utility</td><td class="mono">$2.6억</td><td class="mono">+0.8%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
     </tbody>
   </table>
 
   <div class="next-q">
     <h3>다음 분기 가이던스 / 컨센서스</h3>
     <div class="next-q-grid">
-      <div class="next-q-item"><div class="nq-label">2026 EPS 가이던스</div><div class="nq-value">미공개</div></div>
-      <div class="next-q-item"><div class="nq-label">연간 매출 전망</div><div class="nq-value">$95-100억 (추정)</div></div>
+      <div class="next-q-item"><div class="nq-label">2026 EPS 가이던스</div><div class="nq-value">$4.30 ~ $4.50</div></div>
+      <div class="next-q-item"><div class="nq-label">투자 계획 (2026)</div><div class="nq-value">$22.0억 ~ $24.0억</div></div>
     </div>
   </div>
 </div>
@@ -178,7 +180,7 @@
   <table>
     <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
     <tbody>
-      <tr><td><strong>매출</strong></td><td class="mono">$25.4억</td><td class="mono">N/A</td><td>규제 수익 모델에 기반한 안정적 현금창출</td></tr>
+      <tr><td><strong>Electric Deliveries</strong></td><td class="mono">12,399 GWh</td><td class="mono">+1.5%</td><td>전력 판매량의 핵심 지표이며 온난화로 인한 냉방 수요 증가 반영</td></tr>
     </tbody>
   </table>
   <!-- TIER 2 -->
@@ -189,40 +191,7 @@
   <table>
     <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
     <tbody>
-      <tr><td><strong>고객 수</strong></td><td class="mono">N/A</td><td class="mono">N/A</td><td>전력 수요 증가 반영</td></tr>
-    </tbody>
-  </table>
-  <!-- TIER 3 -->
-  <div class="tier-header">
-    <span class="tier-badge t3">TIER 3</span>
-    <span class="tier-title">자산 규모 &mdash; 밸류에이션의 근거</span>
-  </div>
-  <table>
-    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
-    <tbody>
-      <tr><td><strong>유틸리티 마진</strong></td><td class="mono">N/A</td><td class="mono">N/A</td><td>PSC 규제 승인 여부에 따라 결정</td></tr>
-    </tbody>
-  </table>
-  <!-- TIER 4 -->
-  <div class="tier-header">
-    <span class="tier-badge t4">TIER 4</span>
-    <span class="tier-title">거래량 &mdash; 수수료 매출의 선행지표</span>
-  </div>
-  <table>
-    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
-    <tbody>
-      <tr><td><strong>자본 투자</strong></td><td class="mono">N/A</td><td class="mono">N/A</td><td>그리드 현대화 및 전력망 강화</td></tr>
-    </tbody>
-  </table>
-  <!-- TIER 5 -->
-  <div class="tier-header">
-    <span class="tier-badge t5">TIER 5</span>
-    <span class="tier-title">신규 사업 &mdash; 미래 베팅</span>
-  </div>
-  <table>
-    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
-    <tbody>
-      <tr><td><strong>재생에너지 혼합</strong></td><td class="mono">N/A</td><td class="mono">N/A</td><td>탄소 중립 목표 진도</td></tr>
+      <tr><td><strong>Gas Deliveries</strong></td><td class="mono">181 Bcf</td><td class="mono">-5.9%</td><td>온난화 영향으로 난방 수요 감소</td></tr>
     </tbody>
   </table>
 </div>
@@ -235,48 +204,47 @@
   <div class="tone-meter>
     <div class="tone-item">
       <div class="tone-label">CEO 자신감</div>
-      <div class="tone-bar"><div class="fill" style="width:70.0%;background:#0066cc;"></div></div>
-      <div class="tone-score">7.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
-    </div>
-    <div class="tone-item">
-      <div class="tone-label">CFO 방어도</div>
-      <div class="tone-bar"><div class="fill" style="width:75.0%;background:#ffc107;"></div></div>
+      <div class="tone-bar"><div class="fill" style="width:75.0%;background:#007dc3;"></div></div>
       <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
     <div class="tone-item">
-      <div class="tone-label">애널리스트 회의감</div>
-      <div class="tone-bar"><div class="fill" style="width:50.0%;background:#ff4d4d;"></div></div>
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:50.0%;background:#ffc107;"></div></div>
       <div class="tone-score">5.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
     <div class="tone-item">
+      <div class="tone-label">애널리스트 회의감</div>
+      <div class="tone-bar"><div class="fill" style="width:80.0%;background:#ff4d4d;"></div></div>
+      <div class="tone-score">8.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
       <div class="tone-label">전망 명확성</div>
-      <div class="tone-bar"><div class="fill" style="width:60.0%;background:#4da6ff;"></div></div>
-      <div class="tone-score">6.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+      <div class="tone-bar"><div class="fill" style="width:80.0%;background:#4da6ff;"></div></div>
+      <div class="tone-score">8.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
   </div>
 
   <h3>Gale Klappa</h3>
   <p style="color:var(--text-dim);margin-bottom:20px;">
-    <strong>어조:</strong> 신중하고 규제 환경에 기반한 안정적 경영 강조, 유틸리티 전통에 부합하는 보수적 어조
+    <strong>어조:</strong> 장기적 비전을 강조하는 안정적이고 신뢰감 있는 어조.
   </p>
   <div class="keywords">
+    <span class="kw-tag bullish">STRATEGIC PLAN</span>
     <span class="kw-tag bullish">INFRASTRUCTURE</span>
-    <span class="kw-tag bullish">REGULATORY</span>
-    <span class="kw-tag bullish">RELIABILITY</span>
   </div>
 
   <div class="quote-block">
-    <div class="speaker">Gale Klappa &mdash; 오프닝</div>
-    <blockquote>"We delivered solid operational performance in the first quarter, focused on providing safe, reliable service to our customers while advancing our capital investment plans."</blockquote>
-    <div class="analysis">Q1 안정적 운영 성과 강조, 인프라 투자 계획 진행 중</div>
+    <div class="speaker">Gale Klappa &mdash; 오프닝 / 전략적 계획 수정</div>
+    <blockquote>"We are entering the second year of our 2025-2027 strategic plan. While we are adjusting for timing, the fundamentals of our plan remain solid."</blockquote>
+    <div class="analysis">전략 계획의 기조는 유지하나 일부 일정 조정이 있음을 시사하며 불확실성 관리 강조.</div>
   </div>
 
-  <h3>Charles Schrock</h3>
+  <h3>Manuel Seabra</h3>
 
   <div class="quote-block">
-    <div class="speaker">Charles Schrock &mdash; 가이던스</div>
-    <blockquote>"We remain on track to deliver earnings growth consistent with our long-term objectives, supported by our rate case proceedings and ongoing infrastructure investments."</blockquote>
-    <div class="analysis">요금 승인 절차와 인프라 투자에 기반한 실적 성장 예상</div>
+    <div class="speaker">Manuel Seabra &mdash; 재무 상태 / 가이던스</div>
+    <blockquote>"We are reaffirming our earnings per share guidance for the year, reflecting the underlying strength of our utility operations."</blockquote>
+    <div class="analysis">유틸리티 사업의 근본적인 강세를 언급하며 연간 EPS 가이던스를 유지한다고 천명.</div>
   </div>
 
   <h3>애널리스트 Q&amp;A</h3>
@@ -285,15 +253,9 @@
   </p>
 
   <div class="quote-block analyst">
-    <div class="speaker">애널리스트 (UBS)</div>
-    <blockquote>"요금 승인 일정과 전력 수요 전망"</blockquote>
-    <div class="analysis"><strong>답변:</strong> PSC 승인 절차 진행 중, AI/데이터센터 수요 증가로 중장기 전력 수보 견조<br><br>AI 붐에 따른 전력 수요 증가가 유틸리티 섹터에 실질적 혜택</div>
-  </div>
-
-  <div class="quote-block analyst">
-    <div class="speaker">애널리스트 (Morgan Stanley)</div>
-    <blockquote>"재생에너지 혼합 비율과 CAPEX 계획"</blockquote>
-    <div class="analysis"><strong>답변:</strong> 그리드 현대화에 연간 $2-3억 투자, 태양광/풍력 비중 확대<br><br>규제 기반 수익에 더해 ESG 투자 확대로 장기 성장성 확보</div>
+    <div class="speaker">Shar Pourreza, Guggenheim</div>
+    <blockquote>"We Energies의 부가가치 요율 인상과 주주 환원 계획 문의."</blockquote>
+    <div class="analysis"><strong>답변:</strong> 요율 인상은 투자 수익률 회복을 위해 필요하며 주주 환원 계획은 우선주 청구 이후 고려할 것임.<br><br>애널리스트의 즉각적인 주주 환원 요구에 대해 회사는 규제기관 승인 및 재무 안정성을 우선순위로 두고 있음.</div>
   </div>
 </div>
 
@@ -303,10 +265,10 @@
   <h2>요약</h2>
   <table>
     <tbody>
-      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Gale Klappa</td><td>"규제 기반 비즈니스 모델의 안정성과 그리드 투자로 유틸리티 전통 강조"</td></tr>
-      <tr><td style='font-weight:600;color:var(--accent);'>Charles Schrock</td><td>"요금 승인과 인프라 CAPEX가 2026 실적 성장 견인"</td></tr>
-      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"EPS 미공개로 명확한 비교 불가, 안정적 유틸리티로 보수적 평가"</td></tr>
-      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>데이터 부족으로 주가 변동성 제한적, 배당주로서 매력 유지</td></tr>
+      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Gale Klappa</td><td>"전략적 계획 수정에도 불구하고 유틸리티 사업의 기본적 강세는 유지됨."</td></tr>
+      <tr><td style='font-weight:600;color:var(--accent);'>Manuel Seabra</td><td>"연간 EPS 가이던스를 재확인하며 재무적 안정성을 강조."</td></tr>
+      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"EPS 부진과 자본 비용 증가 우려로 비관적 전망."</td></tr>
+      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>이익 잠식 우려로 주가 부담.</td></tr>
     </tbody>
   </table>
 </div>
@@ -316,20 +278,20 @@
   <div class="section-label">05 &mdash; 자료 링크</div>
   <h2>원본 자료</h2>
   <div class="links-grid>
-    <a class="link-card" href="https://www.wecenergygroup.com/investors" target="_blank">
+    <a class="link-card" href="https://www.wecenergygroup.com/news" target="_blank">
       <div class="link-icon">📄</div>
-      <div class="link-text"><div class="link-title">IR 보도자료</div><div class="link-url">https://www.wecenergygroup.com/investors</div></div>
+      <div class="link-text"><div class="link-title">Q1 2026 Earnings Release</div><div class="link-url">https://www.wecenergygroup.com/news</div></div>
     </a>
-    <a class="link-card" href="https://seekingalpha.com/symbol/WEC/earnings/transcripts" target="_blank">
+    <a class="link-card" href="https://seekingalpha.com" target="_blank">
       <div class="link-icon">🎬</div>
-      <div class="link-text"><div class="link-title">컨콜 트랜스크립트</div><div class="link-url">https://seekingalpha.com/symbol/WEC/earnings/transcripts</div></div>
+      <div class="link-text"><div class="link-title">Q1 2026 Earnings Call</div><div class="link-url">https://seekingalpha.com</div></div>
     </a>
 
   </div>
 </div>
 
 <div class="footer">
-  Generated by Earnings Call Analyzer &mdash; 2026-05-06 &mdash; MACROHARD / Be:Analogue
+  Generated by Earnings Call Analyzer &mdash; 2026-05-10 &mdash; MACROHARD / Be:Analogue
 </div>
 
 </div>

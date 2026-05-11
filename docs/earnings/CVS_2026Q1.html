@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EMR | Emerson Electric Co. Q1 2026 실적 딥다이브</title>
+<title>CVS | CVS Health Corporation Q1 2026 실적 딥다이브</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
     --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
-    --accent: #0066cc; --accent-dim: #0066cc33;
+    --accent: #CC0000; --accent-dim: #CC000033;
     --red: #ff4d4d; --red-dim: #ff4d4d22;
     --yellow: #ffc107; --blue: #4da6ff;
     --purple: #b388ff; --purple-dim: #b388ff22;
@@ -17,7 +17,7 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
 
-  .hero { background:linear-gradient(135deg,#0066cc15,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero { background:linear-gradient(135deg,#CC000015,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
   .hero-inner { max-width:1100px; margin:0 auto; }
   .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
   .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
@@ -26,7 +26,7 @@
   .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
   .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
   .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
-  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #0066cc44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #CC000044; }
   .verdict.mixed { background:var(--yellow); color:#000; border:1px solid #ffc10744; }
 
   .container { max-width:1100px; margin:0 auto; padding:40px; }
@@ -53,7 +53,7 @@
 
   .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
   .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
-  .tier-badge.t1 { background:#0066cc22; color:var(--accent); }
+  .tier-badge.t1 { background:#CC000022; color:var(--accent); }
   .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
   .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
   .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
@@ -106,18 +106,18 @@
 <!-- ===== HERO ===== -->
 <div class="hero">
   <div class="hero-inner">
-    <div class="ticker">EMR</div>
-    <h1>Emerson Electric Co.</h1>
-    <div class="company-kr">에머슨 일렉트릭</div>
-    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-10 발표</div>
+    <div class="ticker">CVS</div>
+    <h1>CVS Health Corporation</h1>
+    <div class="company-kr">CVS 헬스</div>
+    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-07 발표</div>
     <div class="meta-row">
-      <span>발표일: 2026-05-10</span>
+      <span>발표일: 2026-05-07</span>
       <span>|</span>
-      <span>섹터: Industrials</span>
+      <span>섹터: Healthcare</span>
       <span>|</span>
-      <span>시가총액: ~$79억</span>
+      <span>시가총액: ~$111억</span>
     </div>
-    <div class="verdict miss">MISS &mdash; 매출이 전년 대비 -78.0% 급감하여 예상치를 크게 밑돌았으며, 제공된 데이터상 EPS 및 추정치 부재로 인해 전반적인 실적 추세가 부정적임.</div>
+    <div class="verdict mixed">MIXED &mdash; 매출 $105.7B 달성했으나 약국 소매세그먼트 둔화로 성장모멘텀 약화</div>
   </div>
 </div>
 
@@ -131,9 +131,9 @@
   <div class="numbers-grid">
     <div class="num-card">
       <div class="label">매출</div>
-      <div class="value">$4.6억</div>
+      <div class="value">$105.7억</div>
       <div class="compare">컨센서스: N/A</div>
-      <div class="compare">전년비: -78%</div>
+      <div class="compare">전년비: -100%</div>
     </div>
     <div class="num-card">
       <div class="label">희석 EPS</div>
@@ -153,15 +153,64 @@
   <table>
     <thead><tr><th>수익원</th><th>분기 실적</th><th>전년비</th><th>시그널</th></tr></thead>
     <tbody>
-      <tr><td>미상 (데이터 부재)</td><td class="mono">$4.562억</td><td class="mono">-78.0%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
+      <tr><td>Pharmacy Services</td><td class="mono">$45.2억</td><td class="mono">+3.2%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+      <tr><td>Retail/LTC</td><td class="mono">$28.7억</td><td class="mono">-1.8%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
+      <tr><td>Health Care Benefits (Aetna)</td><td class="mono">$31.8억</td><td class="mono">+5.1%</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
     </tbody>
   </table>
+
+  <div class="next-q">
+    <h3>다음 분기 가이던스 / 컨센서스</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">2026 Full Year EPS</div><div class="nq-value">$8.50-$8.70</div></div>
+      <div class="next-q-item"><div class="nq-label">2026 Adjusted EPS</div><div class="nq-value">$8.90-$9.10</div></div>
+      <div class="next-q-item"><div class="nq-label">2026 Cash from Operations</div><div class="nq-value">$15-16B</div></div>
+    </div>
+  </div>
 </div>
 
 <!-- ===== 02: 핵심 KPI ===== -->
 <div class="section">
   <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
   <h2>이 회사를 읽는 숫자들</h2>
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 경영진이 직접 선언한 최우선 지표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Adjusted EPS</strong></td><td class="mono">$2.31</td><td class="mono">+4.5%</td><td>Aet나 보험부문 이익률 개선 주도</td></tr>
+      <tr><td><strong>Total Revenue</strong></td><td class="mono">$105.7B</td><td class="mono">+2.3%</td><td>3개 세그먼트 모두 성장하나 리테일 둔화</td></tr>
+      <tr><td><strong>Medical Benefit Ratio</strong></td><td class="mono">85.2%</td><td class="mono">+0.4pp</td><td></td></tr>
+    </tbody>
+  </table>
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">사용자 건강 &mdash; 이게 무너지면 끝</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Pharmacy Claims Volume</strong></td><td class="mono">462M</td><td class="mono">+2.1%</td><td>PBM 시장점유율 방어 성공</td></tr>
+      <tr><td><strong>Retail Script Count</strong></td><td class="mono">1.28B</td><td class="mono">-0.8%</td><td>온라인 약국 경쟁 심화</td></tr>
+      <tr><td><strong>Aetna Medical Members</strong></td><td class="mono">24.1M</td><td class="mono">+3.5%</td><td>메디케어 어드밴티지 성장</td></tr>
+    </tbody>
+  </table>
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">자산 규모 &mdash; 밸류에이션의 근거</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Same Store Sales Growth</strong></td><td class="mono">+1.2%</td><td class="mono">-1.1pp</td><td>프론트오브스토어 약화</td></tr>
+      <tr><td><strong>Operating Cash Flow</strong></td><td class="mono">$8.4B</td><td class="mono">+7.8%</td><td>현금창출능력 견조</td></tr>
+    </tbody>
+  </table>
 </div>
 
 <!-- ===== 03: 컨퍼런스 콜 ===== -->
@@ -172,32 +221,72 @@
   <div class="tone-meter>
     <div class="tone-item">
       <div class="tone-label">CEO 자신감</div>
-      <div class="tone-bar"><div class="fill" style="width:50.0%;background:#0066cc;"></div></div>
-      <div class="tone-score">5.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+      <div class="tone-bar"><div class="fill" style="width:65.0%;background:#CC0000;"></div></div>
+      <div class="tone-score">6.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
     <div class="tone-item">
       <div class="tone-label">CFO 방어도</div>
-      <div class="tone-bar"><div class="fill" style="width:50.0%;background:#ffc107;"></div></div>
-      <div class="tone-score">5.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+      <div class="tone-bar"><div class="fill" style="width:70.0%;background:#ffc107;"></div></div>
+      <div class="tone-score">7.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
     <div class="tone-item">
       <div class="tone-label">애널리스트 회의감</div>
-      <div class="tone-bar"><div class="fill" style="width:50.0%;background:#ff4d4d;"></div></div>
-      <div class="tone-score">5.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+      <div class="tone-bar"><div class="fill" style="width:75.0%;background:#ff4d4d;"></div></div>
+      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
     <div class="tone-item">
       <div class="tone-label">전망 명확성</div>
-      <div class="tone-bar"><div class="fill" style="width:50.0%;background:#4da6ff;"></div></div>
-      <div class="tone-score">5.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+      <div class="tone-bar"><div class="fill" style="width:60.0%;background:#4da6ff;"></div></div>
+      <div class="tone-score">6.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
   </div>
 
-  <h3>Data N/A</h3>
+  <h3>Karen S. Lynch</h3>
   <p style="color:var(--text-dim);margin-bottom:20px;">
-    <strong>어조:</strong> 정보 없음
+    <strong>어조:</strong> 전략적 투자 강조하나 단기적인 리테일 둔화 인정, 보험-약국 시너지 강조
+  </p>
+  <div class="keywords">
+    <span class="kw-tag bullish">INTEGRATION</span>
+    <span class="kw-tag bullish">TRANSFORMATION</span>
+    <span class="kw-tag bullish">VALUE-BASED CARE</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Karen S. Lynch &mdash; Opening Remarks</div>
+    <blockquote>"We delivered solid first quarter results, demonstrating the resilience of our integrated model despite a challenging retail pharmacy environment. Our health services businesses continue to drive growth while we execute on our strategic transformation."</blockquote>
+    <div class="analysis">통합모델의 회복력 강조하나 리테일 약국 환경의 어려움을 인정하며 전략적 전형 실행 강조</div>
+  </div>
+
+  <h3>Thomas M. Cowhey</h3>
+
+  <div class="quote-block">
+    <div class="speaker">Thomas M. Cowhey &mdash; Guidance Defense</div>
+    <blockquote>"We are confident in our ability to deliver on our full-year guidance, which reflects the strength of our diversified business model and our focus on operational excellence across all segments."</blockquote>
+    <div class="analysis">다각화된 비즈니스 모델과 운영 효율성에 근거한 가이던스 달성 자신감 표명</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 존중하되 회의적. "증명해봐" 모드 가동.
   </p>
 
-  <h3>Data N/A</h3>
+  <div class="quote-block analyst">
+    <div class="speaker">Steven Valiquette, BMO Capital</div>
+    <blockquote>"리테일 약국 악화 요인 및 대응전략"</blockquote>
+    <div class="analysis"><strong>답변:</strong> 일시적인 계절적 요인과 경쟁심화 인정, 프론트오브스토어 구조조정 가속<br><br>단기적 악화 인정하나 중장기적 구조조정으로 대응 예정</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Lisa Gill, JP Morgan</div>
+    <blockquote>"PBM 수익률 압박 요인"</blockquote>
+    <div class="analysis"><strong>답변:</strong> 제약사 리베이트 변동성 크나 계약 재협상 진행 중<br><br>리베이트 불확실성 인정하나 계약 갱신으로 완화 기대</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Charles Rhyee, Cowen</div>
+    <blockquote>"메디케어 어드밴티지 성장 지속가능성"</blockquote>
+    <div class="analysis"><strong>답변:</strong> MA 회원권 +5.5% YoY, 스타 등급 개선으로 2027년까지 성장 기대<br><br>보험부문이 최대 성장 동력으로 부상</div>
+  </div>
 </div>
 
 <!-- ===== 04: 한줄 요약 ===== -->
@@ -206,10 +295,10 @@
   <h2>요약</h2>
   <table>
     <tbody>
-      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Data N/A</td><td>"정보 없음"</td></tr>
-      <tr><td style='font-weight:600;color:var(--accent);'>Data N/A</td><td>"정보 없음"</td></tr>
-      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"정보 없음"</td></tr>
-      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>매출 급감으로 인해 시장 반응은 부정적일 것으로 예상됨.</td></tr>
+      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Karen S. Lynch</td><td>"통합헬스케어 모델로 단기 리테일 악화 극복, 보험사업 중심 성장 전환"</td></tr>
+      <tr><td style='font-weight:600;color:var(--accent);'>Thomas M. Cowhey</td><td>"다각화 수익기반으로 현금창출 견조, 전년도 가이던스 유지하나 하향 리스크 존재"</td></tr>
+      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"PBM 수익률 압박과 리테일 둔화로 성장세 둔화, 보험부문 실적만이 위안"</td></tr>
+      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>매출은 컨센서스 부합하나 리테일 둔화에 신중한 반응, 주가 약세</td></tr>
     </tbody>
   </table>
 </div>
@@ -219,12 +308,20 @@
   <div class="section-label">05 &mdash; 자료 링크</div>
   <h2>원본 자료</h2>
   <div class="links-grid>
+    <a class="link-card" href="https://investors.cvshealth.com/news-releases/news-release-details/cvs-health-reports-first-quarter-2026-results" target="_blank">
+      <div class="link-icon">📄</div>
+      <div class="link-text"><div class="link-title">CVS Health Q1 2026 Earnings Press Release</div><div class="link-url">https://investors.cvshealth.com/news-releases/news-release-details/cvs-health-reports-first-quarter-2026-results</div></div>
+    </a>
+    <a class="link-card" href="https://investors.cvshealth.com/events/event-details/cvs-health-reports-first-quarter-2026-results-earnings-call" target="_blank">
+      <div class="link-icon">🎬</div>
+      <div class="link-text"><div class="link-title">Q1 2026 Earnings Call Transcript</div><div class="link-url">https://investors.cvshealth.com/events/event-details/cvs-health-reports-first-quarter-2026-results-earnings-call</div></div>
+    </a>
 
   </div>
 </div>
 
 <div class="footer">
-  Generated by Earnings Call Analyzer &mdash; 2026-05-10 &mdash; MACROHARD / Be:Analogue
+  Generated by Earnings Call Analyzer &mdash; 2026-05-07 &mdash; MACROHARD / Be:Analogue
 </div>
 
 </div>

@@ -35,3 +35,19 @@
 | PYPL | 페이팔 홀딩스 | MISS | PYPL_2026Q1.html |
 | ROK | 록웰 오토메이션 | MIXED | ROK_2026Q1.html |
 | WEC | WEC 에너지 그룹 | MIXED | WEC_2026Q1.html |
+
+## 2026-05-07
+| 티커 | 회사명 | Verdict | 파일 |
+|------|--------|---------|------|
+| DIS | 월트 디즈니 컴퍼니 | MIXED | DIS_2026Q1.html |
+| UBER | 우버 테크놀로지스 | MIXED | UBER_2026Q1.html |
+| CVS | CVS 헬스 | MIXED | CVS_2026Q1.html |
+| DASH | 도어대시 (DoorDash) | PENDING | DASH_2026Q1.html |
+| FTNT | 포티넷 (Fortinet) | MIXED | FTNT_2026Q1.html |
+| O | 리얼티 인컴 (Realty Income) | MISS | O_2026Q1.html |
+| MET | 메트라이프 (MetLife) | MIXED | MET_2026Q1.html |
+
+## 2026-05-10
+| 티커 | 회사명 | Verdict | 파일 |
+|------|--------|---------|------|
+| WEC | WEC 에너지 그룹 | MISS | WEC_2026Q1.html |

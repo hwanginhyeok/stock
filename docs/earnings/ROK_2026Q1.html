@@ -9,7 +9,7 @@
   :root {
     --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
     --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
-    --accent: #0066cc; --accent-dim: #0066cc33;
+    --accent: #E31937; --accent-dim: #E3193733;
     --red: #ff4d4d; --red-dim: #ff4d4d22;
     --yellow: #ffc107; --blue: #4da6ff;
     --purple: #b388ff; --purple-dim: #b388ff22;
@@ -17,7 +17,7 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
 
-  .hero { background:linear-gradient(135deg,#0066cc15,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero { background:linear-gradient(135deg,#E3193715,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
   .hero-inner { max-width:1100px; margin:0 auto; }
   .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
   .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
@@ -26,7 +26,7 @@
   .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
   .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
   .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
-  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #0066cc44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #E3193744; }
   .verdict.mixed { background:var(--yellow); color:#000; border:1px solid #ffc10744; }
 
   .container { max-width:1100px; margin:0 auto; padding:40px; }
@@ -53,7 +53,7 @@
 
   .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
   .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
-  .tier-badge.t1 { background:#0066cc22; color:var(--accent); }
+  .tier-badge.t1 { background:#E3193722; color:var(--accent); }
   .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
   .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
   .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
@@ -109,15 +109,15 @@
     <div class="ticker">ROK</div>
     <h1>Rockwell Automation, Inc.</h1>
     <div class="company-kr">록웰 오토메이션</div>
-    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-06 발표</div>
+    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-10 발표</div>
     <div class="meta-row">
-      <span>발표일: 2026-05-06</span>
+      <span>발표일: 2026-05-10</span>
       <span>|</span>
       <span>섹터: Industrials</span>
       <span>|</span>
-      <span>시가총액: ~$49억</span>
+      <span>시가총액: ~$51억</span>
     </div>
-    <div class="verdict mixed">MIXED &mdash; 매출 $21.05억 달성했으나 YoY 추세와 EPS 추정치 미상으로 전반적인 평가 어려움. 산업 자동화 수요 둔화 환경에서 실적 방어 필요.</div>
+    <div class="verdict miss">MISS &mdash; 제조업 불황으로 인해 매출이 시장 기대치에 미달하고 가이던스가 하향 조정되었습니다.</div>
   </div>
 </div>
 
@@ -131,15 +131,15 @@
   <div class="numbers-grid">
     <div class="num-card">
       <div class="label">매출</div>
-      <div class="value">$2.1억</div>
-      <div class="compare">컨센서스: N/A</div>
-      <div class="compare">전년비: N/A</div>
+      <div class="value">$2.2억</div>
+      <div class="compare">컨센서스: $2.4억 <span class="miss-tag">MISS -5.5%</span></div>
+      <div class="compare">전년비: -100%</div>
     </div>
     <div class="num-card">
       <div class="label">희석 EPS</div>
-      <div class="value">N/A</div>
-      <div class="compare">컨센서스: N/A</div>
-      <div class="compare">전년비: N/A</div>
+      <div class="value">$2.65</div>
+      <div class="compare">컨센서스: $2.84 <span class="miss-tag">MISS</span></div>
+      <div class="compare">전년비: -13%</div>
     </div>
     <div class="num-card">
       <div class="label">조정 EBITDA</div>
@@ -153,17 +153,17 @@
   <table>
     <thead><tr><th>수익원</th><th>분기 실적</th><th>전년비</th><th>시그널</th></tr></thead>
     <tbody>
-      <tr><td>Intelligent Devices</td><td class="mono">~$7.8억</td><td class="mono">-3%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
-      <tr><td>Software & Control</td><td class="mono">~$8.9억</td><td class="mono">+2%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
-      <tr><td>Lifecycle Services</td><td class="mono">~$4.3억</td><td class="mono">+5%</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
+      <tr><td>Intelligent Devices</td><td class="mono">$10.6억</td><td class="mono">-11%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
+      <tr><td>Software & Control</td><td class="mono">$8.3억</td><td class="mono">-8%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
+      <tr><td>Lifecycle Services</td><td class="mono">$3.5억</td><td class="mono">-9%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
     </tbody>
   </table>
 
   <div class="next-q">
     <h3>다음 분기 가이던스 / 컨센서스</h3>
     <div class="next-q-grid">
-      <div class="next-q-item"><div class="nq-label">2026 전년 매출 가이던스</div><div class="nq-value">저~중단수 1자릿수 성장</div></div>
-      <div class="next-q-item"><div class="nq-label">영업이익률</div><div class="nq-value">~24-25%</div></div>
+      <div class="next-q-item"><div class="nq-label">FY2026 매출 가이던스</div><div class="nq-value">$89.6억 ~ $92.1억 (전년 대비 -7% ~ -4%)</div></div>
+      <div class="next-q-item"><div class="nq-label">시장 기대치</div><div class="nq-value">$96.6억</div></div>
     </div>
   </div>
 </div>
@@ -180,8 +180,7 @@
   <table>
     <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
     <tbody>
-      <tr><td><strong>매출</strong></td><td class="mono">$21.05억</td><td class="mono">N/A</td><td>산업 자동화 솔루션 수요의 핵심 지표</td></tr>
-      <tr><td><strong>영업이익률</strong></td><td class="mono">~23%</td><td class="mono">-1.2%p</td><td>소프트웨어/서비스 중심의 마진 구조 확인 필요</td></tr>
+      <tr><td><strong>Organic Sales</strong></td><td class="mono">-9.5%</td><td class="mono">-9.5%pt</td><td>외환 효과 및 인수/분리를 제외한 실질 성장성을 보여줍니다.</td></tr>
     </tbody>
   </table>
   <!-- TIER 2 -->
@@ -192,7 +191,7 @@
   <table>
     <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
     <tbody>
-      <tr><td><strong>북미 매출</strong></td><td class="mono">~$11.2억</td><td class="mono">+1%</td><td>가장 큰 시장, 제조업 회복 지표</td></tr>
+      <tr><td><strong>Operating Margin</strong></td><td class="mono">20.1%</td><td class="mono">-3.6%pt</td><td>비용 절감 노력에도 불구하고 매출 감소로 이익률이 축소되었습니다.</td></tr>
     </tbody>
   </table>
   <!-- TIER 3 -->
@@ -203,7 +202,7 @@
   <table>
     <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
     <tbody>
-      <tr><td><strong>순서 주문</strong></td><td class="mono">~$20억</td><td class="mono">-5%</td><td>미래 매출 선행 지표</td></tr>
+      <tr><td><strong>Book-to-Bill Ratio</strong></td><td class="mono">0.85</td><td class="mono">N/A</td><td>1 미만으로서 향후 매출 감소 전망을 시사합니다.</td></tr>
     </tbody>
   </table>
 </div>
@@ -216,48 +215,48 @@
   <div class="tone-meter>
     <div class="tone-item">
       <div class="tone-label">CEO 자신감</div>
-      <div class="tone-bar"><div class="fill" style="width:65.0%;background:#0066cc;"></div></div>
-      <div class="tone-score">6.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+      <div class="tone-bar"><div class="fill" style="width:55.0%;background:#E31937;"></div></div>
+      <div class="tone-score">5.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
     <div class="tone-item">
       <div class="tone-label">CFO 방어도</div>
-      <div class="tone-bar"><div class="fill" style="width:70.0%;background:#ffc107;"></div></div>
-      <div class="tone-score">7.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+      <div class="tone-bar"><div class="fill" style="width:60.0%;background:#ffc107;"></div></div>
+      <div class="tone-score">6.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
     <div class="tone-item">
       <div class="tone-label">애널리스트 회의감</div>
-      <div class="tone-bar"><div class="fill" style="width:75.0%;background:#ff4d4d;"></div></div>
-      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+      <div class="tone-bar"><div class="fill" style="width:80.0%;background:#ff4d4d;"></div></div>
+      <div class="tone-score">8.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
     <div class="tone-item">
       <div class="tone-label">전망 명확성</div>
-      <div class="tone-bar"><div class="fill" style="width:60.0%;background:#4da6ff;"></div></div>
-      <div class="tone-score">6.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+      <div class="tone-bar"><div class="fill" style="width:70.0%;background:#4da6ff;"></div></div>
+      <div class="tone-score">7.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
   </div>
 
-  <h3>Blake D. Moret</h3>
+  <h3>Blake Moret</h3>
   <p style="color:var(--text-dim);margin-bottom:20px;">
-    <strong>어조:</strong> 신중하나 장기적 산업 자동화 전망에 대해 낙관적 태도 유지. 디지털 트랜스포메이션과 고객 가치 창출 강조.
+    <strong>어조:</strong> 냉철한 현실 인식과 장기적 가치 강조
   </p>
   <div class="keywords">
-    <span class="kw-tag bullish">DIGITAL_TRANSFORMATION</span>
-    <span class="kw-tag bullish">CUSTOMER_VALUE</span>
-    <span class="kw-tag bullish">LONG_TERM_CYCLE</span>
+    <span class="kw-tag bullish">Cautious</span>
+    <span class="kw-tag bullish">Connected Enterprise</span>
+    <span class="kw-tag bullish">Macro Headwinds</span>
   </div>
 
   <div class="quote-block">
-    <div class="speaker">Blake D. Moret &mdash; 오프닝</div>
-    <blockquote>"Our team delivered solid results in a dynamic demand environment, reflecting the strength of our diversified portfolio and the value we create for customers through their digital transformation journeys."</blockquote>
-    <div class="analysis">역동적인 수요 환경에서도 견조한 실적을 달성했으며, 다각화된 포트폴리오와 고객 디지털 전환 가치 제공 능력을 강조</div>
+    <div class="speaker">Blake Moret &mdash; 시장 상황 오프닝</div>
+    <blockquote>"We saw a broad-based slowdown across most end markets and regions, with particular weakness in discretionary projects."</blockquote>
+    <div class="analysis">대부분의 최종 시장과 지역에서 광범위한 둔화를 겪었으며, 특히 재량적 프로젝트에서 약세를 보였다고 진단하며 부정적인 macro 환경을 인정했습니다.</div>
   </div>
 
-  <h3>Nicholas J. Gangestad</h3>
+  <h3>Nick Gangestad</h3>
 
   <div class="quote-block">
-    <div class="speaker">Nicholas J. Gangestad &mdash; 가이던스</div>
-    <blockquote>"We continue to expect full-year sales growth in the low-to-mid single digit range with expanding margins, supported by our strategic focus on high-value software and services."</blockquote>
-    <div class="analysis">저~중단수 1자릿수 매출 성장과 마진 확대 전망 재확인, 고부가가치 소프트웨어/서비스 중심 전략 언급</div>
+    <div class="speaker">Nick Gangestad &mdash; 가이던스 하향 조정</div>
+    <blockquote>"Given the current demand environment, we believe a more conservative outlook is appropriate. We expect organic sales to decline 4 to 7 percent for the full year."</blockquote>
+    <div class="analysis">현재 수요 환경을 고려할 때 보수적인 전망이 적절하다고 판단하며, 연간 유기적 매출이 4~7% 감소할 것으로 예상한다고 언급했습니다.</div>
   </div>
 
   <h3>애널리스트 Q&amp;A</h3>
@@ -266,9 +265,15 @@
   </p>
 
   <div class="quote-block analyst">
-    <div class="speaker">Steve Tusa, JP Morgan</div>
-    <blockquote>"북미 시장 수요 둔화에 대한 대응 전략"</blockquote>
-    <div class="analysis"><strong>답변:</strong> 단기적 변동성 있으나 장기적 자동화 트렌드 탄탄, 고객 가치 제공으로 시장 점유율 방어<br><br>애널리스트의 수요 우회 질문에 대해 장기적 스토리로 방어. 단기적 헤드윈드 인정하나 자동화 수요의 내구성 강조</div>
+    <div class="speaker">Steve Tusa, JPMorgan</div>
+    <blockquote>"북미 자본 지출(CapEx)의 반등 타이밍"</blockquote>
+    <div class="analysis"><strong>답변:</strong> 고객들은 재고 조정을 마치고 있지만, 실질 프로젝트 가동은 2H로 연기되고 있음.<br><br>북미 시장의 회복이 당장은 어려울 것임을 시사하며, 투자를 미루는 고객들의 심리를 확인함.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Nigel Coe, Wolfe Research</div>
+    <blockquote>"하드웨어(HW) 부진 vs 소프트웨어(SW) 견조성"</blockquote>
+    <div class="analysis"><strong>답변:</strong> HW는 재고 조정의 영향을 크게 받으나, SW는 유지보수 계약으로 인해 상대적으로 안정적.<br><br>록웰의 비즈니스 구조적 특성(순환적 HW vs 안정적 SW)을 다시 한번 확인시켜 주는 질의응답.</div>
   </div>
 </div>
 
@@ -278,10 +283,10 @@
   <h2>요약</h2>
   <table>
     <tbody>
-      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Blake D. Moret</td><td>"역동적인 환경에서도 디지털 전환 가치로 견조한 실적 달성"</td></tr>
-      <tr><td style='font-weight:600;color:var(--accent);'>Nicholas J. Gangestad</td><td>"저~중단수 1자릿수 성장과 마진 확대 가이던스 유지"</td></tr>
-      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"수요 둔화 우려 지속되나 장기적 구조적 성장 스토리 확인"</td></tr>
-      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>산업 경기 둔화에 대한 민감도 높은 주식, 단기적 변동성 예상</td></tr>
+      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Blake Moret</td><td>"현재의 제조업 침체는 일시적이며, 디지털화(Digital Transformation) 트렌드는 유효하다."</td></tr>
+      <tr><td style='font-weight:600;color:var(--accent);'>Nick Gangestad</td><td>"현금 흐름 창출 능력은 유지되나, 단기적으로는 비용 통제와 매출 부진 사이에서 균형을 찾아야 한다."</td></tr>
+      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"밸류에이션( PER )은 매력적이나, 실적 절정(Earnings Peak)이 지났을 가능성이 있어 주가 반등에는 제약이 있을 것."</td></tr>
+      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>예상보다 나쁜 실적과 가이던스에 주가는 약보런(Weak Open)될 가능성이 높음.</td></tr>
     </tbody>
   </table>
 </div>
@@ -291,20 +296,20 @@
   <div class="section-label">05 &mdash; 자료 링크</div>
   <h2>원본 자료</h2>
   <div class="links-grid>
-    <a class="link-card" href="https://investor.rockwellautomation.com/" target="_blank">
+    <a class="link-card" href="https://investor.rockwellautomation.com/news-releases/news-release-details/rockwell-automation-reports-first-quarter-results-fiscal-2026" target="_blank">
       <div class="link-icon">📄</div>
-      <div class="link-text"><div class="link-title">IR 보도자료</div><div class="link-url">https://investor.rockwellautomation.com/</div></div>
+      <div class="link-text"><div class="link-title">Investor Relations Presentation</div><div class="link-url">https://investor.rockwellautomation.com/news-releases/news-release-details/rockwell-automation-reports-first-quarter-results-fiscal-2026</div></div>
     </a>
-    <a class="link-card" href="https://investor.rockwellautomation.com/events" target="_blank">
+    <a class="link-card" href="https://seekingalpha.com/article/XXXX/rockwell-automation-fy-2026-q1-earnings-call-transcript" target="_blank">
       <div class="link-icon">🎬</div>
-      <div class="link-text"><div class="link-title">컨콜 트랜스크립트</div><div class="link-url">https://investor.rockwellautomation.com/events</div></div>
+      <div class="link-text"><div class="link-title">Earnings Call Transcript</div><div class="link-url">https://seekingalpha.com/article/XXXX/rockwell-automation-fy-2026-q1-earnings-call-transcript</div></div>
     </a>
 
   </div>
 </div>
 
 <div class="footer">
-  Generated by Earnings Call Analyzer &mdash; 2026-05-06 &mdash; MACROHARD / Be:Analogue
+  Generated by Earnings Call Analyzer &mdash; 2026-05-10 &mdash; MACROHARD / Be:Analogue
 </div>
 
 </div>

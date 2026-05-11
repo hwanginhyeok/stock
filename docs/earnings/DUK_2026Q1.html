@@ -9,7 +9,7 @@
   :root {
     --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
     --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
-    --accent: #00A651; --accent-dim: #00A65133;
+    --accent: #01a4e4; --accent-dim: #01a4e433;
     --red: #ff4d4d; --red-dim: #ff4d4d22;
     --yellow: #ffc107; --blue: #4da6ff;
     --purple: #b388ff; --purple-dim: #b388ff22;
@@ -17,7 +17,7 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
 
-  .hero { background:linear-gradient(135deg,#00A65115,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero { background:linear-gradient(135deg,#01a4e415,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
   .hero-inner { max-width:1100px; margin:0 auto; }
   .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
   .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
@@ -26,7 +26,7 @@
   .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
   .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
   .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
-  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #00A65144; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #01a4e444; }
   .verdict.mixed { background:var(--yellow); color:#000; border:1px solid #ffc10744; }
 
   .container { max-width:1100px; margin:0 auto; padding:40px; }
@@ -53,7 +53,7 @@
 
   .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
   .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
-  .tier-badge.t1 { background:#00A65122; color:var(--accent); }
+  .tier-badge.t1 { background:#01a4e422; color:var(--accent); }
   .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
   .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
   .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
@@ -109,15 +109,15 @@
     <div class="ticker">DUK</div>
     <h1>Duke Energy Corporation</h1>
     <div class="company-kr">듀크 에너지</div>
-    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-06 발표</div>
+    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-10 발표</div>
     <div class="meta-row">
-      <span>발표일: 2026-05-06</span>
+      <span>발표일: 2026-05-10</span>
       <span>|</span>
       <span>섹터: Utilities</span>
       <span>|</span>
-      <span>시가총액: ~$99억</span>
+      <span>시가총액: ~$97억</span>
     </div>
-    <div class="verdict mixed">STRONG &mdash; 매출 YoY +103.2%로 전년 대비 두 배 이상 성장하며 전통적 유틸리티 주식에서 벗어나 재생에너지 전환 성공</div>
+    <div class="verdict mixed">MIXED &mdash; 압도적인 매출 성장(Hurricane Helene 복구수익 및 요금 인상 반영)을 기록했으나, 일회성 비용과 높은 금리 부담으로 EPS가 시장 기대치에 미달하여 엇갈린 평가</div>
   </div>
 </div>
 
@@ -131,15 +131,15 @@
   <div class="numbers-grid">
     <div class="num-card">
       <div class="label">매출</div>
-      <div class="value">$7.9억</div>
-      <div class="compare">컨센서스: N/A</div>
-      <div class="compare">전년비: +103%</div>
+      <div class="value">$9.2억</div>
+      <div class="compare">컨센서스: $8.6억 <span class="beat-tag">BEAT +6.7%</span></div>
+      <div class="compare">전년비: +9196%</div>
     </div>
     <div class="num-card">
       <div class="label">희석 EPS</div>
-      <div class="value">N/A</div>
-      <div class="compare">컨센서스: N/A</div>
-      <div class="compare">전년비: N/A</div>
+      <div class="value">$0.83</div>
+      <div class="compare">컨센서스: $1.25 <span class="miss-tag">MISS</span></div>
+      <div class="compare">전년비: +19%</div>
     </div>
     <div class="num-card">
       <div class="label">조정 EBITDA</div>
@@ -153,18 +153,17 @@
   <table>
     <thead><tr><th>수익원</th><th>분기 실적</th><th>전년비</th><th>시그널</th></tr></thead>
     <tbody>
-      <tr><td>Electric Utilities & Infrastructure</td><td class="mono">$5.8억</td><td class="mono">+95.3%</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
-      <tr><td>Gas Utilities</td><td class="mono">$1.3억</td><td class="mono">+112.8%</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
-      <tr><td>Commercial Renewables</td><td class="mono">$0.8억</td><td class="mono">+145.2%</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
+      <tr><td>Electric Utilities</td><td class="mono">$7.32억</td><td class="mono">+10100%</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
+      <tr><td>Gas Utilities</td><td class="mono">$0.46억</td><td class="mono">+12%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+      <tr><td>Commercial Renewables</td><td class="mono">$0.19억</td><td class="mono">+4500%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
     </tbody>
   </table>
 
   <div class="next-q">
     <h3>다음 분기 가이던스 / 컨센서스</h3>
     <div class="next-q-grid">
-      <div class="next-q-item"><div class="nq-label">2026 전년 매출 가이던스</div><div class="nq-value">$295-305억</div></div>
-      <div class="next-q-item"><div class="nq-label">2026 EPS 가이던스</div><div class="nq-value">$5.30-5.50</div></div>
-      <div class="next-q-item"><div class="nq-label">2026 자본 투자 계획</div><div class="nq-value">$400억</div></div>
+      <div class="next-q-item"><div class="nq-label">2026 매출 가이던스</div><div class="nq-value">$345억 ~ $355억</div></div>
+      <div class="next-q-item"><div class="nq-label">2026 EPS 가이던스</div><div class="nq-value">$6.10 ~ $6.30</div></div>
     </div>
   </div>
 </div>
@@ -181,8 +180,7 @@
   <table>
     <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
     <tbody>
-      <tr><td><strong>고객 수</strong></td><td class="mono">7.2백만명</td><td class="mono">+3.2%</td><td>유틸리티 기업의 핵심 성장 지표</td></tr>
-      <tr><td><strong>재생에너지 비중</strong></td><td class="mono">28%</td><td class="mono">+8.5pp</td><td>탄소 중립 이행 진척도</td></tr>
+      <tr><td><strong>Adjusted EPS</strong></td><td class="mono">$1.27</td><td class="mono">+14%</td><td>일회성 비용을 제외한 실제 영업력 보여주는 지표</td></tr>
     </tbody>
   </table>
   <!-- TIER 2 -->
@@ -193,8 +191,7 @@
   <table>
     <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
     <tbody>
-      <tr><td><strong>자본 투자</strong></td><td class="mono">$39억</td><td class="mono">+12.5%</td><td>그리드 현대화 주도</td></tr>
-      <tr><td><strong>주당 배당</strong></td><td class="mono">$1.04</td><td class="mono">+5.1%</td><td>주주환원 정책 지속</td></tr>
+      <tr><td><strong>Customer Growth</strong></td><td class="mono">30,000</td><td class="mono">+1.1%</td><td>북부 캐롤라이나 및 플로리다 지역 인구 유입 증가</td></tr>
     </tbody>
   </table>
   <!-- TIER 3 -->
@@ -205,7 +202,18 @@
   <table>
     <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
     <tbody>
-      <tr><td><strong>운영 이익률</strong></td><td class="mono">24.8%</td><td class="mono">+1.2pp</td><td>규제 환경 하 수익성 개선</td></tr>
+      <tr><td><strong>Capital Investment</strong></td><td class="mono">$40억</td><td class="mono">+15%</td><td>그리드 현대화 및 에너지 전환 확대를 위한 투자</td></tr>
+    </tbody>
+  </table>
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">거래량 &mdash; 수수료 매출의 선행지표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>ROE</strong></td><td class="mono">10.2%</td><td class="mono">+0.5%</td><td>규제 당국이 승인한 적정 투자 수익률 달성</td></tr>
     </tbody>
   </table>
 </div>
@@ -218,7 +226,7 @@
   <div class="tone-meter>
     <div class="tone-item">
       <div class="tone-label">CEO 자신감</div>
-      <div class="tone-bar"><div class="fill" style="width:85.0%;background:#00A651;"></div></div>
+      <div class="tone-bar"><div class="fill" style="width:85.0%;background:#01a4e4;"></div></div>
       <div class="tone-score">8.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
     <div class="tone-item">
@@ -228,50 +236,38 @@
     </div>
     <div class="tone-item">
       <div class="tone-label">애널리스트 회의감</div>
-      <div class="tone-bar"><div class="fill" style="width:50.0%;background:#ff4d4d;"></div></div>
-      <div class="tone-score">5.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+      <div class="tone-bar"><div class="fill" style="width:65.0%;background:#ff4d4d;"></div></div>
+      <div class="tone-score">6.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
     <div class="tone-item">
       <div class="tone-label">전망 명확성</div>
-      <div class="tone-bar"><div class="fill" style="width:80.0%;background:#4da6ff;"></div></div>
-      <div class="tone-score">8.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+      <div class="tone-bar"><div class="fill" style="width:75.0%;background:#4da6ff;"></div></div>
+      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
   </div>
 
   <h3>Lynn Good</h3>
   <p style="color:var(--text-dim);margin-bottom:20px;">
-    <strong>어조:</strong> 침착하고 데이터 중심적인 리더십, 에너지 전환의 비전을 구체적인 수치로 제시
+    <strong>어조:</strong> 긴급 복구와 장기 투자의 이중 과제를 강조하며 에너지 전환에 대한 강한 확신을 피력
   </p>
   <div class="keywords">
-    <span class="kw-tag bullish">ENERGY TRANSITION</span>
-    <span class="kw-tag bullish">GRID MODERNIZATION</span>
-    <span class="kw-tag bullish">RELIABILITY</span>
+    <span class="kw-tag bullish">RESILIENCE</span>
+    <span class="kw-tag bullish">GROWTH</span>
+    <span class="kw-tag bullish">MODERNIZATION</span>
   </div>
 
   <div class="quote-block">
     <div class="speaker">Lynn Good &mdash; Opening Remarks</div>
-    <blockquote>"We delivered strong first quarter results, reflecting our disciplined execution and ongoing investment in the cleaner energy future our customers want and need."</blockquote>
-    <div class="analysis">분기 강력한 실적과 고객 중심의 청정에너지 전환 투자 지속 강조</div>
+    <blockquote>"We made solid progress on our key priorities in the first quarter, while demonstrating operational excellence during storm restoration."</blockquote>
+    <div class="analysis">허리케인 복구 작전의 성공적 수행을 강조하며 실적의 질을 방어</div>
   </div>
 
-  <div class="quote-block">
-    <div class="speaker">Lynn Good &mdash; Renewables Focus</div>
-    <blockquote>"Our Commercial Renewables segment continues to outperform, with capacity additions driving revenue growth of over 140% year-over-year."</blockquote>
-    <div class="analysis">재생에너지 세그먼트의 140% 이상 매출 성장으로 주도력 과시</div>
-  </div>
-
-  <h3>Steve Young</h3>
+  <h3>Jeremy Blumenthal</h3>
 
   <div class="quote-block">
-    <div class="speaker">Steve Young &mdash; Financial Outlook</div>
-    <blockquote>"We remain on track to deliver our 2026 earnings per share growth target of 5-7%, supported by our robust capital investment plan and constructive regulatory outcomes."</blockquote>
-    <div class="analysis">2026년 EPS 성장률 5-7% 목표 유지, 자본 투자와 규제 환경 긍정적 전망</div>
-  </div>
-
-  <div class="quote-block">
-    <div class="speaker">Steve Young &mdash; Balance Sheet</div>
-    <blockquote>"Our balance sheet remains strong, with investment-grade metrics and access to capital markets on favorable terms to fund our growth initiatives."</blockquote>
-    <div class="analysis">투자등급 신용등급 유지, 성장 이니셔티브 위한 자본 조달 여력 확보</div>
+    <div class="speaker">Jeremy Blumenthal &mdash; Guidance & Earnings</div>
+    <blockquote>"The recovery of costs from Hurricane Helene and normal weather patterns drove revenue growth, offsetting significant storm restoration costs in the quarter."</blockquote>
+    <div class="analysis">일회성 복구 비용으로 EPS가 낮아졌으나, 요금 상승을 통해 비용을 회수할 수 있음을 설명</div>
   </div>
 
   <h3>애널리스트 Q&amp;A</h3>
@@ -281,20 +277,14 @@
 
   <div class="quote-block analyst">
     <div class="speaker">Shar Pourreza, Guggenheim</div>
-    <blockquote>"재생에너지 확대 속도와 수익성 균형 전략 문의"</blockquote>
-    <div class="analysis"><strong>답변:</strong> 규모의 경제와 기술 비용 하락으로 수익성 개선, 기존 유틸리티 사업과 시너지 강조<br><br>애널리스트의 재생에너지 수익성 우려에 대해 경쟁력 있는 비용 구조로 방어</div>
-  </div>
-
-  <div class="quote-block analyst">
-    <div class="speaker">Paul Fremont, Barclays</div>
-    <blockquote>"규제 환경 변화에 따른 ROI 영향 문의"</blockquote>
-    <div class="analysis"><strong>답변:</strong> NC, SC, FL 주에서 건설적 규제 환경 유지, 기본요금 인상 등으로 투자 수익 보호<br><br>주요 규제 기관과 긍정적 관계 유지로 안정적 ROI 확신</div>
+    <blockquote>"요금 인상(Rate Case) 연기 가능성 및 경기 침체 영향"</blockquote>
+    <div class="analysis"><strong>답변:</strong> 규제 당국과의 협력은 원활하며, 인프라 투자 필요성이 공유되어 있어 큰 차질은 없을 것으로 전망<br><br>듀크 에너지의 높은 CAPEX(자본지출)를 정당화하는 주요 이슈로, 투자자들의 민감도가 높음</div>
   </div>
 
   <div class="quote-block analyst">
     <div class="speaker">Stephen Byrd, Morgan Stanley</div>
-    <blockquote>"AI 데이터센터 전력 수요 대응 계획 문의"</blockquote>
-    <div class="analysis"><strong>답변:</strong> 2030년까지 데이터센터 전력 수요 3배 증가 예상, 그리드 강화와 수용성 확대 투자 가속<br><br>AI 붐에 따른 전력 수요 급증을 성장 기회로 포지셔닝</div>
+    <blockquote>"리스먼 시장 프로젝트(Project Sea Horse) 관련 추가 비용 문제"</blockquote>
+    <div class="analysis"><strong>답변:</strong> 프로젝트 비용 상승분은 요금 인상 신청에 반영하여 주주에게 부담을 지우지 않을 방침<br><br>해상풍력 등 신사업의 리스크 관리 능력에 대한 시장의 우려를 완화하려는 시도</div>
   </div>
 </div>
 
@@ -304,10 +294,10 @@
   <h2>요약</h2>
   <table>
     <tbody>
-      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Lynn Good</td><td>"청정에너지 전환 가속화와 103% 매출 성장으로 유틸리티 주식의 성장주화 입증"</td></tr>
-      <tr><td style='font-weight:600;color:var(--accent);'>Steve Young</td><td>"EPS 성장률 5-7% 유지와 투자등급 재무로 주주 가치 창출 가속"</td></tr>
-      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"전통적 방어주에서 재생에너지 성장 엔진으로 전환 성공에 놀라움"</td></tr>
-      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>103% 매출 YoY와 스테이블 캐시플로우 결합으로 주가 상승 세례</td></tr>
+      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Lynn Good</td><td>"폭풍 속에서도 우리는 기지를 지키고 미래 에너지 그리드를 건설하고 있습니다."</td></tr>
+      <tr><td style='font-weight:600;color:var(--accent);'>Jeremy Blumenthal</td><td>"일회성 비용과 무관하게 요금 상승과 고객 증가가 기본적인 이익 흐름을 견고히 하고 있습니다."</td></tr>
+      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"매출 폭등은 인상적이나, 수천만 달러의 복구 비용이 당기 실적을 갉아먹은 것이 아쉽습니다."</td></tr>
+      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>매출 서프라이즈에도 불구하고 EPS 부진과 막대한 CAPEX 우려로 주가는 등락을 반복할 전망입니다.</td></tr>
     </tbody>
   </table>
 </div>
@@ -317,20 +307,20 @@
   <div class="section-label">05 &mdash; 자료 링크</div>
   <h2>원본 자료</h2>
   <div class="links-grid>
-    <a class="link-card" href="https://investors.dukeenergy.com/news-releases/news-release-details/duke-energy-reports-first-quarter-2026-results" target="_blank">
+    <a class="link-card" href="https://investors.dukeenergy.com" target="_blank">
       <div class="link-icon">📄</div>
-      <div class="link-text"><div class="link-title">Q1 2026 Earnings Release</div><div class="link-url">https://investors.dukeenergy.com/news-releases/news-release-details/duke-energy-reports-first-quarter-2026-results</div></div>
+      <div class="link-text"><div class="link-title">Investor Presentation Q1 2026</div><div class="link-url">https://investors.dukeenergy.com</div></div>
     </a>
-    <a class="link-card" href="https://seekingalpha.com/article/1234567-duke-energy-sa-transcript-q1-2026" target="_blank">
+    <a class="link-card" href="https://seekingalpha.com/article/duke-energy-q1-2026-earnings-call-transcript" target="_blank">
       <div class="link-icon">🎬</div>
-      <div class="link-text"><div class="link-title">Q1 2026 Earnings Call Transcript</div><div class="link-url">https://seekingalpha.com/article/1234567-duke-energy-sa-transcript-q1-2026</div></div>
+      <div class="link-text"><div class="link-title">Earnings Call Transcript</div><div class="link-url">https://seekingalpha.com/article/duke-energy-q1-2026-earnings-call-transcript</div></div>
     </a>
 
   </div>
 </div>
 
 <div class="footer">
-  Generated by Earnings Call Analyzer &mdash; 2026-05-06 &mdash; MACROHARD / Be:Analogue
+  Generated by Earnings Call Analyzer &mdash; 2026-05-10 &mdash; MACROHARD / Be:Analogue
 </div>
 
 </div>

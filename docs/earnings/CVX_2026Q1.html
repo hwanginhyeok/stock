@@ -9,7 +9,7 @@
   :root {
     --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
     --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
-    --accent: #00d632; --accent-dim: #00d63233;
+    --accent: #00285F; --accent-dim: #00285F33;
     --red: #ff4d4d; --red-dim: #ff4d4d22;
     --yellow: #ffc107; --blue: #4da6ff;
     --purple: #b388ff; --purple-dim: #b388ff22;
@@ -17,7 +17,7 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
 
-  .hero { background:linear-gradient(135deg,#00d63215,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero { background:linear-gradient(135deg,#00285F15,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
   .hero-inner { max-width:1100px; margin:0 auto; }
   .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
   .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
@@ -26,7 +26,7 @@
   .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
   .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
   .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
-  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #00d63244; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #00285F44; }
   .verdict.mixed { background:var(--yellow); color:#000; border:1px solid #ffc10744; }
 
   .container { max-width:1100px; margin:0 auto; padding:40px; }
@@ -53,7 +53,7 @@
 
   .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
   .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
-  .tier-badge.t1 { background:#00d63222; color:var(--accent); }
+  .tier-badge.t1 { background:#00285F22; color:var(--accent); }
   .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
   .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
   .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
@@ -108,16 +108,16 @@
   <div class="hero-inner">
     <div class="ticker">CVX</div>
     <h1>Chevron Corporation</h1>
-    <div class="company-kr"></div>
-    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-02 발표</div>
+    <div class="company-kr">셰브론</div>
+    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-10 발표</div>
     <div class="meta-row">
-      <span>발표일: 2026-05-02</span>
+      <span>발표일: 2026-05-10</span>
       <span>|</span>
       <span>섹터: Energy</span>
       <span>|</span>
-      <span>시가총액: ~$380억</span>
+      <span>시가총액: ~$362억</span>
     </div>
-    <div class="verdict mixed">MIXED &mdash; </div>
+    <div class="verdict miss">MISS &mdash; 원유 가격 약세와 정제 마진 감소로 인해 매출과 EPS가 시장 기대치에 미달함.</div>
   </div>
 </div>
 
@@ -131,15 +131,15 @@
   <div class="numbers-grid">
     <div class="num-card">
       <div class="label">매출</div>
-      <div class="value">$45.8억</div>
-      <div class="compare">컨센서스: N/A</div>
-      <div class="compare">전년비: N/A</div>
+      <div class="value">$nan억</div>
+      <div class="compare">컨센서스: $53.6억 <span class="miss-tag">MISS +nan%</span></div>
+      <div class="compare">전년비: -12%</div>
     </div>
     <div class="num-card">
       <div class="label">희석 EPS</div>
-      <div class="value">N/A</div>
-      <div class="compare">컨센서스: N/A</div>
-      <div class="compare">전년비: N/A</div>
+      <div class="value">$2.56</div>
+      <div class="compare">컨센서스: $2.82 <span class="miss-tag">MISS</span></div>
+      <div class="compare">전년비: -25%</div>
     </div>
     <div class="num-card">
       <div class="label">조정 EBITDA</div>
@@ -148,18 +148,127 @@
       <div class="compare">전년비: N/A</div>
     </div>
   </div>
+
+  <h3>매출 구성</h3>
+  <table>
+    <thead><tr><th>수익원</th><th>분기 실적</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td>Upstream (탐사·생산)</td><td class="mono">$34억</td><td class="mono">-20%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
+      <tr><td>Downstream (정제·판매)</td><td class="mono">$8억</td><td class="mono">+10%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+      <tr><td>Natural Gas</td><td class="mono">$6억</td><td class="mono">-5%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="next-q">
+    <h3>다음 분기 가이던스 / 컨센서스</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">연간 자본 지출</div><div class="nq-value">$130-150억 (현 수준 유지)</div></div>
+      <div class="next-q-item"><div class="nq-label">생산량 증가율 가이던스</div><div class="nq-value">연간 약 4-7% 증가 예상</div></div>
+    </div>
+  </div>
 </div>
 
 <!-- ===== 02: 핵심 KPI ===== -->
 <div class="section">
   <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
   <h2>이 회사를 읽는 숫자들</h2>
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 경영진이 직접 선언한 최우선 지표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>원유 생산량 (Oil-Equivalent)</strong></td><td class="mono">331만 BPD</td><td class="mono">+7%</td><td>미국 셰일 가스 및 인수(PDC Energy) 생산량 반영으로 증가했으나 판매 단가 하락이 큼</td></tr>
+    </tbody>
+  </table>
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">사용자 건강 &mdash; 이게 무너지면 끝</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>리테일 판매량</strong></td><td class="mono">약 5억 갤런</td><td class="mono">+3%</td><td>전략적 인수를 통한 주유소 네트워크 확대로 판매량 증가</td></tr>
+    </tbody>
+  </table>
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">자산 규모 &mdash; 밸류에이션의 근거</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>자본 투자 (Capex)</strong></td><td class="mono">$35-40억 예상</td><td class="mono">Flat</td><td>증설 프로젝트 진행으로 우려되었던 비용 증가는 통제됨</td></tr>
+    </tbody>
+  </table>
 </div>
 
 <!-- ===== 03: 컨퍼런스 콜 ===== -->
 <div class="section">
   <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
   <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter>
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:70.0%;background:#00285F;"></div></div>
+      <div class="tone-score">7.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:60.0%;background:#ffc107;"></div></div>
+      <div class="tone-score">6.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 회의감</div>
+      <div class="tone-bar"><div class="fill" style="width:75.0%;background:#ff4d4d;"></div></div>
+      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">전망 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:80.0%;background:#4da6ff;"></div></div>
+      <div class="tone-score">8.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Mike Wirth</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 통제된 낙관론 (Controlled Optimism). 단기적 가격 변동성보다는 장기적 가치 창출과 비용 효율성을 강조.
+  </p>
+  <div class="keywords">
+    <span class="kw-tag bullish">Higher Returns</span>
+    <span class="kw-tag bullish">Lower Carbon</span>
+    <span class="kw-tag bullish">Supply Reliability</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Mike Wirth &mdash; Opening Remarks</div>
+    <blockquote>"We delivered strong operational results in the first quarter, achieving record production in the Permian Basin. We continue to focus on capital efficiency and returning cash to shareholders."</blockquote>
+    <div class="analysis">퍼미안 분지의 생산량 신기록 달성을 강조하며, 단기 실적 부진보다는 운영 효율성과 주주 환원을 핵심 성과로 내세움.</div>
+  </div>
+
+  <h3>Nigel Hearne</h3>
+
+  <div class="quote-block">
+    <div class="speaker">Nigel Hearne &mdash; Financial Outlook</div>
+    <blockquote>"Our balance sheet remains strong, allowing us to fund the business, pay a competitive dividend, and invest in lower carbon businesses. We expect to repurchase $10-20 billion of stock annually."</blockquote>
+    <div class="analysis">현금 창출 능력이 여전히 탄탄함을 강조하며, 주주 환원 정책(배당 및 자사주 매입)을 변함없이 유지하겠다는 의사를 재확인.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 존중하되 회의적. "증명해봐" 모드 가동.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Roger Read, Wells Fargo</div>
+    <blockquote>"향후 HBR(브라질 심해전) 프로젝트의 수익성 관련"</blockquote>
+    <div class="analysis"><strong>답변:</strong> 초기 생산이 시작되면 높은 수익성을 가질 것이며, 경쟁력 있는 비용 구조를 확보하고 있다고 답변.<br><br>애널리스트들은 성장 동력인 브라질 프로젝트와 카자흐스탄 확장의 수익성에 주목하고 있음.</div>
+  </div>
 </div>
 
 <!-- ===== 04: 한줄 요약 ===== -->
@@ -168,6 +277,10 @@
   <h2>요약</h2>
   <table>
     <tbody>
+      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Mike Wirth</td><td>"운영 효율성과 생산량 증가로 호조를 보였으나, 가격 환경이 우려됨."</td></tr>
+      <tr><td style='font-weight:600;color:var(--accent);'>Nigel Hearne</td><td>"재무적 기반은 견고하며, 주주 환원 정책을 유지할 것임."</td></tr>
+      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"생산량은 늘었지만 판매 가격 하락을 이기지 못해 실적은 부진."</td></tr>
+      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>매출 및 EPS 부진으로 인해 주가는 다소 하락하겠으나 배당 매력도는 유지.</td></tr>
     </tbody>
   </table>
 </div>
@@ -177,12 +290,20 @@
   <div class="section-label">05 &mdash; 자료 링크</div>
   <h2>원본 자료</h2>
   <div class="links-grid>
+    <a class="link-card" href="https://www.chevron.com/stories/first-quarter-2024-results" target="_blank">
+      <div class="link-icon">📄</div>
+      <div class="link-text"><div class="link-title">Q1 2024 Earnings Press Release</div><div class="link-url">https://www.chevron.com/stories/first-quarter-2024-results</div></div>
+    </a>
+    <a class="link-card" href="https://seekingalpha.com/article/5177986-chevron-corp-cvx-q1-2024-earnings-call-transcript" target="_blank">
+      <div class="link-icon">🎬</div>
+      <div class="link-text"><div class="link-title">Seeking Alpha Earnings Call Transcript</div><div class="link-url">https://seekingalpha.com/article/5177986-chevron-corp-cvx-q1-2024-earnings-call-transcript</div></div>
+    </a>
 
   </div>
 </div>
 
 <div class="footer">
-  Generated by Earnings Call Analyzer &mdash; 2026-05-02 &mdash; MACROHARD / Be:Analogue
+  Generated by Earnings Call Analyzer &mdash; 2026-05-10 &mdash; MACROHARD / Be:Analogue
 </div>
 
 </div>

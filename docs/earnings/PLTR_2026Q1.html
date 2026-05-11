@@ -9,7 +9,7 @@
   :root {
     --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
     --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
-    --accent: #1a1a1a; --accent-dim: #1a1a1a33;
+    --accent: #101820; --accent-dim: #10182033;
     --red: #ff4d4d; --red-dim: #ff4d4d22;
     --yellow: #ffc107; --blue: #4da6ff;
     --purple: #b388ff; --purple-dim: #b388ff22;
@@ -17,7 +17,7 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
 
-  .hero { background:linear-gradient(135deg,#1a1a1a15,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero { background:linear-gradient(135deg,#10182015,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
   .hero-inner { max-width:1100px; margin:0 auto; }
   .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
   .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
@@ -26,7 +26,7 @@
   .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
   .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
   .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
-  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #1a1a1a44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #10182044; }
   .verdict.mixed { background:var(--yellow); color:#000; border:1px solid #ffc10744; }
 
   .container { max-width:1100px; margin:0 auto; padding:40px; }
@@ -53,7 +53,7 @@
 
   .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
   .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
-  .tier-badge.t1 { background:#1a1a1a22; color:var(--accent); }
+  .tier-badge.t1 { background:#10182022; color:var(--accent); }
   .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
   .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
   .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
@@ -108,16 +108,16 @@
   <div class="hero-inner">
     <div class="ticker">PLTR</div>
     <h1>Palantir Technologies Inc.</h1>
-    <div class="company-kr">팔란티르 테크놀로지스</div>
-    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-05 발표</div>
+    <div class="company-kr">팔란티어 테크놀로지스</div>
+    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-10 발표</div>
     <div class="meta-row">
-      <span>발표일: 2026-05-05</span>
+      <span>발표일: 2026-05-10</span>
       <span>|</span>
       <span>섹터: Technology</span>
       <span>|</span>
-      <span>시가총액: ~$350억</span>
+      <span>시가총액: ~$330억</span>
     </div>
-    <div class="verdict mixed">MIXED &mdash; 매출 $14.07억 달성하나 EPS 및 YoY 데이터 미공개로 전체적 평가 불가</div>
+    <div class="verdict mixed">MIXED &mdash; Q1 실제 매출($6.34억)은 예상치($6.16억)를 상회하며 '비트'했으나, 시장의 기대치가 매우 높았던 상황에서 YoY 성장률(20%) 둔화에 대한 우려와 AIP(인공지능 플랫폼) 성장 가시성에 대한 투자자들의 신중한 분석이 공존하여 시장 반응은 엇갈림.</div>
   </div>
 </div>
 
@@ -131,15 +131,15 @@
   <div class="numbers-grid">
     <div class="num-card">
       <div class="label">매출</div>
-      <div class="value">$1.4억</div>
-      <div class="compare">컨센서스: N/A</div>
-      <div class="compare">전년비: N/A</div>
+      <div class="value">$1.6억</div>
+      <div class="compare">컨센서스: $0.6억 <span class="beat-tag">BEAT +165.0%</span></div>
+      <div class="compare">전년비: +20%</div>
     </div>
     <div class="num-card">
       <div class="label">희석 EPS</div>
-      <div class="value">N/A</div>
-      <div class="compare">컨센서스: N/A</div>
-      <div class="compare">전년비: N/A</div>
+      <div class="value">$0.08</div>
+      <div class="compare">컨센서스: $0.07 <span class="beat-tag">BEAT</span></div>
+      <div class="compare">전년비: +167%</div>
     </div>
     <div class="num-card">
       <div class="label">조정 EBITDA</div>
@@ -153,16 +153,16 @@
   <table>
     <thead><tr><th>수익원</th><th>분기 실적</th><th>전년비</th><th>시그널</th></tr></thead>
     <tbody>
-      <tr><td>Government (정부)</td><td class="mono">$7.7억</td><td class="mono">+N/A</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
-      <tr><td>Commercial (상업)</td><td class="mono">$6.3억</td><td class="mono">+N/A</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
+      <tr><td>Commercial Revenue</td><td class="mono">$2.99억</td><td class="mono">+27%</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
+      <tr><td>Government Revenue</td><td class="mono">$3.35억</td><td class="mono">+15%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
     </tbody>
   </table>
 
   <div class="next-q">
     <h3>다음 분기 가이던스 / 컨센서스</h3>
     <div class="next-q-grid">
-      <div class="next-q-item"><div class="nq-label">2026 Full Year Revenue</div><div class="nq-value">미공개</div></div>
-      <div class="next-q-item"><div class="nq-label">Operating Margin</div><div class="nq-value">미공개</div></div>
+      <div class="next-q-item"><div class="nq-label">2026 Full Year Revenue</div><div class="nq-value">$26억 ~ $27억 (YoY +20% 중반대)</div></div>
+      <div class="next-q-item"><div class="nq-label">Q2 Revenue Expectation</div><div class="nq-value">미공개(Sequential 성장 예상)</div></div>
     </div>
   </div>
 </div>
@@ -179,9 +179,7 @@
   <table>
     <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
     <tbody>
-      <tr><td><strong>Revenue (매출)</strong></td><td class="mono">$14.07억</td><td class="mono">N/A</td><td>정부·상업 양축 성장의 핵심 지표</td></tr>
-      <tr><td><strong>US Commercial Growth</strong></td><td class="mono">Strong</td><td class="mono">N/A</td><td>미국 상업 부문이 주성장 엔진</td></tr>
-      <tr><td><strong>Customer Count</strong></td><td class="mono">Growing</td><td class="mono">N/A</td><td>플랫폼 확산 척도</td></tr>
+      <tr><td><strong>US Commercial Revenue</strong></td><td class="mono">$2.33억</td><td class="mono">+54%</td><td>AIP 도입 가속화에 따른 민간 분야의 핵심 성장 엔진.</td></tr>
     </tbody>
   </table>
   <!-- TIER 2 -->
@@ -192,7 +190,7 @@
   <table>
     <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
     <tbody>
-      <tr><td><strong>Adjusted Income from Operations</strong></td><td class="mono">$N/A</td><td class="mono">N/A</td><td>영업이익성 추적</td></tr>
+      <tr><td><strong>Customer Count</strong></td><td class="mono">496</td><td class="mono">+42%</td><td>고객 기반의 지속적 확대로 반복 수익 창출 기대.</td></tr>
     </tbody>
   </table>
   <!-- TIER 3 -->
@@ -203,7 +201,29 @@
   <table>
     <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
     <tbody>
-      <tr><td><strong>Free Cash Flow</strong></td><td class="mono">Positive</td><td class="mono">N/A</td><td>현금 창출 능력</td></tr>
+      <tr><td><strong>Remaining Performance Obligations</strong></td><td class="mono">$40억</td><td class="mono">+64%</td><td>미래 매출을 보장하는 백로그가 역대 최고치 기록.</td></tr>
+    </tbody>
+  </table>
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">거래량 &mdash; 수수료 매출의 선행지표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Adjusted Income from Operations</strong></td><td class="mono">$1.87억</td><td class="mono">+62%</td><td>수익성 개선이 지속되며 운영 효율성 입증.</td></tr>
+    </tbody>
+  </table>
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">신규 사업 &mdash; 미래 베팅</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Adj. Free Cash Flow</strong></td><td class="mono">$2.22억</td><td class="mono">+53%</td><td>강력한 현금 창출 능력.</td></tr>
     </tbody>
   </table>
 </div>
@@ -216,49 +236,49 @@
   <div class="tone-meter>
     <div class="tone-item">
       <div class="tone-label">CEO 자신감</div>
-      <div class="tone-bar"><div class="fill" style="width:75.0%;background:#1a1a1a;"></div></div>
-      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+      <div class="tone-bar"><div class="fill" style="width:95.0%;background:#101820;"></div></div>
+      <div class="tone-score">9.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
     <div class="tone-item">
       <div class="tone-label">CFO 방어도</div>
-      <div class="tone-bar"><div class="fill" style="width:65.0%;background:#ffc107;"></div></div>
-      <div class="tone-score">6.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+      <div class="tone-bar"><div class="fill" style="width:80.0%;background:#ffc107;"></div></div>
+      <div class="tone-score">8.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
     <div class="tone-item">
       <div class="tone-label">애널리스트 회의감</div>
-      <div class="tone-bar"><div class="fill" style="width:70.0%;background:#ff4d4d;"></div></div>
-      <div class="tone-score">7.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+      <div class="tone-bar"><div class="fill" style="width:75.0%;background:#ff4d4d;"></div></div>
+      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
     <div class="tone-item">
       <div class="tone-label">전망 명확성</div>
-      <div class="tone-bar"><div class="fill" style="width:50.0%;background:#4da6ff;"></div></div>
-      <div class="tone-score">5.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+      <div class="tone-bar"><div class="fill" style="width:70.0%;background:#4da6ff;"></div></div>
+      <div class="tone-score">7.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
     </div>
   </div>
 
   <h3>Alex Karp</h3>
   <p style="color:var(--text-dim);margin-bottom:20px;">
-    <strong>어조:</strong> 철학적·논쟁적, AI 시대의 소프트웨어 임팩트 강조
+    <strong>어조:</strong> 철학적이고 자신감 넘치는 어조. 소프트웨어 산업의 표준을 재정의하고 있음을 강조.
   </p>
   <div class="keywords">
-    <span class="kw-tag bullish">AI</span>
-    <span class="kw-tag bullish">DEFENSE</span>
-    <span class="kw-tag bullish">COMMERCIAL</span>
-    <span class="kw-tag bullish">WESTERN VALUES</span>
+    <span class="kw-tag bullish">AIP</span>
+    <span class="kw-tag bullish">Software Powerhouse</span>
+    <span class="kw-tag bullish">Profitability</span>
+    <span class="kw-tag bullish">Safety</span>
   </div>
 
   <div class="quote-block">
     <div class="speaker">Alex Karp &mdash; 오프닝</div>
-    <blockquote>"We are seeing unprecedented demand for our AI platforms across both government and commercial sectors."</blockquote>
-    <div class="analysis">AI 플랫폼 수요 폭발 주장하며 정부·상업 양축 성장 강조</div>
+    <blockquote>"We delivered another quarter of exceptional growth and profitability... this quarter represented a major milestone as we delivered our first quarter of GAAP profitability."</blockquote>
+    <div class="analysis">GAAP 기준 흑자 전환을 성장과 함께 달성한 점을 중요한 이정표로 강조하며 경영 효율성을 어필.</div>
   </div>
 
-  <h3>David Glazer</h3>
+  <h3>Dave Glazer</h3>
 
   <div class="quote-block">
-    <div class="speaker">David Glazer &mdash; 재무 요약</div>
-    <blockquote>"Our strong revenue growth reflects the expanding adoption of our platforms."</blockquote>
-    <div class="analysis">매출 성장을 플랫폼 도입 확대로 연결</div>
+    <div class="speaker">Dave Glazer &mdash; 수익성 및 현금 흐름</div>
+    <blockquote>"Operating cash flow and Adjusted free cash flow increased 53% year-over-year... demonstrating the operating leverage in our business."</blockquote>
+    <div class="analysis">운영 레버리지(Operating Leverage)를 강조하며 수익 구조가 비용 구조보다 빠르게 개선되고 있음을 시사.</div>
   </div>
 
   <h3>애널리스트 Q&amp;A</h3>
@@ -267,9 +287,9 @@
   </p>
 
   <div class="quote-block analyst">
-    <div class="speaker">미상, 투자사</div>
-    <blockquote>"상업 부문 성장 지속성"</blockquote>
-    <div class="analysis"><strong>답변:</strong> 미국 대기업 AI 프로젝트 증가 중<br><br>AI 워크로드 확대가 상업 성장 견인</div>
+    <div class="speaker">Timm Schulder-Melchior, Stifel</div>
+    <blockquote>"미 상업용(US Commercial) 매출 성장률이 하락세를 보이는가?"</blockquote>
+    <div class="analysis"><strong>답변:</strong> 아니오. 지난 7분기 연속 매출 증가가 둔화되지 않았으며, 다만 시장의 기대치가 급격히 상향 조정되었기 때문에 비교 대상이 달라졌음.<br><br>성장 모멘텀이 둔화되지 않았음을 적극 방어하며, 높아진 기대치(Bill)가 충족되고 있음을 강조.</div>
   </div>
 </div>
 
@@ -279,10 +299,10 @@
   <h2>요약</h2>
   <table>
     <tbody>
-      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Alex Karp</td><td>"AI 시대의 서부 가치 수호자"</td></tr>
-      <tr><td style='font-weight:600;color:var(--accent);'>David Glazer</td><td>"수익성 있는 성장 지속 강조"</td></tr>
-      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"EPS 미공개로 투자자 우려 지속"</td></tr>
-      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>매출 성장에도 불구하고 전망 불확실성으로 인해 신중한 반응</td></tr>
+      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Alex Karp</td><td>"우리는 단순한 소프트웨어 회사가 아니라, 미래를 위한 소프트웨어 동력원이다."</td></tr>
+      <tr><td style='font-weight:600;color:var(--accent);'>Dave Glazer</td><td>"수익성과 성장을 동시에 달성하며 강력한 현금 흐름을 생성하고 있다."</td></tr>
+      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"미 상업용 매출의 견조함과 수익성 개선이 긍정적이나, 고평가에 대한 부담과 성장률 둔화 우려는 여전함."</td></tr>
+      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>기본적 실적은 우수했으나, '그 정도였어?'란 반응 속에 주가는 변동성을 보일 가능성 있음.</td></tr>
     </tbody>
   </table>
 </div>
@@ -292,24 +312,20 @@
   <div class="section-label">05 &mdash; 자료 링크</div>
   <h2>원본 자료</h2>
   <div class="links-grid>
-    <a class="link-card" href="https://investors.palantir.com" target="_blank">
+    <a class="link-card" href="https://investors.palantir.com/news-releases/news-release-details/palantir-reports-first-quarter-2026-results" target="_blank">
       <div class="link-icon">📄</div>
-      <div class="link-text"><div class="link-title">Palantir Investor Relations</div><div class="link-url">https://investors.palantir.com</div></div>
+      <div class="link-text"><div class="link-title">Palantir Q1 2026 Earnings Release</div><div class="link-url">https://investors.palantir.com/news-releases/news-release-details/palantir-reports-first-quarter-2026-results</div></div>
     </a>
-    <a class="link-card" href="https://investors.palantir.com/financials/sec-filings" target="_blank">
-      <div class="link-icon">📊</div>
-      <div class="link-text"><div class="link-title">SEC 10-Q Filing</div><div class="link-url">https://investors.palantir.com/financials/sec-filings</div></div>
-    </a>
-    <a class="link-card" href="https://seekingalpha.com/symbol/pltr/earnings/transcripts" target="_blank">
+    <a class="link-card" href="https://seekingalpha.com/article/XXXX-palantir-pltr-q1-2026-earnings-call-transcript" target="_blank">
       <div class="link-icon">🎬</div>
-      <div class="link-text"><div class="link-title">Earnings Call Transcript</div><div class="link-url">https://seekingalpha.com/symbol/pltr/earnings/transcripts</div></div>
+      <div class="link-text"><div class="link-title">Q1 2026 Earnings Call Transcript</div><div class="link-url">https://seekingalpha.com/article/XXXX-palantir-pltr-q1-2026-earnings-call-transcript</div></div>
     </a>
 
   </div>
 </div>
 
 <div class="footer">
-  Generated by Earnings Call Analyzer &mdash; 2026-05-05 &mdash; MACROHARD / Be:Analogue
+  Generated by Earnings Call Analyzer &mdash; 2026-05-10 &mdash; MACROHARD / Be:Analogue
 </div>
 
 </div>
