@@ -42,6 +42,12 @@ def index() -> FileResponse:
     return FileResponse(_STATIC_DIR / "index.html")
 
 
+@app.get("/tesla")
+def tesla() -> FileResponse:
+    """테슬라 대시보드."""
+    return FileResponse(_STATIC_DIR / "tesla.html")
+
+
 @app.get("/api/issues")
 def list_issues(category: str = "geo") -> list[dict]:
     """활성 이슈 목록을 카테고리별로 랭킹 순 반환. category=geo|stock_us|stock_kr"""

@@ -690,3 +690,271 @@ def get_issue_detail(issue_id: str) -> dict:
         "issue": issue_cleaned,
         "milestones": milestones_cleaned,
     }
+
+
+# ---------------------------------------------------------------------------
+# yfinance / feedparser 기반 실시간 엔드포인트
+# ---------------------------------------------------------------------------
+
+@router.get("/price")
+def get_price() -> dict:
+    """yfinance로 TSLA 현재 주가를 반환한다."""
+    try:
+        import yfinance as yf  # noqa: WPS433
+
+        ticker = yf.Ticker("TSLA")
+        info = ticker.info or {}
+        fast = ticker.fast_info
+
+        price = fast.last_price if hasattr(fast, "last_price") and fast.last_price else None
+        prev_close = fast.previous_close if hasattr(fast, "previous_close") else None
+        if price is None:
+            price = info.get("currentPrice") or info.get("regularMarketPrice") or 0.0
+        if prev_close is None:
+            prev_close = info.get("previousClose") or price
+
+        change = round(price - prev_close, 2) if price and prev_close else 0.0
+        change_pct = round(change / prev_close * 100, 2) if prev_close else 0.0
+
+        return {
+            "price": round(price, 2),
+            "change": change,
+            "change_pct": change_pct,
+            "open": info.get("open") or info.get("regularMarketOpen") or 0.0,
+            "high": info.get("dayHigh") or info.get("regularMarketDayHigh") or 0.0,
+            "low": info.get("dayLow") or info.get("regularMarketDayLow") or 0.0,
+            "volume": info.get("volume") or info.get("regularMarketVolume") or 0,
+            "market_cap": info.get("marketCap") or 0,
+            "week52_high": info.get("fiftyTwoWeekHigh") or 0.0,
+            "week52_low": info.get("fiftyTwoWeekLow") or 0.0,
+            "pe_ratio": info.get("trailingPE") or 0.0,
+            "updated_at": datetime.now().isoformat(timespec="seconds"),
+        }
+    except Exception:
+        return {
+            "price": 0.0, "change": 0.0, "change_pct": 0.0,
+            "open": 0.0, "high": 0.0, "low": 0.0,
+            "volume": 0, "market_cap": 0,
+            "week52_high": 0.0, "week52_low": 0.0,
+            "pe_ratio": 0.0, "updated_at": "",
+        }
+
+
+@router.get("/chart")
+def get_chart(
+    period: str = Query(default="1mo", description="조회 기간 (1d, 5d, 1mo, 3mo, 6mo, 1y)"),
+    interval: str = Query(default="1d", description="봉 간격 (1m, 5m, 1h, 1d)"),
+) -> dict:
+    """yfinance history로 주가 히스토리를 반환한다."""
+    try:
+        import yfinance as yf  # noqa: WPS433
+
+        ticker = yf.Ticker("TSLA")
+        hist = ticker.history(period=period, interval=interval)
+
+        if hist.empty:
+            return {"period": period, "interval": interval, "data": []}
+
+        data = []
+        for index, row in hist.iterrows():
+            item = {
+                "open": round(float(row["Open"]), 2),
+                "high": round(float(row["High"]), 2),
+                "low": round(float(row["Low"]), 2),
+                "close": round(float(row["Close"]), 2),
+                "volume": int(row["Volume"]),
+            }
+            # 인덱스 타입에 따라 date 필드 생성
+            ts = index
+            if hasattr(ts, "date"):
+                item["date"] = ts.date().isoformat()  # "2026-04-09" (timezone 제거)
+            elif hasattr(ts, "isoformat"):
+                item["date"] = ts.isoformat()[:10]
+            else:
+                item["date"] = str(ts)[:10]
+            data.append(item)
+
+        return {"period": period, "interval": interval, "data": data}
+    except Exception:
+        return {"period": period, "interval": interval, "data": []}
+
+
+@router.get("/options")
+def get_options() -> dict:
+    """가장 가까운 만기 TSLA 옵션 요약을 반환한다."""
+    try:
+        import yfinance as yf  # noqa: WPS433
+
+        ticker = yf.Ticker("TSLA")
+        expirations = ticker.options
+        if not expirations:
+            return _empty_options()
+
+        # 오늘이 만기일이면 다음 만기로 fallback
+        from datetime import date
+        today_str = date.today().isoformat()
+        exp = next((e for e in expirations if e > today_str), expirations[0])
+        opt = ticker.option_chain(exp)
+        calls = opt.calls
+        puts = opt.puts
+
+        if calls.empty or puts.empty:
+            return _empty_options(exp)
+
+        # 현재가
+        fast = ticker.fast_info
+        current_price = float(fast.last_price) if hasattr(fast, "last_price") and fast.last_price else 0.0
+
+        # ATM strike 찾기
+        atm_strike = float(calls.iloc[(calls["strike"] - current_price).abs().argsort().iloc[0]]["strike"])
+
+        # ATM IV
+        atm_call_row = calls[(calls["strike"] == atm_strike)]
+        atm_put_row = puts[(puts["strike"] == atm_strike)]
+        atm_call_iv = float(atm_call_row["impliedVolatility"].iloc[0]) if not atm_call_row.empty else 0.0
+        atm_put_iv = float(atm_put_row["impliedVolatility"].iloc[0]) if not atm_put_row.empty else 0.0
+
+        # P/C ratio (총 OI 기준)
+        total_call_oi = int(calls["openInterest"].sum())
+        total_put_oi = int(puts["openInterest"].sum())
+        pc_ratio = round(total_put_oi / total_call_oi, 2) if total_call_oi > 0 else 0.0
+
+        # ATM ±20% 범위 내 OI 상위 5개
+        lo = current_price * 0.8
+        hi = current_price * 1.2
+
+        def _top5(df: "pandas.DataFrame") -> list[dict]:
+            mask = (df["strike"] >= lo) & (df["strike"] <= hi)
+            filtered = df[mask].nlargest(5, "openInterest")
+            return [
+                {
+                    "strike": float(r["strike"]),
+                    "oi": int(r["openInterest"]),
+                    "iv": round(float(r["impliedVolatility"]), 4),
+                    "last": round(float(r["lastPrice"]), 2),
+                }
+                for _, r in filtered.iterrows()
+            ]
+
+        top_calls = _top5(calls)
+        top_puts = _top5(puts)
+
+        return {
+            "expiration": exp,
+            "current_price": round(current_price, 2),
+            "atm_call_iv": round(atm_call_iv, 4),
+            "atm_put_iv": round(atm_put_iv, 4),
+            "pc_ratio": pc_ratio,
+            "total_call_oi": total_call_oi,
+            "total_put_oi": total_put_oi,
+            "top_calls": top_calls,
+            "top_puts": top_puts,
+        }
+    except Exception:
+        return _empty_options()
+
+
+def _empty_options(expiration: str = "") -> dict:
+    """옵션 빈 응답 기본 구조."""
+    return {
+        "expiration": expiration,
+        "current_price": 0.0,
+        "atm_call_iv": 0.0,
+        "atm_put_iv": 0.0,
+        "pc_ratio": 0.0,
+        "total_call_oi": 0,
+        "total_put_oi": 0,
+        "top_calls": [],
+        "top_puts": [],
+    }
+
+
+@router.get("/news")
+def get_news(
+    limit: int = Query(default=10, ge=1, le=30, description="반환할 최대 기사 수"),
+) -> dict:
+    """Teslarati + Electrek Tesla RSS 최신 뉴스를 반환한다."""
+    try:
+        import feedparser  # noqa: WPS433
+
+        FEEDS = [
+            ("Teslarati", "https://www.teslarati.com/feed/"),
+            ("Electrek", "https://electrek.co/guides/tesla/feed/"),
+        ]
+
+        articles: list[dict] = []
+        for source, url in FEEDS:
+            try:
+                feed = feedparser.parse(url)
+                for entry in feed.entries:
+                    published = ""
+                    if hasattr(entry, "published_parsed") and entry.published_parsed:
+                        from time import mktime
+                        published = datetime.fromtimestamp(mktime(entry.published_parsed)).isoformat(timespec="seconds")
+                    elif hasattr(entry, "published"):
+                        published = entry.published
+
+                    summary = ""
+                    if hasattr(entry, "summary"):
+                        import re as _re
+                        clean = _re.sub(r'<[^>]+>', '', entry.summary)
+                        clean = _re.sub(r'\s+', ' ', clean).strip()
+                        summary = clean[:200]
+
+                    articles.append({
+                        "title": getattr(entry, "title", ""),
+                        "url": getattr(entry, "link", ""),
+                        "source": source,
+                        "published": published,
+                        "summary": summary,
+                    })
+            except Exception:
+                continue
+
+        # published 내림차순 정렬
+        articles.sort(key=lambda a: a.get("published", ""), reverse=True)
+        articles = articles[:limit]
+
+        return {"articles": articles}
+    except Exception:
+        return {"articles": []}
+
+
+@router.get("/delivery-signals")
+def get_delivery_signals() -> dict:
+    """delivery_signals JSON 파일을 반환한다."""
+    try:
+        _DELIVERY_DIR = Path("data/research/stocks/tesla/delivery_signals")
+        if not _DELIVERY_DIR.exists():
+            return {"china": {}, "eu": {}, "latest_month": ""}
+
+        result: dict[str, Any] = {"china": {}, "eu": {}, "latest_month": ""}
+        latest = ""
+
+        for json_file in sorted(_DELIVERY_DIR.glob("*.json")):
+            try:
+                content = json.loads(json_file.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, IOError):
+                continue
+
+            # 파일명에서 월 추출 (예: china_2026-04.json → 2026-04)
+            stem = json_file.stem
+            parts = stem.rsplit("_", 1)
+            month_key = parts[-1] if len(parts) == 2 and "-" in parts[-1] else stem
+
+            # 중국/유럽 분기
+            if "china" in stem.lower():
+                result["china"][month_key] = content
+            elif "eu" in stem.lower() or "europe" in stem.lower():
+                result["eu"][month_key] = content
+            else:
+                # 범용: content에 region 힌트가 있으면 사용
+                result["china" if "china" in str(content).lower() else "eu"][month_key] = content
+
+            if month_key > latest:
+                latest = month_key
+
+        result["latest_month"] = latest
+        return result
+    except Exception:
+        return {"china": {}, "eu": {}, "latest_month": ""}
