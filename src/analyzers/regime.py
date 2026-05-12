@@ -11,7 +11,7 @@
         print(result.regime)       # "RISK_ON"
         print(result.confidence)   # 0.72
         print(result.drivers)      # ["ADX 34 (강한 추세)", ...]
-        print(result.sizing)       # {"TSLA": 0.25, "BTC": 0.15, ...}
+        print(result.sizing)       # {"AAPL": 0.12, "MSFT": 0.12, ..., "BTC": 0.125, ...}
 """
 
 from __future__ import annotations
@@ -32,10 +32,21 @@ from src.core.logger import get_logger
 # Crypto ticker 매핑 (yfinance 심볼)
 # ---------------------------------------------------------------------------
 
-_CRYPTO_TICKER_MAP: dict[str, str] = {
-    "BTC": "BTC-USD",
-    "ETH": "ETH-USD",
-}
+
+def _build_crypto_map() -> dict[str, str]:
+    """config watchlist에서 crypto ticker → yfinance 심볼 맵을 생성한다.
+
+    config 로드 실패 시 BTC/ETH 폴백을 반환한다.
+    """
+    try:
+        from src.core.config import get_config
+        crypto_wl = get_config().market.crypto.watchlist
+        return {item.ticker: item.yf_symbol for item in crypto_wl if item.yf_symbol}
+    except Exception:
+        return {"BTC": "BTC-USD", "ETH": "ETH-USD"}
+
+
+_CRYPTO_TICKER_MAP: dict[str, str] = _build_crypto_map()
 
 _CONFIG_PATH = Path(__file__).resolve().parent.parent.parent / "config" / "regime_sizing.yaml"
 _LOOKBACK_HOURS = 24  # 뉴스 센티먼트 집계 윈도우
@@ -60,7 +71,7 @@ class RegimeResult:
         regime: RISK_ON / NEUTRAL / RISK_OFF
         confidence: 0.0~1.0 (abs(합산 점수) / 최대 가능 점수)
         drivers: 레짐 근거 문장 리스트 (최대 3개, 사람이 읽는 한 줄씩)
-        sizing: 레짐별 종목 목표 비율 {"TSLA": 0.25, ...} (가이드, 최종 결정은 사용자)
+        sizing: 레짐별 종목 목표 비율 (가이드, 최종 결정은 사용자) — watchlist 기반 동적 생성
         raw_score: 가중 합산 전 원시 점수 (디버그용)
     """
 
@@ -275,8 +286,22 @@ class MarketRegimeEngine:
     # 기술적 점수 — TSLA/BTC/ETH 평균
     # -----------------------------------------------------------------------
 
+    def _get_regime_tickers(self) -> list[str]:
+        """regime 분석 대상 종목: US watchlist 상위 5개 + crypto watchlist 전체.
+
+        config 로드 실패 시 regime_sizing.yaml positions 키로 폴백한다.
+        """
+        try:
+            from src.core.config import get_config
+            cfg = get_config().market
+            us_tickers = [item.ticker for item in cfg.us.watchlist]
+            crypto_tickers = [item.ticker for item in cfg.crypto.watchlist]
+            return us_tickers[:5] + crypto_tickers
+        except Exception:
+            return list(self._config["positions"]["RISK_ON"].keys())
+
     def _compute_technical_score(self) -> tuple[float, list[str]]:
-        """watchlist 종목(regime_sizing.yaml positions 키)의 평균 기술적 점수.
+        """watchlist 종목(US 상위 5개 + crypto 전체)의 평균 기술적 점수.
 
         Returns:
             ([-1, +1] 정규화 점수, 드라이버 문장 리스트)
@@ -290,7 +315,7 @@ class MarketRegimeEngine:
             self._logger.warning("technical_import_failed", error=str(exc))
             return 0.0, []
 
-        tickers = list(self._config["positions"]["RISK_ON"].keys())
+        tickers = self._get_regime_tickers()
         yf_tickers = [_resolve_ticker(t) for t in tickers]
 
         try:

@@ -1,4 +1,4 @@
-"""TSLA 자체 차트 API — OHLCV + 기술 지표 + 이벤트 마커.
+"""차트 API — OHLCV + 기술 지표 + 이벤트 마커 (멀티 티커).
 
 lightweight-charts 프론트엔드에 데이터를 공급한다.
 """
@@ -11,11 +11,25 @@ import pandas as pd
 import yfinance as yf
 from fastapi import APIRouter, Query
 
+from src.core.config import get_config, get_watchlist_map, resolve_yf_ticker
+
 router = APIRouter(prefix="/api/chart", tags=["chart"])
 
 # OHLCV 캐시 (메모리, 5분 TTL)
 _ohlcv_cache: dict[str, tuple[float, list[dict]]] = {}
 _CACHE_TTL = 300
+
+
+def _default_symbol() -> str:
+    """config 첫 번째 US watchlist 종목을 반환한다. 실패 시 'AAPL' 폴백."""
+    try:
+        wl = get_config().market.us.watchlist
+        return wl[0].ticker if wl else "AAPL"
+    except Exception:
+        return "AAPL"
+
+
+_DEFAULT_SYMBOL = _default_symbol()
 
 
 def _fetch_ohlcv(symbol: str, period: str, interval: str) -> list[dict]:
@@ -39,7 +53,8 @@ def _fetch_ohlcv(symbol: str, period: str, interval: str) -> list[dict]:
 
     # 4h는 yfinance가 지원 안 함 → 1h로 받아서 resample
     yf_interval = "1h" if interval == "4h" else interval
-    df = yf.download(symbol, period=actual_period, interval=yf_interval, progress=False)
+    yf_sym = resolve_yf_ticker(symbol)  # "005930" → "005930.KS", "BTC" → "BTC-USD"
+    df = yf.download(yf_sym, period=actual_period, interval=yf_interval, progress=False)
     if df.empty:
         return []
 
@@ -234,7 +249,7 @@ _PERIOD_DAYS = {
 
 @router.get("/ohlcv")
 def get_ohlcv(
-    symbol: str = "TSLA",
+    symbol: str = _DEFAULT_SYMBOL,
     period: str = Query("6mo", pattern="^(1mo|3mo|6mo|1y|2y|5y|max)$"),
     interval: str = Query("1d", pattern="^(1h|4h|1d|1wk|1mo)$"),
 ) -> dict:
@@ -337,15 +352,15 @@ SEVERITY_SHAPES = {
 
 @router.get("/events")
 def get_chart_events(
-    symbol: str = "TSLA",
+    symbol: str = _DEFAULT_SYMBOL,
     period: str = Query("6mo", pattern="^(1mo|3mo|6mo|1y|2y|5y|max)$"),
     severity_min: str = Query("major", pattern="^(critical|major|moderate|minor)$"),
-    tesla_only: bool = False,
+    primary_only: bool = False,
 ) -> dict:
     """차트에 표시할 이벤트 마커를 반환한다.
 
     필터링 전략 (B안):
-    1. Tesla 엔티티 직접 연결 이벤트 (항상 포함)
+    1. symbol 직접 연결 엔티티 이벤트 (항상 포함)
     2. macro critical 이벤트 (거시 영향)
     3. severity_min 이상만
     """
@@ -361,24 +376,27 @@ def get_chart_events(
     severity_order = ["critical", "major", "moderate", "minor"]
     min_idx = severity_order.index(severity_min) if severity_min in severity_order else 1
 
-    # Tesla 관련 엔티티 ID
+    # symbol 관련 엔티티 ID (ticker 매칭 + 이름 포함 매칭)
     entity_repo = OntologyEntityRepository()
-    tesla_keywords = ["Tesla", "TSLA", "Musk", "xAI", "SpaceX", "FSD", "Optimus", "Cybertruck", "Megapack"]
-    tesla_entity_ids: set[str] = set()
+    wl = get_watchlist_map()
+    wl_item = wl.get(symbol)
+    primary_entity_ids: set[str] = set()
     for ent in entity_repo.get_active():
-        if any(kw.lower() in ent.name.lower() for kw in tesla_keywords) or ent.ticker == "TSLA":
-            tesla_entity_ids.add(ent.id)
+        if ent.ticker == symbol:
+            primary_entity_ids.add(ent.id)
+        elif wl_item and wl_item.name.lower() in ent.name.lower():
+            primary_entity_ids.add(ent.id)
 
-    # Tesla 연결 이벤트 ID
+    # symbol 연결 이벤트 ID
     link_repo = OntologyLinkRepository()
-    tesla_event_ids: set[str] = set()
-    for eid in tesla_entity_ids:
+    primary_event_ids: set[str] = set()
+    for eid in primary_entity_ids:
         for lk in link_repo.get_many(filters={"source_id": eid}, limit=200):
             if lk.target_type == "event":
-                tesla_event_ids.add(lk.target_id)
+                primary_event_ids.add(lk.target_id)
         for lk in link_repo.get_many(filters={"target_id": eid}, limit=200):
             if lk.source_type == "event":
-                tesla_event_ids.add(lk.source_id)
+                primary_event_ids.add(lk.source_id)
 
     # 이벤트 수집
     event_repo = OntologyEventRepository()
@@ -391,16 +409,16 @@ def get_chart_events(
             continue
 
         sev_idx = severity_order.index(ev.severity) if ev.severity in severity_order else 3
-        is_tesla = ev.id in tesla_event_ids
+        is_primary = ev.id in primary_event_ids
         is_macro_critical = ev.event_type == "macro" and ev.severity == "critical"
 
         # 필터링 로직 (B안)
-        if tesla_only and not is_tesla:
+        if primary_only and not is_primary:
             continue
-        if not is_tesla and not is_macro_critical and sev_idx > min_idx:
+        if not is_primary and not is_macro_critical and sev_idx > min_idx:
             continue
-        # moderate 이하 비테슬라 비크리티컬은 제외
-        if not is_tesla and not is_macro_critical and sev_idx >= 2:
+        # moderate 이하 비심볼 비크리티컬은 제외
+        if not is_primary and not is_macro_critical and sev_idx >= 2:
             continue
 
         cat_info = EVENT_CATEGORIES.get(ev.event_type, {"label": ev.event_type, "color": "#8b949e"})
@@ -421,7 +439,7 @@ def get_chart_events(
             "title": ev.title,
             "event_type": ev.event_type,
             "severity": ev.severity,
-            "is_tesla": is_tesla,
+            "is_primary": is_primary,
             "category_label": cat_info["label"],
             "story_thread": getattr(ev, "story_thread", "") or "",
         })
@@ -437,10 +455,10 @@ def get_chart_events(
 
     filtered = []
     for date, items in by_date.items():
-        # critical 우선, tesla 우선 정렬
+        # critical 우선, primary 우선 정렬
         items.sort(key=lambda x: (
             0 if x["severity"] == "critical" else 1 if x["severity"] == "major" else 2,
-            0 if x["is_tesla"] else 1,
+            0 if x["is_primary"] else 1,
         ))
         filtered.extend(items[:3])
 
@@ -450,7 +468,7 @@ def get_chart_events(
         "symbol": symbol,
         "period": period,
         "total_events": len(all_events),
-        "tesla_events": len(tesla_event_ids),
+        "primary_events": len(primary_event_ids),
         "filtered_count": len(filtered),
         "markers": filtered,
     }
@@ -650,7 +668,7 @@ def _compute_inbeom_channel(records: list[dict], trendline: dict, pivot_window: 
 
 @router.get("/trendlines")
 def get_trendlines(
-    symbol: str = "TSLA",
+    symbol: str = _DEFAULT_SYMBOL,
     period: str = Query("1y", pattern="^(3mo|6mo|1y|2y|5y|max)$"),
     interval: str = Query("1d", pattern="^(1h|4h|1d|1wk|1mo)$"),
     pivot_window: int = Query(30, ge=5, le=50),
@@ -678,7 +696,7 @@ def get_trendlines(
 
 @router.get("/signals")
 def get_trend_signals(
-    symbol: str = "TSLA",
+    symbol: str = _DEFAULT_SYMBOL,
     period: str = Query("6mo", pattern="^(1mo|3mo|6mo|1y|2y|5y|max)$"),
     interval: str = Query("1d", pattern="^(1h|4h|1d|1wk|1mo)$"),
 ) -> dict:

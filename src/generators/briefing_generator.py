@@ -22,31 +22,27 @@ logger = get_logger(__name__)
 
 _TEMPLATE_DIR = PROJECT_ROOT / "templates" / "briefing"
 
-# Ticker → readable name for briefing display
-_TICKER_TO_NAME: dict[str, str] = {
-    # US
-    "TSLA": "Tesla", "NVDA": "NVIDIA", "AAPL": "Apple",
-    "MSFT": "Microsoft", "AMZN": "Amazon", "GOOGL": "Alphabet",
-    "META": "Meta", "PLTR": "Palantir", "COIN": "Coinbase",
-    "HOOD": "Robinhood", "AMD": "AMD", "AVGO": "Broadcom",
-    "NFLX": "Netflix", "DIS": "Disney", "BA": "Boeing",
-    "JPM": "JPMorgan", "GS": "Goldman", "INTC": "Intel",
-    "ASML": "ASML", "TSM": "TSMC", "MU": "Micron",
-    # KR
-    "005930": "삼성전자", "000660": "SK하이닉스", "005380": "현대차",
-    "373220": "LG에너지", "000270": "기아", "035420": "NAVER",
-    "035720": "카카오", "068270": "셀트리온", "005490": "포스코",
-    "352820": "하이브", "034020": "두산에너빌", "009830": "한화솔루션",
-    "012450": "한화에어로", "011200": "HMM", "066570": "LG전자",
-    "051910": "LG화학", "006400": "삼성SDI", "012330": "현대모비스",
-    "105560": "KB금융", "055550": "신한지주", "015760": "한국전력",
-    "051600": "한전KPS", "138040": "메리츠", "139480": "이마트",
-    "004170": "신세계", "294870": "호반건설", "375500": "DL이앤씨",
-    "143240": "사람인", "285130": "SK케미칼", "018620": "우진비앤지",
-    "316140": "우리금융", "096770": "SK이노",
-    # Crypto
-    "BTC": "BTC", "ETH": "ETH", "XRP": "XRP", "SOL": "SOL",
-}
+def _build_ticker_name_map() -> dict[str, str]:
+    """watchlist에서 ticker → 표시명 맵을 구성한다.
+
+    config 로드 실패 시 빈 dict를 반환하고 ticker 그대로 출력된다.
+    crypto는 yf_symbol(BTC-USD)도 키로 등록해 시장 데이터 표시명을 통일한다.
+    """
+    result: dict[str, str] = {}
+    try:
+        from src.core.config import get_config, get_watchlist_map
+        for ticker, item in get_watchlist_map().items():
+            result[ticker] = item.name
+        for item in get_config().market.crypto.watchlist:
+            if item.yf_symbol:
+                result[item.yf_symbol] = item.name  # "BTC-USD" → "Bitcoin"
+    except Exception:
+        pass
+    return result
+
+
+# Ticker → readable name for briefing display (config watchlist SSOT)
+_TICKER_TO_NAME: dict[str, str] = _build_ticker_name_map()
 
 
 def _ticker_label(tickers: list[str]) -> str:

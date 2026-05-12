@@ -83,8 +83,8 @@ _FACT_TYPE_KEYWORDS: list[tuple[FactType, list[str]]] = [
 # Common tickers / entity dictionary
 # ============================================================
 
-# Hardcoded high-frequency tickers for fast matching
-_TICKER_DICT: dict[str, str] = {
+# Static fallback — Korean name mappings must be hardcoded; config only has English names.
+_TICKER_DICT_STATIC: dict[str, str] = {
     # ── US Major ──
     "테슬라": "TSLA", "Tesla": "TSLA", "TSLA": "TSLA",
     "엔비디아": "NVDA", "NVIDIA": "NVDA", "NVDA": "NVDA",
@@ -157,7 +157,7 @@ _TICKER_DICT: dict[str, str] = {
 }
 
 # Entity names (for claim.entities field) — superset of ticker keys
-_ENTITY_NAMES: set[str] = set(_TICKER_DICT.keys()) | {
+_ENTITY_NAMES: set[str] = set(_TICKER_DICT_STATIC.keys()) | {
     # Central banks / regulators
     "Fed", "FOMC", "연준", "한국은행", "한은", "금통위", "ECB", "BOJ",
     "SEC", "금감원", "공정위", "금융위", "기재부",
@@ -182,6 +182,26 @@ _ENTITY_NAMES: set[str] = set(_TICKER_DICT.keys()) | {
     "원유", "WTI", "금값", "LNG", "디젤",
     "호르무즈", "Hormuz",
 }
+
+
+def _build_ticker_dict() -> dict[str, str]:
+    """정적 사전 + config watchlist를 합쳐 매핑 딕셔너리를 반환한다.
+
+    watchlist에서 영문 ticker/name을 추가한다.
+    config 로드 실패 시 정적 사전만 사용해 파이프라인이 죽지 않는다.
+    """
+    result = dict(_TICKER_DICT_STATIC)
+    try:
+        from src.core.config import get_watchlist_map
+        for ticker, item in get_watchlist_map().items():
+            result[ticker] = ticker       # "AAPL" → "AAPL"
+            result[item.name] = ticker    # "Apple" → "AAPL"
+    except Exception:
+        pass
+    return result
+
+
+_TICKER_DICT: dict[str, str] = _build_ticker_dict()
 
 
 # ============================================================
