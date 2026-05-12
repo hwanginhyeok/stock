@@ -20,6 +20,7 @@ class Market(StrEnum):
 
     KOREA = "korea"
     US = "us"
+    CRYPTO = "crypto"
 
 
 class Importance(StrEnum):

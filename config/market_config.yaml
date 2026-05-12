@@ -11,16 +11,16 @@ korea:
       code: "2001"
 
   watchlist:
-    - { ticker: "005930", name: "삼성전자" }
-    - { ticker: "000660", name: "SK하이닉스" }
-    - { ticker: "373220", name: "LG에너지솔루션" }
-    - { ticker: "207940", name: "삼성바이오로직스" }
-    - { ticker: "005380", name: "현대자동차" }
-    - { ticker: "006400", name: "삼성SDI" }
-    - { ticker: "051910", name: "LG화학" }
-    - { ticker: "035420", name: "NAVER" }
-    - { ticker: "035720", name: "카카오" }
-    - { ticker: "068270", name: "셀트리온" }
+    - { ticker: "005930", name: "삼성전자",        yf_suffix: ".KS" }
+    - { ticker: "000660", name: "SK하이닉스",      yf_suffix: ".KS" }
+    - { ticker: "373220", name: "LG에너지솔루션",  yf_suffix: ".KS" }
+    - { ticker: "207940", name: "삼성바이오로직스", yf_suffix: ".KS" }
+    - { ticker: "005380", name: "현대자동차",      yf_suffix: ".KS" }
+    - { ticker: "006400", name: "삼성SDI",        yf_suffix: ".KS" }
+    - { ticker: "051910", name: "LG화학",          yf_suffix: ".KS" }
+    - { ticker: "035420", name: "NAVER",           yf_suffix: ".KS" }
+    - { ticker: "035720", name: "카카오",           yf_suffix: ".KS" }
+    - { ticker: "068270", name: "셀트리온",        yf_suffix: ".KS" }
 
 # --- 미국 시장 ---
 us:
@@ -47,6 +47,14 @@ us:
     - { ticker: "TSM", name: "TSMC" }
     - { ticker: "AVGO", name: "Broadcom" }
     - { ticker: "JPM", name: "JPMorgan" }
+
+# --- 암호화폐 ---
+crypto:
+  watchlist:
+    - { ticker: "BTC", name: "Bitcoin",  yf_symbol: "BTC-USD" }
+    - { ticker: "ETH", name: "Ethereum", yf_symbol: "ETH-USD" }
+    - { ticker: "XRP", name: "XRP",      yf_symbol: "XRP-USD" }
+    - { ticker: "SOL", name: "Solana",   yf_symbol: "SOL-USD" }
 
 # --- 기술적 분석 파라미터 ---
 technical:

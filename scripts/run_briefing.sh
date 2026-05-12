@@ -8,7 +8,7 @@
 set -euo pipefail
 
 SCHEDULE="${1:-morning}"
-PROJECT_DIR="/home/window11/stock"
+PROJECT_DIR="/home/gint_pcd/projects/주식부자프로젝트"
 VENV_DIR="$PROJECT_DIR/.venv-wsl"
 LOG_DIR="$PROJECT_DIR/logs"
 # venv 없으면 시스템 python3 폴백

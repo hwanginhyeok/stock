@@ -193,10 +193,29 @@ class IndexInfo(BaseModel):
 
 
 class WatchlistItem(BaseModel):
-    """Watchlist stock."""
+    """Watchlist item for any market (US / Korea / Crypto)."""
 
     ticker: str
     name: str
+    yf_suffix: str = ""   # 한국 KOSPI/KOSDAQ 접미사 e.g. ".KS"
+    yf_symbol: str = ""   # crypto 전체 심볼 e.g. "BTC-USD"
+
+    @property
+    def yf_ticker(self) -> str:
+        """yfinance에 넘길 심볼을 반환한다."""
+        if self.yf_symbol:
+            return self.yf_symbol
+        if self.yf_suffix:
+            return self.ticker + self.yf_suffix
+        return self.ticker
+
+    @property
+    def is_korean(self) -> bool:
+        return bool(self.yf_suffix)
+
+    @property
+    def is_crypto(self) -> bool:
+        return bool(self.yf_symbol)
 
 
 class MACDConfig(BaseModel):
@@ -290,6 +309,12 @@ class USMarket(BaseModel):
     watchlist: list[WatchlistItem] = Field(default_factory=list)
 
 
+class CryptoMarket(BaseModel):
+    """Crypto market config."""
+
+    watchlist: list[WatchlistItem] = Field(default_factory=list)
+
+
 class CacheConfig(BaseModel):
     """Cache TTL configuration."""
 
@@ -303,6 +328,7 @@ class MarketConfig(BaseModel):
 
     korea: KoreaMarket = Field(default_factory=KoreaMarket)
     us: USMarket = Field(default_factory=USMarket)
+    crypto: CryptoMarket = Field(default_factory=CryptoMarket)
     technical: TechnicalConfig = Field(default_factory=TechnicalConfig)
     fundamental: FundamentalConfig = Field(default_factory=FundamentalConfig)
     screening: ScreeningConfig = Field(default_factory=ScreeningConfig)
@@ -527,3 +553,27 @@ def get_config() -> AppConfig:
         env=config.app.env,
     )
     return config
+
+
+def get_watchlist_map() -> dict[str, WatchlistItem]:
+    """전체 watchlist를 ticker → WatchlistItem 딕셔너리로 반환한다.
+
+    Korea / US / Crypto 세 섹션을 합산한다.
+    중복 ticker가 있으면 Korea → US → Crypto 순으로 뒤에 오는 값이 덮어쓴다.
+    """
+    cfg = get_config().market
+    result: dict[str, WatchlistItem] = {}
+    for item in cfg.korea.watchlist + cfg.us.watchlist + cfg.crypto.watchlist:
+        result[item.ticker] = item
+    return result
+
+
+def resolve_yf_ticker(ticker: str) -> str:
+    """내부 ticker → yfinance 심볼로 변환한다.
+
+    watchlist에 등록된 종목이면 WatchlistItem.yf_ticker를 반환하고,
+    미등록 ticker는 그대로 반환한다(옵션 B — 자유 심볼 허용).
+    """
+    wl = get_watchlist_map()
+    item = wl.get(ticker)
+    return item.yf_ticker if item else ticker
