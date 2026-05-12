@@ -32,6 +32,30 @@ def _default_symbol() -> str:
 _DEFAULT_SYMBOL = _default_symbol()
 
 
+@router.get("/watchlist")
+def get_watchlist():
+    """프론트엔드에서 카테고리별 watchlist를 가져간다."""
+    try:
+        cfg = get_config().market
+        result = {
+            "us": [
+                {"ticker": it.ticker, "name": it.name, "yf_ticker": resolve_yf_ticker(it.ticker)}
+                for it in cfg.us.watchlist
+            ],
+            "kr": [
+                {"ticker": it.ticker, "name": it.name, "yf_ticker": resolve_yf_ticker(it.ticker)}
+                for it in cfg.korea.watchlist
+            ],
+            "crypto": [
+                {"ticker": it.ticker, "name": it.name, "yf_ticker": resolve_yf_ticker(it.ticker)}
+                for it in cfg.crypto.watchlist
+            ],
+        }
+        return result
+    except Exception:
+        return {}
+
+
 def _fetch_ohlcv(symbol: str, period: str, interval: str) -> list[dict]:
     """yfinance에서 OHLCV를 가져와 lightweight-charts 포맷으로 반환."""
     import time

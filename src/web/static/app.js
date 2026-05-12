@@ -31,6 +31,10 @@ let currentCategory = 'geo';
 let simulation = null;
 let allIssues = [];
 
+// 멀티 티커 지원
+let currentChartSymbol = 'TSLA';   // 기본값, watchlist 로드 후 업데이트
+let watchlistData = null;           // { us: [...], kr: [...], crypto: [...] }
+
 const ANALYSIS_LABELS = {
   fundamental: 'FUNDAMENTAL', technical: 'TECHNICAL', market: 'MARKET',
 };
@@ -49,7 +53,38 @@ function switchCategory(category) {
   });
   currentIssueId = null;
   document.getElementById('briefing-content').innerHTML = '<div class="empty-state">노드를 클릭하면 브리핑이 표시됩니다</div>';
+  
+  // 카테고리 전환 시 차트 심볼 업데이트
+  updateChartSymbolForCategory(category);
+  
   loadIssues();
+}
+
+function updateChartSymbolForCategory(category) {
+  if (!watchlistData) return;
+  if (category === 'stock_us' && watchlistData.us?.length) {
+    currentChartSymbol = watchlistData.us[0].ticker;
+  } else if (category === 'stock_kr' && watchlistData.kr?.length) {
+    currentChartSymbol = watchlistData.kr[0].ticker;
+  }
+  // 차트 심볼 라벨 업데이트
+  const label = document.getElementById('chart-symbol-label');
+  if (label) label.textContent = currentChartSymbol;
+  // 차트가 이미 초기화되어 있으면 데이터 리로드
+  if (lwChartInitialized) {
+    loadChartData(currentChartPeriod);
+  }
+}
+
+function switchTicker(ticker) {
+  currentChartSymbol = ticker;
+  const label = document.getElementById('chart-symbol-label');
+  if (label) label.textContent = ticker;
+  if (lwChartInitialized) {
+    loadChartData(currentChartPeriod);
+  }
+  // 드롭다운 닫기
+  document.querySelectorAll('.nav-dropdown').forEach(d => d.style.display = 'none');
 }
 
 // ============================================================
@@ -441,10 +476,10 @@ async function loadChartData(period) {
 
   try {
     const [ohlcvResp, eventsResp, signalsResp, trendResp] = await Promise.all([
-      fetch(`/api/chart/ohlcv?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
-      fetch(`/api/chart/events?symbol=TSLA&period=${period}&severity_min=${sevMin}`),
-      fetch(`/api/chart/signals?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
-      fetch(`/api/chart/trendlines?symbol=TSLA&period=${period}&interval=${currentChartInterval}`),
+      fetch(`/api/chart/ohlcv?symbol=${currentChartSymbol}&period=${period}&interval=${currentChartInterval}`),
+      fetch(`/api/chart/events?symbol=${currentChartSymbol}&period=${period}&severity_min=${sevMin}`),
+      fetch(`/api/chart/signals?symbol=${currentChartSymbol}&period=${period}&interval=${currentChartInterval}`),
+      fetch(`/api/chart/trendlines?symbol=${currentChartSymbol}&period=${period}&interval=${currentChartInterval}`),
     ]);
     const ohlcvData = await ohlcvResp.json();
     const eventsData = await eventsResp.json();
@@ -633,7 +668,7 @@ function renderEventMarkers(show) {
     color: m.color,
     shape: m.severity === 'critical' ? 'arrowDown' : 'circle',
     text: m.category_label?.charAt(0) || '·',
-    size: m.severity === 'critical' ? 2 : m.is_tesla ? 2 : 1,
+    size: m.severity === 'critical' ? 2 : 1,
   }));
 
   // 같은 날짜 중복 처리 — 가장 중요한 것만
@@ -662,7 +697,7 @@ function renderEventList(markers) {
     <div class="chart-event-item">
       <div class="ev-date">
         <span class="ev-severity" style="background:${m.color}"></span>
-        ${m.time} · ${m.severity}${m.is_tesla ? ' · TSLA' : ''}
+        ${m.time} · ${m.severity}
       </div>
       <div class="ev-title">
         <span class="ev-badge" style="background:${m.color}22;color:${m.color}">${m.category_label}</span>
@@ -1095,16 +1130,87 @@ function reloadGraph() {
 }
 
 // ============================================================
+// Watchlist 로드 + 드롭다운 렌더링
+// ============================================================
+
+async function loadWatchlist() {
+  try {
+    const res = await fetch('/api/chart/watchlist');
+    watchlistData = await res.json();
+    
+    // US 첫 종목을 기본 심볼로
+    if (watchlistData.us?.length) {
+      currentChartSymbol = watchlistData.us[0].ticker;
+      const label = document.getElementById('chart-symbol-label');
+      if (label) label.textContent = currentChartSymbol;
+    }
+    
+    // 드롭다운 메뉴 구성
+    renderTickerDropdown('us-ticker-dropdown', watchlistData.us || [], 'US');
+    renderTickerDropdown('kr-ticker-dropdown', watchlistData.kr || [], 'KR');
+  } catch (e) { console.error('Watchlist 로딩 실패:', e); }
+}
+
+function renderTickerDropdown(dropdownId, items, marketLabel) {
+  const dropdown = document.getElementById(dropdownId);
+  if (!dropdown || !items.length) return;
+  
+  dropdown.innerHTML = items.map(item => `
+    <div class="dropdown-ticker-item" onclick="switchTicker('${item.ticker}'); ${marketLabel === 'US' ? "switchCategory('stock_us')" : "switchCategory('stock_kr')"};">
+      <span class="dropdown-ticker-code">${item.ticker}</span>
+      <span class="dropdown-ticker-name">${item.name}</span>
+    </div>
+  `).join('');
+}
+
+// ============================================================
 // Init
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
   // 탭 클릭 이벤트 바인딩
   document.querySelectorAll('.nav-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      // US/KR 드롭다운 토글
+      const cat = btn.dataset.category;
+      if (cat === 'stock_us') {
+        const dd = document.getElementById('us-ticker-dropdown');
+        const krDd = document.getElementById('kr-ticker-dropdown');
+        if (dd) {
+          const isVisible = dd.style.display === 'block';
+          krDd.style.display = 'none';
+          dd.style.display = isVisible ? 'none' : 'block';
+        }
+        switchCategory('stock_us');
+        e.stopPropagation();
+        return;
+      }
+      if (cat === 'stock_kr') {
+        const dd = document.getElementById('kr-ticker-dropdown');
+        const usDd = document.getElementById('us-ticker-dropdown');
+        if (dd) {
+          const isVisible = dd.style.display === 'block';
+          usDd.style.display = 'none';
+          dd.style.display = isVisible ? 'none' : 'block';
+        }
+        switchCategory('stock_kr');
+        e.stopPropagation();
+        return;
+      }
+      // GEO 등 일반 탭 → 드롭다운 닫기
+      document.querySelectorAll('.nav-dropdown').forEach(d => d.style.display = 'none');
       switchCategory(btn.dataset.category);
     });
   });
+  
+  // 바깥 클릭 시 드롭다운 닫기
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-dropdown-wrap')) {
+      document.querySelectorAll('.nav-dropdown').forEach(d => d.style.display = 'none');
+    }
+  });
+  
+  loadWatchlist();
   loadIssues();
   loadNewsTicker();
 });

@@ -21,8 +21,14 @@
   <div class="logo">InvestOS</div>
   <div class="nav-tabs">
     <button class="nav-tab active" data-category="geo">GEO</button>
-    <button class="nav-tab" data-category="stock_us">US</button>
-    <button class="nav-tab" data-category="stock_kr">KR</button>
+    <div class="nav-dropdown-wrap">
+      <button class="nav-tab" data-category="stock_us" id="nav-us-btn">US ▾</button>
+      <div class="nav-dropdown" id="us-ticker-dropdown" style="display:none;"></div>
+    </div>
+    <div class="nav-dropdown-wrap">
+      <button class="nav-tab" data-category="stock_kr" id="nav-kr-btn">KR ▾</button>
+      <div class="nav-dropdown" id="kr-ticker-dropdown" style="display:none;"></div>
+    </div>
   </div>
   <div class="updated" id="updated-at"></div>
 </nav>
@@ -100,7 +106,7 @@
       <div class="chart-layout">
         <div class="chart-main">
           <div class="chart-toolbar">
-            <span class="chart-symbol">TSLA</span>
+            <span class="chart-symbol" id="chart-symbol-label">TSLA</span>
             <div class="chart-period-btns">
               <button class="period-btn" data-period="1mo">1M</button>
               <button class="period-btn" data-period="3mo">3M</button>
