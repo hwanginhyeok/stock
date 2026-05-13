@@ -920,6 +920,215 @@ def get_news(
         return {"articles": []}
 
 
+# 모멘텀 실데이터 캐시 (5분 TTL)
+_MOMENTUM_CACHE: dict[str, Any] = {"data": None, "ts": 0.0}
+_MOMENTUM_TTL = 300.0
+
+
+def _compute_momentum_realtime() -> dict[str, Any] | None:
+    """yfinance TSLA 일봉으로 SMA 정배열 + 매수 시그널 + 점수 계산.
+
+    Returns:
+        dict: trend_alignment, score, delta_3d, comment, signal 정보.
+        실패/데이터 부족 시 None.
+    """
+    import time
+
+    now = time.time()
+    cached = _MOMENTUM_CACHE.get("data")
+    if cached is not None and now - _MOMENTUM_CACHE.get("ts", 0.0) < _MOMENTUM_TTL:
+        return cached
+
+    try:
+        import yfinance as yf  # noqa: WPS433
+
+        from src.analyzers.sma_signals import (
+            classify_sma_alignment,
+            detect_pullback_buy_signal,
+        )
+
+        hist = yf.Ticker("TSLA").history(period="1y", interval="1d")
+        if hist is None or len(hist) < 120:
+            return None
+
+        align = classify_sma_alignment(hist)
+        if align.get("alignment") in (None, "N/A"):
+            return None
+
+        sig = detect_pullback_buy_signal(hist, alignment_result=align)
+
+        alignment = align["alignment"]
+        close_vs_vwma = align.get("close_vs_vwma_pct") or 0.0
+
+        # 점수 산정
+        base = {"정배열": 70, "혼재": 50, "역배열": 25}.get(alignment, 50)
+        if close_vs_vwma >= 5:
+            base += 8
+        elif close_vs_vwma >= 0:
+            base += 4
+        elif close_vs_vwma <= -5:
+            base -= 8
+        else:
+            base -= 4
+        if sig.get("signal"):
+            base += 10
+        score = max(0, min(100, base))
+
+        # 3일 전 alignment 변화 (간단 비교)
+        delta_3d = ""
+        if len(hist) >= 3:
+            try:
+                prev_align = classify_sma_alignment(hist.iloc[:-3])
+                prev_score = {"정배열": 70, "혼재": 50, "역배열": 25}.get(
+                    prev_align.get("alignment"), 50
+                )
+                diff = score - prev_score
+                if diff != 0:
+                    delta_3d = f"{diff:+d}"
+            except Exception:
+                pass
+
+        # 코멘트 조립
+        v = align.get("values", {})
+        chain_parts = []
+        for p in (5, 10, 20, 50):
+            if f"sma_{p}" in v:
+                chain_parts.append(f"SMA{p} ${v[f'sma_{p}']:.2f}")
+        if "vwma_100" in v:
+            chain_parts.append(f"VWMA100 ${v['vwma_100']:.2f}")
+        chain_str = " · ".join(chain_parts)
+
+        if sig.get("signal"):
+            comment = f"매수 시그널 발동 — {sig.get('reason', '')}"
+        else:
+            comment = f"{alignment} · VWMA100 {close_vs_vwma:+.1f}%"
+
+        data = {
+            "trend_alignment": alignment,
+            "score": score,
+            "delta_3d": delta_3d,
+            "comment": comment,
+            "chain_str": chain_str,
+            "signal": sig,
+            "values": v,
+            "close_vs_vwma_pct": close_vs_vwma,
+        }
+        _MOMENTUM_CACHE["data"] = data
+        _MOMENTUM_CACHE["ts"] = now
+        return data
+    except Exception:
+        return None
+
+
+@router.get("/portfolio")
+def get_portfolio() -> dict:
+    """포트폴리오 현황(비중·진입가·모멘텀) JSON을 그대로 반환한다.
+
+    mock 단계: data/research/stocks/tesla/portfolio.json 파일을 그대로 응답.
+    실데이터 단계에서는 브로커 연동/실시간 지표로 교체.
+    """
+    try:
+        path = _CSV_DIR / "portfolio.json"
+        if not path.exists():
+            return {"source": "missing"}
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {"source": "error"}
+
+
+@router.get("/headline-cards")
+def get_headline_cards() -> dict:
+    """Essence 상단 3카드(비중관리·현재주가·모멘텀)용 컴팩트 응답.
+
+    portfolio.json을 카드 표시에 필요한 필드만 추려 반환한다.
+    실시간 가격은 별도 /api/tesla/price에서 받아 프론트가 합성한다.
+    """
+    try:
+        path = _CSV_DIR / "portfolio.json"
+        if not path.exists():
+            return {"cards": [], "as_of": "", "source": "missing"}
+
+        pf = json.loads(path.read_text(encoding="utf-8"))
+        weight = pf.get("weight", {}) or {}
+        price = pf.get("price_context", {}) or {}
+        momentum = pf.get("momentum", {}) or {}
+
+        # 비중관리 카드
+        cur_pct = weight.get("current_pct", 0.0)
+        tgt_pct = weight.get("target_pct", 0.0)
+        delta_pct = round(cur_pct - tgt_pct, 1)
+        weight_card = {
+            "key": "weight",
+            "label_ko": "비중관리",
+            "primary": f"{cur_pct:.1f}%",
+            "primary_sub": f"타겟 {tgt_pct:.1f}%",
+            "delta": f"{delta_pct:+.1f}%p",
+            "delta_pos": delta_pct >= 0,
+            "action": weight.get("action_label_ko") or weight.get("action", ""),
+            "comment": weight.get("comment", ""),
+            "color": "#3fb950" if -2.0 <= delta_pct <= 2.0 else ("#d29922" if delta_pct < -2.0 else "#f85149"),
+        }
+
+        # 현재주가 카드 (진입가 대비 손익 + VWMA100 괴리)
+        pl_pct = price.get("pl_pct", 0.0)
+        price_card = {
+            "key": "price",
+            "label_ko": "현재주가",
+            "primary": f"${price.get('current_usd', 0.0):,.2f}",
+            "primary_sub": f"진입 ${price.get('entry_avg_usd', 0.0):,.2f}",
+            "delta": f"{pl_pct:+.2f}%",
+            "delta_pos": pl_pct >= 0,
+            "action": price.get("channel_position_label_ko", ""),
+            "comment": price.get("comment", ""),
+            "color": "#3fb950" if pl_pct >= 0 else "#f85149",
+        }
+
+        # 모멘텀 카드 — 실데이터 우선, 실패 시 portfolio.json mock fallback
+        rt = _compute_momentum_realtime()
+        if rt is not None:
+            score = rt["score"]
+            alignment = rt["trend_alignment"]
+            delta_3d = rt["delta_3d"]
+            signal = rt["signal"]
+            action_text = (
+                f"매수 시그널 ({signal.get('touched_sma', '').upper()})"
+                if signal.get("signal")
+                else rt["chain_str"]
+            )
+            momentum_source = "yfinance"
+            comment_text = rt["comment"]
+        else:
+            score = momentum.get("score", 0)
+            alignment = momentum.get("trend_alignment", "")
+            delta_3d = momentum.get("delta_3d", "")
+            action_text = momentum.get("macd_state", "")
+            momentum_source = "mock"
+            comment_text = momentum.get("comment", "")
+
+        delta_pos = not str(delta_3d).startswith("-")
+        momentum_card = {
+            "key": "momentum",
+            "label_ko": "모멘텀",
+            "primary": f"{score}",
+            "primary_sub": alignment,
+            "delta": f"3D {delta_3d}" if delta_3d else "",
+            "delta_pos": delta_pos,
+            "action": action_text,
+            "comment": comment_text,
+            "color": "#3fb950" if score >= 60 else ("#d29922" if score >= 40 else "#f85149"),
+            "source": momentum_source,
+        }
+
+        return {
+            "as_of": pf.get("as_of", ""),
+            "source": pf.get("source", ""),
+            "regime": pf.get("regime", {}),
+            "cards": [weight_card, price_card, momentum_card],
+        }
+    except Exception:
+        return {"cards": [], "as_of": "", "source": "error"}
+
+
 @router.get("/delivery-signals")
 def get_delivery_signals() -> dict:
     """delivery_signals JSON 파일을 반환한다."""

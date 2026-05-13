@@ -99,6 +99,23 @@ nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
 .delta-badge.pos { background: rgba(63,185,80,0.15); color: var(--green); }
 .delta-badge.neg { background: rgba(248,81,73,0.15); color: var(--red); }
 
+/* 07 Essence header cards (비중·주가·모멘텀) */
+.headline-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.hcard { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; position: relative; overflow: hidden; }
+.hcard::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--border); }
+.hcard .hc-label { font-size: 10px; font-weight: 600; color: var(--dim); text-transform: uppercase; letter-spacing: 0.6px; }
+.hcard .hc-primary { display: flex; align-items: baseline; gap: 10px; }
+.hcard .hc-value { font-size: 26px; font-weight: 700; line-height: 1.1; }
+.hcard .hc-sub { font-size: 11px; color: var(--muted); }
+.hcard .hc-delta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hcard .hc-delta { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+.hcard .hc-delta.pos { background: rgba(63,185,80,0.15); color: var(--green); }
+.hcard .hc-delta.neg { background: rgba(248,81,73,0.15); color: var(--red); }
+.hcard .hc-action { font-size: 11px; font-weight: 600; color: var(--dim); }
+.hcard .hc-comment { font-size: 11px; color: var(--dim); line-height: 1.45; }
+.hcard .hc-meta { font-size: 10px; color: var(--muted); display: flex; gap: 10px; }
+@media (max-width: 900px) { .headline-cards { grid-template-columns: 1fr; } }
+
 /* 07 Essence radar */
 .essence-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .radar-canvas-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; align-items: center; justify-content: center; }
@@ -263,7 +280,11 @@ nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
 
 <!-- 07 Essence -->
 <div class="section">
-  <div class="section-title">Essence 스코어</div>
+  <div class="section-title">트레이딩 상단 — 비중·주가·모멘텀</div>
+  <div class="headline-cards" id="headline-cards">
+    <div class="empty">데이터 없음</div>
+  </div>
+  <div class="section-title" style="margin-top:20px;">Essence 스코어</div>
   <div class="essence-wrap">
     <div class="radar-canvas-wrap">
       <canvas id="radarChart"></canvas>
@@ -466,6 +487,32 @@ async function loadThesis() {
   renderList(d.bear, 'bear');
 }
 
+/* ---- 07 Essence 상단 3카드 (비중·주가·모멘텀) ---- */
+async function loadHeadlineCards() {
+  const d = await api('/api/tesla/headline-cards');
+  const el = document.getElementById('headline-cards');
+  if (!d || !d.cards || !d.cards.length) {
+    el.innerHTML = '<div class="empty">데이터 없음</div>';
+    return;
+  }
+  el.innerHTML = d.cards.map(c => {
+    const color = esc(c.color || 'var(--white)');
+    const deltaCls = c.delta_pos ? 'pos' : 'neg';
+    const deltaHtml = c.delta ? `<span class="hc-delta ${deltaCls}">${esc(c.delta)}</span>` : '';
+    const actionHtml = c.action ? `<span class="hc-action">${esc(c.action)}</span>` : '';
+    const commentHtml = c.comment ? `<div class="hc-comment">${esc(c.comment)}</div>` : '';
+    return `<div class="hcard" style="border-left:3px solid ${color};">
+      <div class="hc-label">${esc(c.label_ko)}</div>
+      <div class="hc-primary">
+        <div class="hc-value" style="color:${color};">${esc(c.primary)}</div>
+        <div class="hc-sub">${esc(c.primary_sub)}</div>
+      </div>
+      <div class="hc-delta-row">${deltaHtml}${actionHtml}</div>
+      ${commentHtml}
+    </div>`;
+  }).join('');
+}
+
 /* ---- 07 Essence ---- */
 let radarChart = null;
 async function loadEssence() {
@@ -571,6 +618,7 @@ async function loadNews() {
     loadOptions(),
     loadDelivery(),
     loadThesis(),
+    loadHeadlineCards(),
     loadEssence(),
     loadTimeline(),
     loadNews(),
