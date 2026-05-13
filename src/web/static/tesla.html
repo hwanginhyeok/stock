@@ -126,15 +126,28 @@ nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
 .ecard-info .ecard-delta { font-size: 11px; margin-top: 2px; }
 
 /* 08 Timeline */
+.tl-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.tl-toggle { display: inline-flex; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 2px; }
+.tl-toggle .ttab { background: transparent; border: 0; color: var(--dim); font-size: 11px; padding: 4px 12px; cursor: pointer; font-family: inherit; border-radius: 4px; transition: all 0.15s; }
+.tl-toggle .ttab:hover { color: var(--white); }
+.tl-toggle .ttab.active { background: var(--red); color: #fff; }
+.tl-toggle .ttab .ttab-count { font-size: 9px; opacity: 0.7; margin-left: 4px; }
+.tl-meta { font-size: 11px; color: var(--muted); margin-left: auto; }
 .timeline { position: relative; padding-left: 24px; border-left: 2px solid var(--border); margin-left: 8px; }
-.tl-entry { position: relative; margin-bottom: 14px; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
-.tl-entry::before { content: ''; position: absolute; left: -31px; top: 14px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--bg); }
-.tl-entry.done::before { background: var(--green); }
-.tl-entry.in_progress::before { background: var(--blue); }
-.tl-entry.planned::before { background: var(--muted); }
-.tl-entry .tl-date { font-size: 10px; font-weight: 600; color: var(--dim); }
-.tl-entry .tl-title { font-size: 12px; font-weight: 500; margin-top: 3px; line-height: 1.4; }
-.tl-entry .tl-desc { font-size: 11px; color: var(--dim); margin-top: 4px; line-height: 1.5; }
+.tl-group { position: relative; margin-bottom: 18px; }
+.tl-group::before { content: ''; position: absolute; left: -31px; top: 6px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--bg); background: var(--muted); }
+.tl-group.is-past::before { background: var(--green); }
+.tl-group.is-soon::before { background: var(--blue); }
+.tl-group .tl-group-date { font-size: 10px; font-weight: 700; color: var(--dim); margin-bottom: 6px; letter-spacing: 0.4px; }
+.tl-group .tl-group-date .tl-rel { font-weight: 400; color: var(--muted); margin-left: 6px; }
+.tl-event { position: relative; padding: 10px 14px 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; border-left: 3px solid var(--muted); }
+.tl-event .tl-event-head { display: flex; align-items: center; gap: 8px; }
+.tl-event .tl-title { font-size: 12px; font-weight: 600; line-height: 1.35; flex: 1; }
+.tl-event .tl-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.4px; color: #fff; }
+.tl-event .tl-imp { font-size: 9px; color: var(--muted); font-weight: 600; }
+.tl-event .tl-desc { font-size: 11px; color: var(--dim); margin-top: 5px; line-height: 1.5; }
+.tl-event.thesis-bear { background: linear-gradient(90deg, rgba(248,81,73,0.05), var(--surface) 40%); }
+.tl-event.thesis-bull { background: linear-gradient(90deg, rgba(63,185,80,0.05), var(--surface) 40%); }
 
 /* 09 News */
 .news-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; transition: border-color 0.15s; cursor: pointer; display: flex; flex-direction: column; }
@@ -296,6 +309,14 @@ nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
 <!-- 08 Timeline -->
 <div class="section">
   <div class="section-title">마일스톤 타임라인</div>
+  <div class="tl-toolbar">
+    <div class="tl-toggle" id="tl-toggle">
+      <button class="ttab" data-level="core">핵심<span class="ttab-count" id="ttab-cnt-core">—</span></button>
+      <button class="ttab active" data-level="important">중요<span class="ttab-count" id="ttab-cnt-important">—</span></button>
+      <button class="ttab" data-level="all">전체<span class="ttab-count" id="ttab-cnt-all">—</span></button>
+    </div>
+    <div class="tl-meta" id="tl-meta"></div>
+  </div>
   <div class="timeline" id="milestone-tl"><div class="empty">데이터 없음</div></div>
 </div>
 
@@ -574,24 +595,114 @@ async function loadEssence() {
 }
 
 /* ---- 08 Timeline ---- */
-async function loadTimeline() {
-  const d = await api('/api/tesla/timeline?importance_level=important');
-  if (!d || !d.events || !d.events.length) return;
+const TL_TOPIC_COLORS = {
+  robotaxi: '#ff6b35',
+  fsd: '#58a6ff',
+  optimus: '#d2a8ff',
+  '4680': '#f0883e',
+  megapack: '#3fb950',
+};
+const TL_TOPIC_LABELS = {
+  robotaxi: 'Robotaxi',
+  fsd: 'FSD',
+  optimus: 'Optimus',
+  '4680': '4680',
+  megapack: 'Megapack',
+};
+const TL_FALLBACK_COLOR = '#6e7681';
+let tlCurrentLevel = 'important';
 
-  const el = document.getElementById('milestone-tl');
-  el.innerHTML = d.events.slice(0, 20).map(ev => {
-    const isPast = ev.is_past;
-    const statusCls = isPast ? 'done' : (ev.importance_score >= 12 ? 'in_progress' : 'planned');
-    const dateStr = ev.occurred_at || '';
-    const title = ev.title || '';
-    const desc = ev.summary || ev.description || '';
-    return `<div class="tl-entry ${statusCls}">
-      <div class="tl-date">${esc(dateStr)}</div>
-      <div class="tl-title">${esc(title)}</div>
-      ${desc ? `<div class="tl-desc">${esc(desc.slice(0, 150))}</div>` : ''}
-    </div>`;
-  }).join('');
+function tlRelativeDate(daysOffset) {
+  if (daysOffset === 0) return '오늘';
+  if (daysOffset > 0) {
+    if (daysOffset < 30) return `D+${daysOffset}`;
+    if (daysOffset < 365) return `+${Math.round(daysOffset / 30)}M`;
+    return `+${(daysOffset / 365).toFixed(1)}Y`;
+  }
+  const ad = Math.abs(daysOffset);
+  if (ad < 30) return `D-${ad}`;
+  if (ad < 365) return `-${Math.round(ad / 30)}M`;
+  return `-${(ad / 365).toFixed(1)}Y`;
 }
+
+function tlGroupByDate(events) {
+  const map = new Map();
+  for (const ev of events) {
+    const key = ev.occurred_at || '';
+    if (!key) continue;
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(ev);
+  }
+  return Array.from(map.entries())
+    .map(([date, evs]) => ({
+      date,
+      events: evs.slice().sort((a, b) => (b.importance_score || 0) - (a.importance_score || 0)),
+      max_importance: Math.max(...evs.map(e => e.importance_score || 0)),
+      days_offset: evs[0].days_offset,
+      is_past: evs[0].is_past,
+    }))
+    .sort((a, b) => b.date.localeCompare(a.date));
+}
+
+function tlRenderEvent(ev) {
+  const topic = ev.topic;
+  const color = TL_TOPIC_COLORS[topic] || TL_FALLBACK_COLOR;
+  const label = TL_TOPIC_LABELS[topic] || (ev.category ? ev.category : '기타');
+  const thesisCls = ev.thesis_side === 'bear' ? 'thesis-bear' : (ev.thesis_side === 'bull' ? 'thesis-bull' : '');
+  const desc = ev.outcome || ev.summary || ev.description || '';
+  const impact = ev.impact_label_ko ? ` · ${esc(ev.impact_label_ko)}` : '';
+  return `<div class="tl-event ${thesisCls}" style="border-left-color:${esc(color)};">
+    <div class="tl-event-head">
+      <div class="tl-title">${esc(ev.title || '')}</div>
+      <span class="tl-badge" style="background:${esc(color)};">${esc(label)}</span>
+      <span class="tl-imp">${esc(String(ev.importance || ''))} · ${(ev.importance_score || 0).toFixed(1)}</span>
+    </div>
+    ${desc ? `<div class="tl-desc">${esc(desc.slice(0, 200))}${impact}</div>` : ''}
+  </div>`;
+}
+
+function tlRenderGroup(g) {
+  let stateCls = '';
+  if (g.is_past) stateCls = 'is-past';
+  else if (g.days_offset !== undefined && g.days_offset <= 30) stateCls = 'is-soon';
+  const rel = tlRelativeDate(g.days_offset || 0);
+  return `<div class="tl-group ${stateCls}">
+    <div class="tl-group-date">${esc(g.date)}<span class="tl-rel">${esc(rel)}</span></div>
+    ${g.events.map(tlRenderEvent).join('')}
+  </div>`;
+}
+
+async function loadTimeline(level) {
+  tlCurrentLevel = level || tlCurrentLevel;
+  const d = await api(`/api/tesla/timeline?importance_level=${tlCurrentLevel}`);
+  const el = document.getElementById('milestone-tl');
+  const meta = document.getElementById('tl-meta');
+
+  // 토글 카운트 갱신
+  if (d && d.counts) {
+    document.getElementById('ttab-cnt-core').textContent = d.counts.core ?? '0';
+    document.getElementById('ttab-cnt-important').textContent = d.counts.important ?? '0';
+    document.getElementById('ttab-cnt-all').textContent = d.counts.all ?? '0';
+  }
+  // 토글 active 상태 갱신
+  document.querySelectorAll('#tl-toggle .ttab').forEach(b => {
+    b.classList.toggle('active', b.dataset.level === tlCurrentLevel);
+  });
+
+  if (!d || !d.events || !d.events.length) {
+    el.innerHTML = '<div class="empty">표시할 이벤트가 없습니다</div>';
+    meta.textContent = '';
+    return;
+  }
+
+  const groups = tlGroupByDate(d.events);
+  meta.textContent = `${d.events.length}건 · ${groups.length}개 시점`;
+  el.innerHTML = groups.map(tlRenderGroup).join('');
+}
+
+document.querySelectorAll('#tl-toggle .ttab').forEach(btn => {
+  btn.addEventListener('click', () => loadTimeline(btn.dataset.level));
+});
 
 /* ---- 09 News ---- */
 async function loadNews() {
@@ -620,7 +731,7 @@ async function loadNews() {
     loadThesis(),
     loadHeadlineCards(),
     loadEssence(),
-    loadTimeline(),
+    loadTimeline('important'),
     loadNews(),
   ]);
 })();
