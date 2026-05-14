@@ -1,0 +1,16 @@
+[Unit]
+Description=InvestOS FastAPI Server
+After=network.target
+
+[Service]
+Type=simple
+User=gint_pcd
+WorkingDirectory=/home/gint_pcd/projects/주식부자프로젝트
+ExecStart=/home/gint_pcd/projects/주식부자프로젝트/.venv-wsl/bin/python -m uvicorn src.web.app:app --host 0.0.0.0 --port 8200
+Restart=always
+RestartSec=5
+StandardOutput=append:/home/gint_pcd/.pm_logs/investos_server.log
+StandardError=append:/home/gint_pcd/.pm_logs/investos_server.log
+
+[Install]
+WantedBy=multi-user.target
