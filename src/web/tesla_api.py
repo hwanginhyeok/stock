@@ -320,7 +320,7 @@ def get_timeline(
     }
     # importance_level별 임계값
     LEVEL_THRESHOLDS: dict[str, int] = {
-        "core": 15, "important": 6, "all": 1,
+        "core": 15, "important": 10, "all": 1,
     }
 
     # topics_quarterly.json에서 토픽 로딩
@@ -404,7 +404,7 @@ def get_timeline(
     }
 
     # importance_level 기반 필터
-    min_score = LEVEL_THRESHOLDS.get(importance_level, 6)
+    min_score = LEVEL_THRESHOLDS.get(importance_level, 10)
     filtered_events = [e for e in scored_events if e["importance_score"] >= min_score]
 
     # importance_score 내림차순 → occurred_at 오름차순
