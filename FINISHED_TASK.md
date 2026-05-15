@@ -4,6 +4,7 @@
 
 | # | 태스크 | 완료일 | 비고 |
 |---|--------|--------|------|
+| 1-52 | VWMA100 터치 전략 백테스트 + 스크리너 구현 | 2026-05-15 | sma_signals 백테스트→VWMA100 터치 전략으로 방향 전환. TSLA 5y A/B 비교. NASDAQ100+SP500 스크리너 cron 등록 |
 | 1-59 | Essence 상단 3카드 실데이터 연동 — 비중·주가·모멘텀 | 2026-05-15 | 현재주가 $443.30 실시간 / P&L +80.35% / VWMA100 채널위치 / 비중 28.7% 동적계산 |
 | 1-58 | 트레이딩 차트 반영 — pandas_ta→sma_signals 전환 + signals API 복구 | 2026-05-15 | numba/coverage 충돌 해결. VWMA100 BUY 2026-05-08, TREND_UP |
 | 1-60 | 타임라인 핵심 압축 — core/important/all 토글 + 동일날 그룹핑 | 2026-05-14 | importance 점수 기반 필터 + topic 그룹핑. important 임계값 10으로 최종 조정 |

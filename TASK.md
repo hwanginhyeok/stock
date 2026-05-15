@@ -4,9 +4,9 @@
 
 ## 요약
 
-- Current: 5개
-- Prepared: P1 3개 활성 + 보류 21개 (P1 9 / P2 6 / P3 6)
-- Finished: 34개 (+ 2026-03 archive)
+- Current: 2개 (1-45 장기 / 1-64)
+- Prepared: P1 3개 활성 + 보류 24개
+- Finished: 37개 (+ 2026-03 archive)
 - 마지막 동기화: 2026-05-15
 
 ---
