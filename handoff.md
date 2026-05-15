@@ -1,37 +1,38 @@
-# Handoff — 2026-05-14
+# Handoff — 2026-05-15
 
 ## 작업 중이던 것
 
-### 1-58: 차트 시그널 마커 통합 (코드 완료, 확인 대기)
-- **완료된 것**: `src/analyzers/sma_signals.py`에 `historical_chart_signals()` 추가 (커밋 66d99f8)
-- **완료된 것**: `src/web/chart_api.py` `/api/chart/strategy` 리팩토링 — SMA100→VWMA100 기준 통일
-- **남은 것**: uvicorn 재시작 후 차트에서 PO/W/BR/PB 마커 실물 확인
-- **재시작 명령**: `pkill -f 'uvicorn src.web.app' && uvicorn src.web.app:app --reload --port 8200 &`
+### 1-45: Tesla 이슈 DB (⚠️ 21일+ 고착)
+- GLM 작업 중이라고 비고에만 있고 실제 진행 불명확
+- **다음 세션 첫 액션**: GLM 세션(주식부자 pane2) 상태 확인 → 결과 없으면 재지시
 
-### 1-52: 정배열/역배열 (계속 진행 중)
-- 1-58 차트 마커 통합 완료로 비고 업데이트됨
-- **남은 것**: 백테스트 결과 분석, 1H/4H 타임프레임 확장
+### 1-64: 실적 시즌 섹터 종합 분석 HTML
+- 개별 리포트(딥다이브 17종 + trend 9종)는 완료됨
+- 섹터별 대장/약자/트렌드 종합 HTML 아직 미작성
 
-## 컨텍스트
+## 이번 세션 결정 사항
 
-### 이번 세션 결정사항
-- important 임계값 6→10으로 상향 (ecb9de5) — 타임라인 이벤트 노이즈 감소 목적
-- `historical_chart_signals()`: lookback=5봉, tolerance=±0.5%, VWMA100 기준선 (SMA100 폐기)
-- strategy API 리팩토링으로 pandas_ta→numba→coverage 호환성 버그 동시 해결 (서버가 500 던지던 문제)
+### 전략 방향 확정
+- **사용자 전략**: VWMA100 터치 후 약조정을 매수 기회로 보는 스크리너 방식
+- 기계적 매매가 아니라 후보 리스트 → 사용자 수동 판단
+- 백테스트: TSLA 5y 기준 승률 37%, 손익비 1.63, 누적 +30%
 
-### 마커 타입 (프론트 app.js 이미 처리됨)
-- `PO` (녹색 ▲): 정배열 진입
-- `W` (노랑 ▲): 과도기 진입 (점진 매도)
-- `BR` (빨강 ▼): 추세 붕괴
-- `PB` (파랑 ▲): 눌림목 매수
+### 스크리너 완성
+- scripts/screener_vwma100.py: NASDAQ100+SP500, 매일 05:00 KST cron 등록
+- 우상향/우하향 구분, 저가 VWMA100 ±1.5% 터치 조건
+- 오늘 신호: ODFL, ABNB, AEP (우상향) / OKTA, KHC, COIN, NDAQ (우하향)
+
+### numba/coverage 충돌 해결 (D-007)
+- except ImportError → except Exception 수정
+- get_trend_signals: pandas_ta → sma_signals.py + 수동 RSI로 대체
 
 ## 파일 변경 요약
-- `src/analyzers/sma_signals.py`: historical_chart_signals() 함수 추가 (+186줄)
-- `src/web/chart_api.py`: strategy 엔드포인트 리팩토링 (-156줄 순감)
-- `src/web/tesla_api.py`: important 임계값 6→10
+- src/web/tesla_api.py: Essence 3카드 실데이터
+- src/web/chart_api.py: pandas_ta 제거, signals API 복구
+- scripts/screener_vwma100.py: NASDAQ100+SP500 스크리너 (핵심)
+- scripts/backtest_vwma100_touch.py: VWMA100 터치 A/B 백테스트
 
 ## 다음 세션 첫 액션
-1. `pkill -f 'uvicorn src.web.app' && uvicorn src.web.app:app --reload --port 8200 &`
-2. 브라우저에서 차트 열고 1y 기간 — PO/W/BR/PB 마커 17개 확인
-3. 차트 확인 완료 시 1-58 FINISHED로 이동
-4. 이후 1-52 백테스트 또는 1H/4H 확장 착수
+1. 1-45 GLM 고착 확인 — 결과 없으면 재지시
+2. 스크리너 첫 실행 결과 확인 — 내일 05:00 후 ~/.pm_logs/screener_vwma100.log
+3. 1-64 섹터 종합 HTML 마무리
