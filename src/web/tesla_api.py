@@ -1012,6 +1012,8 @@ def _compute_momentum_realtime() -> dict[str, Any] | None:
             "signal": sig,
             "values": v,
             "close_vs_vwma_pct": close_vs_vwma,
+            "current_price": float(hist.iloc[-1]["Close"]),
+            "vwma100_usd": float(v.get("vwma_100", 0.0)),
         }
         _MOMENTUM_CACHE["data"] = data
         _MOMENTUM_CACHE["ts"] = now
@@ -1040,10 +1042,12 @@ def get_portfolio() -> dict:
 def get_headline_cards() -> dict:
     """Essence 상단 3카드(비중관리·현재주가·모멘텀)용 컴팩트 응답.
 
-    portfolio.json을 카드 표시에 필요한 필드만 추려 반환한다.
-    실시간 가격은 별도 /api/tesla/price에서 받아 프론트가 합성한다.
+    실시간 데이터 우선 (yfinance 5분 캐시). 실패 시 portfolio.json fallback.
+    portfolio.json은 사용자 입력 필드(shares, avg_cost, target_pct, total_portfolio_usd)만 관리.
     """
     try:
+        from datetime import date as _date
+
         path = _CSV_DIR / "portfolio.json"
         if not path.exists():
             return {"cards": [], "as_of": "", "source": "missing"}
@@ -1052,11 +1056,69 @@ def get_headline_cards() -> dict:
         weight = pf.get("weight", {}) or {}
         price = pf.get("price_context", {}) or {}
         momentum = pf.get("momentum", {}) or {}
+        position = pf.get("position", {}) or {}
 
-        # 비중관리 카드
-        cur_pct = weight.get("current_pct", 0.0)
+        # ── 실시간 데이터 (yfinance, 캐시 공유)
+        rt = _compute_momentum_realtime()
+
+        if rt is not None:
+            current_usd = rt["current_price"]
+            vwma100_usd = rt["vwma100_usd"]
+            close_vs_vwma = rt["close_vs_vwma_pct"]
+            rt_source = "yfinance"
+        else:
+            current_usd = price.get("current_usd", 0.0)
+            vwma100_usd = price.get("vwma100_usd", 0.0)
+            close_vs_vwma = price.get("vwma100_deviation_pct", 0.0)
+            rt_source = "mock"
+
+        # ── 사용자 포지션 (portfolio.json 입력값)
+        entry_avg = position.get("avg_cost_usd") or price.get("entry_avg_usd", 0.0)
+        shares = position.get("shares", 0)
+        total_portfolio_usd = pf.get("total_portfolio_usd", 0.0)
+
+        # ── 현재주가 카드
+        pl_pct = round((current_usd - entry_avg) / entry_avg * 100, 2) if entry_avg else 0.0
+
+        if close_vs_vwma >= 5:
+            channel_pos = "채널 상단"
+        elif close_vs_vwma <= -5:
+            channel_pos = "채널 하단"
+        else:
+            channel_pos = "채널 중단"
+
+        price_card = {
+            "key": "price",
+            "label_ko": "현재주가",
+            "primary": f"${current_usd:,.2f}",
+            "primary_sub": f"진입 ${entry_avg:,.2f}",
+            "delta": f"{pl_pct:+.2f}%",
+            "delta_pos": pl_pct >= 0,
+            "action": channel_pos,
+            "comment": f"VWMA100 ${vwma100_usd:,.2f} ({close_vs_vwma:+.1f}%)",
+            "color": "#3fb950" if pl_pct >= 0 else "#f85149",
+            "source": rt_source,
+        }
+
+        # ── 비중관리 카드 — 실시간 주가로 current_pct 재계산
+        if total_portfolio_usd and current_usd and shares:
+            cur_pct = round(shares * current_usd / total_portfolio_usd * 100, 1)
+        else:
+            cur_pct = weight.get("current_pct", 0.0)
+
         tgt_pct = weight.get("target_pct", 0.0)
         delta_pct = round(cur_pct - tgt_pct, 1)
+
+        if delta_pct < -2.0:
+            action_label = weight.get("action_label_ko") or "분할 매수"
+            weight_comment = f"타겟 {delta_pct:+.1f}%p 미달 · 추가 여력 있음"
+        elif delta_pct > 2.0:
+            action_label = "비중 축소"
+            weight_comment = f"타겟 {delta_pct:+.1f}%p 초과 · 부분 익절 검토"
+        else:
+            action_label = "유지"
+            weight_comment = f"타겟 ±{abs(delta_pct):.1f}%p 내 · 적정 비중"
+
         weight_card = {
             "key": "weight",
             "label_ko": "비중관리",
@@ -1064,27 +1126,12 @@ def get_headline_cards() -> dict:
             "primary_sub": f"타겟 {tgt_pct:.1f}%",
             "delta": f"{delta_pct:+.1f}%p",
             "delta_pos": delta_pct >= 0,
-            "action": weight.get("action_label_ko") or weight.get("action", ""),
-            "comment": weight.get("comment", ""),
+            "action": action_label,
+            "comment": weight_comment,
             "color": "#3fb950" if -2.0 <= delta_pct <= 2.0 else ("#d29922" if delta_pct < -2.0 else "#f85149"),
         }
 
-        # 현재주가 카드 (진입가 대비 손익 + VWMA100 괴리)
-        pl_pct = price.get("pl_pct", 0.0)
-        price_card = {
-            "key": "price",
-            "label_ko": "현재주가",
-            "primary": f"${price.get('current_usd', 0.0):,.2f}",
-            "primary_sub": f"진입 ${price.get('entry_avg_usd', 0.0):,.2f}",
-            "delta": f"{pl_pct:+.2f}%",
-            "delta_pos": pl_pct >= 0,
-            "action": price.get("channel_position_label_ko", ""),
-            "comment": price.get("comment", ""),
-            "color": "#3fb950" if pl_pct >= 0 else "#f85149",
-        }
-
-        # 모멘텀 카드 — 실데이터 우선, 실패 시 portfolio.json mock fallback
-        rt = _compute_momentum_realtime()
+        # ── 모멘텀 카드
         if rt is not None:
             score = rt["score"]
             alignment = rt["trend_alignment"]
@@ -1095,15 +1142,15 @@ def get_headline_cards() -> dict:
                 if signal.get("signal")
                 else rt["chain_str"]
             )
-            momentum_source = "yfinance"
             comment_text = rt["comment"]
+            momentum_source = "yfinance"
         else:
             score = momentum.get("score", 0)
             alignment = momentum.get("trend_alignment", "")
             delta_3d = momentum.get("delta_3d", "")
             action_text = momentum.get("macd_state", "")
-            momentum_source = "mock"
             comment_text = momentum.get("comment", "")
+            momentum_source = "mock"
 
         delta_pos = not str(delta_3d).startswith("-")
         momentum_card = {
@@ -1119,9 +1166,11 @@ def get_headline_cards() -> dict:
             "source": momentum_source,
         }
 
+        as_of = _date.today().isoformat() if rt_source == "yfinance" else pf.get("as_of", "")
+
         return {
-            "as_of": pf.get("as_of", ""),
-            "source": pf.get("source", ""),
+            "as_of": as_of,
+            "source": rt_source,
             "regime": pf.get("regime", {}),
             "cards": [weight_card, price_card, momentum_card],
         }
