@@ -65,3 +65,12 @@
 - **노하우**: lightweight-charts에서 시리즈를 동적으로 추가/제거하면 내부 auto-scroll이 매번 트리거됨 → **시리즈는 한 번만 생성하고 setData로 데이터만 갱신**. 멀티 차트 동기화는 피드백 루프 방지 플래그 필수. visible range는 모든 데이터 로딩이 끝난 뒤 별도 setTimeout으로 강제 설정
 - **회고**: lightweight-charts 공식 문서가 "data updates and auto-scaling" 섹션을 명시 안 함. 처음부터 시리즈 재사용 패턴으로 설계했어야. removeSeries→addLineSeries 반복은 성능도 나쁨
 - **관련 파일**: `src/web/static/app.js` (initLightweightChart, loadChartData, syncTimeScale)
+
+## D-007: numba/coverage 의존성 충돌로 pandas_ta 전면 불능
+- **날짜**: 2026-05-15
+- **상황**: chart_api.py의 `import pandas_ta as ta` 호출 시 500 에러
+- **문제**: pandas_ta → numba → `coverage.types.Tracer` 참조 → coverage 7.4.4에서 해당 속성 제거됨. `except ImportError`로만 잡아서 `AttributeError`가 뚫림
+- **삽질**: `except ImportError` → `except Exception`으로 바꾸면 `_compute_indicators`는 해결. 그런데 `get_trend_signals` 함수에도 bare `import pandas_ta as ta`가 있어서 500 재발
+- **해결**: 두 곳 모두 수정. `get_trend_signals`는 pandas_ta 전체를 `sma_signals.py`의 `vwma_series/sma_series` + 수동 RSI rolling으로 대체. ADX는 조건에서 제거 (RSI 단독 필터로도 충분)
+- **노하우**: `except ImportError`만 잡으면 의존성 체인 중간의 `AttributeError/ImportError` 변종을 못 잡음. 서드파티 라이브러리 import는 항상 `except Exception`으로. pandas_ta 없이 VWMA/SMA/RSI는 pandas rolling으로 직접 구현 가능 (20줄 이내)
+- **관련 파일**: `src/web/chart_api.py`, `src/analyzers/sma_signals.py`
