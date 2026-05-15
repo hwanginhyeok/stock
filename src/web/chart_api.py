@@ -221,7 +221,8 @@ def _compute_indicators(records: list[dict]) -> dict:
             if st_dir:
                 result["supertrend_direction"] = int(st[st_dir[0]].iloc[-1]) if pd.notna(st[st_dir[0]].iloc[-1]) else None
 
-    except ImportError:
+    except Exception:
+        # numba/coverage 의존성 충돌 등 import 실패 시 지표 없이 OHLCV만 반환
         pass
 
     # 현재가 정보
@@ -800,21 +801,25 @@ def get_trend_signals(
             "current_trend": "INSUFFICIENT_DATA", "total_signals": 0,
         }
 
-    import pandas_ta as ta
+    from src.analyzers.sma_signals import sma_series, vwma_series
 
     df = pd.DataFrame(records)
     close = df["close"].astype(float)
-    high = df["high"].astype(float)
-    low = df["low"].astype(float)
     volume = df["volume"].astype(float)
 
-    vwma100 = ta.vwma(close, volume, length=100)
-    rsi = ta.rsi(close, length=14)
-    adx_result = ta.adx(high, low, close)
-    adx = adx_result.iloc[:, 0] if adx_result is not None else None
-    sma20 = ta.sma(close, length=20)
-    sma50 = ta.sma(close, length=50)
-    volume_ma20 = ta.sma(volume, length=20)
+    # pandas_ta 없이 직접 계산 (numba/coverage 충돌 회피)
+    df_upper = df.rename(columns={"close": "Close", "volume": "Volume"})
+    vwma100 = vwma_series(df_upper, 100)
+    sma20 = sma_series(close, 20)
+    sma50 = sma_series(close, 50)
+    volume_ma20 = volume.rolling(20).mean()
+
+    # 수동 RSI (14일)
+    delta = close.diff()
+    gain = delta.clip(lower=0).rolling(14).mean()
+    loss = (-delta.clip(upper=0)).rolling(14).mean()
+    rs = gain / loss.replace(0, float("nan"))
+    rsi = 100 - (100 / (1 + rs))
 
     signals = []
     for i in range(1, len(df)):
@@ -823,33 +828,30 @@ def get_trend_signals(
         curr_vwma = vwma100.iloc[i] if pd.notna(vwma100.iloc[i]) else None
         prev_vwma = vwma100.iloc[i - 1] if pd.notna(vwma100.iloc[i - 1]) else None
         curr_rsi = rsi.iloc[i] if pd.notna(rsi.iloc[i]) else None
-        curr_adx = adx.iloc[i] if adx is not None and pd.notna(adx.iloc[i]) else None
         curr_vol = volume.iloc[i]
         avg_vol = volume_ma20.iloc[i] if pd.notna(volume_ma20.iloc[i]) else curr_vol
         vol_ratio = curr_vol / avg_vol if avg_vol > 0 else 1
 
-        if curr_vwma is None or prev_vwma is None or curr_rsi is None or curr_adx is None:
+        if curr_vwma is None or prev_vwma is None or curr_rsi is None:
             continue
 
         cross_above = prev_close < prev_vwma and curr_close > curr_vwma
         cross_below = prev_close > prev_vwma and curr_close < curr_vwma
         time_val = records[i]["time"]
 
-        if cross_above and curr_rsi > 40 and curr_adx > 20:
+        if cross_above and curr_rsi > 40:
             sig_type = "STRONG_BUY" if vol_ratio >= 1.5 else "BUY"
             desc = "VWMA100 돌파 강력 매수 (거래량 확보)" if vol_ratio >= 1.5 else "VWMA100 돌파 매수"
             signals.append({
                 "time": time_val, "type": sig_type, "price": round(curr_close, 2),
                 "vwma100": round(curr_vwma, 2), "rsi": round(curr_rsi, 2),
-                "adx": round(curr_adx, 2), "volume_ratio": round(vol_ratio, 2),
-                "description": desc,
+                "volume_ratio": round(vol_ratio, 2), "description": desc,
             })
         elif cross_below and curr_rsi < 60:
             signals.append({
                 "time": time_val, "type": "SELL", "price": round(curr_close, 2),
                 "vwma100": round(curr_vwma, 2), "rsi": round(curr_rsi, 2),
-                "adx": round(curr_adx, 2), "volume_ratio": round(vol_ratio, 2),
-                "description": "VWMA100 이탈 매도",
+                "volume_ratio": round(vol_ratio, 2), "description": "VWMA100 이탈 매도",
             })
 
     # 현재 추세
@@ -865,11 +867,11 @@ def get_trend_signals(
         elif last_close < last_vwma and last_sma20 < last_sma50:
             current_trend = "TREND_DOWN"
 
+    last_rsi = rsi.iloc[-1]
     return {
         "symbol": symbol, "interval": interval, "signals": signals,
         "current_trend": current_trend,
-        "current_rsi": round(float(rsi.iloc[-1]), 2) if pd.notna(rsi.iloc[-1]) else None,
-        "current_adx": round(float(adx.iloc[-1]), 2) if adx is not None and pd.notna(adx.iloc[-1]) else None,
+        "current_rsi": round(float(last_rsi), 2) if pd.notna(last_rsi) else None,
         "total_signals": len(signals),
     }
 
