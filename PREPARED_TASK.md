@@ -3,17 +3,14 @@
 > **InvestOS 인프라 + 테슬라 entity 체계 집중** — HIH_2 업무 entity 패턴을 stock에 적용
 > 아티클 작업은 전부 보류, 인프라/데이터 파이프라인 우선
 
-## P1 — 1-43 매핑 설계 완료 후 착수할 것 (초안)
+## P1 — 활성
 
 | # | 태스크 | 우선순위 | depends | 비고 |
 |---|--------|----------|---------|------|
-| 1-44 | 테슬라 특화 엔티티 스키마 설계 (제품/공장/사람/이벤트/지표) | P1 | 1-43 | 1-39 essential/propria 프레임에 테슬라 하위 타입 확장 |
-| 1-45 | 지정학(GeoInvest) 이슈 DB 재정리 (HIH #번호 스타일) | P1 | 1-43 | 이란/호르무즈/관세 등을 이슈 DB로 — 상태/블로커/마일스톤 |
 | 1-46 | `stock-notion-sync` 스킬 — Notion DB 연동 PoC | P1 | 1-43, 1-44 | hih-notion-sync 복제. 이슈 DB 1개부터 |
-| 1-47 | 기존 파이프라인 → 새 엔티티 스키마 migration | P1 | 1-44, 1-45 | DB 마이그레이션 + 역호환 검증 |
-| 1-48 | properties dict 웹 UI 노출 | P1 | 1-44 | `/api/entities/{id}/properties` + D3 노드 클릭 시 본질 속성 표시 |
-
-> ※ 1-44~1-48은 **1-43 매핑 설계 초안** 결과에 따라 조정됨. 현재는 placeholder.
+| 1-47 | 기존 파이프라인 → 새 엔티티 스키마 migration | P1 | 1-44✅, 1-45✅ | **depends 풀림 (1-45 CSV 시드 완성 확인)**. CSV `data/research/stocks/tesla/{issues,milestones,tagged_issues}.csv` → ontology_entities/ontology_events 마이그 스크립트 작성 + 역호환 검증. Hermes에 위임 예정 (stock:1.1 Sonnet 1M 한도 막힘) |
+| 1-53 | 빗각·채널 기반 시그널 (인범 매매법) | P1 | 1-49 | 빗각 터치=매수 대기, 이탈 후 회복=강한 매수, 채널 상단=익절 |
+| 1-66 | APScheduler 데몬 systemd 서비스 등록 (briefing 자동 재시작) | P1 | — | 현재 `run_workflow.py schedule`이 APScheduler 데몬으로 briefing(05:53/17:47) 실행. WSL sleep/PC 재부팅 시 자동 복원 안 됨 → 5/16(금) briefing 미실행 사례. systemd --user 서비스로 등록 → 자동 재시작. 2026-05-17 Hermes RC 분석 결과 |
 
 ## 보류 (InvestOS 인프라 집중 전환으로 일시 중단)
 
@@ -28,7 +25,7 @@
 ### 리서치 보류 (5-x)
 | # | 태스크 | 우선순위 | 비고 |
 |---|--------|----------|------|
-| 5-9 | 바이오 섹터 리서치 허브 | P1 | ⏸️ 테슬라 집중 전환으로 보류 |
+| 5-11 | 바이오 섹터 리서치 허브 | P1 | ⏸️ 테슬라 집중 전환으로 보류 |
 
 ### P1 보류 (기존)
 | # | 태스크 | 우선순위 | depends | 비고 |

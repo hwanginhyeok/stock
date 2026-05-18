@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KO | 코카콜라 Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #f40009; --accent-dim: #f4000933;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#f4000915,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #f4000944; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  /* CARDS */
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:#00d632; }
+  .negative { color:var(--red); }
+
+  /* KPI TIER */
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#00d63222; color:#00d632; }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  /* QUOTE */
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  /* TONE METER */
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  /* NEXT Q */
+  .next-q { background:linear-gradient(135deg,#4da6ff10,var(--surface)); border:1px solid #4da6ff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--blue); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--blue); }
+
+  /* LINKS */
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  /* TAGS */
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:#00d63222; color:#00d632; }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  /* KPI NOTE */
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NYSE: KO</div>
+    <h1>The Coca-Cola Company</h1>
+    <div class="company-kr">코카콜라 컴퍼니</div>
+    <div class="subtitle">Q1 FY2026 실적 딥다이브 &mdash; 2026.04.28 장전 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-04-28</span>
+      <span>|</span>
+      <span>섹터: 소비재 / 음료</span>
+      <span>|</span>
+      <span>시가총액: ~$1,800억</span>
+      <span>|</span>
+      <span>유기적 성장: +10% YoY</span>
+    </div>
+    <div class="verdict beat">BEAT &mdash; 매출 +2.5% vs 컨센서스 / EPS +6.2% vs 컨센서스 / 주가 +5%</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">순매출 (Net Revenue)</div>
+      <div class="value">$124.7억</div>
+      <div class="compare">컨센서스: $121.7억 <span class="beat-tag">BEAT +2.5%</span></div>
+      <div class="compare">전년비: +12% 보고 / +10% 유기적</div>
+    </div>
+    <div class="num-card">
+      <div class="label">비교 EPS (Non-GAAP)</div>
+      <div class="value">$0.86</div>
+      <div class="compare">컨센서스: $0.81 <span class="beat-tag">BEAT +6.2%</span></div>
+      <div class="compare">전년비: +18% / GAAP EPS $0.91</div>
+    </div>
+    <div class="num-card">
+      <div class="label">영업이익률</div>
+      <div class="value">35.0%</div>
+      <div class="compare">전년비: 32.9% &rarr; +210bp</div>
+      <div class="compare">비교 영업이익률: 34.5% (+70bp)</div>
+    </div>
+  </div>
+
+  <h3>매출 구성 &mdash; 지역별 유기적 성장</h3>
+  <table>
+    <thead><tr><th>지역</th><th>유기적 성장</th><th>판매량(UCV)</th><th>가격/믹스</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td>북미 (North America)</td><td class="mono positive">+12%</td><td class="mono positive">+4%</td><td class="mono positive">+1%</td><td><span class="kw-tag bullish">LEAD</span></td></tr>
+      <tr><td>EMEA (유럽·중동·아프리카)</td><td class="mono positive">+11%</td><td class="mono positive">+2%</td><td class="mono positive">+5%</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
+      <tr><td>라틴아메리카</td><td class="mono positive">+9%</td><td class="mono positive">+1%</td><td class="mono positive">+1%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+      <tr><td>아태 (Asia Pacific)</td><td class="mono positive">+5%</td><td class="mono positive">+5%</td><td class="mono negative">-6%</td><td><span class="kw-tag neutral-tag">MIXED</span></td></tr>
+      <tr><td>보틀링 인베스트먼트</td><td class="mono">—</td><td class="mono positive">+1%</td><td class="mono negative">-1%</td><td><span class="kw-tag neutral-tag">STABLE</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>카테고리별 판매량 (Unit Case Volume)</h3>
+  <table>
+    <thead><tr><th>카테고리</th><th>Q1 2026 성장</th><th>주요 드라이버</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td><strong>전체 유닛 케이스</strong></td><td class="mono positive">+3%</td><td>전 지역 성장</td><td><span class="kw-tag bullish">BROAD-BASED</span></td></tr>
+      <tr><td>탄산음료 (Sparkling)</td><td class="mono positive">+2%</td><td>아태·북미 견인</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+      <tr><td>&nbsp;&nbsp;상표 코카콜라 (Trademark)</td><td class="mono positive">+2%</td><td>아태·북미 성장</td><td><span class="kw-tag neutral-tag">CORE</span></td></tr>
+      <tr><td>&nbsp;&nbsp;<strong>코카콜라 제로슈거</strong></td><td class="mono positive" style="font-size:16px;font-weight:700;">+13%</td><td>전 지역 균등 성장</td><td><span class="kw-tag bullish">STAR</span></td></tr>
+      <tr><td>&nbsp;&nbsp;스파클링 플레이버</td><td class="mono positive">+3%</td><td>전 지역 성장</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
+      <tr><td>물·스포츠·커피·차</td><td class="mono positive">+5%</td><td>물 +5% / 전 지역</td><td><span class="kw-tag bullish">GROWTH</span></td></tr>
+      <tr><td>주스·유제품·식물성</td><td class="mono negative">-1%</td><td>EMEA 하락이 아태 상쇄</td><td><span class="kw-tag bearish">DRAG</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="next-q">
+    <h3>FY2026 가이던스 (상향 조정)</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">유기적 매출 성장</div><div class="nq-value">4~5%</div></div>
+      <div class="next-q-item"><div class="nq-label">비교 EPS 성장 (상향)</div><div class="nq-value">8~9%</div></div>
+      <div class="next-q-item"><div class="nq-label">연간 잉여현금흐름</div><div class="nq-value">~$122억</div></div>
+    </div>
+  </div>
+
+  <div class="kpi-note" style="margin-top:16px;">
+    <strong>가이던스 상향 이유:</strong> 실질 사업 개선이 아닌 <strong>실효 세율 인하(20.9% &rarr; 19.9%)</strong>가 핵심. 비교 통화중립 EPS 성장은 6~7%로 종전과 동일. 환율 우호(1~2pp 순풍)가 추가로 기여. 투자자는 세율 효과를 제거한 유기적 EPS 추세를 별도로 봐야 함.
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>이 회사를 읽는 숫자들</h2>
+
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 코카콜라가 직접 정의한 최우선 지표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>유기적 매출 성장률</strong></td>
+        <td class="mono positive" style="font-size:18px;font-weight:700;">+10%</td>
+        <td class="mono">Q4 2025: +6%</td>
+        <td>환율·M&amp;A·보틀링 구조변화를 제거한 순수 사업 성장력. 경영진이 가장 먼저 인용하는 숫자</td>
+      </tr>
+      <tr>
+        <td><strong>유닛 케이스 볼륨 성장</strong></td>
+        <td class="mono positive" style="font-size:18px;font-weight:700;">+3%</td>
+        <td class="mono">역사 평균 +1.1% 대비 가속</td>
+        <td>실물 음료가 얼마나 더 팔렸나. 가격 올려서 수익 낸 게 아니라 볼륨도 함께 성장 = 프리미엄 신호</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>볼륨 + 가격 동시 성장의 의미:</strong> 유기적 매출 10% = 볼륨(농축액 판매 +8%) + 가격/믹스(+2%). 볼륨이 성장하면서 가격도 올렸다 = 소비자가 가격을 용인하고 있다는 뜻. 소비재에서 이 조합이 성립할 때가 최고의 시기.
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">브랜드 건강 &mdash; 포트폴리오의 활력 신호</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>코카콜라 제로슈거 성장</strong></td>
+        <td class="mono positive" style="font-size:16px;font-weight:700;">+13%</td>
+        <td class="mono">전 지역 균등 성장</td>
+        <td>건강 트렌드 대응의 핵심 산물. 전통 레귤러와 잠식 없이 순증 — "카테고리 확장"의 교과서</td>
+      </tr>
+      <tr>
+        <td><strong>가격 vs 볼륨 믹스</strong></td>
+        <td class="mono">가격 +4pp / 믹스 -2pp</td>
+        <td class="mono">순 +2%</td>
+        <td>가격은 올렸지만 고가 SKU로의 믹스 개선은 아직. 저가 어포더빌리티 전략이 믹스를 억누르는 구조</td>
+      </tr>
+      <tr>
+        <td><strong>스파클링 플레이버 성장</strong></td>
+        <td class="mono positive">+3%</td>
+        <td class="mono">전 지역 성장</td>
+        <td>Sprite, Fanta 등 비콜라 탄산군. 전 지역에서 균등하게 성장 = 포트폴리오 폭이 넓다는 증거</td>
+      </tr>
+      <tr>
+        <td><strong>물·스포츠·커피·차</strong></td>
+        <td class="mono positive">+5%</td>
+        <td class="mono">전 지역 성장</td>
+        <td>탄산 외 카테고리 확장. Powerade, Gold Peak 등이 견인. 물 +5%는 Dasani·Topo Chico 성장 반영</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>코카콜라 제로슈거가 왜 핵심인가:</strong> GLP-1(위고비 등 비만치료제) 확산으로 저칼로리 트렌드가 구조적으로 강화 중. 제로슈거 +13%는 이 트렌드를 타는 동시에 기존 레귤러 콜라 소비자를 유지하는 이중 방어선. 경영진이 "Zero-Zero(zero alcohol, zero sugar)" 서브 브랜드까지 출시한 것도 같은 맥락.
+  </div>
+
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">지역별 성과 &mdash; 지형도를 읽는 열쇠</span>
+  </div>
+  <table>
+    <thead><tr><th>지역</th><th>UCV 성장</th><th>비교 영업이익 (통화중립)</th><th>주요 이슈</th></tr></thead>
+    <tbody>
+      <tr><td><strong>북미</strong></td><td class="mono positive">+4%</td><td class="mono positive">+17%</td><td>포트폴리오 강세. 이스터 타이밍 효과. Topo Chico·Fairlife 공급 제약 존재</td></tr>
+      <tr><td><strong>EMEA</strong></td><td class="mono positive">+2%</td><td class="mono positive">+12%</td><td>유럽 소비자 신중. 중동 3월 볼륨 지역 갈등 영향 하락. 아프리카가 보완</td></tr>
+      <tr><td><strong>라틴아메리카</strong></td><td class="mono positive">+1%</td><td class="mono positive">+9%</td><td>브라질·중앙아메리카 성장 &gt; 멕시코(설탕세)·아르헨티나 하락. 순 플러스 유지</td></tr>
+      <tr><td><strong>아태</strong></td><td class="mono positive">+5%</td><td class="mono negative">-17%</td><td>볼륨은 최고 성장이나 가격/믹스 -6%. 마진 압박 2/3은 재고 조정. 장기 브랜드 투자 우선</td></tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>아태 딜레마:</strong> 볼륨 +5%이면서 이익은 -17%인 역설. CFO 존 머피는 "마진 압박의 2/3는 일시적 재고 요인"이라 해명하며 장기 소비자 프랜차이즈 투자를 우선한다고 강조. 아태 마진 회복 여부가 H2 2026 가이던스 달성의 변수.
+  </div>
+
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">수익성 &mdash; 매출 성장이 이익으로 이어지는가</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td><strong>GAAP 영업이익률</strong></td><td class="mono positive">35.0%</td><td class="mono positive">+210bp</td><td><span class="kw-tag bullish">EXPANSION</span></td></tr>
+      <tr><td><strong>비교 영업이익률</strong></td><td class="mono positive">34.5%</td><td class="mono positive">+70bp</td><td><span class="kw-tag bullish">STEADY UP</span></td></tr>
+      <tr><td><strong>잉여현금흐름 (FCF)</strong></td><td class="mono">$18억</td><td class="mono positive">YoY 증가</td><td><span class="kw-tag bullish">CASH MACHINE</span></td></tr>
+      <tr><td><strong>환율 영향 (EPS)</strong></td><td class="mono positive">+3%p 순풍</td><td class="mono">—</td><td><span class="kw-tag bullish">TAILWIND</span></td></tr>
+      <tr><td><strong>실효 세율</strong></td><td class="mono">19.9%</td><td class="mono positive">종전 20.9%에서 하락</td><td><span class="kw-tag neutral-tag">RATE CUT BENEFIT</span></td></tr>
+      <tr><td><strong>농축액 vs UCV 격차</strong></td><td class="mono">농축액 +8% / UCV +3%</td><td class="mono">+5pp 갭</td><td><span class="kw-tag neutral-tag">TIMING LAG</span></td></tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>농축액 vs UCV 5pp 갭의 의미:</strong> 코카콜라는 보틀러에게 농축액을 팔아서 매출을 인식한다. UCV(실제 소비자에게 팔린 음료)보다 농축액 판매가 빠르게 성장한다는 것은 보틀러들이 <strong>재고를 쌓고 있다는 신호</strong>일 수 있다. 이 갭이 지속되면 다음 분기 농축액 판매가 둔화되는 경향이 있음. 경영진은 계절성·출시 타이밍으로 설명.
+  </div>
+
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">전략 &mdash; 브랜드 포트폴리오와 미래 베팅</span>
+  </div>
+  <table>
+    <thead><tr><th>전략 축</th><th>현황</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>저칼로리/제로슈거 확장</strong></td><td class="mono">Zero Sugar +13% / Zero-Zero 출시</td><td>GLP-1 시대의 선제 포지셔닝. 카테고리 잠식 없는 순증 구조 확인</td></tr>
+      <tr><td><strong>어포더빌리티 전략</strong></td><td class="mono">미니캔·싱글서브·멀티팩 확대</td><td>인플레 환경에서 저소득층 이탈 방지. 믹스 개선에는 역풍이나 볼륨 확보로 상쇄</td></tr>
+      <tr><td><strong>4 Eyes 프레임워크</strong></td><td class="mono">Insight·Innovation·Intimacy·Integrated Execution</td><td>경영진 내부 실행 프레임. 컨콜에서 반복 언급 = 문화·조직 정렬의 신호</td></tr>
+      <tr><td><strong>Fairlife (유제품)</strong></td><td class="mono">공급 제약 존재</td><td>고성장 프리미엄 단백질 음료. 수요 초과 = 긍정 신호. 생산 확장이 H2 성장 변수</td></tr>
+      <tr><td><strong>매각 진행 (보틀링 구조 경량화)</strong></td><td class="mono">매출에 -4pp / EPS에 -1pp</td><td>단기 역풍이나 자본효율 개선 장기 전략. "에셋 라이트" 전환 지속</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter">
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:82%;background:var(--accent);"></div></div>
+      <div class="tone-score">8.2<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 투명성</div>
+      <div class="tone-bar"><div class="fill" style="width:78%;background:var(--yellow);"></div></div>
+      <div class="tone-score">7.8<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">가이던스 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:80%;background:#4da6ff;"></div></div>
+      <div class="tone-score">8.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">리스크 인정</div>
+      <div class="tone-bar"><div class="fill" style="width:65%;background:var(--purple);"></div></div>
+      <div class="tone-score">6.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Henrique Braun (CEO, 2025년 취임)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 실용주의 운영자. James Quincey의 "전략 비전가" 스타일과 달리, 현장 실행과 소비자 근접성을 강조. 리스크는 인정하되 대응 프레임으로 즉시 전환.
+  </p>
+
+  <div class="keywords">
+    <span class="kw-tag bullish">CLOSE TO THE CONSUMER</span>
+    <span class="kw-tag bullish">EXECUTING LOCALLY</span>
+    <span class="kw-tag bullish">BALANCED ALGORITHM</span>
+    <span class="kw-tag bullish">BROAD-BASED GROWTH</span>
+    <span class="kw-tag neutral-tag">MANAGING COMPLEXITY</span>
+    <span class="kw-tag neutral-tag">DISRUPTION PLAYBOOK</span>
+    <span class="kw-tag bearish">COMPLEX EXTERNAL ENVIRONMENT</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Henrique Braun &mdash; 오프닝</div>
+    <blockquote>"We are off to a good start this year. We delivered strong first quarter results despite a complex external environment."</blockquote>
+    <div class="analysis">"Good start" + "despite complex environment" — 상반된 단어를 한 문장에 넣어 성과를 돋보이게 하는 IR 클래식 구조. "Complex external environment"는 관세·지정학·환율을 한 번에 감싸는 방어막 언어. 구체적 리스크 지목 없이 전반적 도전을 인정.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Henrique Braun &mdash; 성장 전략</div>
+    <blockquote>"Our performance this quarter reflects our unwavering focus on staying close to the consumer, executing locally and managing complexity."</blockquote>
+    <div class="analysis"><strong>"Staying close to the consumer"</strong> — Braun CEO의 핵심 메시지. 글로벌 전략 대신 로컬 실행을 강조하는 탈중앙화 철학. James Quincey가 "System First"였다면, Braun은 "Consumer First". <strong>"Managing complexity"</strong> — 관세·분쟁·환율 등 외부 충격에 대한 대처 역량을 경쟁 우위로 포지셔닝.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Henrique Braun &mdash; 균형 성장 알고리즘</div>
+    <blockquote>"We will continue to be balanced. We'll have confidence that we're going to deliver on the updated guidance to the year."</blockquote>
+    <div class="analysis">"Balanced algorithm" = 볼륨 성장과 가격 성장을 상황에 따라 3:2 혹은 2:3으로 탄력 운영하겠다는 뜻. 한 축에 지나치게 의존하지 않겠다는 수비형 선언. 가이던스 달성에 대한 자신감은 표현했으나 근거 데이터는 애매하게 처리.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Henrique Braun &mdash; 어포더빌리티 (Dara Mohsenian, Morgan Stanley 질문에)</div>
+    <blockquote>(저소득층 소비자 이탈 방어 전략) 싱글서브·미니캔·멀티팩 포맷으로 가격 접근성을 확대, RGM(Revenue Growth Management) 역량을 동원해 인플레 환경에서 소비자를 붙잡겠다.</blockquote>
+    <div class="analysis">P&amp;G의 "tiering down" 전략과 동일한 패턴. 볼륨을 지키기 위해 가격대를 낮추면 믹스(mix)가 악화되는 트레이드오프를 수반. Q1에서 가격/믹스 +2%의 "믹스 -2pp"가 이미 이 효과를 반영하고 있음.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Henrique Braun &mdash; 라틴아메리카 (Filippo Falorni, Citi 질문에)</div>
+    <blockquote>(멕시코 설탕세 영향) 브라질과 중앙아메리카 성장이 멕시코·아르헨티나 하락을 상쇄. RGM 역량으로 세금 헤드윈드를 관리하고 있다.</blockquote>
+    <div class="analysis">지역 내 포트폴리오 분산이 리스크 헤지로 작동한 사례. 멕시코는 설탕세+경기 둔화 이중 역풍. 하지만 라틴아메리카 전체 UCV +1%는 사실상 횡보 수준으로 숫자 자체는 강하지 않음.</div>
+  </div>
+
+  <h3>John Murphy (CFO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 정밀한 수치 전달자. 환율·세율·구조적 변화를 정확히 구분하며 "실질 성장"과 "항목 효과"를 투명하게 분리. 아태 마진 방어 논리가 가장 도전적이었던 구간.
+  </p>
+
+  <div class="quote-block">
+    <div class="speaker">John Murphy &mdash; 유기적 성장 해석</div>
+    <blockquote>"We grew organic revenues 10%. Unit case growth was 3%... Price/mix growth of 2% was primarily driven by approximately 4 points of pricing actions partially offset by 2 points of unfavorable mix."</blockquote>
+    <div class="analysis"><strong>가격 +4pp, 믹스 -2pp, 순 +2%</strong> — 정직한 분해. 가격은 공격적으로 올렸지만 소비자들이 더 싼 SKU로 이동(믹스 희석). 이것이 "어포더빌리티 전략의 대가". 주목할 점: 볼륨(+3%)은 역사 평균(+1.1%)을 크게 상회 — 수요는 살아있다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">John Murphy &mdash; 가이던스 상향 근거</div>
+    <blockquote>"We now expect comparable earnings per share growth of 8% to 9% versus $3 in 2025... We anticipate an approximate 1- to 2-point currency tailwind to comparable net revenues and a 3-point positive FX impact to comparable EPS for full year 2026."</blockquote>
+    <div class="analysis"><strong>EPS 가이던스 상향(7~8% &rarr; 8~9%)의 분해:</strong> ① 세율 인하 효과(1pp 기여), ② 환율 순풍(EPS에 +3pp). 통화중립 EPS 성장은 6~7%로 불변. 즉, 사업 자체의 체력이 높아진 게 아니라 세금·환율 혜택으로 포장된 상향. 투자자들이 이 구분을 인지하는지가 관건.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">John Murphy &mdash; 아태 마진 (Bonnie Herzog, Goldman Sachs 질문에)</div>
+    <blockquote>(아태 통화중립 영업이익 -17%에 대해) 마진 압박의 2/3는 재고 관련 일시적 요인. 장기적으로 소비자 프랜차이즈 개발을 단기 마진보다 우선시한다.</blockquote>
+    <div class="analysis">"2/3 일시적"은 검증하기 어려운 주장 — 재고 조정이 맞다면 Q2에 반등해야 함. "소비자 프랜차이즈"라는 표현은 투자 단계임을 암시하는 CFO 언어. 아태에서 진짜로 볼륨 투자를 늘리고 있는지, 아니면 비용 구조 문제인지는 다음 분기가 판가름.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 비트 달성에 우호적이나 세율/환율 효과를 제거한 실질 성장에 대한 날카로운 질문 집중. 관세 노출도 우려 반복.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Dara Mohsenian (Morgan Stanley) &mdash; 소비자 탄성</div>
+    <blockquote>"How are you thinking about the elasticity of the lower-income consumer and the affordability strategies you're deploying?"</blockquote>
+    <div class="analysis">핵심 질문: 가격을 올려도 저소득층이 계속 사줄 것인가? 코카콜라는 어포더빌리티 포맷으로 방어하고 있지만, 이것이 결국 ASP(평균 판매단가)를 낮추는 구조. 관세발 인플레가 심화될 경우 이 탄성이 깨질 수 있다.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Bonnie Herzog (Goldman Sachs) &mdash; 아태 마진 회복 타임라인</div>
+    <blockquote>(아태 영업이익 -17%에 대해) 이것이 구조적인가 일시적인가?</blockquote>
+    <div class="analysis">CFO가 "2/3 일시적"이라고 답변했으나 시장은 확인을 원하고 있음. Q2 아태 영업이익 개선 여부가 경영진 신뢰도의 시험대. 만약 Q2에도 압박이 지속되면 아태 마진 해명은 소명 실패로 처리될 것.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Filippo Falorni (Citi) &mdash; 관세 노출도</div>
+    <blockquote>(알루미늄·PET 원자재 관세 영향) 보틀링 파트너의 비용 전가 능력은 어느 수준인가?</blockquote>
+    <div class="analysis">코카콜라 본사는 농축액 판매자이므로 직접 관세 노출이 제한적. 그러나 보틀링 파트너가 비용 압박을 받으면 결국 시스템 전체 볼륨에 영향을 미침. 경영진은 "disruption playbook"과 구매 협력으로 대응한다고 했으나 정량 수치 미제시.</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr><td style="width:160px;font-weight:600;color:var(--accent);">Henrique Braun</td><td>"소비자 가까이, 로컬 실행, 볼륨과 가격을 균형 있게 — 복잡한 환경에서도 성장 지속"</td></tr>
+      <tr><td style="font-weight:600;color:var(--accent);">John Murphy</td><td>"EPS 상향은 세율+환율 혜택. 유기적 실력은 통화중립 6~7% — 구조적 개선은 진행 중"</td></tr>
+      <tr><td style="font-weight:600;color:var(--yellow);">애널리스트</td><td>"비트는 인정. 아태 마진과 세율 효과를 제거한 실질 성장이 지속 가능한가가 다음 관문"</td></tr>
+      <tr><td style="font-weight:600;color:#00d632;">시장 반응</td><td>당일 +4.97% 상승. KO $75.44 &rarr; $79.18. 방어주 특성 + 비트 + 가이던스 상향 삼박자. 관세 불확실성 속 안전자산 수요도 가세.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid">
+    <a class="link-card" href="https://investors.coca-colacompany.com/news-events/press-releases/detail/1158/coca-cola-reports-first-quarter-2026-results-and-updates-full-year-guidance" target="_blank">
+      <div class="link-icon">&#x1F4C4;</div>
+      <div class="link-text"><div class="link-title">IR 보도자료</div><div class="link-url">investors.coca-colacompany.com</div></div>
+    </a>
+    <a class="link-card" href="https://investors.coca-colacompany.com/_assets/_52012db951529a18efcc9f4f7476589e/cocacolacompany/db/880/11107/earnings_release/Coca-Cola+2026+Q1+Earnings+Release_Full+Release_4.28.26.pdf" target="_blank">
+      <div class="link-icon">&#x1F4CA;</div>
+      <div class="link-text"><div class="link-title">Q1 2026 실적 전문 (PDF)</div><div class="link-url">Full Earnings Release 4.28.26</div></div>
+    </a>
+    <a class="link-card" href="https://www.fool.com/earnings/call-transcripts/2026/04/28/coca-cola-ko-q1-2026-earnings-transcript/" target="_blank">
+      <div class="link-icon">&#x1F4DD;</div>
+      <div class="link-text"><div class="link-title">컨콜 트랜스크립트 (Motley Fool)</div><div class="link-url">fool.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.benzinga.com/insights/news/26/04/52103606/coca-cola-q1-2026-earnings-call-complete-transcript" target="_blank">
+      <div class="link-icon">&#x1F4C8;</div>
+      <div class="link-text"><div class="link-title">컨콜 트랜스크립트 (Benzinga)</div><div class="link-url">benzinga.com</div></div>
+    </a>
+    <a class="link-card" href="https://stockstory.org/us/stocks/nyse/ko/news/earnings/coca-cola-nyseko-surprises-with-q1-cy2026-sales" target="_blank">
+      <div class="link-icon">&#x1F50E;</div>
+      <div class="link-text"><div class="link-title">KPI 분석 (StockStory)</div><div class="link-url">stockstory.org</div></div>
+    </a>
+    <a class="link-card" href="https://www.stocktitan.net/news/KO/coca-cola-reports-first-quarter-2026-results-and-updates-full-year-7ssxy2uikvdb.html" target="_blank">
+      <div class="link-icon">&#x1F4F0;</div>
+      <div class="link-text"><div class="link-title">실적 요약 (StockTitan)</div><div class="link-url">stocktitan.net</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-04-29 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>

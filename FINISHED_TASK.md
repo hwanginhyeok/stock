@@ -4,6 +4,27 @@
 
 | # | 태스크 | 완료일 | 비고 |
 |---|--------|--------|------|
+| 1-45 | Tesla 이슈 DB — TSLA-E/P/C/F/I/R/M 체계 | 2026-04-21 | CSV 시드 완성: `data/research/stocks/tesla/issues.csv` 10건 + `milestones.csv` 24건 + `tagged_issues.csv` 10건. `src/core/models.py:501` 데이터모델. CSV→DB 마이그는 1-47이 담당 (의도된 분리). **실제 완료 04-21경, 메모리 미갱신으로 21일 blocked 표기 → 2026-05-17 PM 검증으로 인지** |
+| 1-52 | VWMA100 터치 전략 백테스트 + 스크리너 구현 | 2026-05-15 | sma_signals 백테스트→VWMA100 터치 전략으로 방향 전환. TSLA 5y A/B 비교. NASDAQ100+SP500 스크리너 cron 등록 |
+| 1-59 | Essence 상단 3카드 실데이터 연동 — 비중·주가·모멘텀 | 2026-05-15 | 현재주가 $443.30 실시간 / P&L +80.35% / VWMA100 채널위치 / 비중 28.7% 동적계산 |
+| 1-58 | 트레이딩 차트 반영 — pandas_ta→sma_signals 전환 + signals API 복구 | 2026-05-15 | numba/coverage 충돌 해결. VWMA100 BUY 2026-05-08, TREND_UP |
+| 1-60 | 타임라인 핵심 압축 — core/important/all 토글 + 동일날 그룹핑 | 2026-05-14 | importance 점수 기반 필터 + topic 그룹핑. important 임계값 10으로 최종 조정 |
+| 1-63 | earn_reporter.py 검증 + 크론 등록 | 2026-05-10 | EPS·매출 N/A 버그 3개 수정 후 검증 완료. crontab 등록 승인 |
+| 1-65 | 실적 리포트 voice/톤 검토 — 사용자 리뷰 | 2026-05-10 | 딥다이브 17개 검토 완료. EPS N/A·단위불일치·NaN 버그 3개 수정. 전체 재생성 + GDrive 업로드 |
+| 1-32 | X 시황 포스트 — 테슬라 | 2026-05-05 | 폐기 — 31일 품질 피드백 보류, 방향 재설정 필요 |
+| 1-62 | 실적 딥다이브 — 빅테크 4 (META/GOOGL/MSFT/AMZN) | 2026-04-30 | 딥다이브 4종 |
+| 1-61 | 실적 딥다이브 리포트 백필 | 2026-04-30 | 17개 딥다이브 + 9개 trend |
+| 1-55 | Thesis + Timeline + Topic Quarterly | 2026-04-23 | Essence Dashboard 구성 요소 |
+| 1-56 | Timeline 레인 분리 + 충돌 방지 | 2026-04-23 | swimlane 렌더링 |
+| 1-57 | occurred_at 통일 + 사실성 감사 | 2026-04-24 | 이벤트 날짜 정합성 |
+| 1-54 | Tesla Essence Dashboard | 2026-04-23 | 웹 대시보드 |
+| 1-44 | Tesla 특화 엔티티 스키마 설계 (본질론 기반) | 2026-04-23 | 코드 완료 |
+| 1-48 | properties dict 웹 UI 노출 (3단 분류) | 2026-04-23 | 코드 완료 |
+| 1-51 | 미래 이벤트 차트 표시 (실적·FOMC 등) | 2026-04-23 | 코드 완료 |
+| 1-30 | InvestOS — 테슬라 인텔리전스 인프라 | 2026-04-24 | 1-44~1-47로 분해 완료 |
+| 1-43 | HIH_2 entity 체계 조사 & stock 매핑 설계 | 2026-04-23 | 블로커 해제 (독립 진행). stock 현황 조사 완료 → 1-44~1-48로 분해. `docs/프로젝트/task/1-43.md` |
+| 1-50 | 차트 이벤트 가중 필터 (importance 점수) | 2026-04-15 | severity × relevance × freshness. 키워드 기반 Tesla 직접/간접/거시 분류. core/important/all 셀렉터 |
+| 1-49 | 자체 차트 시스템 구축 (TSLA) | 2026-04-15 | TV 위젯 + lightweight-charts + yfinance + SMA6/VWMA100/VPVR/RSI/MACD + 멀티 타임프레임(1H/4H/D/W/M) + 매수매도 시그널 + 인범 빗각(고고저/저저고) + 평행 채널 + VP 교차 + XY축 독립 줌. 후속: 1-50~53. D-006 기록 |
 | 5-9 | trend_detector Ollama→Gemini Flash 전환 | 2026-04-08 | gemini -p 1차 + Ollama fallback, dry-run 통과 |
 | 1-41 | 엔티티 노이즈 필터 강화 — 금액/수량/비자 패턴 | 2026-04-08 | 공통 모듈 + DB 45개 정리 (3183→3138) |
 | 1-42 | 뉴스 티커 최신화 + GEO/US/KR 핫뉴스 2개씩 | 2026-04-08 | published_at 정렬, 카테고리별 선별 |

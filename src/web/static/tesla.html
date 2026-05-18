@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tesla 인텔리전스 대시보드</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+:root {
+  --bg: #0a0a0a; --surface: #141414; --surface2: #1a1a1a; --border: #2a2a2a;
+  --white: #e8e8e8; --dim: #888; --muted: #555;
+  --red: #e31937; --green: #3fb950; --blue: #58a6ff;
+  --orange: #db6d28; --yellow: #d29922; --purple: #bc8cff; --cyan: #56d4dd;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--white); font-family: 'IBM Plex Sans KR', -apple-system, sans-serif; font-size: 13px; line-height: 1.5; }
+
+/* Nav */
+nav { position: sticky; top: 0; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; height: 48px; }
+nav .back-link { color: var(--dim); text-decoration: none; font-size: 12px; margin-right: 16px; transition: color 0.15s; }
+nav .back-link:hover { color: var(--white); }
+nav .logo { font-size: 15px; font-weight: 700; color: var(--red); letter-spacing: 0.5px; }
+nav .logo span { color: var(--white); font-weight: 400; margin-left: 6px; }
+nav .updated { margin-left: auto; font-size: 11px; color: var(--dim); }
+
+/* Sections */
+.section { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
+.section-title { font-size: 11px; font-weight: 600; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
+/* 01 Hero */
+.hero { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px 28px; display: grid; grid-template-columns: 200px 1fr 300px; gap: 24px; align-items: center; }
+.hero-brand .ticker { font-size: 28px; font-weight: 700; color: var(--red); }
+.hero-brand .subtitle { font-size: 12px; color: var(--dim); margin-top: 2px; }
+.hero-price { text-align: center; }
+.hero-price .price { font-size: 42px; font-weight: 700; letter-spacing: -1px; }
+.hero-price .change { font-size: 16px; font-weight: 600; margin-top: 4px; }
+.hero-price .change.up { color: var(--green); }
+.hero-price .change.down { color: var(--red); }
+.hero-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-box { background: var(--surface2); border-radius: 6px; padding: 8px 12px; }
+.stat-box .label { font-size: 10px; color: var(--dim); }
+.stat-box .value { font-size: 14px; font-weight: 600; margin-top: 2px; }
+
+/* 02 Chart */
+.chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.chart-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+.chart-tab { background: transparent; border: 1px solid var(--border); color: var(--dim); font-size: 11px; padding: 4px 14px; border-radius: 4px; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.chart-tab:hover { color: var(--white); border-color: var(--dim); }
+.chart-tab.active { background: var(--red); color: #fff; border-color: var(--red); }
+.chart-canvas-wrap { height: 300px; position: relative; }
+
+/* Cards grid */
+.card-grid { display: grid; gap: 12px; }
+.card-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.card-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.card-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+.card-title { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.card-value { font-size: 22px; font-weight: 700; }
+.card-sub { font-size: 11px; color: var(--dim); margin-top: 4px; }
+
+/* Options table */
+.opt-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.opt-table th { text-align: left; padding: 6px 8px; color: var(--dim); font-weight: 600; border-bottom: 1px solid var(--border); font-size: 10px; text-transform: uppercase; }
+.opt-table td { padding: 5px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.opt-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+/* 05 Earnings (static) */
+.earnings-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+.earnings-main { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+.earnings-main .quarter { font-size: 18px; font-weight: 700; }
+.earnings-main .beat { display: inline-block; background: rgba(63,185,80,0.15); color: var(--green); font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 4px; margin-left: 8px; }
+.earnings-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+.em-item { background: var(--surface2); border-radius: 6px; padding: 10px; }
+.em-item .em-label { font-size: 10px; color: var(--dim); }
+.em-item .em-val { font-size: 15px; font-weight: 700; margin-top: 2px; }
+.em-item .em-yoy { font-size: 10px; margin-top: 2px; }
+.earnings-link { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+.earnings-link a { color: var(--red); text-decoration: none; font-size: 13px; font-weight: 600; margin-top: 8px; }
+.earnings-link a:hover { text-decoration: underline; }
+
+/* 06 Thesis */
+.thesis-score-bar { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 20px; }
+.score-gauge { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; border: 3px solid var(--dim); }
+.score-label { font-size: 14px; font-weight: 600; }
+.score-meta { font-size: 11px; color: var(--dim); margin-top: 2px; }
+.thesis-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.thesis-col-title { font-size: 12px; font-weight: 700; margin-bottom: 10px; padding-bottom: 6px; }
+.thesis-col-title.bull { color: var(--green); border-bottom: 2px solid var(--green); }
+.thesis-col-title.bear { color: var(--red); border-bottom: 2px solid var(--red); }
+.thesis-card { background: var(--surface2); border-radius: 6px; padding: 10px 12px; margin-bottom: 8px; border-left: 3px solid transparent; }
+.thesis-card.bull { border-left-color: var(--green); }
+.thesis-card.bear { border-left-color: var(--red); }
+.thesis-card .tc-title { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+.thesis-card .tc-detail { font-size: 11px; color: var(--dim); line-height: 1.5; margin-bottom: 4px; }
+.thesis-card .tc-meta { display: flex; justify-content: space-between; align-items: center; }
+.delta-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+.delta-badge.pos { background: rgba(63,185,80,0.15); color: var(--green); }
+.delta-badge.neg { background: rgba(248,81,73,0.15); color: var(--red); }
+
+/* 07 Essence header cards (비중·주가·모멘텀) */
+.headline-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.hcard { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; position: relative; overflow: hidden; }
+.hcard::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--border); }
+.hcard .hc-label { font-size: 10px; font-weight: 600; color: var(--dim); text-transform: uppercase; letter-spacing: 0.6px; }
+.hcard .hc-primary { display: flex; align-items: baseline; gap: 10px; }
+.hcard .hc-value { font-size: 26px; font-weight: 700; line-height: 1.1; }
+.hcard .hc-sub { font-size: 11px; color: var(--muted); }
+.hcard .hc-delta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hcard .hc-delta { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+.hcard .hc-delta.pos { background: rgba(63,185,80,0.15); color: var(--green); }
+.hcard .hc-delta.neg { background: rgba(248,81,73,0.15); color: var(--red); }
+.hcard .hc-action { font-size: 11px; font-weight: 600; color: var(--dim); }
+.hcard .hc-comment { font-size: 11px; color: var(--dim); line-height: 1.45; }
+.hcard .hc-meta { font-size: 10px; color: var(--muted); display: flex; gap: 10px; }
+@media (max-width: 900px) { .headline-cards { grid-template-columns: 1fr; } }
+
+/* 07 Essence radar */
+.essence-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.radar-canvas-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; align-items: center; justify-content: center; }
+.essence-cards { display: flex; flex-direction: column; gap: 8px; }
+.ecard { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
+.ecard-score { font-size: 28px; font-weight: 700; min-width: 50px; text-align: center; }
+.ecard-info .ecard-name { font-size: 12px; font-weight: 600; }
+.ecard-info .ecard-delta { font-size: 11px; margin-top: 2px; }
+
+/* 08 Timeline */
+.tl-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.tl-toggle { display: inline-flex; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 2px; }
+.tl-toggle .ttab { background: transparent; border: 0; color: var(--dim); font-size: 11px; padding: 4px 12px; cursor: pointer; font-family: inherit; border-radius: 4px; transition: all 0.15s; }
+.tl-toggle .ttab:hover { color: var(--white); }
+.tl-toggle .ttab.active { background: var(--red); color: #fff; }
+.tl-toggle .ttab .ttab-count { font-size: 9px; opacity: 0.7; margin-left: 4px; }
+.tl-meta { font-size: 11px; color: var(--muted); margin-left: auto; }
+.timeline { position: relative; padding-left: 24px; border-left: 2px solid var(--border); margin-left: 8px; }
+.tl-group { position: relative; margin-bottom: 18px; }
+.tl-group::before { content: ''; position: absolute; left: -31px; top: 6px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--bg); background: var(--muted); }
+.tl-group.is-past::before { background: var(--green); }
+.tl-group.is-soon::before { background: var(--blue); }
+.tl-group .tl-group-date { font-size: 10px; font-weight: 700; color: var(--dim); margin-bottom: 6px; letter-spacing: 0.4px; }
+.tl-group .tl-group-date .tl-rel { font-weight: 400; color: var(--muted); margin-left: 6px; }
+.tl-event { position: relative; padding: 10px 14px 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; border-left: 3px solid var(--muted); }
+.tl-event .tl-event-head { display: flex; align-items: center; gap: 8px; }
+.tl-event .tl-title { font-size: 12px; font-weight: 600; line-height: 1.35; flex: 1; }
+.tl-event .tl-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.4px; color: #fff; }
+.tl-event .tl-imp { font-size: 9px; color: var(--muted); font-weight: 600; }
+.tl-event .tl-desc { font-size: 11px; color: var(--dim); margin-top: 5px; line-height: 1.5; }
+.tl-event.thesis-bear { background: linear-gradient(90deg, rgba(248,81,73,0.05), var(--surface) 40%); }
+.tl-event.thesis-bull { background: linear-gradient(90deg, rgba(63,185,80,0.05), var(--surface) 40%); }
+
+/* 09 News */
+.news-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; transition: border-color 0.15s; cursor: pointer; display: flex; flex-direction: column; }
+.news-card:hover { border-color: var(--dim); }
+.news-card .nc-source { font-size: 10px; font-weight: 600; color: var(--blue); text-transform: uppercase; margin-bottom: 4px; }
+.news-card .nc-title { font-size: 13px; font-weight: 600; line-height: 1.4; margin-bottom: 6px; flex: 1; }
+.news-card .nc-summary { font-size: 11px; color: var(--dim); line-height: 1.5; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.news-card .nc-footer { font-size: 10px; color: var(--muted); }
+
+/* Utility */
+.empty { color: var(--dim); font-size: 12px; padding: 20px; text-align: center; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="back-link">&larr; InvestOS</a>
+  <div class="logo">TSLA<span>인텔리전스 대시보드</span></div>
+  <div class="updated" id="nav-updated"></div>
+</nav>
+
+<!-- 01 Hero -->
+<div class="section">
+  <div class="hero" id="hero">
+    <div class="hero-brand">
+      <div class="ticker">TSLA</div>
+      <div class="subtitle">Tesla 인텔리전스 대시보드</div>
+    </div>
+    <div class="hero-price">
+      <div class="price" id="hero-price">--</div>
+      <div class="change" id="hero-change">-- (--)</div>
+    </div>
+    <div class="hero-stats" id="hero-stats">
+      <div class="stat-box"><div class="label">시가총액</div><div class="value" id="s-mcap">--</div></div>
+      <div class="stat-box"><div class="label">PER</div><div class="value" id="s-per">--</div></div>
+      <div class="stat-box"><div class="label">52주 최고</div><div class="value" id="s-hi">--</div></div>
+      <div class="stat-box"><div class="label">52주 최저</div><div class="value" id="s-lo">--</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 02 Chart -->
+<div class="section">
+  <div class="section-title">주가 차트</div>
+  <div class="chart-wrap">
+    <div class="chart-tabs">
+      <button class="chart-tab" data-period="5d">1W</button>
+      <button class="chart-tab active" data-period="1mo">1M</button>
+      <button class="chart-tab" data-period="3mo">3M</button>
+      <button class="chart-tab" data-period="6mo">6M</button>
+      <button class="chart-tab" data-period="1y">1Y</button>
+    </div>
+    <div class="chart-canvas-wrap">
+      <canvas id="priceChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- 03 Options -->
+<div class="section">
+  <div class="section-title">옵션 현황 <span id="opt-exp" style="color:var(--dim);font-weight:400;"></span></div>
+  <div class="card-grid cols-4" id="opt-cards"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;">
+    <div class="card">
+      <div class="card-title">Call OI 상위</div>
+      <table class="opt-table"><thead><tr><th>Strike</th><th>OI</th><th>IV</th><th>Last</th></tr></thead><tbody id="opt-calls"></tbody></table>
+    </div>
+    <div class="card">
+      <div class="card-title">Put OI 상위</div>
+      <table class="opt-table"><thead><tr><th>Strike</th><th>OI</th><th>IV</th><th>Last</th></tr></thead><tbody id="opt-puts"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- 04 Delivery -->
+<div class="section">
+  <div class="section-title">인도량 선행 지표</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="card">
+      <div class="card-title">중국 월별 인도</div>
+      <div style="height:240px;"><canvas id="chinaChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">EU 최신 인도량</div>
+      <div id="eu-table"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 05 Earnings (static) -->
+<div class="section">
+  <div class="section-title">실적 요약</div>
+  <div class="earnings-grid">
+    <div class="earnings-main">
+      <div><span class="quarter">Q1 2026</span><span class="beat">BEAT</span></div>
+      <div class="earnings-metrics">
+        <div class="em-item">
+          <div class="em-label">매출</div>
+          <div class="em-val">$19.34B</div>
+          <div class="em-yoy" style="color:var(--green);">+0.5% YoY</div>
+        </div>
+        <div class="em-item">
+          <div class="em-label">EPS</div>
+          <div class="em-val">$0.27</div>
+          <div class="em-yoy" style="color:var(--red);">-40% YoY</div>
+        </div>
+        <div class="em-item">
+          <div class="em-label">에너지</div>
+          <div class="em-val">+67%</div>
+          <div class="em-yoy" style="color:var(--green);">YoY 성장</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--dim);">다음 분기 가이던스: 가이던스 없음 (경영진 언급)</div>
+    </div>
+    <div class="earnings-link">
+      <div style="font-size:12px;color:var(--dim);">상세 실적 분석</div>
+      <a href="/static/earnings/TSLA_2026Q1.html" target="_blank">TSLA Q1 2026 리포트 보기 &rarr;</a>
+    </div>
+  </div>
+</div>
+
+<!-- 06 Thesis -->
+<div class="section">
+  <div class="section-title">Bull / Bear Thesis</div>
+  <div class="thesis-score-bar" id="thesis-bar">
+    <div class="score-gauge" id="thesis-gauge">--</div>
+    <div>
+      <div class="score-label" id="thesis-label">--</div>
+      <div class="score-meta" id="thesis-meta"></div>
+    </div>
+  </div>
+  <div class="thesis-cols">
+    <div>
+      <div class="thesis-col-title bull">Bull</div>
+      <div id="bull-list"><div class="empty">데이터 없음</div></div>
+    </div>
+    <div>
+      <div class="thesis-col-title bear">Bear</div>
+      <div id="bear-list"><div class="empty">데이터 없음</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 07 Essence -->
+<div class="section">
+  <div class="section-title">트레이딩 상단 — 비중·주가·모멘텀</div>
+  <div class="headline-cards" id="headline-cards">
+    <div class="empty">데이터 없음</div>
+  </div>
+  <div class="section-title" style="margin-top:20px;">Essence 스코어</div>
+  <div class="essence-wrap">
+    <div class="radar-canvas-wrap">
+      <canvas id="radarChart"></canvas>
+    </div>
+    <div class="essence-cards" id="essence-cards"><div class="empty">데이터 없음</div></div>
+  </div>
+</div>
+
+<!-- 08 Timeline -->
+<div class="section">
+  <div class="section-title">마일스톤 타임라인</div>
+  <div class="tl-toolbar">
+    <div class="tl-toggle" id="tl-toggle">
+      <button class="ttab" data-level="core">핵심<span class="ttab-count" id="ttab-cnt-core">—</span></button>
+      <button class="ttab active" data-level="important">중요<span class="ttab-count" id="ttab-cnt-important">—</span></button>
+      <button class="ttab" data-level="all">전체<span class="ttab-count" id="ttab-cnt-all">—</span></button>
+    </div>
+    <div class="tl-meta" id="tl-meta"></div>
+  </div>
+  <div class="timeline" id="milestone-tl"><div class="empty">데이터 없음</div></div>
+</div>
+
+<!-- 09 News -->
+<div class="section">
+  <div class="section-title">최신 소식</div>
+  <div class="card-grid cols-3" id="news-grid"><div class="empty">데이터 없음</div></div>
+</div>
+
+<script>
+/* ---- 유틸 ---- */
+const fmt = (n, d=2) => n != null ? Number(n).toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d}) : '--';
+const fmtK = n => { if (!n) return '--'; if (n >= 1e12) return (n/1e12).toFixed(1)+'T'; if (n >= 1e9) return (n/1e9).toFixed(1)+'B'; if (n >= 1e6) return (n/1e6).toFixed(1)+'M'; return fmt(n,0); };
+const pct = n => n != null ? (n*100).toFixed(2)+'%' : '--';
+const iv = n => n != null ? (n*100).toFixed(1)+'%' : '--';
+const OI = n => n != null ? Number(n).toLocaleString() : '--';
+/* XSS 방지: 외부 데이터 이스케이프 */
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const safeUrl = u => (typeof u === 'string' && /^https?:\/\//i.test(u)) ? u : '#';
+
+async function api(path) { try { const r = await fetch(path); return await r.json(); } catch { return null; } }
+
+/* ---- 01 Hero ---- */
+async function loadPrice() {
+  const d = await api('/api/tesla/price');
+  if (!d || !d.price) return;
+  document.getElementById('hero-price').textContent = '$' + fmt(d.price);
+  const el = document.getElementById('hero-change');
+  const sign = d.change >= 0 ? '+' : '';
+  el.textContent = `${sign}${fmt(d.change)} (${sign}${fmt(d.change_pct)}%)`;
+  el.className = 'change ' + (d.change >= 0 ? 'up' : 'down');
+  document.getElementById('s-mcap').textContent = '$' + fmtK(d.market_cap);
+  document.getElementById('s-per').textContent = fmt(d.pe_ratio);
+  document.getElementById('s-hi').textContent = '$' + fmt(d.week52_high);
+  document.getElementById('s-lo').textContent = '$' + fmt(d.week52_low);
+  document.getElementById('nav-updated').textContent = d.updated_at ? 'Updated ' + d.updated_at.slice(11, 16) : '';
+}
+
+/* ---- 02 Chart ---- */
+let priceChart = null;
+async function loadChart(period = '1mo') {
+  const d = await api(`/api/tesla/chart?period=${period}&interval=1d`);
+  if (!d || !d.data || !d.data.length) return;
+  const labels = d.data.map(r => r.date ? r.date.slice(0, 10) : '');
+  const closes = d.data.map(r => r.close);
+  const volumes = d.data.map(r => r.volume);
+
+  if (priceChart) priceChart.destroy();
+  const ctx = document.getElementById('priceChart').getContext('2d');
+  priceChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'TSLA',
+        data: closes,
+        borderColor: '#e31937',
+        backgroundColor: 'rgba(227,25,55,0.08)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 0,
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#888', maxTicksLimit: 8, font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        y: { ticks: { color: '#888', font: { size: 10 }, callback: v => '$'+v.toFixed(0) }, grid: { color: 'rgba(255,255,255,0.04)' } }
+      },
+      interaction: { intersect: false, mode: 'index' },
+    }
+  });
+}
+
+document.querySelectorAll('.chart-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.chart-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadChart(btn.dataset.period);
+  });
+});
+
+/* ---- 03 Options ---- */
+async function loadOptions() {
+  const d = await api('/api/tesla/options');
+  if (!d || !d.expiration) return;
+  document.getElementById('opt-exp').textContent = `(만기: ${d.expiration})`;
+  const cards = document.getElementById('opt-cards');
+  cards.innerHTML = [
+    ['ATM Call IV', iv(d.atm_call_iv)],
+    ['ATM Put IV', iv(d.atm_put_iv)],
+    ['Total Call OI', OI(d.total_call_oi)],
+    ['Total Put OI', OI(d.total_put_oi)],
+  ].map(([t,v]) => `<div class="card"><div class="card-title">${t}</div><div class="card-value">${v}</div></div>`).join('');
+
+  const renderTable = (rows, id) => {
+    const tbody = document.getElementById(id);
+    if (!rows || !rows.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty">데이터 없음</td></tr>'; return; }
+    tbody.innerHTML = rows.map(r => `<tr><td>$${fmt(r.strike,0)}</td><td>${OI(r.oi)}</td><td>${iv(r.iv)}</td><td>$${fmt(r.last)}</td></tr>`).join('');
+  };
+  renderTable(d.top_calls, 'opt-calls');
+  renderTable(d.top_puts, 'opt-puts');
+}
+
+/* ---- 04 Delivery ---- */
+async function loadDelivery() {
+  const d = await api('/api/tesla/delivery-signals');
+  if (!d) return;
+
+  /* 중국 바 차트 */
+  const china = d.china || {};
+  const months = Object.keys(china).sort();
+  const chinaLabels = months.map(m => m.slice(5));
+  const chinaData = months.map(m => china[m]?.tesla_units || 0);
+
+  if (chinaData.length) {
+    const ctx = document.getElementById('chinaChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: chinaLabels,
+        datasets: [{ label: 'Tesla 인도', data: chinaData, backgroundColor: 'rgba(227,25,55,0.7)', borderRadius: 4 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } },
+          y: { ticks: { color: '#888', font: { size: 10 }, callback: v => (v/1000).toFixed(0)+'K' }, grid: { color: 'rgba(255,255,255,0.04)' } }
+        }
+      }
+    });
+  }
+
+  /* EU 테이블 */
+  const eu = d.eu || {};
+  const euMonths = Object.keys(eu).sort();
+  const latestEu = euMonths.length ? eu[euMonths.length - 1] : null;
+  const euDiv = document.getElementById('eu-table');
+  if (latestEu && eu[latestEu]) {
+    const countries = eu[latestEu];
+    let html = `<div style="font-size:11px;color:var(--dim);margin-bottom:8px;">${latestEu}</div>`;
+    html += '<table class="opt-table"><thead><tr><th>국가</th><th>Tesla</th></tr></thead><tbody>';
+    for (const [country, data] of Object.entries(countries)) {
+      const units = data.tesla_units || data.total_units || '--';
+      html += `<tr><td>${country}</td><td>${typeof units === 'number' ? units.toLocaleString() : units}</td></tr>`;
+    }
+    html += '</tbody></table>';
+    euDiv.innerHTML = html;
+  } else {
+    euDiv.innerHTML = '<div class="empty">EU 데이터 없음</div>';
+  }
+}
+
+/* ---- 06 Thesis ---- */
+async function loadThesis() {
+  const d = await api('/api/tesla/thesis');
+  if (!d) return;
+
+  const gauge = document.getElementById('thesis-gauge');
+  const score = d.overall_score ?? 0;
+  gauge.textContent = score;
+  const gaugeColor = score < 35 ? 'var(--red)' : score < 55 ? 'var(--yellow)' : 'var(--green)';
+  gauge.style.borderColor = gaugeColor;
+  gauge.style.color = gaugeColor;
+
+  document.getElementById('thesis-label').textContent = d.overall_label || '--';
+  document.getElementById('thesis-meta').textContent = `Bull ${d.bull_count ?? 0} / Bear ${d.bear_count ?? 0} | Net Δ ${d.net_delta ?? 0}`;
+
+  const renderList = (items, side) => {
+    const el = document.getElementById(side + '-list');
+    if (!items || !items.length) { el.innerHTML = '<div class="empty">데이터 없음</div>'; return; }
+    el.innerHTML = items.slice(0, 8).map(it => {
+      const delta = it.delta || 0;
+      const cls = delta >= 0 ? 'pos' : 'neg';
+      return `<div class="thesis-card ${side === 'bull' ? 'bull' : 'bear'}">
+        <div class="tc-title">${esc(it.title || it.name || '--')}</div>
+        ${it.detail ? `<div class="tc-detail">${esc(it.detail)}</div>` : ''}
+        <div class="tc-meta">
+          <span style="font-size:10px;color:var(--dim);">${esc(it.occurred_at || '')}</span>
+          <span class="delta-badge ${cls}">${delta >= 0 ? '+' : ''}${delta}</span>
+        </div>
+      </div>`;
+    }).join('');
+  };
+  renderList(d.bull, 'bull');
+  renderList(d.bear, 'bear');
+}
+
+/* ---- 07 Essence 상단 3카드 (비중·주가·모멘텀) ---- */
+async function loadHeadlineCards() {
+  const d = await api('/api/tesla/headline-cards');
+  const el = document.getElementById('headline-cards');
+  if (!d || !d.cards || !d.cards.length) {
+    el.innerHTML = '<div class="empty">데이터 없음</div>';
+    return;
+  }
+  el.innerHTML = d.cards.map(c => {
+    const color = esc(c.color || 'var(--white)');
+    const deltaCls = c.delta_pos ? 'pos' : 'neg';
+    const deltaHtml = c.delta ? `<span class="hc-delta ${deltaCls}">${esc(c.delta)}</span>` : '';
+    const actionHtml = c.action ? `<span class="hc-action">${esc(c.action)}</span>` : '';
+    const commentHtml = c.comment ? `<div class="hc-comment">${esc(c.comment)}</div>` : '';
+    return `<div class="hcard" style="border-left:3px solid ${color};">
+      <div class="hc-label">${esc(c.label_ko)}</div>
+      <div class="hc-primary">
+        <div class="hc-value" style="color:${color};">${esc(c.primary)}</div>
+        <div class="hc-sub">${esc(c.primary_sub)}</div>
+      </div>
+      <div class="hc-delta-row">${deltaHtml}${actionHtml}</div>
+      ${commentHtml}
+    </div>`;
+  }).join('');
+}
+
+/* ---- 07 Essence ---- */
+let radarChart = null;
+async function loadEssence() {
+  const d = await api('/api/tesla/essence');
+  if (!d || !d.components || !d.components.length) return;
+
+  const labels = d.components.map(c => c.label_ko || c.name);
+  const scores = d.components.map(c => c.score || 0);
+
+  /* 레이더 */
+  const ctx = document.getElementById('radarChart').getContext('2d');
+  if (radarChart) radarChart.destroy();
+  radarChart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Score',
+        data: scores,
+        borderColor: '#e31937',
+        backgroundColor: 'rgba(227,25,55,0.15)',
+        borderWidth: 2,
+        pointBackgroundColor: '#e31937',
+        pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { color: '#888', backdropColor: 'transparent', font: { size: 9 } },
+          grid: { color: 'rgba(255,255,255,0.08)' },
+          pointLabels: { color: '#e8e8e8', font: { size: 11 } },
+          angleLines: { color: 'rgba(255,255,255,0.08)' }
+        }
+      }
+    }
+  });
+
+  /* 카드 */
+  const el = document.getElementById('essence-cards');
+  el.innerHTML = d.components.map(c => {
+    const delta = c.delta_7d;
+    let deltaHtml = '';
+    if (delta && delta !== '' && delta !== '0') {
+      const isPos = !delta.startsWith('-');
+      deltaHtml = `<span style="color:${isPos ? 'var(--green)' : 'var(--red)'};font-size:11px;">${isPos ? '↑' : '↓'} ${delta}</span>`;
+    }
+    return `<div class="ecard">
+      <div class="ecard-score" style="color:${esc(c.color || 'var(--white)')};">${c.score || 0}</div>
+      <div class="ecard-info">
+        <div class="ecard-name">${esc(c.label_ko || c.name)}</div>
+        <div class="ecard-delta">${deltaHtml}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ---- 08 Timeline ---- */
+const TL_TOPIC_COLORS = {
+  robotaxi: '#ff6b35',
+  fsd: '#58a6ff',
+  optimus: '#d2a8ff',
+  '4680': '#f0883e',
+  megapack: '#3fb950',
+};
+const TL_TOPIC_LABELS = {
+  robotaxi: 'Robotaxi',
+  fsd: 'FSD',
+  optimus: 'Optimus',
+  '4680': '4680',
+  megapack: 'Megapack',
+};
+const TL_FALLBACK_COLOR = '#6e7681';
+let tlCurrentLevel = 'important';
+
+function tlRelativeDate(daysOffset) {
+  if (daysOffset === 0) return '오늘';
+  if (daysOffset > 0) {
+    if (daysOffset < 30) return `D+${daysOffset}`;
+    if (daysOffset < 365) return `+${Math.round(daysOffset / 30)}M`;
+    return `+${(daysOffset / 365).toFixed(1)}Y`;
+  }
+  const ad = Math.abs(daysOffset);
+  if (ad < 30) return `D-${ad}`;
+  if (ad < 365) return `-${Math.round(ad / 30)}M`;
+  return `-${(ad / 365).toFixed(1)}Y`;
+}
+
+function tlGroupByDate(events) {
+  const map = new Map();
+  for (const ev of events) {
+    const key = ev.occurred_at || '';
+    if (!key) continue;
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(ev);
+  }
+  return Array.from(map.entries())
+    .map(([date, evs]) => ({
+      date,
+      events: evs.slice().sort((a, b) => (b.importance_score || 0) - (a.importance_score || 0)),
+      max_importance: Math.max(...evs.map(e => e.importance_score || 0)),
+      days_offset: evs[0].days_offset,
+      is_past: evs[0].is_past,
+    }))
+    .sort((a, b) => b.date.localeCompare(a.date));
+}
+
+function tlRenderEvent(ev) {
+  const topic = ev.topic;
+  const color = TL_TOPIC_COLORS[topic] || TL_FALLBACK_COLOR;
+  const label = TL_TOPIC_LABELS[topic] || (ev.category ? ev.category : '기타');
+  const thesisCls = ev.thesis_side === 'bear' ? 'thesis-bear' : (ev.thesis_side === 'bull' ? 'thesis-bull' : '');
+  const desc = ev.outcome || ev.summary || ev.description || '';
+  const impact = ev.impact_label_ko ? ` · ${esc(ev.impact_label_ko)}` : '';
+  return `<div class="tl-event ${thesisCls}" style="border-left-color:${esc(color)};">
+    <div class="tl-event-head">
+      <div class="tl-title">${esc(ev.title || '')}</div>
+      <span class="tl-badge" style="background:${esc(color)};">${esc(label)}</span>
+      <span class="tl-imp">${esc(String(ev.importance || ''))} · ${(ev.importance_score || 0).toFixed(1)}</span>
+    </div>
+    ${desc ? `<div class="tl-desc">${esc(desc.slice(0, 200))}${impact}</div>` : ''}
+  </div>`;
+}
+
+function tlRenderGroup(g) {
+  let stateCls = '';
+  if (g.is_past) stateCls = 'is-past';
+  else if (g.days_offset !== undefined && g.days_offset <= 30) stateCls = 'is-soon';
+  const rel = tlRelativeDate(g.days_offset || 0);
+  return `<div class="tl-group ${stateCls}">
+    <div class="tl-group-date">${esc(g.date)}<span class="tl-rel">${esc(rel)}</span></div>
+    ${g.events.map(tlRenderEvent).join('')}
+  </div>`;
+}
+
+async function loadTimeline(level) {
+  tlCurrentLevel = level || tlCurrentLevel;
+  const d = await api(`/api/tesla/timeline?importance_level=${tlCurrentLevel}`);
+  const el = document.getElementById('milestone-tl');
+  const meta = document.getElementById('tl-meta');
+
+  // 토글 카운트 갱신
+  if (d && d.counts) {
+    document.getElementById('ttab-cnt-core').textContent = d.counts.core ?? '0';
+    document.getElementById('ttab-cnt-important').textContent = d.counts.important ?? '0';
+    document.getElementById('ttab-cnt-all').textContent = d.counts.all ?? '0';
+  }
+  // 토글 active 상태 갱신
+  document.querySelectorAll('#tl-toggle .ttab').forEach(b => {
+    b.classList.toggle('active', b.dataset.level === tlCurrentLevel);
+  });
+
+  if (!d || !d.events || !d.events.length) {
+    el.innerHTML = '<div class="empty">표시할 이벤트가 없습니다</div>';
+    meta.textContent = '';
+    return;
+  }
+
+  const groups = tlGroupByDate(d.events);
+  meta.textContent = `${d.events.length}건 · ${groups.length}개 시점`;
+  el.innerHTML = groups.map(tlRenderGroup).join('');
+}
+
+document.querySelectorAll('#tl-toggle .ttab').forEach(btn => {
+  btn.addEventListener('click', () => loadTimeline(btn.dataset.level));
+});
+
+/* ---- 09 News ---- */
+async function loadNews() {
+  const d = await api('/api/tesla/news?limit=9');
+  if (!d || !d.articles || !d.articles.length) return;
+
+  const el = document.getElementById('news-grid');
+  el.innerHTML = d.articles.map(a => {
+    const pub = a.published ? a.published.slice(0, 16).replace('T', ' ') : '';
+    return `<a class="news-card" href="${safeUrl(a.url)}" target="_blank" rel="noopener noreferrer">
+      <div class="nc-source">${esc(a.source)}</div>
+      <div class="nc-title">${esc(a.title)}</div>
+      <div class="nc-summary">${esc(a.summary || '')}</div>
+      <div class="nc-footer">${esc(pub)}</div>
+    </a>`;
+  }).join('');
+}
+
+/* ---- Init ---- */
+(async () => {
+  await Promise.all([
+    loadPrice(),
+    loadChart('1mo'),
+    loadOptions(),
+    loadDelivery(),
+    loadThesis(),
+    loadHeadlineCards(),
+    loadEssence(),
+    loadTimeline('important'),
+    loadNews(),
+  ]);
+})();
+</script>
+</body>
+</html>

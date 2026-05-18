@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBUX | 스타벅스 Q2 FY2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #00b36b; --accent-dim: #00b36b33;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#00b36b15,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #00b36b44; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  /* CARDS */
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--accent); }
+  .negative { color:var(--red); }
+
+  /* KPI TIER */
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#00b36b22; color:var(--accent); }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  /* QUOTE */
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  /* TONE METER */
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  /* NEXT Q */
+  .next-q { background:linear-gradient(135deg,#4da6ff10,var(--surface)); border:1px solid #4da6ff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--blue); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--blue); }
+
+  /* LINKS */
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  /* TAGS */
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  /* KPI NOTE */
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+  /* HIGHLIGHT BOX */
+  .highlight-box { background:linear-gradient(135deg,#00b36b12,var(--surface)); border:1px solid #00b36b33; border-radius:8px; padding:20px 24px; margin:20px 0; }
+  .highlight-box .hb-title { font-size:13px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .highlight-box p { font-size:14px; color:var(--text-dim); line-height:1.8; }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NASDAQ: SBUX</div>
+    <h1>Starbucks Corporation</h1>
+    <div class="company-kr">스타벅스 코퍼레이션</div>
+    <div class="subtitle">Q2 FY2026 실적 딥다이브 &mdash; 2026.04.28 장후 발표 (회계연도: 10월 시작, 해당 분기: 2026년 1~3월)</div>
+    <div class="meta-row">
+      <span>발표일: 2026-04-28</span>
+      <span>|</span>
+      <span>섹터: 소비재 / 레스토랑 &middot; 커피</span>
+      <span>|</span>
+      <span>시가총액: ~$1,170억 (장후)</span>
+      <span>|</span>
+      <span>CEO: Brian Niccol (재임 7분기)</span>
+    </div>
+    <div class="verdict beat">BEAT &mdash; 매출 +4.0% / Non-GAAP EPS +19% vs 컨센서스 &mdash; 2년 만의 첫 동반 성장</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">총 매출</div>
+      <div class="value">$95.3억</div>
+      <div class="compare">컨센서스: $91.6억 <span class="beat-tag">BEAT +4.0%</span></div>
+      <div class="compare">전년비: +9.0%</div>
+    </div>
+    <div class="num-card">
+      <div class="label">GAAP 희석 EPS</div>
+      <div class="value">$0.45</div>
+      <div class="compare">컨센서스: $0.42 <span class="beat-tag">BEAT +7.1%</span></div>
+      <div class="compare">전년비: +22%</div>
+    </div>
+    <div class="num-card">
+      <div class="label">Non-GAAP EPS</div>
+      <div class="value">$0.50</div>
+      <div class="compare">컨센서스: $0.42 <span class="beat-tag">BEAT +19%</span></div>
+      <div class="compare">2년 만의 첫 EPS 성장</div>
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <div class="hb-title">이 분기가 특별한 이유</div>
+    <p>매출 +9%, EPS +22% — 스타벅스가 <strong>동시에 Top-line과 Bottom-line을 모두 성장시킨 건 2년 만에 처음</strong>이다. Brian Niccol이 2024년 9월 취임한 이후 6분기, 드디어 수치가 "Back to Starbucks" 전략의 효과를 증명하기 시작했다. 단순한 비트가 아니다. <strong>내러티브의 전환점(inflection point)</strong>이다.</p>
+  </div>
+
+  <h3>매출 구성 (세그먼트별)</h3>
+  <table>
+    <thead><tr><th>세그먼트</th><th>Q2 FY2026</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td><strong>북미 (North America)</strong></td><td class="mono">$68.9억</td><td class="mono positive">+7%</td><td><span class="kw-tag bullish">RECOVERY</span></td></tr>
+      <tr><td><strong>인터내셔널</strong></td><td class="mono">$20.5억</td><td class="mono positive">+10%</td><td><span class="kw-tag bullish">SOLID</span></td></tr>
+      <tr><td><strong>채널 개발 (Channel Development)</strong></td><td class="mono">$5.7억</td><td class="mono positive">+39%</td><td><span class="kw-tag bullish">BREAKOUT</span></td></tr>
+      <tr><td><strong>글로벌 동일매장 매출 (Comp)</strong></td><td class="mono">+6.2%</td><td class="mono">&mdash;</td><td><span class="kw-tag bullish">BEST IN 8Q</span></td></tr>
+      <tr><td><strong>미국 동일매장 매출 (Comp)</strong></td><td class="mono">+7.1%</td><td class="mono">&mdash;</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
+      <tr><td><strong>중국 동일매장 매출 (Comp)</strong></td><td class="mono">+0.5%</td><td class="mono">&mdash;</td><td><span class="kw-tag neutral-tag">FRAGILE</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Comp 성장 분해 (글로벌 +6.2%)</h3>
+  <table>
+    <thead><tr><th>드라이버</th><th>기여도</th><th>의미</th></tr></thead>
+    <tbody>
+      <tr><td><strong>거래 건수 증가 (Traffic)</strong></td><td class="mono positive">+3.8%</td><td>손님이 더 많이 왔다 — 진짜 회복의 증거</td></tr>
+      <tr><td><strong>평균 티켓 증가 (Ticket)</strong></td><td class="mono positive">+2.3%</td><td>1인당 더 많이 쓴다 — 메뉴 믹스 개선</td></tr>
+    </tbody>
+  </table>
+
+  <div class="kpi-note">
+    <strong>왜 Traffic이 더 중요한가:</strong> 리테일·카페 산업에서 Comp 성장은 두 가지 방법으로만 가능하다 — 가격 올리기(Ticket) 또는 손님 더 받기(Traffic). 가격 올리기는 한계가 있고, Traffic 증가는 진짜 수요 회복을 뜻한다. 미국 Comp +7.1% 중 Traffic +4.3%, Ticket +2.6%로 <strong>구성 비율이 건강하다</strong>. 과거 2~3분기 동안 Traffic이 마이너스였던 것과 완전히 대비된다.
+  </div>
+
+  <div class="next-q" style="margin-top:24px;">
+    <h3>가이던스 상향 (FY2026)</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">글로벌 Comp 전망</div><div class="nq-value">+5% 이상</div><div style="font-size:11px;color:var(--text-muted);margin-top:4px;">기존 +3% 상향</div></div>
+      <div class="next-q-item"><div class="nq-label">미국 Comp 전망</div><div class="nq-value">+5% 이상</div><div style="font-size:11px;color:var(--text-muted);margin-top:4px;">기존 +3% 상향</div></div>
+      <div class="next-q-item"><div class="nq-label">조정 EPS 전망 (FY2026)</div><div class="nq-value">$2.25~$2.45</div><div style="font-size:11px;color:var(--text-muted);margin-top:4px;">기존 $2.15~$2.40 상향</div></div>
+    </div>
+    <div style="margin-top:16px;font-size:13px;color:var(--text-dim);">
+      <strong style="color:var(--blue);">장기 목표 (FY2028):</strong> 영업이익률 13.5%~15% (현재 9.4% 대비 +400~560bp). Niccol이 이 수치를 공개 선언한 것은 "우리는 더 간다"는 시그널.
+    </div>
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>카페·리테일 기업을 읽는 숫자들</h2>
+
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 동일매장 매출 (Comp Sales)</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q2 FY2026</th><th>전분기 (Q1)</th><th>왜 이게 최우선인가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>글로벌 Comp 성장률</strong></td>
+        <td class="mono positive" style="font-size:18px;font-weight:700;">+6.2%</td>
+        <td class="mono positive">+4.0%</td>
+        <td>신규 매장 없이 기존 매장에서만 벌어들이는 성과. 진짜 브랜드 파워를 보여주는 유일한 지표</td>
+      </tr>
+      <tr>
+        <td><strong>미국 Comp 성장률</strong></td>
+        <td class="mono positive" style="font-size:18px;font-weight:700;">+7.1%</td>
+        <td class="mono positive">+4.0%</td>
+        <td>2연속 플러스. 2022년 Q2 이후 최초로 Rewards + non-Rewards 고객 동시 Traffic 증가</td>
+      </tr>
+      <tr>
+        <td><strong>글로벌 거래 건수 성장</strong></td>
+        <td class="mono positive">+3.8%</td>
+        <td class="mono positive">+1%대</td>
+        <td>Ticket 인상 없이 Traffic으로 매출 키우는 게 가능해졌다는 증거</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>Comp의 맥락:</strong> 스타벅스는 한때 "리테일의 법칙"이었다. 2010년대 글로벌 확장기엔 매 분기 Comp +5~8%가 당연했다. 2023~2024년 연속 마이너스를 기록하며 모든 것이 흔들렸다. 이번 +6.2%는 숫자 이상의 의미를 가진다 — <strong>"스타벅스는 아직 브랜드다"</strong>는 시장의 재평가.
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">시장별 성과 &mdash; 미국 vs 중국 vs 인터내셔널</span>
+  </div>
+  <table>
+    <thead><tr><th>시장</th><th>Comp</th><th>Traffic</th><th>Ticket</th><th>영업이익률</th><th>판단</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>미국 (North America)</strong></td>
+        <td class="mono positive">+7.1%</td>
+        <td class="mono positive">+4.3%</td>
+        <td class="mono positive">+2.6%</td>
+        <td class="mono negative">9.9% <span style="font-size:11px;color:var(--red);">(↓1.7bp)</span></td>
+        <td><span class="kw-tag bullish">TOP LINE WIN</span> <span class="kw-tag bearish">MARGIN RISK</span></td>
+      </tr>
+      <tr>
+        <td><strong>중국</strong></td>
+        <td class="mono positive">+0.5%</td>
+        <td class="mono positive">+2.1%</td>
+        <td class="mono negative">-1.6%</td>
+        <td class="mono">별도 (JV 전환 중)</td>
+        <td><span class="kw-tag neutral-tag">FRAGILE FLOOR</span></td>
+      </tr>
+      <tr>
+        <td><strong>인터내셔널 전체</strong></td>
+        <td class="mono positive">+2.6%</td>
+        <td class="mono positive">+2.1%</td>
+        <td class="mono positive">+0.5%</td>
+        <td class="mono positive">19.4% <span style="font-size:11px;color:var(--accent);">(↑7.8bp)</span></td>
+        <td><span class="kw-tag bullish">MARGIN LEADER</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>미국 마진 역설:</strong> 미국은 Comp +7.1%인데 영업이익률은 9.9%로 전년(11.6%) 대비 170bp 하락. Niccol의 처방 — 바리스타 충원, 서비스 속도 개선, 마케팅 강화 — 이 비용을 끌어올리고 있다. 단기 투자인가, 구조적 압박인가가 <strong>이 주식의 핵심 논쟁</strong>이다. FY2028 목표 15% 달성을 위해선 지금의 고비용 구조를 반드시 해결해야 한다.
+  </div>
+
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">효율성 지표 &mdash; 마진, 매장당 생산성</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q2 FY2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>연결 영업이익률</strong></td><td class="mono positive">9.4%</td><td class="mono positive">+110bp</td><td>전체는 개선. 인터내셔널 마진 확대가 미국 하락을 상쇄</td></tr>
+      <tr><td><strong>미국 영업이익률</strong></td><td class="mono negative">9.9%</td><td class="mono negative">-170bp</td><td>투자 비용(바리스타 채용, 매장 리뉴얼)이 이익을 압박</td></tr>
+      <tr><td><strong>인터내셔널 영업이익률</strong></td><td class="mono positive">19.4%</td><td class="mono positive">+780bp</td><td>중국 JV 구조 재편 효과 + 지역 효율화</td></tr>
+      <tr><td><strong>글로벌 총 매장 수</strong></td><td class="mono">~40,000+</td><td class="mono">&mdash;</td><td>Q1 기준 41,118개. Q3부터 중국 점포 연결 제외 (JV 전환)</td></tr>
+      <tr><td><strong>4/4/12 목표 달성률</strong></td><td class="mono positive">~80%</td><td class="mono">&mdash;</td><td>카페 4분 / 드라이브스루 4분 / 모바일 픽업 12분 이내 기준</td></tr>
+    </tbody>
+  </table>
+
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">브랜드 & 디지털 &mdash; Starbucks Rewards / 모바일</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q2 FY2026</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Starbucks Rewards 활성 회원</strong></td>
+        <td class="mono positive" style="font-weight:700;">3,560만명 (역대 최고)</td>
+        <td><span class="kw-tag bullish">ALL-TIME HIGH</span></td>
+      </tr>
+      <tr>
+        <td><strong>Rewards + non-Rewards 동시 Traffic 증가</strong></td>
+        <td class="mono">4년 만에 최초</td>
+        <td><span class="kw-tag bullish">BRAND RECOVERY</span></td>
+      </tr>
+      <tr>
+        <td><strong>리워드 프로그램 리뉴얼</strong></td>
+        <td class="mono">3월 론칭 (Green/Gold/Reserve)</td>
+        <td><span class="kw-tag neutral-tag">WATCH</span></td>
+      </tr>
+      <tr>
+        <td><strong>채널 개발 매출 성장</strong></td>
+        <td class="mono positive">+39% ($5.7억)</td>
+        <td><span class="kw-tag bullish">GLOBAL COFFEE ALLIANCE</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>Rewards 회원의 전략적 의미:</strong> 스타벅스 Rewards는 단순 적립 프로그램이 아니다. 미국 내 매출의 약 60%가 Rewards 회원에서 발생하며, 개인화 마케팅과 모바일 주문의 데이터 기반이 된다. 3월에 개편한 3단계 멤버십(Green/Gold/Reserve)은 고객 세분화와 고가 음료로의 업셀 강화를 노린다. <strong>회원수 3,560만이 역대 최고치를 찍었다는 것</strong>은 이탈 없이 성장하고 있다는 의미.
+  </div>
+
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">턴어라운드 게이지 &mdash; Niccol 전략의 진행 상황</span>
+  </div>
+  <table>
+    <thead><tr><th>전략 필러</th><th>Q2 진행 상황</th><th>판정</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>1. 고객 경험 — "세계 최고의 서비스"</strong></td>
+        <td>4/4/12 목표 80% 달성. 미국 Traffic +4.3%로 서비스 개선 효과 가시화</td>
+        <td><span class="kw-tag bullish">ON TRACK</span></td>
+      </tr>
+      <tr>
+        <td><strong>2. 바리스타 — "리테일 최고의 직장"</strong></td>
+        <td>바리스타 충원 지속 → 미국 영업이익률 -170bp 압박 중</td>
+        <td><span class="kw-tag neutral-tag">COST DRAG</span></td>
+      </tr>
+      <tr>
+        <td><strong>3. 커뮤니티 커피하우스</strong></td>
+        <td>머그컵·앉아서 마시기 캠페인. 아티산 베이커리 론칭. 단골 고객 재방문 증가</td>
+        <td><span class="kw-tag bullish">PROGRESSING</span></td>
+      </tr>
+      <tr>
+        <td><strong>4. 메뉴 단순화</strong></td>
+        <td>단백질 콜드폼 등 신규 아이템 인기. 복잡한 커스터마이징 축소 진행 중</td>
+        <td><span class="kw-tag neutral-tag">IN PROGRESS</span></td>
+      </tr>
+      <tr>
+        <td><strong>5. 글로벌 성장 가속</strong></td>
+        <td>인터내셔널 매출 +10%. 중국 Boyu Capital JV 클로즈 (Q2 말) — Q3부터 연결 제외</td>
+        <td><span class="kw-tag neutral-tag">CHINA PIVOT</span></td>
+      </tr>
+      <tr>
+        <td><strong>6. 주주 가치 창출</strong></td>
+        <td>가이던스 상향. FY2028 마진 13.5~15% 목표 유지. 2년 만에 EPS 성장 복귀</td>
+        <td><span class="kw-tag bullish">BEAT</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter">
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:90%;background:var(--accent);"></div></div>
+      <div class="tone-score" style="color:var(--accent);">9.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:70%;background:var(--yellow);"></div></div>
+      <div class="tone-score" style="color:var(--yellow);">7.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">마진 우려 강도</div>
+      <div class="tone-bar"><div class="fill" style="width:75%;background:var(--red);"></div></div>
+      <div class="tone-score" style="color:var(--red);">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">전망 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:80%;background:var(--blue);"></div></div>
+      <div class="tone-score" style="color:var(--blue);">8.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Brian Niccol (회장 겸 CEO) &mdash; 전략가, 내러티브 설계자</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 자신감 있는 선언가. 턴어라운드를 "증명된 사실"로 포지셔닝하면서도 장기 여정임을 강조. Chipotle에서 검증된 운영 DNA를 스타벅스에 이식하는 데 집중. 방어적 설명 없이 공격적 비전을 제시.
+  </p>
+
+  <div class="keywords">
+    <span class="kw-tag bullish">BACK TO STARBUCKS</span>
+    <span class="kw-tag bullish">MARKED THE TURN</span>
+    <span class="kw-tag bullish">COMMUNITY COFFEEHOUSE</span>
+    <span class="kw-tag bullish">4/4/12</span>
+    <span class="kw-tag neutral-tag">LONG-TERM JOURNEY</span>
+    <span class="kw-tag bearish">MARGIN INVESTMENT</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Brian Niccol &mdash; 오프닝 선언</div>
+    <blockquote>"Our second quarter marked the turn in our turnaround as our Back to Starbucks plan drove both top and bottom line growth for the first time in more than two years."</blockquote>
+    <div class="analysis"><strong>"marked the turn"</strong> — 조심스러운 표현이 아니다. "전환점을 찍었다"는 단호한 선언. CFO가 쓸 법한 "sign of progress" 같은 말 대신 CEO답게 결론부터 던진다. "for the first time in more than two years"를 붙인 건 역사적 의미 강조. 투자자에게 "이제 다음 챕터로 넘어간다"는 신호를 보낸 것이다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Brian Niccol &mdash; 운영 목표 (4/4/12)</div>
+    <blockquote>"We're now at about 80 percent of our stores hitting our operational targets — four minutes in the cafe, four minutes in the drive-thru, and better than 12 minutes for promised times in mobile order pickup."</blockquote>
+    <div class="analysis">Niccol이 Chipotle에서 배운 핵심 원칙은 <strong>"운영 우수성이 매출을 만든다"</strong>는 것이다. 4/4/12는 단순한 속도 목표가 아니다 — 손님이 "기다려도 된다"고 느끼게 하는 허용 범위를 수치로 정의한 것이다. 80%는 아직 20%가 남았다는 의미이기도 하다. 이 비율이 90~95%가 되면 마진 개선 속도가 달라질 가능성이 있다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Brian Niccol &mdash; Traffic 회복의 의미</div>
+    <blockquote>"This is the first quarter we grew both Rewards and non-Rewards transactions since Q2 of fiscal 2022 — nearly four years ago."</blockquote>
+    <div class="analysis">가장 강력한 수치 발언. Rewards 회원은 상대적으로 충성 고객이라 Traffic이 유지되는 경향이 있다. 하지만 <strong>non-Rewards 고객의 재방문 증가</strong>는 "브랜드 전반의 회복"을 뜻한다. 4년 만이라는 기간이 이 달성의 무게를 설명한다. 스타벅스가 단순히 할인·프로모션으로 끌어들인 게 아니라 실질적 경험 개선이 이뤄졌다는 신호.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Brian Niccol &mdash; 장기 여정 인정</div>
+    <blockquote>"We still have a lot of work to do. This is a long-term journey, and we're committed to delivering on our promises to customers, partners, and shareholders."</blockquote>
+    <div class="analysis">승리 선언 직후 바로 겸손을 더했다. 전형적인 Niccol 화법 — <strong>"우리는 이겼다, 그러나 아직 멀었다."</strong> 과도한 기대를 차단하면서도 실망은 주지 않는 균형 잡기. FY2028 마진 목표(13.5~15%)가 아직 현 수준(9.4%)에서 한참 멀다는 것을 인지하고 있음을 보여준다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Brian Niccol &mdash; 중국 JV 전환</div>
+    <blockquote>"The transaction with Boyu Capital closed shortly after quarter end. We believe this partnership unlocks the full potential of the Starbucks brand in China while allowing us to focus on our core markets."</blockquote>
+    <div class="analysis">중국은 Comp +0.5%로 사실상 정체 상태다. 루이싱(Luckin Coffee)과의 경쟁 심화, 중산층 소비 위축, 현지 브랜드 부상이 겹쳤다. Boyu Capital에 60% 지분을 넘기면서 $130억 이상의 가치를 확보하는 구조지만, <strong>핵심은 중국에서 손을 떼는 것이 아니라 "현지화 파트너십"으로 리스크를 이전하는 것</strong>이다. Q3부터 중국 실적이 연결에서 제외되면 인터내셔널 마진이 크게 좋아 보이는 효과가 생긴다 — 숫자 해석에 주의 필요.</div>
+  </div>
+
+  <h3>Cathy Smith (CFO) &mdash; 수치의 통역사</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 안정적이고 데이터 중심. 마진 압박에 대해 "투자"라는 프레임으로 방어하면서도 구체적인 개선 경로를 제시. Rachel Ruggeri 이후 취임한 CFO로, 이번이 실질적인 첫 번째 본격 실적 발표였다.
+  </p>
+
+  <div class="quote-block">
+    <div class="speaker">Cathy Smith &mdash; 마진 압박 설명</div>
+    <blockquote>"North America operating margin contracted to 9.9 percent, reflecting investments in labor and marketing as we continue to drive traffic growth. We view this as the right investment at the right time."</blockquote>
+    <div class="analysis"><strong>"right investment at the right time"</strong> — 이 표현이 핵심. 마진 하락을 변명하지 않고 <strong>전략적 선택임을 선언</strong>한다. 하지만 애널리스트 입장에서는 "그 투자가 언제 수익으로 돌아오냐"가 관건이다. FY2028 목표까지 2년. 그 사이 마진이 얼마나 빠르게 회복되느냐가 주가를 결정한다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Cathy Smith &mdash; 가이던스 상향 근거</div>
+    <blockquote>"Based on the strength of Q2 and our confidence in the Back to Starbucks strategy, we are raising our full-year guidance for both comp sales and adjusted EPS."</blockquote>
+    <div class="analysis">CFO가 가이던스를 올리는 것은 단순한 숫자 상향 그 이상이다. <strong>경영진이 내부 데이터에서 이미 3월 이후의 모멘텀을 확인하고 있다는 신호</strong>를 보내는 것이다. Q2 실적만으로 올해 전망치를 올린다는 것은 Q3·Q4에 대한 자신감이 있다는 의미다.</div>
+  </div>
+
+  <h3>애널리스트 Q&A &mdash; 핵심 긴장 지점</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 좋은 결과를 인정하면서도 "마진 회복 타임라인"을 집요하게 파고든다. 중국 리스크와 FY2028 목표의 실현 가능성이 가장 많이 등장한 주제.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; CNBC / 마진 회복 압박</div>
+    <blockquote>"Investors are cheering the sales recovery, but they're also watching for stronger profits. The question is whether Starbucks can eventually grow earnings faster than its cost base."</blockquote>
+    <div class="analysis"><strong>핵심 논쟁을 한 문장으로 압축.</strong> 매출은 살아나고 있다. 그런데 비용(바리스타 충원, 리뉴얼, 마케팅)도 함께 올라가고 있다. FY2028 목표(15%)를 달성하려면 매출 성장이 비용 증가를 압도하는 레버리지 구간이 와야 한다. 그 구간이 언제 오냐가 지금 가장 중요한 질문.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; 중국 구조 재편</div>
+    <blockquote>"With China being deconsolidated from Q3, how should we think about the revenue impact and whether the JV economics are actually better for Starbucks long-term?"</blockquote>
+    <div class="analysis">예리한 질문. 중국이 Q3부터 연결 제외되면 단기적으로 인터내셔널 매출이 줄어 보이지만, 라이선스 수수료 방식으로 전환하면 <strong>자본 부담 없이 안정적인 수익이 들어온다</strong>. Niccol은 이를 "더 효율적인 자본 배분"으로 설명한다. 다만 중국 로열티가 Boyu Capital 구조 아래에서 얼마나 투명하게 흐르느냐는 중장기 불확실성으로 남는다.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; 소비자 환경</div>
+    <blockquote>"How are you thinking about macro headwinds? Are you seeing any consumer trade-down from premium drinks?"</blockquote>
+    <div class="analysis">스타벅스 평균 티켓은 미국 기준 약 $10~11. 관세 충격, 물가 압박 환경에서 소비자가 "가성비 커피"로 이동하면 스타벅스 Comp가 다시 꺾일 수 있다. Niccol의 답변은 "아직 그런 신호를 보지 못하고 있다"였지만, <strong>이 리스크는 2025~2026년 내내 테일리스크로 존재</strong>한다.</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr>
+        <td style="width:180px;font-weight:600;color:var(--accent);">Brian Niccol (CEO)</td>
+        <td>"이 분기는 턴어라운드의 전환점이다. Traffic이 돌아왔고, 브랜드가 살아 있다는 것을 증명했다. FY2028 마진 15%를 향해 간다."</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--accent);">Cathy Smith (CFO)</td>
+        <td>"마진 투자는 선택이 아닌 전략이다. Q3 이후 중국 연결 제외로 자본 효율이 개선된다. 가이던스를 올릴 자신이 있다."</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--yellow);">시장 / 애널리스트</td>
+        <td>"매출 회복은 믿겠다. 그런데 FY2028 마진 15%까지 남은 길이 멀다. 분기마다 증명해야 한다."</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--accent);">주가 반응</td>
+        <td>장후 +6.0% ($103.59). 2년 만의 첫 동반 Beat + 가이던스 상향이 매수 트리거. 다음날 +5~6% 상승세 유지.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="highlight-box" style="margin-top:24px;">
+    <div class="hb-title">이 주식을 어떻게 볼 것인가 &mdash; 투자 테제 구조</div>
+    <p>
+      스타벅스는 지금 <strong>턴어라운드의 2페이즈</strong>에 진입했다.<br><br>
+      <strong>1페이즈 (FY2025~Q1 FY2026):</strong> "브랜드가 아직 살아 있나?" — Traffic 마이너스를 끊는 게 목표였다. 2연속 플러스로 통과.<br><br>
+      <strong>2페이즈 (현재~FY2027):</strong> "마진 투자가 레버리지로 전환되는가?" — 바리스타 충원·서비스 개선 비용이 Traffic 성장을 통해 이익으로 돌아오는 구조를 만들어야 한다. 미국 영업이익률 9.9%가 FY2028 목표 15%까지 가려면 연 200~250bp씩 개선이 필요하다.<br><br>
+      <strong>리스크:</strong> 미국 소비 둔화, 중국 경쟁(루이싱), 트럼프 관세발 식재료 비용 상승, 노동 비용 구조.<br><br>
+      <strong>테제 유지 조건:</strong> Comp +5% 이상 유지 + 미국 마진 분기별 개선 추세.
+    </p>
+  </div>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid">
+    <a class="link-card" href="https://investor.starbucks.com/news/financial-releases/news-details/2026/Starbucks-Reports-Q2-Fiscal-Year-2026-Results/default.aspx" target="_blank">
+      <div class="link-icon">&#x1F4C4;</div>
+      <div class="link-text"><div class="link-title">IR 보도자료 (공식)</div><div class="link-url">investor.starbucks.com</div></div>
+    </a>
+    <a class="link-card" href="https://about.starbucks.com/press/2026/starbucks-reports-q2-fiscal-year-2026-results/" target="_blank">
+      <div class="link-icon">&#x2615;</div>
+      <div class="link-text"><div class="link-title">Starbucks 뉴스룸</div><div class="link-url">about.starbucks.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.fool.com/earnings/call-transcripts/2026/04/28/starbucks-sbux-q2-2026-earnings-transcript/" target="_blank">
+      <div class="link-icon">&#x1F4DD;</div>
+      <div class="link-text"><div class="link-title">컨콜 트랜스크립트 (Motley Fool)</div><div class="link-url">fool.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.benzinga.com/insights/news/26/04/52115194/starbucks-q2-2026-earnings-call-complete-transcript" target="_blank">
+      <div class="link-icon">&#x1F4DC;</div>
+      <div class="link-text"><div class="link-title">컨콜 전문 트랜스크립트 (Benzinga)</div><div class="link-url">benzinga.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.cnbc.com/2026/04/28/starbucks-brian-niccol-turnaround-investing-club.html" target="_blank">
+      <div class="link-icon">&#x1F4FA;</div>
+      <div class="link-text"><div class="link-title">CNBC &mdash; 턴어라운드 분석</div><div class="link-url">cnbc.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.investing.com/news/transcripts/earnings-call-transcript-starbucks-q2-2026-beats-expectations-stock-rises-93CH-4643181" target="_blank">
+      <div class="link-icon">&#x1F4CA;</div>
+      <div class="link-text"><div class="link-title">실적 발표 요약 (Investing.com)</div><div class="link-url">investing.com</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-04-29 &mdash; MACROHARD / Be:Analogue<br>
+  <span style="font-size:11px;margin-top:4px;display:block;">본 자료는 정보 제공 목적이며 투자 권유가 아닙니다. 모든 투자 결정은 본인 책임입니다.</span>
+</div>
+
+</div>
+</body>
+</html>

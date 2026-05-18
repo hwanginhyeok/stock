@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V | 비자 Q2 FY2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #6b7cff; --accent-dim: #6b7cff33;
+    --gold: #f5c842; --gold-dim: #f5c84222;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#6b7cff15,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #6b7cff44; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  /* CARDS */
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--accent); }
+  .negative { color:var(--red); }
+  .gold-text { color:var(--gold); }
+
+  /* KPI TIER */
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#6b7cff22; color:var(--accent); }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  /* QUOTE */
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block.cfo { border-left-color:var(--gold); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block.cfo .speaker { color:var(--gold); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  /* TONE METER */
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  /* NEXT Q */
+  .next-q { background:linear-gradient(135deg,#6b7cff10,var(--surface)); border:1px solid #6b7cff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--accent); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--accent); }
+
+  /* LINKS */
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  /* TAGS */
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+  .kw-tag.gold-tag { background:var(--gold-dim); color:var(--gold); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  /* KPI NOTE */
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+  /* ACCOUNT NOTE */
+  .fiscal-note { background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:10px 16px; font-size:12px; color:var(--text-muted); margin-bottom:24px; }
+  .fiscal-note strong { color:var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NYSE: V</div>
+    <h1>Visa Inc.</h1>
+    <div class="company-kr">비자</div>
+    <div class="subtitle">Q2 FY2026 실적 딥다이브 &mdash; 2026.04.28 장후 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-04-28</span>
+      <span>|</span>
+      <span>회계분기: FY2026 Q2 (2026년 1~3월)</span>
+      <span>|</span>
+      <span>섹터: 금융 / 결제 네트워크</span>
+      <span>|</span>
+      <span>시가총액: ~$5,400억</span>
+    </div>
+    <div class="verdict beat">BEAT &mdash; 매출 +$2.7억 vs 컨센서스 / EPS +$0.15 초과 / 가이던스 상향</div>
+  </div>
+</div>
+
+<div class="container">
+
+<div class="fiscal-note">
+  <strong>회계연도 주의:</strong> Visa의 회계연도(FY)는 10월 시작. Q2 FY2026 = 2026년 1월~3월. 4/28 발표된 것은 Q2 FY2026이며, 본 리포트에서는 편의상 "Q2 2026"으로 표기.
+</div>
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">순매출 (Net Revenue)</div>
+      <div class="value">$112.3억</div>
+      <div class="compare">컨센서스: $109.6억 <span class="beat-tag">BEAT +$2.7억</span></div>
+      <div class="compare">전년비: <span class="positive">+17%</span> &mdash; 2013년 이후 최고 성장률</div>
+    </div>
+    <div class="num-card">
+      <div class="label">Non-GAAP 희석 EPS</div>
+      <div class="value">$3.31</div>
+      <div class="compare">컨센서스: $3.16 <span class="beat-tag">BEAT +$0.15</span></div>
+      <div class="compare">전년비: <span class="positive">+20%</span></div>
+    </div>
+    <div class="num-card">
+      <div class="label">GAAP 순이익</div>
+      <div class="value">$60.0억</div>
+      <div class="compare">GAAP EPS: $3.14 <span class="beat-tag">YoY +36%</span></div>
+      <div class="compare">영업이익: $72.3억 (마진 <span class="positive">64.6%</span>)</div>
+    </div>
+  </div>
+
+  <h3>매출 구성 (Revenue Breakdown)</h3>
+  <table>
+    <thead><tr><th>수익원</th><th>Q2 FY2026</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>서비스 수익 (Service Revenue)</strong><br><span style="font-size:11px;color:var(--text-muted)">카드 발급사에게 청구. 이전 분기 결제볼륨 기반</span></td>
+        <td class="mono">$50.0억</td>
+        <td class="mono positive">+13%</td>
+        <td><span class="kw-tag bullish">STEADY</span></td>
+      </tr>
+      <tr>
+        <td><strong>데이터처리 수익 (Data Processing)</strong><br><span style="font-size:11px;color:var(--text-muted)">거래 승인·청산·결제 처리 수수료. 건수 기반</span></td>
+        <td class="mono">$55.0억</td>
+        <td class="mono positive">+18%</td>
+        <td><span class="kw-tag bullish">ACCELERATING</span></td>
+      </tr>
+      <tr>
+        <td><strong>국제거래 수익 (International Transaction)</strong><br><span style="font-size:11px;color:var(--text-muted)">교차국경 결제 처리 + 환전 수수료</span></td>
+        <td class="mono">$36.0억</td>
+        <td class="mono positive">+10%</td>
+        <td><span class="kw-tag neutral-tag">STABLE</span></td>
+      </tr>
+      <tr>
+        <td><strong>부가서비스 (Value-Added Services)</strong><br><span style="font-size:11px;color:var(--text-muted)">리스크·데이터 분석·토큰화·컨설팅. 전략적 성장 엔진</span></td>
+        <td class="mono">$33.0억</td>
+        <td class="mono positive">+27%</td>
+        <td><span class="kw-tag bullish">BREAKOUT</span></td>
+      </tr>
+      <tr>
+        <td><strong>기타 수익 (Other Revenue)</strong></td>
+        <td class="mono">$13.0억</td>
+        <td class="mono positive">+41%</td>
+        <td><span class="kw-tag bullish">STRONG</span></td>
+      </tr>
+      <tr style="background:var(--surface2);">
+        <td><strong>클라이언트 인센티브 (차감)</strong><br><span style="font-size:11px;color:var(--text-muted)">카드 발급사·가맹점 리베이트. 예상보다 낮게 나옴</span></td>
+        <td class="mono negative">차감</td>
+        <td class="mono positive">예상 하회 (호재)</td>
+        <td><span class="kw-tag bullish">UPSIDE DRIVER</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>매출 구조 이해:</strong> Visa의 총매출(Gross Revenue)에서 클라이언트 인센티브(발급사·가맹점 리베이트)를 차감한 것이 순매출(Net Revenue). 인센티브가 예상보다 낮아 순매출이 컨센서스를 상회했다. VAS는 이제 전체 순매출의 30%를 차지하며 25%+ 상수달러 성장 중.
+  </div>
+
+  <h3>자본 환원</h3>
+  <div class="numbers-grid" style="grid-template-columns:1fr 1fr 1fr;">
+    <div class="num-card">
+      <div class="label">신규 자사주 매입 프로그램</div>
+      <div class="value" style="color:var(--gold);">$200억</div>
+      <div class="compare">이사회 신규 승인 (분기 중 역대 최고)</div>
+    </div>
+    <div class="num-card">
+      <div class="label">분기 총 주주환원</div>
+      <div class="value">$92.0억</div>
+      <div class="compare">자사주 $79.0억 + 배당 $13.0억</div>
+    </div>
+    <div class="num-card">
+      <div class="label">자사주 매입 평균가</div>
+      <div class="value">$320.66</div>
+      <div class="compare">약 2,500만 주 매입</div>
+    </div>
+  </div>
+
+  <div class="next-q">
+    <h3>FY2026 전체 연도 가이던스 (상향)</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item">
+        <div class="nq-label">순매출 성장 (상수달러)</div>
+        <div class="nq-value">低두자릿~低십대</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">종전: 高한자릿~低두자릿</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">Non-GAAP EPS 성장</div>
+        <div class="nq-value">低십대%</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">종전: 中高한자릿</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">잔여 매입 여력</div>
+        <div class="nq-value">$330억</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">기존 + 신규 $200억 합산</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>결제 네트워크를 읽는 숫자들</h2>
+
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 네트워크 심장박동</span>
+    <span class="tier-desc">볼륨이 멈추면 모든 수익이 멈춘다</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q2 FY2026</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>결제 볼륨 (Payments Volume)</strong><br><span style="font-size:11px;color:var(--text-muted)">비자 카드로 소비된 총금액. 서비스 수익의 원천</span></td>
+        <td class="mono positive" style="font-size:18px;font-weight:700;">$3.7조</td>
+        <td class="mono positive" style="font-weight:700;">+9% (상수달러)</td>
+        <td>소비자 지출 건강도의 직접 지표. 경기침체 시 즉각 반영됨</td>
+      </tr>
+      <tr>
+        <td><strong>교차국경 볼륨 (Cross-Border Volume)</strong><br><span style="font-size:11px;color:var(--text-muted)">국제여행·이커머스 국경간 결제. 마진이 가장 높은 수익원</span></td>
+        <td class="mono positive" style="font-size:18px;font-weight:700;">+12%</td>
+        <td class="mono">(유럽 역내 제외: +11%)</td>
+        <td>여행 회복세의 선행지표. 국내 결제 대비 2~3배 수익률. Visa 수익성의 핵심 레버</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>왜 이 두 개가 가장 중요한가:</strong> 결제볼륨은 서비스 수익(이전 분기 기반)을, 처리건수는 데이터처리 수익을, 교차국경은 국제거래 수익을 직접 결정한다. 볼륨 9% + 교차국경 12% 성장이 이번 분기 17% 매출 성장의 뼈대다.
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">네트워크 건강 &mdash; 인프라 스케일</span>
+    <span class="tier-desc">처리 능력이 곧 해자</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q2 FY2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>처리 거래 건수 (Processed Transactions)</strong></td>
+        <td class="mono positive">661억 건</td>
+        <td class="mono positive">+9%</td>
+        <td>데이터처리 수익 직결. 분기 66.1B = 일평균 7.3억 건 처리</td>
+      </tr>
+      <tr>
+        <td><strong>총 네트워크 거래</strong></td>
+        <td class="mono">836억 건</td>
+        <td class="mono positive">+9%</td>
+        <td>처리 건수 + ATM/직불/기타. 네트워크 전체 활동량</td>
+      </tr>
+      <tr>
+        <td><strong>토큰화 자격증명 (Tokenized Credentials)</strong></td>
+        <td class="mono positive">50억+</td>
+        <td class="mono">&mdash;</td>
+        <td>200개국·14,500개 금융기관. 에이전틱 커머스 시대의 보안 인프라. 2021년 이후 5배 이상 증가</td>
+      </tr>
+      <tr>
+        <td><strong>총 자격증명 (Total Credentials)</strong></td>
+        <td class="mono">45억+</td>
+        <td class="mono positive">성장 지속</td>
+        <td>실물+디지털 카드 총계. 네트워크 참여자 규모</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>토큰화가 왜 Tier 2인가:</strong> 토큰은 카드번호 대신 일회성 디지털 식별자를 쓰는 기술. AI 에이전트가 대신 결제하는 "에이전틱 커머스" 시대에 Visa의 가장 핵심 인프라가 된다. McInerney는 이번 콜에서 50억 자격증명을 "에이전틱 커머스의 온-램프"라고 정의했다.
+  </div>
+
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">수익성 지표 &mdash; 비자의 경제학</span>
+    <span class="tier-desc">네트워크 사업의 수익 구조</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q2 FY2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>영업이익률 (Operating Margin)</strong></td>
+        <td class="mono positive" style="font-weight:700;">64.6%</td>
+        <td class="mono positive">+YoY</td>
+        <td>순매출의 64.6%가 영업이익. 네트워크 사업의 규모의 경제. S&P500 평균의 5배 수준</td>
+      </tr>
+      <tr>
+        <td><strong>GAAP 순이익률</strong></td>
+        <td class="mono positive">53.4%</td>
+        <td class="mono positive">매출 +17% vs 순이익 +32%</td>
+        <td>매출보다 이익이 더 빠르게 성장 = 레버리지 효과. 비용 통제 성공</td>
+      </tr>
+      <tr>
+        <td><strong>Non-GAAP 운영비</strong></td>
+        <td class="mono negative">+17% YoY</td>
+        <td class="mono">&mdash;</td>
+        <td>인건비·마케팅 증가. FIFA 월드컵 2026 대비 마케팅 투자 선행</td>
+      </tr>
+      <tr>
+        <td><strong>GAAP 운영비</strong></td>
+        <td class="mono positive">-4% YoY</td>
+        <td class="mono">&mdash;</td>
+        <td>소송 충당금 감소 효과. 일회성 항목 제거 시 실질 비용은 증가 중</td>
+      </tr>
+      <tr>
+        <td><strong>VAS 비중</strong></td>
+        <td class="mono positive">30%</td>
+        <td class="mono positive">성장 중</td>
+        <td>부가서비스가 이제 총매출의 30%. 고마진 사업으로 믹스 개선 중</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">성장 동력 &mdash; 미래 수익원</span>
+    <span class="tier-desc">기존 결제 볼륨을 넘어서는 새로운 흐름</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q2 FY2026</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>부가서비스 (VAS)</strong><br><span style="font-size:11px;color:var(--text-muted)">리스크 솔루션·데이터 분석·토큰화·오픈뱅킹</span></td>
+        <td class="mono positive">$33억 (+27%)</td>
+        <td>순매출의 30% 도달. 고마진·경쟁사 진입 장벽 높음. 네트워크 락인 효과</td>
+      </tr>
+      <tr>
+        <td><strong>Visa Direct (실시간 P2P 송금)</strong></td>
+        <td class="mono positive">지속 성장</td>
+        <td>Venmo·Zelle 대안. B2B, 정부 보조금, 보험금 지급 등 새로운 결제 흐름 공략</td>
+      </tr>
+      <tr>
+        <td><strong>Pismo (코어뱅킹 클라우드)</strong></td>
+        <td class="mono positive">15개국 신규 진출</td>
+        <td>Wells Fargo 코어뱅킹 이전 계약 체결. 인수 이후 지속 확장. 발급사 락인 전략</td>
+      </tr>
+      <tr>
+        <td><strong>에이전틱 커머스 (신규)</strong></td>
+        <td class="mono gold-text">Intelligent Commerce Connect 출시</td>
+        <td>AI 에이전트 결제 인프라. Visa CLI(커맨드라인 결제) PoC 공개. 마이크로트랜잭션 신시장</td>
+      </tr>
+      <tr>
+        <td><strong>FIFA 월드컵 2026</strong></td>
+        <td class="mono gold-text">공식 파트너</td>
+        <td>여름 2026 메가이벤트. 교차국경 결제 촉진 + 브랜드 노출. Q3~Q4 수혜 예상</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>에이전틱 커머스란:</strong> 사람이 아닌 AI 에이전트가 자율적으로 결제를 수행하는 새로운 상거래 형태. McInerney는 "에이전트가 구매를 여러 건으로 쪼개 처리하고, 데이터와 리소스 소비를 건당 결제하는 마이크로트랜잭션 신범주가 생긴다"고 설명. 이커머스·모바일커머스 이후 세 번째 물결로 포지셔닝.
+  </div>
+
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">리스크 레이더 &mdash; 경계 신호</span>
+    <span class="tier-desc">이것이 무너지면 멀티플이 압축된다</span>
+  </div>
+  <table>
+    <thead><tr><th>리스크 요인</th><th>현황</th><th>경영진 대응</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>관세·인플레이션 충격</strong><br><span style="font-size:11px;color:var(--text-muted)">소비자 지출 위축 우려</span></td>
+        <td class="mono neutral-tag">모니터링 중</td>
+        <td>"관세 가격 반영은 대부분 이루어짐. 다만 기대인플레이션 자극 리스크 잔존"</td>
+      </tr>
+      <tr>
+        <td><strong>규제 리스크</strong><br><span style="font-size:11px;color:var(--text-muted)">DOJ 소송·인터체인지 수수료 규제</span></td>
+        <td class="mono negative">지속</td>
+        <td>공식 논평 최소화. 소송 충당금 Q2 GAAP 비용에 반영.</td>
+      </tr>
+      <tr>
+        <td><strong>Mastercard 경쟁</strong></td>
+        <td class="mono neutral-tag">양사 동반 성장</td>
+        <td>Mastercard도 동일 날 강한 실적. 파이 자체가 커지는 국면 — 경쟁보다 시장 확대</td>
+      </tr>
+      <tr>
+        <td><strong>클라이언트 인센티브 상승</strong><br><span style="font-size:11px;color:var(--text-muted)">대형 발급사 협상력 증가</span></td>
+        <td class="mono positive">Q2 예상 하회 (긍정)</td>
+        <td>장기적으로는 대형 은행 협상력 강화 시 인센티브 증가 가능성. 이번엔 상방 서프라이즈</td>
+      </tr>
+      <tr>
+        <td><strong>에이전틱 커머스 사기·분쟁</strong><br><span style="font-size:11px;color:var(--text-muted)">AI 에이전트 무단 결제 책임 소재</span></td>
+        <td class="mono negative">미성숙</td>
+        <td>"Visa 카드홀더 사기 보호 원칙 유지. 규칙은 유스케이스 성숙에 따라 진화"</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>주가 YTD -11%의 원인:</strong> 실적 자체는 우수하나 관세 불확실성·소비 위축 우려로 연초 대비 하락. Citi·UBS·Truist 모두 Buy 유지하되 목표주가를 하향. 실적은 좋았고 가이던스도 올렸으나, 2H 거시 불확실성이 멀티플을 압박 중.
+  </div>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter">
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:92%;background:var(--accent);"></div></div>
+      <div class="tone-score" style="color:var(--accent);">9.2<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:80%;background:var(--gold);"></div></div>
+      <div class="tone-score" style="color:var(--gold);">8.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 회의감</div>
+      <div class="tone-bar"><div class="fill" style="width:35%;background:var(--red);"></div></div>
+      <div class="tone-score" style="color:var(--yellow);">3.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">전망 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:85%;background:var(--blue);"></div></div>
+      <div class="tone-score" style="color:var(--blue);">8.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Ryan McInerney (CEO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 자신감 넘치는 "기술 기업 CEO" 포지셔닝. 결제 네트워크가 아닌 "커머스 오케스트레이터"로 재정의. 에이전틱 커머스를 새 성장 서사로 전면에 세움.
+  </p>
+
+  <div class="keywords">
+    <span class="kw-tag bullish">AGENTIC COMMERCE</span>
+    <span class="kw-tag bullish">PAYMENTS HYPERSCALER</span>
+    <span class="kw-tag bullish">INTELLIGENT COMMERCE CONNECT</span>
+    <span class="kw-tag bullish">TOKENIZATION</span>
+    <span class="kw-tag gold-tag">WORLD CUP 2026</span>
+    <span class="kw-tag neutral-tag">SECURITY & TRUST</span>
+    <span class="kw-tag neutral-tag">PISMO</span>
+    <span class="kw-tag bearish">TARIFF RISK</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Ryan McInerney &mdash; 에이전틱 커머스 선언</div>
+    <blockquote>"Like e-commerce and mobile commerce before it, agentic commerce will accelerate the digitization of commerce around the world, and Visa will benefit."<br><br>"Agents will create significantly more transactions by intelligently splitting purchases across multiple transactions, and in some use cases, agents will pay for their own data and resource consumption transaction by transaction, creating an entirely new category of commerce with microtransactions."</blockquote>
+    <div class="analysis">이커머스 → 모바일커머스 → 에이전틱커머스 3단 진화 프레임을 내세워 Visa를 각 물결의 수혜자로 포지셔닝. 핵심 논리는 <strong>"거래 건수 폭증"</strong>: AI 에이전트가 구매를 쪼개고, 자기 리소스를 건당 결제하면 처리 건수가 기하급수적으로 늘어난다는 것. Visa의 데이터처리 수익은 건당 과금이므로 직접 수혜.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Ryan McInerney &mdash; Intelligent Commerce Connect + Visa CLI</div>
+    <blockquote>"We recently launched Intelligent Commerce Connect — an on-ramp to agentic commerce... We also introduced Visa CLI as a proof of concept for payments via command-line tools. Claude Code and other agentic coding assistants will allow anyone to become a developer, making it easy to work in simple command-style tools."</blockquote>
+    <div class="analysis">Claude Code를 직접 언급한 것이 이채롭다. Visa CLI는 AI 코딩 에이전트가 API처럼 Visa 결제를 호출할 수 있는 개념. "결제 인프라의 API화"가 진행되면 Visa는 단순 카드 네트워크를 넘어 <strong>AI 경제의 결제 레이어</strong>로 진화한다. 아직 PoC 단계이지만 방향성이 명확.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Ryan McInerney &mdash; 네트워크 해자 강조</div>
+    <blockquote>"Our network, security, and trust position Visa uniquely for agentic commerce... If a Visa cardholder experiences fraud, they're gonna be protected."</blockquote>
+    <div class="analysis">"security and trust"는 Visa가 새로운 경쟁자(핀테크·블록체인)에 대항해 내세우는 핵심 해자 논리. AI 에이전트 결제에서 사기 책임 소재가 불명확한 현재 시점에, Visa의 기존 분쟁 해결 인프라가 진입 장벽이 된다는 주장. 설득력 있지만 검증이 필요한 명제.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Ryan McInerney &mdash; 최강 실적 강조</div>
+    <blockquote>"This is the strongest net revenue growth since 2013, when you exclude the post-pandemic recovery and the Visa Europe acquisition."</blockquote>
+    <div class="analysis">13년 만의 최고 매출 성장. 단서("팬데믹 회복·Visa Europe 인수 제외")를 붙였지만, 그 단서 자체가 정당하다. 구조적 성장 모멘텀을 주장하는 근거로 충분. 관세 불확실성에도 소비 지출이 견고하다는 실증적 증거.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Ryan McInerney &mdash; FIFA 월드컵 2026</div>
+    <blockquote>"As the official payment technology partner of FIFA World Cup 2026, we're ready to welcome the world."</blockquote>
+    <div class="analysis">월드컵은 Visa에게 교차국경 결제의 최대 이벤트. 미국 개최(2026년 여름)이므로 FY2026 Q3~Q4에 직접 수혜. 2022년 카타르 월드컵에서도 Visa는 교차국경 볼륨 급증을 경험했다. 이번 콜에서는 미래 카탈리스트로 제시.</div>
+  </div>
+
+  <h3>Chris Suh (CFO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 침착한 숫자 관리자. 서프라이즈 요인을 투명하게 설명하고, 가이던스 상향의 근거를 구체적으로 제시. 리스크 요인도 솔직하게 언급.
+  </p>
+
+  <div class="quote-block cfo">
+    <div class="speaker">Chris Suh &mdash; 매출 서프라이즈 분해</div>
+    <blockquote>"Our outperformance was largely driven by three factors: higher than expected volatility, stronger than expected value-added services revenue, and lower than expected incentives."</blockquote>
+    <div class="analysis">서프라이즈 3요인을 명확히 분리한 것이 인상적. <strong>변동성 증가</strong>(트럼프 관세발 시장 불확실성 → 외환·선물 거래 폭증 → 데이터처리 수익 증가), <strong>VAS 27% 성장</strong>, <strong>인센티브 하회</strong>. 특히 변동성이 역설적으로 Visa에 수혜를 준 구조 — "불확실성이 클수록 Visa가 번다"는 논리.</div>
+  </div>
+
+  <div class="quote-block cfo">
+    <div class="speaker">Chris Suh &mdash; 가이던스 상향 근거</div>
+    <blockquote>"We are raising full-year guidance to reflect our strong year-to-date performance and current assumptions on drivers, incentives, volatility, and expected higher value-added services revenue growth."</blockquote>
+    <div class="analysis">가이던스를 올리면서 "변동성"을 가정에 포함시킨 것이 핵심. 즉, 관세·지정학 불확실성이 유지된다면 Visa의 수익이 더 올라간다는 비전통적 구조. 단, 이것이 금융시장 변동성 기반이어서 실물 경기 침체 시에는 역방향.</div>
+  </div>
+
+  <div class="quote-block cfo">
+    <div class="speaker">Chris Suh &mdash; 관세 리스크 언급</div>
+    <blockquote>"We suspect the bulk of the tariff impact to prices is now behind us, but there is a risk that tariffs could lift inflation expectations, and that could negatively impact consumer spending over time."</blockquote>
+    <div class="analysis">경영진이 리스크를 적극 언급한 것 자체가 긍정적 신호 — 숨기지 않는다는 의미. "이미 반영됐다"는 주장이지만 "could"라는 조건부 언어 사용. 소비 침체 시나리오를 배제하지 않으면서도 현재 데이터는 건강하다는 균형적 메시지.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 실적 자체에 대한 회의 없음. 관세·소비 둔화·에이전틱 커머스 리스크에 집중. 대체로 우호적 분위기.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; 에이전틱 커머스 수익화 시점 질문</div>
+    <blockquote>"When do you expect agentic commerce to be meaningful to revenue? Is this a 2027 story or longer?"</blockquote>
+    <div class="analysis">에이전틱 커머스는 매력적이지만 "언제 숫자에 보이냐"가 관건. McInerney는 구체적 시점을 명시하지 않았다 — 아직 기반 구축 단계. 2026년은 씨드 머니, 2027~28년이 수확기 구조로 추정.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; 소비자 지출 트렌드 질문</div>
+    <blockquote>"Are you seeing any signs of consumer spending weakness going into April given tariff headlines?"</blockquote>
+    <div class="analysis">관세 공포감이 소비에 선반영됐는지 확인하는 질문. Suh의 답변은 "3월까지 데이터는 건강하다. 4월은 보고 있다"는 취지 — 아직 데이터가 없는 구간. Q3 결과가 진짜 테스트다.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">시장 반응</div>
+    <blockquote>장후 +4.1~5.2% 급등. Mastercard도 동반 상승. "결제 네트워크는 경기 방어주이자 성장주"라는 재인식.</blockquote>
+    <div class="analysis">연초 대비 -11% 눌려있던 주가가 실적 발표 후 급반등. $200억 자사주 매입 프로그램 발표가 추가 촉매. 현재 컨센서스 목표주가 중앙값 $400.60 — 37명 Buy, 3명 Hold, 0명 Sell. 가장 부정적인 애널리스트도 Hold다.</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr>
+        <td style="width:160px;font-weight:600;color:var(--accent);">Ryan McInerney</td>
+        <td>"에이전틱 커머스는 이커머스·모바일커머스에 이은 세 번째 물결. 우리의 50억 토큰이 그 고속도로다"</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--gold);">Chris Suh</td>
+        <td>"변동성·VAS·인센티브 하회 세 가지가 서프라이즈 원천. 연간 가이던스 올렸다. 소비는 지금까지 건강하다"</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--yellow);">애널리스트</td>
+        <td>"13년 만의 최고 성장, 인정. 관세 이후 소비 트렌드가 Q3의 진짜 시험대 (강한 Buy 유지)"</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--blue);">주가 반응</td>
+        <td>장후 +4.1~5.2% 급등. Mastercard 동반 상승. $200억 자사주 매입이 촉매. 연초 대비 -11% → 회복 궤도 진입.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--red);">핵심 리스크</td>
+        <td>관세발 소비 침체 시나리오 / 에이전틱 커머스 사기 책임 미정립 / 인센티브 증가 가능성 / DOJ 소송</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="background:var(--surface2);border:1px solid #6b7cff33;border-radius:8px;padding:20px;margin-top:24px;">
+    <div style="font-size:12px;color:var(--accent);font-family:'IBM Plex Mono',monospace;letter-spacing:2px;margin-bottom:12px;">ANALYST TAKE</div>
+    <p style="font-size:15px;line-height:1.8;color:var(--text-dim);">
+      Visa는 이번 분기에 <strong style="color:var(--text);">세 가지 동시 서프라이즈</strong>(볼륨 성장, VAS 가속, 인센티브 하회)를 기록하며 컨센서스를 크게 상회했다. 더 중요한 것은 <strong style="color:var(--text);">서사(narrative)의 전환</strong>: "카드 네트워크"에서 "커머스 오케스트레이터"로, "트랜잭션 처리자"에서 "AI 경제의 결제 레이어"로. Intelligent Commerce Connect와 Visa CLI는 아직 PoC이지만, 방향성이 설득력 있다.
+    </p>
+    <p style="font-size:15px;line-height:1.8;color:var(--text-dim);margin-top:12px;">
+      단기 리스크는 <strong style="color:var(--text);">Q3 소비 데이터</strong>다. 관세 영향이 실물 소비로 전이되는지 2026년 7월 실적에서 판가름난다. 지금까지는 "탄력적(resilient)" 소비였지만, 장기 관세가 유지될 경우 교차국경 볼륨 둔화가 국제거래 수익에 가장 먼저 반영될 것이다.
+    </p>
+  </div>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid">
+    <a class="link-card" href="https://investor.visa.com/news/news-details/2026/Visa-Fiscal-Second-Quarter-2026-Financial-Results/default.aspx" target="_blank">
+      <div class="link-icon">&#x1F4C4;</div>
+      <div class="link-text"><div class="link-title">IR 공식 보도자료</div><div class="link-url">investor.visa.com</div></div>
+    </a>
+    <a class="link-card" href="https://s1.q4cdn.com/050606653/files/doc_financials/2026/q2/Q2-2026-Earnings-Release_vF.pdf" target="_blank">
+      <div class="link-icon">&#x1F4CA;</div>
+      <div class="link-text"><div class="link-title">Q2 FY2026 실적 발표 (PDF)</div><div class="link-url">q4cdn.com (Visa IR)</div></div>
+    </a>
+    <a class="link-card" href="https://s1.q4cdn.com/050606653/files/doc_financials/2026/q2/Visa-Inc-Second-Quarter-2026-Financial-Results-Presentation.pdf" target="_blank">
+      <div class="link-icon">&#x1F4C8;</div>
+      <div class="link-text"><div class="link-title">실적 발표 프레젠테이션 (PDF)</div><div class="link-url">q4cdn.com (Visa IR)</div></div>
+    </a>
+    <a class="link-card" href="https://s1.q4cdn.com/050606653/files/doc_financials/2026/q2/Q2FY26-Visa-Operational-Performance-Data.pdf" target="_blank">
+      <div class="link-icon">&#x1F4CB;</div>
+      <div class="link-text"><div class="link-title">운영 퍼포먼스 데이터 (PDF)</div><div class="link-url">q4cdn.com (Visa IR)</div></div>
+    </a>
+    <a class="link-card" href="https://www.benzinga.com/insights/news/26/04/52116008/visa-q2-2026-earnings-call-transcript" target="_blank">
+      <div class="link-icon">&#x1F3AC;</div>
+      <div class="link-text"><div class="link-title">컨퍼런스 콜 트랜스크립트</div><div class="link-url">benzinga.com</div></div>
+    </a>
+    <a class="link-card" href="https://news.alphastreet.com/visa-inc-v-q2-2026-earnings-call-transcript/" target="_blank">
+      <div class="link-icon">&#x1F50E;</div>
+      <div class="link-text"><div class="link-title">컨퍼런스 콜 트랜스크립트</div><div class="link-url">alphastreet.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.investing.com/news/transcripts/earnings-call-transcript-visa-beats-q2-2026-forecasts-stock-rises-93CH-4643296" target="_blank">
+      <div class="link-icon">&#x1F4F0;</div>
+      <div class="link-text"><div class="link-title">Investing.com 트랜스크립트 요약</div><div class="link-url">investing.com</div></div>
+    </a>
+    <a class="link-card" href="https://finance.biggo.com/news/US_V_2026-04-28" target="_blank">
+      <div class="link-icon">&#x1F4AC;</div>
+      <div class="link-text"><div class="link-title">BigGo Finance 콜 하이라이트</div><div class="link-url">finance.biggo.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.pymnts.com/visa/2026/visa-earnings-spotlight-agentic-commerce-as-next-growth-engine/" target="_blank">
+      <div class="link-icon">&#x1F916;</div>
+      <div class="link-text"><div class="link-title">PYMNTS — 에이전틱 커머스 심층분석</div><div class="link-url">pymnts.com</div></div>
+    </a>
+    <a class="link-card" href="https://seekingalpha.com/article/4895366-visa-inc-2026-q2-results-earnings-call-presentation" target="_blank">
+      <div class="link-icon">&#x1F4C1;</div>
+      <div class="link-text"><div class="link-title">Seeking Alpha 커버리지</div><div class="link-url">seekingalpha.com</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-04-29 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>

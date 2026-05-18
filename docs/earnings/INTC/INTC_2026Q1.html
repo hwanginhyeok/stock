@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INTC | 인텔 Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #4da6ff; --accent-dim: #4da6ff33;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#4da6ff15,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #4da6ff44; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  /* CARDS */
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:#4da6ff; }
+  .negative { color:var(--red); }
+
+  /* KPI TIER */
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#4da6ff22; color:#4da6ff; }
+  .tier-badge.t2 { background:#00d63222; color:#00d632; }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  /* QUOTE */
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  /* TONE METER */
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  /* NEXT Q */
+  .next-q { background:linear-gradient(135deg,#4da6ff10,var(--surface)); border:1px solid #4da6ff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--blue); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--blue); }
+
+  /* LINKS */
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  /* TAGS */
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  /* KPI NOTE */
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+  /* CONTEXT BOX */
+  .context-box { background:linear-gradient(135deg,#4da6ff08,var(--surface)); border:1px solid #4da6ff22; border-radius:8px; padding:20px 24px; margin:24px 0; }
+  .context-box .ctx-title { font-size:12px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NASDAQ: INTC</div>
+    <h1>Intel Corporation</h1>
+    <div class="company-kr">인텔 코퍼레이션</div>
+    <div class="subtitle">Q1 FY2026 실적 딥다이브 &mdash; 2026.04.23 장후 발표 / 6연속 어닝 비트</div>
+    <div class="meta-row">
+      <span>발표일: 2026-04-23</span>
+      <span>|</span>
+      <span>섹터: 반도체 / 파운드리</span>
+      <span>|</span>
+      <span>시가총액: ~$3,600억 (발표 후)</span>
+      <span>|</span>
+      <span>CEO: Lip-Bu Tan (취임 13개월)</span>
+    </div>
+    <div class="verdict beat">BEAT &mdash; 매출 +10.2% vs 컨센서스 / EPS $0.29 (컨센 $0.00~$0.01 압도)</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">매출 (Non-GAAP)</div>
+      <div class="value">$13.6B</div>
+      <div class="compare">컨센서스: $12.32B <span class="beat-tag">BEAT +10.2%</span></div>
+      <div class="compare">전년비: +7% YoY</div>
+    </div>
+    <div class="num-card">
+      <div class="label">조정 EPS (Non-GAAP)</div>
+      <div class="value">$0.29</div>
+      <div class="compare">컨센서스: $0.00~$0.01 <span class="beat-tag">BEAT 대폭</span></div>
+      <div class="compare">GAAP EPS: -$0.73 (구조조정비 $4.1B 포함)</div>
+    </div>
+    <div class="num-card">
+      <div class="label">Non-GAAP 총이익률</div>
+      <div class="value">41%</div>
+      <div class="compare">가이던스 대비: <span class="beat-tag">+650bp 초과</span></div>
+      <div class="compare">3분기 연속 순차 확대 (2019년 이후 최초)</div>
+    </div>
+  </div>
+
+  <div class="context-box">
+    <div class="ctx-title">왜 GAAP 순손실 $3.7B인데 주가가 +24%인가</div>
+    <p style="font-size:13px;color:var(--text-dim);line-height:1.8;">
+      GAAP 순손실 $37억은 Mobileye 지분 관련 영업권 손상($4.1B 구조조정·일회성 비용) 때문. 시장이 보는 건 <strong style="color:var(--accent);">Non-GAAP 영업력</strong>이다. 매출 $10.2% 비트, EPS 대폭 비트, 총이익률 가이던스를 650bp 초과, 그리고 Q2 가이던스가 컨센 대비 +6.3% 높음. 이 4개가 동시에 좋으면 GAAP 손실은 노이즈로 처리된다.
+    </p>
+  </div>
+
+  <h3>매출 분해 (세그먼트별)</h3>
+  <table>
+    <thead><tr><th>사업부</th><th>Q1 2026</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td><strong>DCAI</strong> (데이터센터 &amp; AI)</td><td class="mono positive">$5.05B</td><td class="mono positive">+22%</td><td><span class="kw-tag bullish">ACCELERATION</span></td></tr>
+      <tr><td><strong>CCG</strong> (클라이언트 컴퓨팅)</td><td class="mono">$7.70B</td><td class="mono positive">+1%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+      <tr><td><strong>Intel Foundry</strong> (파운드리)</td><td class="mono positive">$5.40B</td><td class="mono positive">+16%</td><td><span class="kw-tag bullish">RAMPING</span></td></tr>
+      <tr><td><strong>All Other</strong> (Mobileye·IFS·기타)</td><td class="mono">$628M</td><td class="mono negative">-33%</td><td><span class="kw-tag bearish">ALTERA 분사 영향</span></td></tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>All Other -33% 맥락:</strong> 2025년 9월 12일 Altera(FPGA 사업부)를 분사·매각했기 때문. 베이스라인에서 Altera 매출이 빠진 것. Mobileye는 자율주행 매출 감소로 별도 압박. 이 두 가지를 제외하면 실질 사업 성장은 숫자 이상이다.
+  </div>
+
+  <div class="next-q" style="margin-top:24px;">
+    <h3>Q2 2026 가이던스</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">매출 가이던스</div><div class="nq-value">$13.8B~$14.8B</div></div>
+      <div class="next-q-item"><div class="nq-label">Non-GAAP EPS</div><div class="nq-value">$0.20</div></div>
+      <div class="next-q-item"><div class="nq-label">컨센서스 대비</div><div class="nq-value" style="font-size:16px;">매출 +6.3% / EPS vs $0.09</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>반도체 기업을 읽는 숫자들</h2>
+
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 턴어라운드의 척도</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>변화</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>DCAI 매출 성장률</strong></td>
+        <td class="mono positive" style="font-size:18px;font-weight:700;">+22% YoY</td>
+        <td class="mono positive">$5.05B</td>
+        <td>AI 수요가 CPU로 회귀하는 신호. GPU 중심에서 CPU+GPU 혼합 인프라로 이동 중</td>
+      </tr>
+      <tr>
+        <td><strong>AI 매출 비중</strong></td>
+        <td class="mono positive" style="font-size:18px;font-weight:700;">60%</td>
+        <td class="mono positive">+40% YoY 성장</td>
+        <td>전사 매출의 60%가 AI 관련 사업에서 발생. 1년 전과 질적으로 다른 회사</td>
+      </tr>
+      <tr>
+        <td><strong>어닝 비트 연속</strong></td>
+        <td class="mono positive" style="font-size:18px;font-weight:700;">6분기 연속</td>
+        <td class="mono">&mdash;</td>
+        <td>Lip-Bu Tan 취임(2025 Q1) 이후 단 한 번도 미스 없음. 실행력 신뢰도 회복의 핵심</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>왜 AI 비중이 60%가 중요한가:</strong> 1년 전 인텔은 "AI 낙오자" 프레임으로 불렸다. Gaudi AI 가속기 실패, NVIDIA에 밀린 데이터센터. 그런데 Q1 2026에 AI 관련 매출 비중이 60%라는 건 비즈니스 믹스 자체가 바뀐 것. 이게 주가가 +24%가 아니라 +90%(4월 한 달)인 이유다.
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">공정 경쟁력 &mdash; 파운드리의 생존 조건</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>상태</th><th>세부</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Intel 18A 공정</strong></td>
+        <td><span class="kw-tag bullish">HVM 진입</span></td>
+        <td class="mono">Q1 2026 고성능 양산 시작</td>
+        <td>Panther Lake 소비자 CPU가 OEM 파트너에 선행 생산 출하. 18A 수율 예상 대비 빠른 개선</td>
+      </tr>
+      <tr>
+        <td><strong>파운드리 고객 확보</strong></td>
+        <td><span class="kw-tag bullish">Google 장기계약</span></td>
+        <td class="mono">Xeon CPU + ASIC 3~5년 계약</td>
+        <td>Google이 서버 CPU와 ASIC 물량을 인텔에 발주. TSMC 독점 균열의 시작점</td>
+      </tr>
+      <tr>
+        <td><strong>NVIDIA DGX 선정</strong></td>
+        <td><span class="kw-tag bullish">공식 채택</span></td>
+        <td class="mono">Xeon 6 = DGX Rubin NVL8 호스트 CPU</td>
+        <td>AI 인프라의 꽃인 NVIDIA DGX 시스템에 인텔 CPU가 탑재. "CPU+GPU 공존" 입증</td>
+      </tr>
+      <tr>
+        <td><strong>CPU:GPU 서버 비율</strong></td>
+        <td><span class="kw-tag bullish">1:4로 회복 중</span></td>
+        <td class="mono">이전: 1:8 / 현재: 1:4 / 목표: 1:1~</td>
+        <td>AI 서버에서 GPU 비중이 압도적이었으나 추론(inference) 단계가 커지며 CPU 수요 복귀</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>CPU:GPU 비율 전환의 의미:</strong> 2023~2024년 AI 인프라는 GPU 집중 투자. 1 서버에 GPU 8장, CPU는 호스트 1개. 그런데 AI가 학습(training)에서 추론(inference)·에이전틱(agentic) 단계로 이동하면서 CPU 처리 부하가 늘고 있다. 1:4가 1:1이 되면 인텔 데이터센터 매출은 단순 계산으로 2배 가능성.
+  </div>
+
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">재무 건전성 &mdash; 턴어라운드 비용과 현금</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Non-GAAP 총이익률</strong></td><td class="mono positive">41% (+650bp vs 가이던스)</td><td>3분기 연속 순차 확대. 2019년 이후 처음. 파운드리 수율 개선 효과</td></tr>
+      <tr><td><strong>영업 현금 흐름</strong></td><td class="mono">$1.1B</td><td>양전환. 신규 공장 건설로 Gross CapEx $5B 소모 → 조정 FCF -$2B</td></tr>
+      <tr><td><strong>Gross CapEx</strong></td><td class="mono negative">$5.0B</td><td>공장 증설 비용. 2026년 전체 CapEx는 전년 수준 유지, 장비 투자 +25% YoY</td></tr>
+      <tr><td><strong>GAAP 순손실</strong></td><td class="mono negative">-$3.7B (-$0.73/주)</td><td>Mobileye 영업권 손상 + 구조조정 비용 $4.1B 포함. 일회성 성격</td></tr>
+      <tr><td><strong>R&amp;D 비율</strong></td><td class="mono">OpEx 2026 목표 $16B 이상</td><td>인플레이션·변동 보상 증가·전략적 투자로 당초 목표 상회 예고</td></tr>
+    </tbody>
+  </table>
+
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">전략 자산 &mdash; 미국 재건의 인텔</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>현황</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>CHIPS Act 보조금</strong></td>
+        <td><span class="kw-tag bullish">$7.86B 확정</span></td>
+        <td>미국 상무부 직접 지원. 오하이오·애리조나·오리건 공장 건설 자금</td>
+      </tr>
+      <tr>
+        <td><strong>아일랜드 팹 투자</strong></td>
+        <td class="mono">$14B 프로그램 진행 중</td>
+        <td>유럽 파운드리 거점. 지정학적 공급망 분산 전략의 핵심</td>
+      </tr>
+      <tr>
+        <td><strong>제품 로드맵</strong></td>
+        <td class="mono">Panther Lake → Diamond Rapids → Coral Rapids</td>
+        <td>18A 기반 제품이 연속 파이프라인. Lip-Bu Tan이 "실행의 해"로 선언</td>
+      </tr>
+      <tr>
+        <td><strong>Altera 분사 완료</strong></td>
+        <td><span class="kw-tag neutral-tag">2025.09 분사</span></td>
+        <td>FPGA 비핵심 사업 매각. 포트폴리오 집중화. 단기 매출 감소 감수</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>CHIPS Act의 전략적 의미:</strong> $78억 보조금은 단순 자금이 아니다. 미국 정부가 인텔을 "국가 반도체 인프라"로 지정한 것. TSMC가 미국 공장을 짓고 있지만 미국 기업이 미국 팹을 운영하는 건 다르다. 국방부 안보 칩, 정부 조달이 인텔 파운드리로 향할 수밖에 없는 구조.
+  </div>
+
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">리스크 &mdash; 아직 남은 과제들</span>
+  </div>
+  <table>
+    <thead><tr><th>리스크</th><th>현황</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Gaudi AI 가속기</strong></td>
+        <td><span class="kw-tag bearish">언급 최소화</span></td>
+        <td>NVIDIA H100/H200 대비 소프트웨어 생태계(CUDA) 열위. 컨콜에서 구체적 판매 수치 없음</td>
+      </tr>
+      <tr>
+        <td><strong>Mobileye</strong></td>
+        <td><span class="kw-tag bearish">자율주행 수요 약세</span></td>
+        <td>자율주행 시장 성장 지연. 영업권 손상으로 GAAP 손실 확대. 분리 가능성 대두</td>
+      </tr>
+      <tr>
+        <td><strong>AMD 데이터센터 경쟁</strong></td>
+        <td><span class="kw-tag neutral-tag">진행 중</span></td>
+        <td>EPYC 서버 CPU가 xeon 시장 점유율 지속 잠식. 다만 AI 추론 단계에서 CPU 성능이 재부각</td>
+      </tr>
+      <tr>
+        <td><strong>파운드리 외부 고객 규모</strong></td>
+        <td><span class="kw-tag bearish">아직 자사 물량 위주</span></td>
+        <td>파운드리 $5.4B 중 상당 부분이 자사 칩 생산. 진정한 외부 파운드리로 전환은 시간 필요</td>
+      </tr>
+      <tr>
+        <td><strong>메모리 비용 상승</strong></td>
+        <td><span class="kw-tag bearish">H2 2026 헤드윈드</span></td>
+        <td>CFO가 명시적으로 경고. 18A 램프업 중 메모리 입력 비용이 후반기 마진 압박 가능성</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter">
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:92%;background:var(--accent);"></div></div>
+      <div class="tone-score" style="color:var(--accent);">9.2<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:75%;background:var(--yellow);"></div></div>
+      <div class="tone-score" style="color:var(--yellow);">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 우호도</div>
+      <div class="tone-bar"><div class="fill" style="width:85%;background:#00d632;"></div></div>
+      <div class="tone-score" style="color:#00d632;">8.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">전망 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:88%;background:var(--purple);"></div></div>
+      <div class="tone-score" style="color:var(--purple);">8.8<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Lip-Bu Tan (CEO) &mdash; 턴어라운드 설계자</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 엔지니어 출신 CEO 특유의 담담한 자신감. 과장 없이 수치로 말하되, 전략의 방향성을 명확히 각인시키는 방식. 취임 13개월 만에 "생존 담론"에서 "성장 담론"으로 완전 전환.
+  </p>
+
+  <div class="keywords">
+    <span class="kw-tag bullish">YEAR OF EXECUTION</span>
+    <span class="kw-tag bullish">CPU RENAISSANCE</span>
+    <span class="kw-tag bullish">AGENTIC AI ERA</span>
+    <span class="kw-tag bullish">XPU STRATEGY</span>
+    <span class="kw-tag bullish">SIXTH STRAIGHT BEAT</span>
+    <span class="kw-tag neutral-tag">DISCIPLINED</span>
+    <span class="kw-tag neutral-tag">LASER FOCUSED</span>
+    <span class="kw-tag bearish">MEMORY HEADWIND H2</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Lip-Bu Tan &mdash; CPU 르네상스 선언</div>
+    <blockquote>"The CPU is reinserting itself as the indispensable foundation of the AI era. This isn't just our wishful thinking, it's what we hear from our customers."</blockquote>
+    <div class="analysis">
+      <strong>"reinserting itself"</strong> &mdash; 수동형 동사 선택이 절묘하다. "우리가 CPU를 다시 만들었다"가 아니라 "CPU가 스스로 AI의 중심으로 돌아왔다". 인텔이 만든 게 아니라 시장 구조가 바뀐 것이라는 객관화. <strong>"not just our wishful thinking"</strong> &mdash; 선제적으로 의심을 무력화하는 화법. 고객 목소리라는 근거를 덧붙여 주관적 희망이 아님을 강조.
+    </div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Lip-Bu Tan &mdash; 생존에서 성장으로</div>
+    <blockquote>"A year ago the conversation was about survival. Today it's about how quickly we can add capacity."</blockquote>
+    <div class="analysis">
+      이 한 문장이 Q1 2026 컨콜 전체의 핵심이다. 2025년 Q1 취임 당시 인텔은 20,000명 감원, 팹 매각 루머, CEO 교체 충격이 겹쳐 있었다. 13개월 후 같은 자리에서 "용량을 얼마나 빨리 늘릴 수 있냐"가 고민이 됐다. 이 문장은 프레임 전환을 선언한 것이다. <strong>내러티브가 바뀌면 주가 멀티플이 바뀐다.</strong>
+    </div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Lip-Bu Tan &mdash; 에이전틱 AI와 CPU</div>
+    <blockquote>"The next wave of AI will bring intelligence closer to the end user, moving from foundational models to inference to agentic. This shift is significantly increasing the need for Intel's CPUs and wafer and advanced packaging offerings."</blockquote>
+    <div class="analysis">
+      AI 인프라의 진화를 3단계로 정리하고 각 단계에서 CPU 수요가 늘어난다는 논리. <strong>"foundational models"(GPT-4류) → inference(실제 사용 추론) → agentic(자율 에이전트)</strong>. Agentic AI가 늘어날수록 엣지 디바이스와 서버 CPU 처리량이 증가한다는 주장은 설득력 있다. 이 논리가 맞다면 DCAI +22% 성장은 시작에 불과.
+    </div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Lip-Bu Tan &mdash; XPU 전략</div>
+    <blockquote>"We are not just a CPU company anymore. We have CPU, GPU, advanced packaging, and foundry — that's our XPU strategy."</blockquote>
+    <div class="analysis">
+      <strong>"XPU"</strong> &mdash; 인텔이 만든 신조어. CPU+GPU+NPU+가속기를 통합 플랫폼으로 묶는 개념. NVIDIA가 "AI 가속기"로 단일 솔루션을 판다면 인텔은 "전체 스택의 XPU 공급자"로 포지셔닝. 고객이 엔비디아 GPU를 사도 인텔 CPU, 패키징, 파운드리를 쓰게 만드는 전략.
+    </div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Lip-Bu Tan &mdash; 실행의 해</div>
+    <blockquote>"2026 is the year of execution — with improvements in yield, productivity, and cycle time to catch up with demand."</blockquote>
+    <div class="analysis">
+      "실행"을 선언했다는 건 "전략 수립은 끝났다"는 뜻. CEO가 1년차에 할 일(진단·정리·방향 설정)을 마치고 2년차에 실행 모드로 전환. Yield 개선이 총이익률 +650bp로 이미 나타나고 있다는 것이 이 선언의 신뢰도를 높인다.
+    </div>
+  </div>
+
+  <h3>David Zinsner (CFO) &mdash; 수자로 말하는 수비수</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 실적이 좋을 때도 과장하지 않는 엔지니어적 CFO. 리스크를 선제 공개하는 방식으로 신뢰를 구축. 메모리 비용 헤드윈드를 자발적으로 경고한 것이 대표적.
+  </p>
+
+  <div class="quote-block">
+    <div class="speaker">David Zinsner &mdash; 실적 총평</div>
+    <blockquote>"We delivered robust Q1 results, reflecting the growing and essential role of the CPU in the AI era and unprecedented demand for silicon, as well as our disciplined execution to expand available supply."</blockquote>
+    <div class="analysis">
+      <strong>"unprecedented demand"</strong>가 핵심. 반도체 수요가 역사적으로 전례 없는 수준이라는 표현. CEO가 전략을 이야기했다면 CFO는 수요가 구조적이라는 점을 강조. "disciplined execution" 반복 &mdash; 비용 통제와 공급망 관리가 이번 비트의 배경임을 명확히 함.
+    </div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">David Zinsner &mdash; 총이익률 경고</div>
+    <blockquote>"Better yields on Intel 18A offset some of the higher costs incurred in the early part of ramping a new node. However, rising input costs, especially in memory, present growing headwinds in the second half."</blockquote>
+    <div class="analysis">
+      <strong>리스크를 자발적으로 경고한 것이 신뢰도를 높인다.</strong> 1분기 총이익률이 +650bp 이상 좋았는데도 "하반기는 메모리 비용이 올라간다"고 선제 공개. 이건 IR에서 드문 솔직함. 반대로 말하면 하반기 마진 가이던스가 보수적으로 책정됐을 가능성 &rarr; 또 한번 Beat 여지가 있다는 해석도 가능.
+    </div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A &mdash; "믿겠다, 증명해봐"</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> HOOD 컨콜과 정반대. 로빈후드는 "prove-it story" 회의감이었다면, 인텔은 데이터가 맞아떨어지니 애널리스트들이 오히려 긍정적 해석을 찾는 분위기.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Wells Fargo Aaron Rakers &mdash; 업그레이드 근거</div>
+    <blockquote>"The inflection in gross margin and the materialization of the foundry customer pipeline [is the reason for the upgrade]."</blockquote>
+    <div class="analysis">
+      <strong>"inflection"</strong> &mdash; 변곡점. 총이익률이 단순 개선이 아니라 구조적 전환점에 왔다는 표현. 파운드리 고객 파이프라인이 "materialization"(실체화)됐다는 표현도 중요. 이론에서 계약으로 바뀐 것. Wells Fargo가 인텔을 업그레이드한 핵심 논리.
+    </div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Evercore ISI &mdash; "New Intel" 선언</div>
+    <blockquote>"INTC's new CEO fixed the balance sheet, and is executing on a strategy that appears to have put INTC back on the competitive track."</blockquote>
+    <div class="analysis">
+      "fixed the balance sheet" &mdash; Altera 분사, 비용 구조 정리, CHIPS Act 자금 확보를 포괄하는 표현. <strong>"back on the competitive track"</strong> &mdash; 인텔이 경쟁 레이스에 재진입했다는 공식 인정. Evercore가 Outperform으로 등급을 올린 이유.
+    </div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">KeyBanc &mdash; 목표주가 $110</div>
+    <blockquote>[목표주가 $70 → $110으로 상향, Overweight 유지]</blockquote>
+    <div class="analysis">
+      목표주가 +57% 상향. 반도체 섹터에서 이례적 폭의 수정. 기존 추정치가 인텔의 턴어라운드 속도를 크게 과소평가했음을 자인하는 수준. Jefferies $80, Stifel $75, BofA $56 등 경쟁사 대비 최고치.
+    </div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr><td style="width:160px;font-weight:600;color:var(--accent);">Lip-Bu Tan (CEO)</td><td>"생존 담론은 끝났다. 이제 얼마나 빨리 용량을 늘릴 수 있냐가 질문이다 &mdash; CPU는 AI 시대의 필수 인프라로 복귀했다"</td></tr>
+      <tr><td style="font-weight:600;color:var(--accent);">David Zinsner (CFO)</td><td>"총이익률 650bp 초과는 18A 수율 개선의 결과. 하반기 메모리 비용 상승은 경고해둔다"</td></tr>
+      <tr><td style="font-weight:600;color:var(--yellow);">애널리스트</td><td>"6분기 연속 비트 + Google 계약 + AI 비중 60% = 'New Intel'이 실체화됐다" (대부분 업그레이드)</td></tr>
+      <tr><td style="font-weight:600;color:var(--accent);">시장 반응</td><td>장후 +12% 급등 &rarr; 다음날 장중 +24% 마감($82.57). 1987년 이후 단일일 최대 상승. 4월 한 달 +90%.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="context-box" style="margin-top:24px;">
+    <div class="ctx-title">대반전의 본질: 무엇이 바뀌었나</div>
+    <p style="font-size:13px;color:var(--text-dim);line-height:1.9;">
+      2024년 인텔은 "레거시 CPU 회사"였다. AI 열풍에서 소외되고, 파운드리 적자를 내고, CEO Pat Gelsinger가 교체됐다. 1년 뒤인 Q1 2026, 같은 회사에서 무엇이 바뀌었나.<br><br>
+      <strong style="color:var(--accent);">1. 비즈니스 믹스:</strong> AI 매출 비중 60%. 1년 전과 질적으로 다른 회사.<br>
+      <strong style="color:var(--accent);">2. 실행력:</strong> 6분기 연속 비트. CEO Lip-Bu Tan 취임 이후 단 한 번도 미스 없음.<br>
+      <strong style="color:var(--accent);">3. 제조 능력:</strong> 18A 고성능 양산 진입. 총이익률 구조적 개선 시작.<br>
+      <strong style="color:var(--accent);">4. 고객 신뢰:</strong> Google 장기계약, NVIDIA DGX 채택. 파운드리 고객 파이프라인 실체화.<br>
+      <strong style="color:var(--accent);">5. 내러티브:</strong> "생존"에서 "성장"으로. 주가 멀티플은 내러티브에 선반영된다.
+    </p>
+  </div>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid">
+    <a class="link-card" href="https://www.intc.com/news-events/press-releases/detail/1767/intel-reports-first-quarter-2026-financial-results" target="_blank">
+      <div class="link-icon">&#x1F4C4;</div>
+      <div class="link-text"><div class="link-title">IR 보도자료 (공식)</div><div class="link-url">intc.com</div></div>
+    </a>
+    <a class="link-card" href="https://newsroom.intel.com/corporate/intel-reports-first-quarter-2026-financial-results" target="_blank">
+      <div class="link-icon">&#x1F4F0;</div>
+      <div class="link-text"><div class="link-title">Intel Newsroom</div><div class="link-url">newsroom.intel.com</div></div>
+    </a>
+    <a class="link-card" href="https://d1io3yog0oux5.cloudfront.net/_2cc2e214977e16134faf0e97e6380cbb/intel/db/887/9254/prepared_remarks/1Q2026-Earnings-Call.pdf" target="_blank">
+      <div class="link-icon">&#x1F4CB;</div>
+      <div class="link-text"><div class="link-title">CEO/CFO 준비 발언 전문 (PDF)</div><div class="link-url">cloudfront.net / intel</div></div>
+    </a>
+    <a class="link-card" href="https://www.fool.com/earnings/call-transcripts/2026/04/23/intel-intc-q1-2026-earnings-transcript/" target="_blank">
+      <div class="link-icon">&#x1F4C3;</div>
+      <div class="link-text"><div class="link-title">컨콜 트랜스크립트 (Motley Fool)</div><div class="link-url">fool.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.businesswire.com/news/home/20260423038467/en/Intel-Reports-First-Quarter-2026-Financial-Results" target="_blank">
+      <div class="link-icon">&#x1F4CA;</div>
+      <div class="link-text"><div class="link-title">전문 실적 보도 (BusinessWire)</div><div class="link-url">businesswire.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.cnbc.com/2026/04/24/intel-stock-soars-more-than-20percent-as-chipmaker-shows-signs-of-turnaround.html" target="_blank">
+      <div class="link-icon">&#x1F4C8;</div>
+      <div class="link-text"><div class="link-title">CNBC: "1987년 이후 최대 상승"</div><div class="link-url">cnbc.com</div></div>
+    </a>
+    <a class="link-card" href="https://futurumgroup.com/insights/intel-q1-fy-2026-earnings-point-to-agentic-cpu-demand-and-foundry-upside/" target="_blank">
+      <div class="link-icon">&#x1F50E;</div>
+      <div class="link-text"><div class="link-title">Futurum: 에이전틱 CPU 수요 분석</div><div class="link-url">futurumgroup.com</div></div>
+    </a>
+    <a class="link-card" href="https://seekingalpha.com/article/4893739-intel-corporation-intc-q1-2026-earnings-call-transcript" target="_blank">
+      <div class="link-icon">&#x1F4DD;</div>
+      <div class="link-text"><div class="link-title">컨콜 트랜스크립트 (Seeking Alpha)</div><div class="link-url">seekingalpha.com</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-04-29 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>

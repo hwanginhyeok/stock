@@ -1,23 +1,12 @@
-# 주식부자프로젝트 태스크
+# 주식부자 태스크
 
 > Current: [CURRENT_TASK.md](CURRENT_TASK.md) | Prepared: [PREPARED_TASK.md](PREPARED_TASK.md) | Finished: [FINISHED_TASK.md](FINISHED_TASK.md)
 
 ## 요약
 
-- Current: 3개 (1-43 HIH 매핑, 1-30 InvestOS, 1-32 X 시황)
-- Prepared: 22개 (**활성 P1: 5 (1-44~1-48, 1-43 후속)**, 보류 P1: 10, P2: 6, P3: 7)
-- Finished: 16개 (4월) + [53개 아카이브](TASK_ARCHIVE/2026-03.md)
+- Current: 1개 (1-64 실적 시즌 섹터 종합 분석 HTML)
+- Prepared: P1 활성 **4** (1-46 / 1-47 / 1-53 / 1-66) + 보류 다수 (P1 5 / P2 7 / P3 7)
+- Finished: 38개 (1-45 사실상 04-21 완료, 2026-05-17 PM 검증 인지)
+- 마지막 동기화: 2026-05-18 (PM /hih-clear 정리)
 
-## 현재 포커스 (2026-04-11~)
-
-**InvestOS 인프라 + 테슬라 entity 체계 집중.**
-HIH_2 업무(Notion DB + issue #번호 + 마일스톤 추적) 패턴을 참고해서 stock에 적용.
-아티클(4-x)은 전부 보류.
-
-## 번호 체계
-
-`{분야코드}-{순번}` — 1=시스템, 2=코드, 3=분석, 4=아티클, 5=리서치
-
-## 아티클 상세
-
-개별 아티클의 Phase 체크리스트·테제·리서치 경로는 `docs/프로젝트/task/{ID}.md`에 기록.
+---------

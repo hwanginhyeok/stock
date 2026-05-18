@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMZN | 아마존 Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #ffb347; --accent-dim: #ffb34733;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+    --orange: #FF9900; --orange-dim: #FF990022;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#FF990018,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #ffb34744; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  /* CARDS */
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--accent); }
+  .negative { color:var(--red); }
+
+  /* KPI TIER */
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#ffb34722; color:var(--accent); }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  /* QUOTE */
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block.cfo { border-left-color:var(--blue); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block.cfo .speaker { color:var(--blue); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  /* TONE METER */
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  /* NEXT Q */
+  .next-q { background:linear-gradient(135deg,#4da6ff10,var(--surface)); border:1px solid #4da6ff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--blue); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--blue); }
+
+  /* LINKS */
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  /* TAGS */
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  /* KPI NOTE */
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+  /* AWS HIGHLIGHT */
+  .aws-highlight { background:linear-gradient(135deg,#ffb34710,var(--surface)); border:1px solid #ffb34733; border-radius:8px; padding:20px 24px; margin:16px 0; }
+  .aws-highlight .aws-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:2px; color:var(--accent); margin-bottom:8px; }
+  .aws-highlight .aws-stat { font-family:'IBM Plex Mono',monospace; font-size:36px; font-weight:700; color:var(--accent); }
+  .aws-highlight .aws-desc { font-size:13px; color:var(--text-dim); margin-top:4px; }
+
+  /* CAPEX WARNING */
+  .capex-warning { background:linear-gradient(135deg,#ff4d4d10,var(--surface)); border:1px solid #ff4d4d33; border-radius:8px; padding:20px 24px; margin:16px 0; }
+  .capex-warning .cw-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:2px; color:var(--red); margin-bottom:8px; }
+  .capex-warning .cw-stat { font-family:'IBM Plex Mono',monospace; font-size:32px; font-weight:700; color:var(--red); }
+  .capex-warning .cw-desc { font-size:13px; color:var(--text-dim); margin-top:4px; }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NASDAQ: AMZN</div>
+    <h1>Amazon.com</h1>
+    <div class="company-kr">아마존닷컴</div>
+    <div class="subtitle">Q1 FY2026 실적 딥다이브 &mdash; 2026.04.29 장후 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-04-29</span>
+      <span>|</span>
+      <span>섹터: 소비재 / 이커머스 &middot; 클라우드</span>
+      <span>|</span>
+      <span>시가총액: ~$2.1조</span>
+      <span>|</span>
+      <span>AWS 연환산 매출: $150B+</span>
+    </div>
+    <div class="verdict beat">BEAT &mdash; 매출 +$4.2B vs 컨센서스 / EPS $2.78 vs 예상 $1.64 (+70%)</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">총 매출</div>
+      <div class="value" style="color:var(--accent);">$181.5B</div>
+      <div class="compare">컨센서스: $177.3B <span class="beat-tag">BEAT +2.4%</span></div>
+      <div class="compare">전년비: +17% YoY</div>
+    </div>
+    <div class="num-card">
+      <div class="label">희석 EPS</div>
+      <div class="value" style="color:var(--accent);">$2.78</div>
+      <div class="compare">컨센서스: $1.64 <span class="beat-tag">BEAT +70%</span></div>
+      <div class="compare">전년비: +62% YoY</div>
+    </div>
+    <div class="num-card">
+      <div class="label">전사 영업이익</div>
+      <div class="value" style="color:var(--accent);">$23.9B</div>
+      <div class="compare">영업이익률: 13.1% (역대 최고)</div>
+      <div class="compare">전년비: +64% YoY</div>
+    </div>
+  </div>
+
+  <h3>매출 세그먼트 분해</h3>
+  <table>
+    <thead><tr><th>세그먼트</th><th>Q1 2026</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td><strong>AWS (클라우드)</strong></td><td class="mono positive" style="font-weight:700;">$37.6B</td><td class="mono positive">+28% (15분기 최고)</td><td><span class="kw-tag bullish">ACCELERATION</span></td></tr>
+      <tr><td>광고 서비스</td><td class="mono positive">$17.2B</td><td class="mono positive">+24%</td><td><span class="kw-tag bullish">STRONG BEAT</span></td></tr>
+      <tr><td>북미 (North America)</td><td class="mono">$104.1B</td><td class="mono positive">+12%</td><td><span class="kw-tag bullish">STEADY</span></td></tr>
+      <tr><td>국제 (International)</td><td class="mono">$39.8B</td><td class="mono positive">+11%</td><td><span class="kw-tag neutral-tag">STABLE</span></td></tr>
+      <tr><td>온라인 스토어</td><td class="mono">$64.3B</td><td class="mono positive">+12%</td><td><span class="kw-tag bullish">BEAT</span></td></tr>
+      <tr><td>3P 셀러 서비스</td><td class="mono">$41.6B</td><td class="mono positive">+~10%</td><td><span class="kw-tag neutral-tag">RESILIENT</span></td></tr>
+      <tr><td>구독 서비스 (Prime)</td><td class="mono">$11.7B</td><td class="mono positive">+9%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+      <tr><td>오프라인 스토어</td><td class="mono">$5.8B</td><td class="mono positive">+~6%</td><td><span class="kw-tag neutral-tag">STABLE</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="aws-highlight">
+    <div class="aws-label">AWS NORTH STAR</div>
+    <div class="aws-stat">+28% YoY</div>
+    <div class="aws-desc">Q4 2025 +24% 대비 400bp 가속 &mdash; 15분기(약 4년) 만의 최고 성장률 / 연환산 $150B 런레이트 / 수주잔고(Backlog) $364B (Anthropic $100B+ 딜 미포함)</div>
+  </div>
+
+  <h3>영업이익 세그먼트 분해</h3>
+  <table>
+    <thead><tr><th>세그먼트</th><th>영업이익</th><th>영업이익률</th><th>전년비 변화</th></tr></thead>
+    <tbody>
+      <tr><td><strong>AWS</strong></td><td class="mono positive" style="font-weight:700;">$14.2B</td><td class="mono positive">37.8%</td><td class="mono positive">+23% YoY</td></tr>
+      <tr><td>북미</td><td class="mono positive">$8.3B</td><td class="mono positive">8.0%</td><td class="mono positive">+43% YoY (전년 $5.8B)</td></tr>
+      <tr><td>국제</td><td class="mono positive">$1.4B</td><td class="mono positive">3.6%</td><td class="mono positive">흑자 전환 유지</td></tr>
+      <tr><td><strong>전사 합계</strong></td><td class="mono positive" style="font-weight:700;">$23.9B</td><td class="mono positive"><strong>13.1%</strong></td><td class="mono positive">역대 최고 마진</td></tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>왜 영업이익률 13.1%가 중요한가:</strong> AWS 37.8% 마진이 리테일 적자를 덮고도 남는 구조. 국제 3.6% 영업이익률은 2년 전 적자에서 흑자로 전환 중 &mdash; 리테일 효율화가 실제로 숫자에 반영되고 있다는 증거. FCF(12개월 기준)는 $1.2B으로 95% 감소했는데, $44.2B Capex 집중 투자 때문. "지금 번 돈을 전부 미래에 쏟아붓겠다"는 선언이다.
+  </div>
+
+  <div class="capex-warning">
+    <div class="cw-label">CAPEX RISK</div>
+    <div class="cw-stat">$200B / FY2026</div>
+    <div class="cw-desc">Q1 단기에만 $44.2B 집행 (전년 동기 $25B → +77% YoY). AI 인프라 투자 집중으로 12개월 FCF $1.2B (-95% YoY). Capex가 수익화보다 빠르게 증가 &mdash; 투자자들이 가장 우려하는 지점.</div>
+  </div>
+
+  <div class="next-q">
+    <h3>Q2 2026 가이던스</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">Q2 매출 가이던스</div><div class="nq-value">$194~199B</div></div>
+      <div class="next-q-item"><div class="nq-label">Q2 성장률 (YoY)</div><div class="nq-value">+16~19%</div></div>
+      <div class="next-q-item"><div class="nq-label">Q2 영업이익 가이던스</div><div class="nq-value">$20~24B</div></div>
+    </div>
+  </div>
+  <div class="kpi-note">
+    <strong>가이던스 해석:</strong> Q2 영업이익 하단($20B)이 컨센서스($19.2B)보다 높지만, Amazon LEO(위성 인터넷) 관련 $1B 추가 비용과 Q2 SBC(주식보상비용) 시즌성이 상한($24B)에 대한 경계심을 유발. Prime Day가 Q2에 포함되면 상단 돌파 가능.
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>아마존을 읽는 숫자들</h2>
+
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; AWS 성장률 + 영업이익</span>
+    <span class="tier-desc">클라우드가 무너지면 전체 밸류에이션이 무너진다</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>직전 분기</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>AWS 매출 성장률</strong></td>
+        <td class="mono positive" style="font-size:20px; font-weight:700;">+28% YoY</td>
+        <td class="mono positive">+24% (Q4 2025)</td>
+        <td>4분기 연속 가속. Azure (+35%)보다 낮지만 격차가 좁혀지고 있음. 15분기 만의 최고치가 핵심.</td>
+      </tr>
+      <tr>
+        <td><strong>AWS 영업이익</strong></td>
+        <td class="mono positive" style="font-size:20px; font-weight:700;">$14.2B</td>
+        <td class="mono">$11.5B (Q4 2025)</td>
+        <td>전사 영업이익의 59%. 이 숫자가 전사 이익을 만드는 엔진. 마진 37.8%는 Azure(50%+)보다 낮지만 절대액이 빠르게 성장 중.</td>
+      </tr>
+      <tr>
+        <td><strong>AWS 백로그</strong></td>
+        <td class="mono positive">$364B</td>
+        <td class="mono">&mdash;</td>
+        <td>미래 매출 확정 잔고. Anthropic $100B+ 딜은 미포함. 실제 파이프라인은 더 크다는 의미.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>AWS 성장 가속의 의미:</strong> Q4 2024 +19% → Q1 2025 +21% → Q2 2025 +23% → Q3 2025 +24% → Q4 2025 +24% → Q1 2026 +28%. 완만한 가속에서 갑작스런 점프. 원인은 Bedrock(AI 플랫폼) 수요 급증 &mdash; 고객당 지출이 토큰 사용량 급증으로 빠르게 늘었다. "Q4 to Q1 AWS 매출 증가폭이 역대 최대"라는 표현이 이를 뒷받침.
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">리테일 건강 &mdash; 이커머스가 적자에서 엔진으로</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>북미 영업이익률</strong></td><td class="mono positive">8.0%</td><td class="mono positive">전년 5.6% → 8.0%</td><td>2년 전 적자였던 북미 리테일이 이제 8% 마진. 물류 자동화 + 지역화 효과.</td></tr>
+      <tr><td><strong>국제 영업이익</strong></td><td class="mono positive">$1.4B (+3.6%)</td><td class="mono positive">적자 → 흑자 전환 유지</td><td>유럽/인도 시장 흑자 기반 다지기. 아직 규모는 작지만 방향성이 중요.</td></tr>
+      <tr><td><strong>3P 비중 / 유닛 성장</strong></td><td class="mono">$41.6B / 단위 +15%</td><td class="mono positive">+10% YoY</td><td>코로나 이후 최고 성장률. 판매자 수수료가 AWS 다음의 마진 엔진.</td></tr>
+      <tr><td><strong>광고 성장률</strong></td><td class="mono positive">+24% YoY</td><td class="mono positive">컨센서스 +21.2% 대비 BEAT</td><td>Meta, Google과 경쟁하는 퍼포먼스 광고. 리테일 데이터 기반이 차별점.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">수익성 &mdash; 투자 vs 이익의 균형</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>전사 영업이익률</strong></td><td class="mono positive">13.1%</td><td class="mono positive">전년 10.7% → 13.1%</td><td>역대 최고. 이 구조가 유지되면 AI Capex를 정당화 가능.</td></tr>
+      <tr><td><strong>12개월 FCF</strong></td><td class="mono negative">$1.2B</td><td class="mono negative">-95% YoY</td><td>Capex $44.2B 분기 지출로 현금 소진. "투자 싸이클 중"이라는 해명이 얼마나 버틸지가 관건.</td></tr>
+      <tr><td><strong>분기 Capex</strong></td><td class="mono negative">$44.2B</td><td class="mono negative">전년 $25B → +77%</td><td>FY2026 전체 $200B 예상. 분기 평균 $50B. 사실상 모든 영업 현금흐름을 재투자.</td></tr>
+      <tr><td><strong>EPS</strong></td><td class="mono positive">$2.78</td><td class="mono positive">전년 $0.98 → +184%</td><td>세후 순이익 급증. 그러나 Capex 폭증으로 FCF와 괴리 &mdash; 회계이익 vs 실현이익 차이.</td></tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>FCF vs EPS 괴리 해석:</strong> EPS $2.78(+184%)이면서 FCF는 $1.2B(-95%). 이 괴리는 Capex의 회계 처리 방식(감가상각 전 지출이 FCF에 즉시 반영)에서 온다. 투자자 시각에서는 "지금 쓰는 $44B가 미래에 얼마를 벌어올 것인가"가 핵심 질문.
+  </div>
+
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">성장 엔진 &mdash; 광고 + 구독</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td><strong>광고 매출</strong></td><td class="mono positive">$17.24B</td><td class="mono positive">+24% YoY</td><td><span class="kw-tag bullish">OUTPERFORM</span> &mdash; 컨센서스 $16.87B 초과. 리테일 데이터 기반 퍼포먼스 광고의 힘.</td></tr>
+      <tr><td><strong>구독 서비스</strong></td><td class="mono">$11.7B</td><td class="mono positive">+9% YoY</td><td><span class="kw-tag neutral-tag">STEADY</span> &mdash; Prime 가격 인상 효과 + 프라임 비디오 성장. 안정적 반복 매출.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">AI / 전략 &mdash; 미래 베팅</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr><td><strong>칩 사업 AI 런레이트</strong></td><td class="mono positive">연$20B+</td><td>Graviton, Trainium, Nitro 합산. 전년비 3자리수(100%+) 성장. Trainium2는 "거의 매진", Trainium3는 "거의 완판 예약".</td></tr>
+      <tr><td><strong>Bedrock 고객 지출</strong></td><td class="mono positive">QoQ +170%</td><td>125,000+ 고객 / Fortune 100의 80% 사용. Q1 처리 토큰 수 = 역대 누적 합산 초과.</td></tr>
+      <tr><td><strong>AI 수주잔고</strong></td><td class="mono positive">$364B (+Anthropic)</td><td>장기 AI 공급 계약 잔고. $100B+ Anthropic 딜 추가 시 실질 파이프라인 $450B+.</td></tr>
+      <tr><td><strong>Alexa+ 출시</strong></td><td class="mono">2026년 2월 출시</td><td>초기 사용자 쇼핑 빈도 3배 증가. 10년간 적자였던 Alexa를 수익화하는 구조 전환 시도.</td></tr>
+      <tr><td><strong>Amazon LEO (위성)</strong></td><td class="mono neutral-tag">Q3 상용화 목표</td><td>Q2 비용 $1B 추가 예고. Starlink 대항마. 단기 이익 압박 vs 장기 글로벌 커넥티비티 플랫폼.</td></tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>Andy Jassy의 AI 전략 핵심:</strong> AWS가 AI에서 선택받는 이유를 "풀 스택 기능성"과 "데이터 근접성"으로 설명. 고객 데이터와 추론이 이미 AWS에 있어서 이동 마찰이 없다는 논리. Trainium 칩이 Nvidia 의존에서 벗어나는 내재화 전략이기도 함.
+  </div>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter">
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:90%;background:var(--accent);"></div></div>
+      <div class="tone-score" style="color:var(--accent);">9.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:65%;background:var(--blue);"></div></div>
+      <div class="tone-score" style="color:var(--blue);">6.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 회의감</div>
+      <div class="tone-bar"><div class="fill" style="width:55%;background:var(--yellow);"></div></div>
+      <div class="tone-score" style="color:var(--yellow);">5.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">전망 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:80%;background:var(--purple);"></div></div>
+      <div class="tone-score" style="color:var(--purple);">8.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Andy Jassy (CEO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 데이터 기반 확신. 좋은 숫자를 담담하게 제시하면서 Capex 우려에는 "단기 비용이 장기 선점"이라는 논리로 방어. 머스크의 비전 세일즈보다 베이조스의 "Day 1" DNA를 더 닮은 말투.
+  </p>
+
+  <div class="keywords">
+    <span class="kw-tag bullish">FULL STACK AI</span>
+    <span class="kw-tag bullish">FASTEST GROWTH IN 15 QUARTERS</span>
+    <span class="kw-tag bullish">DATA PROXIMITY</span>
+    <span class="kw-tag bullish">TRIPLE DIGIT GROWTH</span>
+    <span class="kw-tag neutral-tag">TARIFFS CREEPING IN</span>
+    <span class="kw-tag neutral-tag">MEMORY COSTS SKYROCKETING</span>
+    <span class="kw-tag bearish">CAPACITY CONSTRAINTS</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Andy Jassy &mdash; AWS 선택 이유</div>
+    <blockquote>"People continue to choose AWS for AI in part because of their broad full stack functionality, and because people want their inferences, they scale it to be close to their data and their applications, with much more of it living in AWS than elsewhere."</blockquote>
+    <div class="analysis"><strong>"데이터 근접성(data proximity)"</strong>이 핵심 논리. 이미 AWS에 데이터가 있는 기업 입장에서 다른 클라우드로 AI 추론을 이전하면 데이터 이동 비용과 레이턴시가 발생 &mdash; 이걸 락인(lock-in)의 자연스러운 형태로 표현. 경쟁사 대비 "이동하기 어렵다"를 강점으로 포지셔닝.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Andy Jassy &mdash; Trainium 칩</div>
+    <blockquote>"Trainium2 is largely sold out, Trainium3 is nearly fully subscribed, and much of Trainium4 has already been reserved."</blockquote>
+    <div class="analysis">출시도 전에 예약 완판. <strong>$225B+ 이상의 수주잔고</strong>가 Trainium에 묶여있다는 의미. Nvidia GPU 가격 급등과 공급 제한에 대응하기 위해 기업들이 아마존 자체 칩으로 대안을 찾는 흐름. "칩 내재화 = Capex의 구조적 수익화" 논리가 성립하기 시작.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Andy Jassy &mdash; 관세 이슈</div>
+    <blockquote>"Tariffs are creeping into prices."</blockquote>
+    <div class="analysis">매우 솔직하고 짧은 인정. 트럼프 관세가 아마존 마켓플레이스에 판매자 원가 상승으로 전가되고 있다는 시사. 3P 셀러의 40%+ 중국산 상품 비중을 감안하면 Q2 이후 영향이 커질 수 있다. 그러나 관세 우려 속 단위 판매량 +15% 달성 &mdash; 팬트업 수요 혹은 관세 전 선매수 효과 가능성.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Andy Jassy &mdash; Bedrock AI 플랫폼</div>
+    <blockquote>"Bedrock saw 170% growth in customer spend quarter-over-quarter and processed more tokens in Q1 than all prior years combined."</blockquote>
+    <div class="analysis">"역대 누적보다 한 분기 처리량이 더 많다" &mdash; AI 수요의 비선형적 폭발을 보여주는 데이터. 170% QoQ 성장은 연환산이 아닌 분기 대비이므로 실제 속도는 상상 이상. Fortune 100의 80%가 Bedrock 사용자라는 수치는 엔터프라이즈 침투율이 이미 높다는 증거.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Andy Jassy &mdash; 메모리 비용 경고</div>
+    <blockquote>"The cost of components, particularly memory, has skyrocketed."</blockquote>
+    <div class="analysis">AI 인프라 구축에서 메모리(HBM) 가격이 병목. Nvidia GPU 수요 급증과 함께 HBM 공급이 타이트해진 영향. 이는 Capex 급증의 숨겨진 원인 중 하나이며, 동시에 Trainium 자체 칩 전략의 당위성을 뒷받침하는 컨텍스트. "우리가 직접 만들어야 한다"는 내재화 논리의 배경.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Andy Jassy &mdash; Alexa+ 효과</div>
+    <blockquote>"Alexa+ is tripling shopping frequency among early users."</blockquote>
+    <div class="analysis">초기 사용자 한정 데이터지만 강력한 수치. 쇼핑 빈도 3배는 ARPU 개선과 직결. 10년간 돈을 잃어온 Alexa를 GenAI로 리부트하는 전략 &mdash; 이제 수익화의 실마리가 보이기 시작한다는 신호. 그러나 "초기 사용자"라는 단서 &mdash; 대규모 전개 시에도 유효한지는 검증 필요.</div>
+  </div>
+
+  <h3>Brian Olsavsky (CFO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 침착한 수비수. Capex 우려를 "투자 싸이클" 프레임으로 관리. Amazon LEO라는 신규 비용 요인을 사전 예고하며 Q2 미스 리스크를 미리 가격에 반영시키는 IR 전략.
+  </p>
+
+  <div class="quote-block cfo">
+    <div class="speaker">Brian Olsavsky &mdash; Amazon LEO 비용 경고</div>
+    <blockquote>"We expect a year-over-year cost increase of approximately $1 billion related to Amazon LEO, tied to satellite manufacturing and launch costs, affecting Q2 operating income. Amazon is aiming to begin commercial service in the third quarter of this year."</blockquote>
+    <div class="analysis">Q2 가이던스($20~24B 영업이익)에 $1B LEO 비용이 포함된 것인지, 추가인지가 중요 포인트. Starlink와의 위성 인터넷 경쟁에 뛰어드는 베팅 &mdash; 비용은 단기이지만 글로벌 커넥티비티 플랫폼이 되면 AWS와의 시너지가 기대된다. Q3 상용화 일정 명시로 투자자에게 구체적 타임라인 제시.</div>
+  </div>
+
+  <div class="quote-block cfo">
+    <div class="speaker">Brian Olsavsky &mdash; AWS 보안 강점</div>
+    <blockquote>"We have the strongest security and operational performance."</blockquote>
+    <div class="analysis">AWS가 AI 고객을 유지하는 두 번째 축으로 "보안"을 내세움. 금융, 헬스케어, 정부 고객에게 클라우드 선택의 핵심 기준. FedRAMP 인증과 GovCloud가 경쟁사 대비 강점 &mdash; 고마진 공공/규제 섹터 고객 기반이 두텁다는 의미.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 실적은 좋다, 그러나 Capex가 걱정이다. "언제 Capex가 수익으로 전환되느냐"가 질문의 핵심.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">시장 애널리스트 &mdash; 핵심 우려</div>
+    <blockquote>
+      "Amazon Q1: $200B in FY26 CapEx for a $15B AI Run-Rate Story."<br><br>
+      "AMZN Stock Heads to $300 on Amazon Q1 Earnings Beat but Cloud Cost Growth Increases Risks."
+    </blockquote>
+    <div class="analysis"><strong>$200B Capex / $15B AI 런레이트</strong> &mdash; 이 비율이 시장의 가장 큰 우려. 투자 대비 수익화 속도가 느리다는 시각. 반론: 클라우드 Capex는 선행 지출 후 10~15년 감가상각으로 회계 처리 &mdash; 오늘의 $200B가 2027~2030년 자유현금흐름을 만든다는 구조. AWS가 28% 성장 중이라면 "지금이 투자 시점"이라는 논리도 성립.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">관세 리스크 질문</div>
+    <blockquote>"How is the tariff situation affecting third-party seller pricing and inventory decisions?"</blockquote>
+    <div class="analysis">Jassy가 "tariffs are creeping in"이라고 인정한 맥락. 중국산 상품 비중이 높은 3P 셀러들이 관세 부담을 소비자 가격에 전가 중 &mdash; 아마존 플랫폼 상품 가격 인플레이션으로 이어질 수 있음. 그러나 Q1 단위 판매량 +15%(코로나 이후 최고)는 관세 선매수 수요가 실적을 일시 부풀렸을 가능성도 시사.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">AWS 성장 지속성 질문</div>
+    <blockquote>"Can AWS sustain the 28% growth trajectory given capacity constraints and memory cost pressures?"</blockquote>
+    <div class="analysis">AWS 백로그 $364B + Anthropic $100B+ 딜 = 수요 가시성은 충분. 그러나 공급 제약(메모리, 데이터센터 부지, 전력)이 실제 매출 실현 속도를 제한. "수요는 넘치는데 공급을 못 따라가는" 구조 &mdash; 이 경우 Capex 증가는 리스크가 아니라 필수 투자. 연간 $200B Capex의 정당성이 여기에 있다.</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr><td style="width:160px;font-weight:600;color:var(--accent);">Andy Jassy</td><td>"AWS는 15분기 만에 가장 빠르게 달리고 있고, AI는 이제 시작이다. Capex는 두렵지 않다 &mdash; 수요가 공급을 초과하는 상황에서 투자는 의무다."</td></tr>
+      <tr><td style="font-weight:600;color:var(--blue);">Brian Olsavsky</td><td>"Q2에 LEO 비용 $1B을 미리 알려두겠다. 나쁜 서프라이즈 없도록. 영업이익률 13.1%가 구조화됐다는 건 증명했다."</td></tr>
+      <tr><td style="font-weight:600;color:var(--yellow);">시장 / 애널</td><td>"블로우아웃 실적은 맞다. 근데 $200B Capex로 15B 런레이트를 정당화하려면 앞으로 2년 안에 AWS가 50% 가까이 성장해야 한다."</td></tr>
+      <tr><td style="font-weight:600;color:var(--red);">주가 반응</td><td>장후 -2.93% (Capex 충격) → 리바운드 +4% (AWS 28% 재인식). 결국 혼조 마감. 300달러 돌파 기대감과 Capex 우려가 팽팽.</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:32px;">투자자 시각: Day 1 문화 vs 효율화 균형</h3>
+  <p style="color:var(--text-dim);line-height:1.8;margin-bottom:20px;">
+    베이조스의 "Day 1" 철학은 "항상 스타트업처럼 행동하라, 성숙 = 죽음"이라는 뜻이다. Jassy는 이 문화 위에 "수익화 규율"을 접붙였다. 리테일 흑자 전환, 국제 흑자 유지, AWS 마진 37.8% &mdash; 이 세 가지가 동시에 달성된 분기다. 문제는 Capex $200B이 이 균형을 무너뜨릴 가능성. Jassy가 답해야 하는 질문은 하나다: <strong>"이 투자가 2027년에 얼마의 FCF를 만드는가?"</strong>
+  </p>
+
+  <div class="keywords">
+    <span class="kw-tag bullish">AWS 28% 가속</span>
+    <span class="kw-tag bullish">영업이익률 역대 최고 13.1%</span>
+    <span class="kw-tag bullish">Bedrock 170% QoQ 성장</span>
+    <span class="kw-tag bullish">광고 24% 성장</span>
+    <span class="kw-tag bullish">백로그 $364B</span>
+    <span class="kw-tag neutral-tag">FCF -95% (Capex 투자 싸이클)</span>
+    <span class="kw-tag bearish">Capex $200B FY2026</span>
+    <span class="kw-tag bearish">관세 가격 전가 시작</span>
+    <span class="kw-tag bearish">메모리 비용 급등</span>
+    <span class="kw-tag neutral-tag">LEO $1B Q2 추가 비용</span>
+  </div>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid">
+    <a class="link-card" href="https://www.aboutamazon.com/news/company-news/amazon-earnings-q1-2026-report" target="_blank">
+      <div class="link-icon">&#x1F4C4;</div>
+      <div class="link-text"><div class="link-title">Amazon Q1 2026 공식 IR 보도자료</div><div class="link-url">aboutamazon.com</div></div>
+    </a>
+    <a class="link-card" href="https://ir.aboutamazon.com/quarterly-results/default.aspx" target="_blank">
+      <div class="link-icon">&#x1F4CA;</div>
+      <div class="link-text"><div class="link-title">분기 실적 페이지 (슬라이드 / PDF)</div><div class="link-url">ir.aboutamazon.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.fool.com/earnings/call-transcripts/2026/04/29/amazon-amzn-q1-2026-earnings-call-transcript/" target="_blank">
+      <div class="link-icon">&#x1F4DD;</div>
+      <div class="link-text"><div class="link-title">컨콜 트랜스크립트 (Motley Fool)</div><div class="link-url">fool.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.cnbc.com/2026/04/29/amazon-amzn-q1-earnings-report-2026.html" target="_blank">
+      <div class="link-icon">&#x1F4FA;</div>
+      <div class="link-text"><div class="link-title">CNBC 실적 리포트</div><div class="link-url">cnbc.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.cnbc.com/2026/04/29/aws-earnings-q1-2026.html" target="_blank">
+      <div class="link-icon">&#x2601;&#xFE0F;</div>
+      <div class="link-text"><div class="link-title">AWS Q1 2026 상세 분석 (CNBC)</div><div class="link-url">cnbc.com/aws-earnings</div></div>
+    </a>
+    <a class="link-card" href="https://www.aboutamazon.com/news/company-news/amazon-ceo-andy-jassy-aws-ai-q1-2026-earnings" target="_blank">
+      <div class="link-icon">&#x1F3A4;</div>
+      <div class="link-text"><div class="link-title">Andy Jassy &mdash; AWS AI 발언 원문</div><div class="link-url">aboutamazon.com</div></div>
+    </a>
+    <a class="link-card" href="https://seekingalpha.com/article/4895198-amazon-stock-faces-a-post-earnings-unwind" target="_blank">
+      <div class="link-icon">&#x1F50E;</div>
+      <div class="link-text"><div class="link-title">Seeking Alpha &mdash; 주가 반응 분석</div><div class="link-url">seekingalpha.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.morningstar.com/stocks/amazon-earnings-guidance-200-billion-capital-expenditure-2026-overshadows-good-results" target="_blank">
+      <div class="link-icon">&#x2B50;</div>
+      <div class="link-text"><div class="link-title">Morningstar &mdash; Capex $200B 분석</div><div class="link-url">morningstar.com</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-04-30 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>

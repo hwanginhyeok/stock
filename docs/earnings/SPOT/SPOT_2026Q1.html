@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPOT | 스포티파이 Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #1DB954; --accent-dim: #1DB95433;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#1DB95415,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #1DB95444; }
+  .verdict.mixed { background:#ffc10722; color:var(--yellow); border:1px solid #ffc10744; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  /* CARDS */
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+  .num-card .compare .warn-tag { color:var(--yellow); font-weight:600; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--accent); }
+  .negative { color:var(--red); }
+
+  /* KPI TIER */
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#1DB95422; color:var(--accent); }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  /* QUOTE */
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block.warn { border-left-color:var(--red); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block.warn .speaker { color:var(--red); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  /* TONE METER */
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  /* NEXT Q */
+  .next-q { background:linear-gradient(135deg,#4da6ff10,var(--surface)); border:1px solid #4da6ff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--blue); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--blue); }
+  .next-q-item .nq-note { font-size:11px; color:var(--red); margin-top:2px; }
+
+  /* LINKS */
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  /* TAGS */
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  /* KPI NOTE */
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+  /* HIGHLIGHT BOX */
+  .alert-box { background:#ff4d4d11; border:1px solid #ff4d4d33; border-radius:8px; padding:16px 20px; margin:16px 0; font-size:13px; color:var(--text-dim); }
+  .alert-box strong { color:var(--red); }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NYSE: SPOT</div>
+    <h1>Spotify Technology S.A.</h1>
+    <div class="company-kr">스포티파이 테크놀로지</div>
+    <div class="subtitle">Q1 FY2026 실적 딥다이브 &mdash; 2026.04.28 장전 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-04-28</span>
+      <span>|</span>
+      <span>섹터: 미디어 / 스트리밍</span>
+      <span>|</span>
+      <span>시가총액: ~$950억</span>
+      <span>|</span>
+      <span>MAU: 761M</span>
+      <span>|</span>
+      <span>총이익률: 33.0% (분기 최고)</span>
+    </div>
+    <div class="verdict mixed">MIXED &mdash; Q1 실적 Beat (EPS +17%) + 가이던스 Miss (Q2 OI €630M vs 컨센 €684M) &rarr; 주가 -10~14%</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">매출 (€)</div>
+      <div class="value">€4.53B</div>
+      <div class="compare">컨센서스: €4.52B <span class="beat-tag">BEAT</span></div>
+      <div class="compare">YoY: +8% (CC: +14%)</div>
+    </div>
+    <div class="num-card">
+      <div class="label">희석 EPS</div>
+      <div class="value">$3.45</div>
+      <div class="compare">컨센서스: $2.95 <span class="beat-tag">BEAT +17%</span></div>
+      <div class="compare">Q1 역대 최대 EPS</div>
+    </div>
+    <div class="num-card">
+      <div class="label">영업이익 (Operating Income)</div>
+      <div class="value">€715M</div>
+      <div class="compare">영업이익률: 15.8% (YoY +40%)</div>
+      <div class="compare">FCF: €824M (Q1 역대 최고)</div>
+    </div>
+  </div>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">총이익률 (Gross Margin)</div>
+      <div class="value">33.0%</div>
+      <div class="compare"><span class="beat-tag">분기 사상 최고치</span></div>
+      <div class="compare">가이던스 대비 +20bp 초과</div>
+    </div>
+    <div class="num-card">
+      <div class="label">MAU</div>
+      <div class="value">761M</div>
+      <div class="compare">컨센서스: 759M <span class="beat-tag">BEAT</span></div>
+      <div class="compare">YoY: +12% (+10M QoQ)</div>
+    </div>
+    <div class="num-card">
+      <div class="label">프리미엄 구독자</div>
+      <div class="value">293M</div>
+      <div class="compare">가이던스 부합 (컨센 일치)</div>
+      <div class="compare">YoY: +9% (+3M QoQ)</div>
+    </div>
+  </div>
+
+  <h3>매출 구성</h3>
+  <table>
+    <thead><tr><th>수익원</th><th>Q1 2026</th><th>전년비</th><th>CC 성장률</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>프리미엄 매출</strong></td>
+        <td class="mono">€3.90B</td>
+        <td class="mono positive">+10%</td>
+        <td class="mono positive">+16%</td>
+        <td><span class="kw-tag bullish">STRONG</span></td>
+      </tr>
+      <tr>
+        <td><strong>광고 지원 매출</strong> (Ad-supported)</td>
+        <td class="mono">€385M</td>
+        <td class="mono negative">-5%</td>
+        <td class="mono positive">+3% (CC)</td>
+        <td><span class="kw-tag bearish">FX HEADWIND</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>FX 효과 주의:</strong> 광고 매출 -5%는 YoY 기준이나 상수 환율(Constant Currency) 기준으로는 +3% 성장. 유로화 강세로 인한 환율 역풍이 실제 성장을 가렸다. 음악 광고는 인상수 증가로 성장, 단가(pricing) 소폭 약화.
+  </div>
+
+  <div class="next-q" style="margin-top:32px;">
+    <h3>Q2 2026 가이던스 (컨센서스 대비)</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item">
+        <div class="nq-label">MAU 가이던스</div>
+        <div class="nq-value">778M</div>
+        <div class="nq-note">컨센 대비 부합</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">프리미엄 구독자</div>
+        <div class="nq-value">299M</div>
+        <div class="nq-note">컨센 302M vs 가이던스 299M MISS</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">매출</div>
+        <div class="nq-value">€4.8B</div>
+        <div class="nq-note">&mdash;</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">총이익률</div>
+        <div class="nq-value">33.1%</div>
+        <div class="nq-note">Q1 대비 +10bp 개선</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">영업이익</div>
+        <div class="nq-value" style="color:var(--red);">€630M</div>
+        <div class="nq-note">컨센 €684M <strong>MISS -7.9%</strong></div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">OI 방향</div>
+        <div class="nq-value" style="color:var(--red);">-€85M</div>
+        <div class="nq-note">Q1 €715M &rarr; Q2 €630M 하락</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert-box" style="margin-top:16px;">
+    <strong>핵심 충격:</strong> Q1 영업이익 €715M이 사상 최고치였으나 Q2 가이던스 €630M은 QoQ 하락. "다음 분기에 더 못 버는 회사"라는 인식이 주가 -10~14% 급락의 실제 원인. Q1 실적 Beat는 무력화됐다.
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>스트리밍 기업을 읽는 숫자들</h2>
+
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 플랫폼 생존을 결정하는 지표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>MAU</strong> (월간 활성 사용자)</td>
+        <td class="mono positive" style="font-size:18px; font-weight:700;">761M</td>
+        <td class="mono positive">+12% YoY</td>
+        <td>광고 매출 기반 + 프리미엄 전환 풀. 가이던스 759M 초과. 경쟁사 Apple/Amazon은 미공개 &mdash; Spotify만 투명하게 공개</td>
+      </tr>
+      <tr>
+        <td><strong>프리미엄 구독자</strong></td>
+        <td class="mono positive" style="font-size:18px; font-weight:700;">293M</td>
+        <td class="mono positive">+9% YoY</td>
+        <td>안정적 구독 매출의 원천. 3회 가격 인상 후에도 순증 +3M. 이탈(Churn)이 없다는 증거</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>MAU 761M이 왜 대단한가:</strong> 전 세계 인터넷 인구의 약 10%. 북미 성장은 둔화(가격 인상 여파)이지만 라틴아메리카·유럽이 이를 상쇄. 무료 사용자(468M)가 미래 유료 전환 파이프라인 — 전환율 1%p 상승 = 구독자 +5M.
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">수익화 효율 &mdash; 같은 유저에서 얼마나 버는가</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>프리미엄 ARPU</strong></td>
+        <td class="mono">€4.76/월</td>
+        <td class="mono positive">CC +5.7%</td>
+        <td>가격 인상 효과 반영. YoY 보고 기준은 FX로 flat이지만 CC 기준 상승 추세 유지</td>
+      </tr>
+      <tr>
+        <td><strong>광고 MAU당 매출</strong></td>
+        <td class="mono">€0.82/MAU</td>
+        <td class="mono negative">YoY 약보합</td>
+        <td>468M 무료 사용자에서 창출. 광고 단가 소폭 약화 &mdash; 매크로 광고 시장 연동</td>
+      </tr>
+      <tr>
+        <td><strong>전환율</strong> (구독자/MAU)</td>
+        <td class="mono">38.5%</td>
+        <td class="mono">&mdash;</td>
+        <td>293M/761M. 가격 인상에도 전환율 유지 = 서비스 Lock-in 강함</td>
+      </tr>
+      <tr>
+        <td><strong>총이익률</strong></td>
+        <td class="mono positive" style="font-weight:700;">33.0%</td>
+        <td class="mono positive">+133bp YoY</td>
+        <td>분기 사상 최고치. 가이던스 +20bp 초과. 콘텐츠 비용 협상 개선 + 팟캐스트/오디오북 마진 기여</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>ARPU의 역설:</strong> 유로화 기준 ARPU는 FX 역풍으로 정체처럼 보이지만 달러 기준으로는 실질 개선. 중요한 건 미국 가격 인상($11.99→$12.99) 후 churn 없다는 것. 3년간 3회 인상 = 구조적 가격 결정력 보유.
+  </div>
+
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">수익성 트렌드 &mdash; 밸류에이션의 정당성</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>영업이익</strong></td>
+        <td class="mono positive">€715M</td>
+        <td class="mono positive">+40% YoY</td>
+        <td>영업이익률 15.8%. 1년 전 비교가 의미 있는 수준으로 올라왔음</td>
+      </tr>
+      <tr>
+        <td><strong>영업이익률</strong></td>
+        <td class="mono positive">15.8%</td>
+        <td class="mono positive">+3.6%p YoY</td>
+        <td>연 4%p 개선 추세. 목표 마진은 장기적으로 30%+라고 경영진 언급</td>
+      </tr>
+      <tr>
+        <td><strong>FCF</strong> (잉여현금흐름)</td>
+        <td class="mono positive">€824M</td>
+        <td class="mono positive">Q1 역대 최고</td>
+        <td>영업이익 €715M보다 FCF €824M이 더 큼 = 실질 현금 창출력 우수</td>
+      </tr>
+      <tr>
+        <td><strong>총이익</strong></td>
+        <td class="mono">€1.50B</td>
+        <td class="mono positive">+33bp 마진 개선</td>
+        <td>음악 로열티 구조 개선 + 자체 콘텐츠(팟캐스트/오디오북) 고마진 기여</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">콘텐츠 & AI &mdash; 미래 해자(Moat)의 원천</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>AI DJ 사용자</strong></td>
+        <td class="mono positive">9,400만명</td>
+        <td>구독자의 32%가 AI DJ 사용. 추천→재생→재방문 플라이휠 구동</td>
+      </tr>
+      <tr>
+        <td><strong>Song DNA</strong> (출시 4주)</td>
+        <td class="mono positive">5,200만명</td>
+        <td>출시 4주 만에 5,200만. 음악 취향 DNA 기반 초개인화 추천 기능</td>
+      </tr>
+      <tr>
+        <td><strong>오디오북</strong></td>
+        <td class="mono">&mdash;</td>
+        <td>프리미엄 ADD-ON 수익화 3계층 (무료/프리미엄/오디오북 추가구매). 마진 기여 증가 추세</td>
+      </tr>
+      <tr>
+        <td><strong>팟캐스트</strong></td>
+        <td class="mono">&mdash;</td>
+        <td>Exclusive 콘텐츠 투자 지속. 광고 수익 기여 + 프리미엄 Lock-in 역할</td>
+      </tr>
+      <tr>
+        <td><strong>Peloton 피트니스 허브</strong></td>
+        <td class="mono">신규 출시</td>
+        <td>헬스·피트니스 콘텐츠 확장. 새로운 사용 컨텍스트 = 이탈 방지</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>AI 전략의 핵심:</strong> Söderström이 "iPhone + App Store 출시 때와 같은 모멘트"로 AI를 정의. AI DJ 9,400만은 단순 기능이 아닌 플랫폼 Lock-in 도구. Song DNA 5,200만은 출시 4주 만의 수치 &mdash; 빠른 침투율이 핵심 시그널.
+  </div>
+
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">리스크 &mdash; 가이던스 Miss의 실체</span>
+  </div>
+  <table>
+    <thead><tr><th>리스크</th><th>현황</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Q2 영업이익 QoQ 하락</strong></td>
+        <td class="mono negative">€715M → €630M</td>
+        <td>전략적 투자(AI, 콘텐츠, 지역 확장) 가속화로 비용 증가. "이익 두 자릿수인데 왜 하락 가이던스?" &mdash; 시장이 받아들이기 어려운 메시지</td>
+      </tr>
+      <tr>
+        <td><strong>북미 구독자 성장 둔화</strong></td>
+        <td class="mono negative">Q2 가이던스 299M (컨센 302M)</td>
+        <td>미국 가격 인상($12.99) 3년간 3회. 성숙 시장에서 가격 탄성도 한계 도달 가능성</td>
+      </tr>
+      <tr>
+        <td><strong>광고 매출 약세</strong></td>
+        <td class="mono negative">YoY -5% (보고 기준)</td>
+        <td>매크로 광고 시장 연동. CC 기준 +3%지만 FX 역풍 지속 시 보고 기준 회복 지연</td>
+      </tr>
+      <tr>
+        <td><strong>경쟁 심화</strong></td>
+        <td class="mono neutral-tag">Apple / Amazon / YouTube</td>
+        <td>Apple Music은 기기 번들, YouTube Music은 유튜브 구독 연동. 차별화 핵심은 AI 개인화 + 팟캐스트 독점</td>
+      </tr>
+      <tr>
+        <td><strong>AI 음악 저작권 갈등</strong></td>
+        <td class="mono negative">진행 중</td>
+        <td>Söderström의 "AI 파생 음악" 발언이 아티스트 단체와 갈등 씨앗. 로열티 구조 재협상 리스크</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="kpi-note" style="margin-bottom:20px;">
+    <strong>리더십 변화:</strong> Daniel Ek는 2026년부터 Executive Chairman으로 물러나고 공동 CEO 체제 전환. <strong>Alex Norström</strong> (Co-CEO, 비즈니스) + <strong>Gustav Söderström</strong> (Co-CEO, 제품·기술) + <strong>Christian Luiga</strong> (CFO).
+  </div>
+
+  <div class="tone-meter">
+    <div class="tone-item">
+      <div class="tone-label">Norström 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:80%;background:var(--accent);"></div></div>
+      <div class="tone-score">8.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">Söderström 야심</div>
+      <div class="tone-bar"><div class="fill" style="width:90%;background:var(--accent);"></div></div>
+      <div class="tone-score">9.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:55%;background:var(--yellow);"></div></div>
+      <div class="tone-score">5.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 회의감</div>
+      <div class="tone-bar"><div class="fill" style="width:75%;background:var(--red);"></div></div>
+      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Gustav Söderström (Co-CEO, 제품·기술)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 테크 비전 선도자. AI를 단순 기능이 아니라 "스트리밍의 다음 챕터"로 프레이밍. iPhone 비유까지 동원.
+  </p>
+
+  <div class="keywords">
+    <span class="kw-tag bullish">AI MOMENT</span>
+    <span class="kw-tag bullish">SONG DNA</span>
+    <span class="kw-tag bullish">AI DJ 94M</span>
+    <span class="kw-tag bullish">DERIVATIVES</span>
+    <span class="kw-tag neutral-tag">AUDIOBOOKS 3-TIER</span>
+    <span class="kw-tag bearish">CREATOR CONFLICT</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Gustav Söderström &mdash; AI 전략 선언</div>
+    <blockquote>"This feels like one of the most significant moments in Spotify's history — similar to when the iPhone and App Store launched. We have the capabilities and technologies we need. We are the right company to solve this problem."</blockquote>
+    <div class="analysis"><strong>iPhone 비유</strong> &mdash; AI DJ·Song DNA를 인프라 전환점으로 격상. "We are the right company"는 경쟁자(Apple, Amazon, YouTube)를 겨냥한 자신감 선언. 개인화 데이터 14년 축적 = 학습 데이터 해자(Moat). 단, iPhone 비유는 과장 리스크.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Gustav Söderström &mdash; AI 파생 음악 (논란의 발언)</div>
+    <blockquote>"Existing creators are largely left out of the AI opportunity altogether... We have the capabilities to build derivative music tools. An untapped opportunity for artists to make money off of their existing IP."</blockquote>
+    <div class="analysis"><strong>가장 논쟁적 발언.</strong> "파생(derivative)" &mdash; AI가 기존 아티스트 음악을 학습해 변주곡을 만든다는 개념. 아티스트 단체·레이블 입장에서는 저작권 침해 우려. "artist에게 돈 번다"는 포지셔닝이지만 업계 반응은 냉랭. 중장기 로열티 재협상 리스크.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Gustav Söderström &mdash; 오디오북 수익화 3계층</div>
+    <blockquote>"Spotify always had the business model to capture the long tail with a free tier, and the averagely engaged users in premium. But until we launched the audiobooks add-on, we didn't really have a tool to capture the people who want to read for hundreds of hours a month... Now we have those three tools."</blockquote>
+    <div class="analysis"><strong>수익화 피라미드 완성:</strong> 무료(광고) → 프리미엄(구독) → 오디오북 헤비유저(추가과금). 각 계층에서 최대 LTV 추출. 단일 구독료에 묶여 있던 헤비 독서가를 별도 과금 풀로 분리 &mdash; ARPU 상방 압력 생성.</div>
+  </div>
+
+  <h3>Alex Norström (Co-CEO, 비즈니스)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 안정적 성장 서사 관리자. 가격 인상 후 churn 없음을 반복 강조. 마진 개선 궤도를 방어.
+  </p>
+
+  <div class="quote-block">
+    <div class="speaker">Alex Norström &mdash; 가격 인상 churn 방어</div>
+    <blockquote>"We saw no surprises with respect to price increase related churn following the January U.S. price increase. Premium Subscriber performance was fuelled by broad-based regional growth, led by Latin America and Europe."</blockquote>
+    <div class="analysis">"No surprises" &mdash; 미국 $12.99 인상 후 이탈이 없다는 공식 확인. 3년 3회 인상에도 churn 제어 = 제품 Lock-in 강도 증명. 라틴아메리카·유럽 주도라는 표현은 역설적으로 <strong>북미 성장 둔화를 인정</strong>하는 것.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Alex Norström &mdash; 자유 티어 글로벌 확장</div>
+    <blockquote>"We're rolling out an enhanced free tier globally. The free experience is the first step in converting users to premium — we need it to be the best it can be."</blockquote>
+    <div class="analysis">무료 티어 강화 = MAU 성장 가속 → 전환 파이프라인 확대. 단기 광고 수익보다 장기 구독자 풀 구축 우선. <strong>빠른 성장 시장(인도, 동남아)을 의식한 전략.</strong></div>
+  </div>
+
+  <h3>Christian Luiga (CFO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> Q2 가이던스 하락을 "투자 가속화"로 프레이밍. 방어적이지 않으나 설득력은 제한적.
+  </p>
+
+  <div class="quote-block">
+    <div class="speaker">Christian Luiga &mdash; Q2 가이던스 하락 설명</div>
+    <blockquote>"We expect meaningful year-over-year growth in free cash flow in 2026. Q2 operating income reflects our decision to accelerate strategic investments — AI, content, and market expansion — while we're in a position of strength."</blockquote>
+    <div class="analysis"><strong>"position of strength"에서 투자 가속</strong> &mdash; 방어적 삭감이 아닌 공격적 확장이라는 메시지. 하지만 시장은 €715M → €630M QoQ 하락에 집중. "YoY FCF 의미 있는 성장"이 위안이지만 구체적 수치 없이 "meaningful"만으로는 불충분.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> "실적은 좋은데 왜 다음 분기 이익이 줄어드나" — 단일 질문에 집중된 콜.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; 가격 인상 피로 우려</div>
+    <blockquote>"Are the price hikes finally catching up? Spotify has raised prices three times in three years, and now we see subscriber guidance below consensus. Is this the first sign of subscriber fatigue?"</blockquote>
+    <div class="analysis">시장의 핵심 우려를 정확히 짚음. 경영진은 "churn 없음"으로 방어했지만 <strong>Q2 구독자 가이던스 299M (컨센 302M)</strong>이 이미 답을 주고 있다. 성숙 시장(북미) 포화 가능성.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; AI 투자 ROI</div>
+    <blockquote>"You're accelerating AI investment in Q2. Can you quantify the expected return on Song DNA, AI DJ? When does AI become a revenue driver, not a cost driver?"</blockquote>
+    <div class="analysis">정당한 질문. 경영진은 "AI DJ 9,400만 사용자"로 참여도를 증거로 제시했지만 <strong>직접적 수익 기여 수치는 미공개.</strong> AI가 아직 비용 센터인지 수익 센터인지 미결 상태.</div>
+  </div>
+
+  <div class="quote-block warn">
+    <div class="speaker">시장 반응 요약</div>
+    <blockquote>"Spotify beat Q1 handsomely — EPS +17%, record margins — but the market sold first and asked questions later. The €85M sequential drop in operating income guidance is the story."</blockquote>
+    <div class="analysis">실적 Beat가 의미 없었던 드문 케이스. Q2 영업이익 QoQ 하락 가이던스가 "수익성 개선 스토리"에 균열을 냈다. <strong>고 멀티플(P/E 60~80x) 주식에서 가이던스 Miss는 매우 치명적.</strong></div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr>
+        <td style="width:160px;font-weight:600;color:var(--accent);">Alex Norström</td>
+        <td>"761M MAU, 33% 마진, FCF 역대 최고 — 우리는 성장하고 있다. 가격 인상 churn? 없다."</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--accent);">Gustav Söderström</td>
+        <td>"AI는 iPhone 급 전환점. Song DNA 5,200만·AI DJ 9,400만이 증거. 지금이 Spotify 역사상 가장 중요한 시점."</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--blue);">Christian Luiga</td>
+        <td>"Q2 영업이익 하락은 투자 가속화 때문. FCF는 YoY 성장 유지. 장기 마진 30%+ 목표 불변."</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--yellow);">애널리스트</td>
+        <td>"Q1은 훌륭. 그런데 왜 Q2 이익이 줄어드나? 가격 인상 3회 &mdash; 이제 한계인가?"</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--red);">시장 반응</td>
+        <td>장후 -10~14%. EPS Beat는 무력화. Q2 영업이익 가이던스 €630M (컨센 €684M) &mdash; -7.9% Miss가 트리거.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="kpi-note" style="margin-top:20px;">
+    <strong>Bottom Line:</strong> Spotify는 "훌륭한 Q1 + 실망스러운 Q2 전망"의 조합을 보여줬다. 비즈니스 본질(MAU, 마진, FCF)은 건강하지만 <strong>밸류에이션 프리미엄을 정당화하려면 영업이익 개선 추세가 꺾이지 않아야</strong> 한다는 시장의 기대를 Q2 가이던스가 배신했다. 주가 -10~14%는 과매도일 수 있으나 Q2 실적으로 증명이 필요.
+  </div>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid">
+    <a class="link-card" href="https://newsroom.spotify.com/2026-04-28/spotify-q1-2026-earnings/" target="_blank">
+      <div class="link-icon">&#x1F4C4;</div>
+      <div class="link-text"><div class="link-title">Spotify 공식 IR 보도자료</div><div class="link-url">newsroom.spotify.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.fool.com/earnings/call-transcripts/2026/04/28/spotify-spot-q1-2026-earnings-transcript/" target="_blank">
+      <div class="link-icon">&#x1F4DD;</div>
+      <div class="link-text"><div class="link-title">Q1 2026 컨퍼런스 콜 트랜스크립트</div><div class="link-url">fool.com / Motley Fool</div></div>
+    </a>
+    <a class="link-card" href="https://www.benzinga.com/insights/news/26/04/52095660/spotify-technology-q1-2026-earnings-call-complete-transcript" target="_blank">
+      <div class="link-icon">&#x1F4CB;</div>
+      <div class="link-text"><div class="link-title">컨콜 전문 트랜스크립트</div><div class="link-url">benzinga.com</div></div>
+    </a>
+    <a class="link-card" href="https://seekingalpha.com/article/4895086-spotify-technology-s-a-spot-q1-2026-earnings-call-transcript" target="_blank">
+      <div class="link-icon">&#x1F50D;</div>
+      <div class="link-text"><div class="link-title">Seeking Alpha 트랜스크립트</div><div class="link-url">seekingalpha.com</div></div>
+    </a>
+    <a class="link-card" href="https://variety.com/2026/music/news/spotify-q1-2026-earnings-revenue-total-premium-subscribers-1236731842/" target="_blank">
+      <div class="link-icon">&#x1F3A7;</div>
+      <div class="link-text"><div class="link-title">Variety — 북미 구독자 분석</div><div class="link-url">variety.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.musicbusinessworldwide.com/spotify-subscriber-base-grew-by-3m-to-293m-in-q1-company-posted-837m-operating-profit-for-the-quarter/" target="_blank">
+      <div class="link-icon">&#x1F4C8;</div>
+      <div class="link-text"><div class="link-title">MBW — 구독자·영업이익 분석</div><div class="link-url">musicbusinessworldwide.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.cnbc.com/2026/04/28/spotify-stock-spot-earnings-beat-guidance.html" target="_blank">
+      <div class="link-icon">&#x1F4FA;</div>
+      <div class="link-text"><div class="link-title">CNBC — 가이던스 Miss 분석</div><div class="link-url">cnbc.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.musicbusinessworldwide.com/spotifys-co-ceos-outline-ai-ambitions-and-more-on-q1-2026-earnings-call/" target="_blank">
+      <div class="link-icon">&#x1F916;</div>
+      <div class="link-text"><div class="link-title">MBW — 공동 CEO AI 전략 발언</div><div class="link-url">musicbusinessworldwide.com</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-04-29 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>

@@ -291,6 +291,66 @@ stock_entity_properties:
     propria:
       - track_record
 
+# --- Tesla 본질론 기반 속성 스키마 ---
+# Tesla essence (to ti en einai): 수직통합 × 제1원칙 엔지니어링 × 청정에너지 미션 × 자율성+로봇 야망
+tesla_essence:
+  components:
+    - vertical_integration    # 수직통합
+    - first_principle_engineering  # 제1원칙 엔지니어링
+    - clean_energy_mission    # 청정에너지 미션
+    - autonomy_robotics       # 자율성 + 로봇 야망
+
+tesla_entity_properties:
+  tesla_product:
+    essential:
+      - category           # vehicle/energy/charging
+      - first_principle_bet  # 어떤 제1원칙에 기반하는가
+      - role_in_master_plan  # Master Plan 3에서의 역할
+    propria:
+      - unit_volume
+      - asp
+      - margin
+      - production_ramp_rate
+  tesla_capability:
+    essential:
+      - moat_type          # intangible_assets/network_effects/cost_advantage
+      - inputs_required    # 데이터, 컴퓨트, 인재
+      - output_function    # 산출 기능
+    propria:
+      - accuracy_metric
+      - users
+      - interventions_per_mile
+  tesla_factory:
+    essential:
+      - production_mandate
+      - vertical_scope
+      - product_mix
+    propria:
+      - capacity
+      - utilization
+      - opex
+      - workforce
+  tesla_initiative:
+    essential:
+      - strategic_goal
+      - timeline_horizon   # short/medium/long
+      - essence_component  # 4대 본질 중 관련 항목
+      - capital_required_range
+    propria:
+      - progress_pct
+      - milestone_count
+      - burn_rate
+
+# --- Tesla 이슈 번호 프리픽스 ---
+tesla_issue_prefixes:
+  E: essence        # 본질 변화
+  P: product
+  C: capability
+  F: factory
+  I: initiative
+  R: regulatory
+  M: musk_statement  # Musk 발언
+
 # --- 제1원칙 분석 설정 ---
 first_principle_analysis:
   # 분석 대상 최소 조건

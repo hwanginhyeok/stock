@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BA | 보잉 Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #4d8bff; --accent-dim: #4d8bff33;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#0039a615,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #4d8bff44; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  /* CARDS */
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--accent); }
+  .negative { color:var(--red); }
+
+  /* KPI TIER */
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#4d8bff22; color:var(--accent); }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  /* QUOTE */
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  /* TONE METER */
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  /* NEXT Q */
+  .next-q { background:linear-gradient(135deg,#4d8bff10,var(--surface)); border:1px solid #4d8bff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--accent); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--accent); }
+
+  /* LINKS */
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  /* TAGS */
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  /* KPI NOTE */
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+  /* RECOVERY TIMELINE */
+  .timeline { position:relative; padding-left:24px; margin:24px 0; }
+  .timeline::before { content:''; position:absolute; left:8px; top:0; bottom:0; width:2px; background:var(--border); }
+  .timeline-item { position:relative; margin-bottom:20px; }
+  .timeline-item::before { content:''; position:absolute; left:-20px; top:6px; width:10px; height:10px; border-radius:50%; background:var(--accent); }
+  .timeline-item.done::before { background:var(--accent); }
+  .timeline-item.pending::before { background:var(--text-muted); }
+  .timeline-item .tl-date { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-muted); margin-bottom:4px; }
+  .timeline-item .tl-event { font-size:14px; font-weight:600; }
+  .timeline-item .tl-detail { font-size:13px; color:var(--text-dim); }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">NYSE: BA &nbsp;|&nbsp; 산업재 / 항공우주&middot;방산</div>
+    <h1>The Boeing Company</h1>
+    <div class="company-kr">보잉</div>
+    <div class="subtitle">Q1 FY2026 실적 딥다이브 &mdash; 2026.04.22 장전 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-04-22</span>
+      <span>|</span>
+      <span>섹터: 산업재 / 항공우주&middot;방산</span>
+      <span>|</span>
+      <span>시가총액: ~$1,410억</span>
+      <span>|</span>
+      <span>CEO: Kelly Ortberg (취임 2024.08)</span>
+    </div>
+    <div class="verdict beat">BEAT &mdash; EPS -$0.20 vs 컨센 -$0.68~-$0.75 / +70.8% 상회 &nbsp;|&nbsp; 매출 $22.2B vs 컨센 $21.85B Beat</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">매출</div>
+      <div class="value" style="color:var(--accent);">$22.2B</div>
+      <div class="compare">컨센서스: $21.85B <span class="beat-tag">BEAT +1.7%</span></div>
+      <div class="compare">전년비: <span class="positive">+14% YoY</span></div>
+    </div>
+    <div class="num-card">
+      <div class="label">조정 EPS</div>
+      <div class="value" style="color:var(--accent);">-$0.20</div>
+      <div class="compare">컨센서스: -$0.68~-$0.75 <span class="beat-tag">BEAT +70.8%</span></div>
+      <div class="compare">전년비: 손실 대폭 축소 (Q1 2025: -$1.13)</div>
+    </div>
+    <div class="num-card">
+      <div class="label">순손실 (GAAP)</div>
+      <div class="value">-$31M</div>
+      <div class="compare">주당 -$0.11 (희석)</div>
+      <div class="compare">전년비: Q1 2025 -$343M &rarr; <span class="positive">대폭 개선</span></div>
+    </div>
+  </div>
+
+  <h3>사업부별 매출 분해</h3>
+  <table>
+    <thead><tr><th>사업부</th><th>Q1 2026</th><th>YoY</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Commercial Airplanes (BCA)</strong></td>
+        <td class="mono">$9.2B</td>
+        <td class="mono positive">+13%</td>
+        <td><span class="kw-tag bullish">RECOVERY</span></td>
+      </tr>
+      <tr>
+        <td><strong>Defense, Space &amp; Security (BDS)</strong></td>
+        <td class="mono">$7.6B</td>
+        <td class="mono positive">+21%</td>
+        <td><span class="kw-tag bullish">SURGE</span></td>
+      </tr>
+      <tr>
+        <td><strong>Global Services (BGS)</strong></td>
+        <td class="mono">$5.37B</td>
+        <td class="mono positive">+6%</td>
+        <td><span class="kw-tag neutral-tag">STEADY</span></td>
+      </tr>
+      <tr>
+        <td style="font-weight:700;">합계</td>
+        <td class="mono" style="font-weight:700;">$22.2B</td>
+        <td class="mono positive" style="font-weight:700;">+14%</td>
+        <td><span class="kw-tag bullish">3개 사업부 동시 성장</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>3개 사업부 동시 성장</strong>은 언제?: 최근 수년간 처음으로 Commercial, Defense, Services 전 부문이 동시에 플러스 성장을 기록했다. 2024년 파업과 품질 위기 이후 생산 정상화가 가시화되는 구체적 증거.
+  </div>
+
+  <div class="next-q" style="margin-top:28px;">
+    <h3>FY2026 가이던스</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item">
+        <div class="nq-label">FCF 가이던스 (FY2026)</div>
+        <div class="nq-value">$1B~$3B</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">737 연간 인도 목표</div>
+        <div class="nq-value">~500기</div>
+      </div>
+      <div class="next-q-item">
+        <div class="nq-label">787 연간 인도 목표</div>
+        <div class="nq-value">90~100기</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>항공우주 기업을 읽는 숫자들</h2>
+
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 턴어라운드의 두 기둥</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>상업 항공기 인도 수</strong></td>
+        <td class="mono positive" style="font-size:18px; font-weight:700;">143기</td>
+        <td class="mono positive">+10% YoY</td>
+        <td>인도 = 현금 입금. 항공기는 인도 시점에 수익 인식. 생산-인도 정상화의 핵심 척도</td>
+      </tr>
+      <tr>
+        <td><strong>FCF 흑자 전환 (FY2026 가이던스)</strong></td>
+        <td class="mono positive" style="font-size:18px; font-weight:700;">$1B~$3B</td>
+        <td class="mono">&mdash; (직전 연간 -$14B+)</td>
+        <td>2022~2025년 4년 연속 FCF 적자. 2026년 흑자 전환 성공 여부가 모든 밸류에이션의 기준점</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>왜 이 두 개가 North Star인가:</strong> 보잉의 현금 문제는 단순한 손익 문제가 아니다. 항공기 한 대당 계약금이 인도 시점에 최종 정산된다. 생산은 하되 인도를 못 하면 현금이 안 들어온다 &mdash; 이것이 2024년 파업과 품질 위기 때 수십 억 달러 현금이 증발한 구조. 143기 인도 + FCF 가이던스 $1B~$3B는 이 악순환이 끊겼다는 신호다.
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">상업 항공 &mdash; 핵심 엔진의 회복 속도</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비 / 목표</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>737 MAX 월 생산률</strong></td>
+        <td class="mono">42기/월 (현재) &rarr; 47기/월 (여름)</td>
+        <td class="mono positive">목표 52기/월 (연내)</td>
+        <td>FAA 승인 생산 한도 점진 확대. 47기 달성 = 연 약 564기 공급능력 (수요 vs 공급 역전)</td>
+      </tr>
+      <tr>
+        <td><strong>737 MAX Q1 인도</strong></td>
+        <td class="mono">114기</td>
+        <td class="mono">전체 143기의 80%</td>
+        <td>여전히 보잉 현금흐름의 가장 큰 레버. 737이 살아야 보잉이 산다</td>
+      </tr>
+      <tr>
+        <td><strong>787 드림라이너 생산률</strong></td>
+        <td class="mono">8기/월 (안정화)</td>
+        <td class="mono">Q1 15기 생산</td>
+        <td>연 90~100기 인도 목표. 787은 737보다 단가 높아 ASP 상승 효과</td>
+      </tr>
+      <tr>
+        <td><strong>수주잔고 (Backlog)</strong></td>
+        <td class="mono" style="font-weight:700;">$695B (역대 최고)</td>
+        <td class="mono positive">3개 사업부 모두 최고치</td>
+        <td>약 5,600기 항공기 = 현재 생산률로 약 10년치 물량. 수요는 문제없다는 증거</td>
+      </tr>
+      <tr>
+        <td><strong>최종조립 재작업(Rework) 시간</strong></td>
+        <td class="mono positive">약 20% 감소</td>
+        <td class="mono">전년 대비</td>
+        <td>품질 개선의 정량 지표. 재작업 줄면 단위당 원가 하락 &rarr; 마진 개선 경로</td>
+      </tr>
+      <tr>
+        <td><strong>vs Airbus 인도 비교</strong></td>
+        <td class="mono positive">143기 (Boeing) vs 114기 (Airbus)</td>
+        <td class="mono">2019년 이후 첫 분기 역전</td>
+        <td>분기 기준으로 Airbus를 앞선 것은 약 7년 만. 상징성 크다</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">방산 &mdash; 숨겨진 성장 엔진</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>전년비</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Defense, Space &amp; Security 매출</strong></td>
+        <td class="mono">$7.6B</td>
+        <td class="mono positive">+21%</td>
+        <td>상업 항공 회복에 가려졌지만 방산이 분기 성장을 버텨준 진짜 공신</td>
+      </tr>
+      <tr>
+        <td><strong>주요 계약 (중동 14% 비중)</strong></td>
+        <td class="mono">백로그 중 14%가 중동</td>
+        <td class="mono">대부분 2030년 이후 인도</td>
+        <td>지정학 리스크 노출이 있으나, 인도 시점 분산으로 단기 충격은 제한적</td>
+      </tr>
+      <tr>
+        <td><strong>Global Services 매출</strong></td>
+        <td class="mono">$5.37B</td>
+        <td class="mono positive">+6%</td>
+        <td>MRO(정비·수리·오버홀) + 부품 + 훈련. 불황기에도 상대적으로 안정적인 수익원</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>방산이 중요한 이유:</strong> 상업 항공기는 경기 사이클과 항공사 재정에 종속되지만, 방산 계약은 다년간 고정 계약이다. Q1에 BDS가 +21% 성장한 것은 미 국방부 + 동맹국 방산 수요 증가를 반영하며, 상업 항공 회복기에 현금 버퍼 역할을 한다.
+  </div>
+
+  <!-- TIER 4 -->
+  <div class="tier-header">
+    <span class="tier-badge t4">TIER 4</span>
+    <span class="tier-title">수익성 &mdash; 아직 갈 길이 멀다</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>Q1 2026</th><th>목표 / 전망</th><th>읽는 법</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>GAAP 순손실</strong></td>
+        <td class="mono">-$31M (-$0.11/주)</td>
+        <td class="mono positive">전년 -$343M 대비 급감</td>
+        <td>흑자 전환은 아직. 그러나 손실 규모가 극적으로 줄어드는 중</td>
+      </tr>
+      <tr>
+        <td><strong>BCA 영업이익률</strong></td>
+        <td class="mono negative">여전히 적자</td>
+        <td class="mono">흑자 전환 목표: 2027년</td>
+        <td>상업 항공은 생산률 확대와 재작업 감소가 선행되어야 마진 개선 가능. 2027이 타깃</td>
+      </tr>
+      <tr>
+        <td><strong>현금 및 유동성</strong></td>
+        <td class="mono">$20.9B</td>
+        <td class="mono">&mdash;</td>
+        <td>현금 보유고는 충분. 단기 파산 리스크는 없음</td>
+      </tr>
+      <tr>
+        <td><strong>총 부채</strong></td>
+        <td class="mono negative">$47.2B</td>
+        <td class="mono positive">전분기 대비 $6.9B 감소</td>
+        <td>만기 도래 채무 상환으로 부채 감소 중. 부채 상환은 CFO Malave의 최우선 과제 #1</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>부채 $47.2B를 어떻게 볼 것인가:</strong> 보잉의 부채는 2020~2025년 사이 팬데믹 + 737 MAX 운항 중단 + 파업으로 급증했다. Q1에 $6.9B을 상환한 것은 FCF 전환과 자본 조달 이후 본격적인 부채 감축이 시작됐다는 신호. 그러나 $47B는 여전히 연 매출의 약 54%에 달하는 수준이다.
+  </div>
+
+  <!-- TIER 5 -->
+  <div class="tier-header">
+    <span class="tier-badge t5">TIER 5</span>
+    <span class="tier-title">리스크 &mdash; 턴어라운드를 막을 수 있는 것들</span>
+  </div>
+  <table>
+    <thead><tr><th>리스크</th><th>현황</th><th>심각도</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>중국 737 MAX 인도 동결</strong></td>
+        <td>미중 관세 분쟁으로 중국 항공사들이 보잉 수령 중단. 약 25기 인도 대기 중</td>
+        <td><span class="kw-tag bearish">HIGH</span></td>
+      </tr>
+      <tr>
+        <td><strong>중국 수주 불확실성</strong></td>
+        <td>잠재적 500기+ 중국 수주가 무역 협상 결과에 종속. "정부 지원 없이는 대규모 수주 어렵다" (Ortberg)</td>
+        <td><span class="kw-tag bearish">HIGH</span></td>
+      </tr>
+      <tr>
+        <td><strong>품질 잔여 리스크</strong></td>
+        <td>재작업 시간 20% 감소했으나, 완전한 제조 품질 정상화까지 추가 시간 필요</td>
+        <td><span class="kw-tag neutral-tag">MEDIUM</span></td>
+      </tr>
+      <tr>
+        <td><strong>공급망 병목</strong></td>
+        <td>Spirit AeroSystems 인수 통합 진행 중. 공급망 역량이 생산 확대의 실질적 한계</td>
+        <td><span class="kw-tag neutral-tag">MEDIUM</span></td>
+      </tr>
+      <tr>
+        <td><strong>BCA 마진 지연</strong></td>
+        <td>상업 항공기 영업 흑자 전환이 2027년 목표 &mdash; 시장이 기다려줄 인내심 필요</td>
+        <td><span class="kw-tag neutral-tag">MEDIUM</span></td>
+      </tr>
+      <tr>
+        <td><strong>노사 관계</strong></td>
+        <td>2024년 7주 파업 이후 협상 타결. 단기 재파업 리스크는 낮으나 장기 계약 만료 주시 필요</td>
+        <td><span class="kw-tag bullish">LOW (현재)</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="kpi-note">
+    <strong>중국 리스크가 핵심 변수:</strong> 미중 무역전쟁이 보잉에 직접 타격을 주고 있다. 중국은 보잉 총 백로그의 약 14%를 차지하는 전략적 고객이다. 5월 트럼프-시진핑 무역 협상에서 항공기 딜이 패키지에 포함될 경우 추가 상승 촉매가 될 수 있다. Jefferies 애널리스트 Sheila Kahyaoglu의 목표주가 $295 유지와 Buy 의견의 핵심 논거가 바로 중국 수주 복원 시나리오다.
+  </div>
+
+  <!-- RECOVERY TIMELINE -->
+  <h3>턴어라운드 타임라인</h3>
+  <div class="timeline">
+    <div class="timeline-item done">
+      <div class="tl-date">2024.08</div>
+      <div class="tl-event">Kelly Ortberg CEO 취임</div>
+      <div class="tl-detail">Dave Calhoun 교체. 품질 문제 + 파업 위기 속 외부 인사 발탁. 제조 현장 출신 실무형 리더</div>
+    </div>
+    <div class="timeline-item done">
+      <div class="tl-date">2024.09~11</div>
+      <div class="tl-event">IAM 파업 7주 &rarr; 협상 타결</div>
+      <div class="tl-detail">생산 완전 중단. 협상 타결 후 Everett/Renton 공장 재가동. 연간 약 $1.5B 현금 손실 추정</div>
+    </div>
+    <div class="timeline-item done">
+      <div class="tl-date">2025 전반</div>
+      <div class="tl-event">생산 안정화 &amp; FAA 인증 복구</div>
+      <div class="tl-detail">737 월 38기 &rarr; 42기로 점진 확대. 품질 관리 시스템 재구축. 재작업 시간 감축 시작</div>
+    </div>
+    <div class="timeline-item done">
+      <div class="tl-date">2026.Q1</div>
+      <div class="tl-event">143기 인도 + Airbus 7년 만에 분기 역전</div>
+      <div class="tl-detail">3개 사업부 동시 플러스 성장. EPS 컨센 +70.8% 초과. FCF 흑자 전환 가이던스 유지</div>
+    </div>
+    <div class="timeline-item pending">
+      <div class="tl-date">2026 여름</div>
+      <div class="tl-event">737 생산률 47기/월 목표</div>
+      <div class="tl-detail">Everett North Line 가동 시 52기/월로 확대. 공급망 역량이 병목 변수</div>
+    </div>
+    <div class="timeline-item pending">
+      <div class="tl-date">2027</div>
+      <div class="tl-event">BCA 영업 흑자 전환 목표</div>
+      <div class="tl-detail">생산 원가 정상화 + 재작업 근절 + 가격 인상 협상 완료 시 달성 가능</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter">
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:80%;background:var(--accent);"></div></div>
+      <div class="tone-score" style="color:var(--accent);">8.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 현실성</div>
+      <div class="tone-bar"><div class="fill" style="width:75%;background:var(--yellow);"></div></div>
+      <div class="tone-score" style="color:var(--yellow);">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 기대</div>
+      <div class="tone-bar"><div class="fill" style="width:70%;background:var(--blue);"></div></div>
+      <div class="tone-score" style="color:var(--blue);">7.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">중국 리스크 투명도</div>
+      <div class="tone-bar"><div class="fill" style="width:65%;background:var(--red);"></div></div>
+      <div class="tone-score" style="color:var(--red);">6.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Kelly Ortberg (President &amp; CEO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 신중한 낙관론자. 과장 없는 언어. "진행 중(on plan)"과 "측정 가능한 개선(measurable progress)"을 반복. 자신이 고친 사람이라는 것을 증명하되, 아직 게임이 끝나지 않았음을 인정하는 균형.
+  </p>
+
+  <div class="keywords">
+    <span class="kw-tag bullish">MEASURABLE PROGRESS</span>
+    <span class="kw-tag bullish">RESTORING TRUST</span>
+    <span class="kw-tag bullish">ON PLAN</span>
+    <span class="kw-tag bullish">BUILDING MOMENTUM</span>
+    <span class="kw-tag neutral-tag">MORE TO DO</span>
+    <span class="kw-tag neutral-tag">SAFETY AND QUALITY</span>
+    <span class="kw-tag bearish">WITHOUT GOVERNMENT SUPPORT (China)</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Kelly Ortberg &mdash; 오프닝 스테이트먼트</div>
+    <blockquote>"We're off to a really good start and headed in the right direction. The company is remaining on plan and building momentum from solid performance across all three businesses."</blockquote>
+    <div class="analysis"><strong>"on plan"과 "building momentum"</strong>이 핵심 단어. Ortberg는 과잉 약속을 피하는 스타일이다. "great start"나 "exceptional"이 아닌 "good start" &mdash; 측정 가능한 말만 한다. 투자자에게 보내는 신호: <em>"우리가 말한 대로 하고 있다. 더 이상 서프라이즈 적자는 없다."</em></div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Kelly Ortberg &mdash; 안전&middot;품질</div>
+    <blockquote>"Our team remains squarely focused on safety and quality, disciplined execution, and elevating operational performance. Their dedication to safety and quality, embracing our values and behaviors, and continuous improvement have enabled a solid start to the year."</blockquote>
+    <div class="analysis">"squarely focused"와 "disciplined execution" &mdash; 2024년 Alaska Airlines 사고 이후 품질이 전 세계 규제기관의 레이더에 잡혀 있다. 이 발언은 단순한 PR이 아니라 FAA, EASA와의 신뢰 재건 메시지다. <strong>"values and behaviors"는 조직 문화 변혁의 언어 &mdash; 제조 현장 규율 재정립을 의미.</strong></div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Kelly Ortberg &mdash; 진행 상황</div>
+    <blockquote>"While there's more to do in 2026, we're making measurable progress. We're restoring trust with our customers, we're increasing production rates."</blockquote>
+    <div class="analysis"><strong>"while there's more to do"</strong> &mdash; Ortberg 화법의 정수. 절반의 성공을 선언하면서도 나머지 절반을 솔직히 인정한다. 전임 CEO 시대의 "everything is fine" 메시지와 180도 다른 어조. 이것이 시장이 Ortberg에게 주는 신뢰 프리미엄의 원천이다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Kelly Ortberg &mdash; 737 생산 확대</div>
+    <blockquote>"We plan to increase 737 production to 47 per month this summer, with a move to 52 per month enabled by activating the 737 North Line in Everett."</blockquote>
+    <div class="analysis">42 &rarr; 47 &rarr; 52기/월. 구체적인 숫자와 로드맵. 시장이 원하는 것은 비전이 아니라 <strong>숫자와 타임라인</strong>이다. "이번 여름"이라는 구체적 시점 명시 &mdash; 분기 후 검증 가능하다. 52기 달성 시 연 624기 공급 능력 = 연간 수요를 초과하는 공급력 확보.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Kelly Ortberg &mdash; 중국 리스크 (가장 솔직한 발언)</div>
+    <blockquote>"Without government support, I don't think we will see any large orders from China in the short term."</blockquote>
+    <div class="analysis">이 발언이 컨콜에서 가장 주목받은 부분이다. 경영진이 IR 콜에서 이렇게 직접적으로 정부 개입의 필요성을 언급하는 것은 이례적이다. 해석: <em>"우리가 해결할 수 있는 문제가 아니다. 워싱턴-베이징 협상 테이블에 달려 있다."</em> 투명성은 높지만, 투자자 입장에서는 통제 불가능한 외부 변수라는 것을 확인한 셈.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Kelly Ortberg &mdash; 고객 신뢰 회복</div>
+    <blockquote>"We're hearing very good things about the quality of our airplanes from our customers."</blockquote>
+    <div class="analysis">CNBC 인터뷰에서의 발언. 추상적이지만 중요한 시그널이다. 항공사들은 보통 공개적으로 공급업체를 칭찬하지 않는다. 고객 목소리가 긍정적이라면, 취소(cancellation)나 공급업체 전환(Airbus로 이탈) 가능성이 낮다는 뜻이다.</div>
+  </div>
+
+  <h3>Jay Malave (EVP &amp; CFO)</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 수치 중심 실용주의자. 부채 상환 &rarr; 투자 &rarr; 주주환원 순서를 일관되게 강조. 감성 없이 현금흐름 언어만 구사한다.
+  </p>
+
+  <div class="quote-block">
+    <div class="speaker">Jay Malave &mdash; 재무 우선순위</div>
+    <blockquote>"Our priorities remain: debt reduction first, then investment in the business, then returning value to shareholders."</blockquote>
+    <div class="analysis"><strong>배당·자사주 매입은 없다.</strong> Malave가 이 순서를 공개 선언한 것은 단순한 CFO 발언이 아니다 &mdash; 주주들에게 "당분간 현금을 주주에게 돌려주지 않겠다"는 약속이다. $47.2B 부채가 해소되기 전까지는 수익 배분 기대를 접으라는 메시지. 합리적이나 배당 기대 투자자에게는 실망.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Jay Malave &mdash; 생산 효율 개선</div>
+    <blockquote>"We saw nearly 20% reduction in final assembly rework hours compared with the first quarter of 2025."</blockquote>
+    <div class="analysis">이 수치가 Tier 4 마진 개선의 선행 지표다. 재작업은 비용 중복이다 &mdash; 같은 비행기를 두 번 만드는 것. 20% 감소는 직접 단위 원가 하락으로 이어진다. 737이 연간 500기를 인도하는 시점에 재작업이 0에 수렴하면 BCA 마진은 급격히 개선된다.</div>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Jay Malave &mdash; 부채 감축</div>
+    <blockquote>"Debt declined by $6.9 billion during the quarter to $47.2 billion due to repayment of maturing debt."</blockquote>
+    <div class="analysis">단일 분기에 $6.9B을 갚았다. 이는 만기 도래 채무 상환으로 선택이 아닌 의무였다. 그러나 갚을 수 있었다는 것 자체가 유동성 건전성의 신호다. 현금 $20.9B 보유 + 단기 상환 완료 &mdash; 단기 재무 리스크는 낮다.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 조심스러운 낙관론. "이번엔 진짜냐?"를 숫자로 확인하려는 모드. 중국 관련 질문이 예상대로 집중됐다.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">JPMorgan, Seth Seifman &mdash; 핵심 프레임 전환</div>
+    <blockquote>"Boeing is transitioning from a 'story stock' to a 'cash counting' stock. The next major milestone is whether Q2 free cash flow can approach break-even."</blockquote>
+    <div class="analysis"><strong>"story stock" &rarr; "cash counting stock"</strong>이 핵심 키워드. 이제 서사(narrative)가 아니라 현금(cash)으로 보잉을 판단하겠다는 시장의 선언이다. 2분기 FCF가 브레이크이븐(0)에 근접하면 FY2026 가이던스 $1B~$3B의 신뢰도가 급등한다. 2분기 FCF가 이 사이클의 분수령.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Jefferies, Sheila Kahyaoglu &mdash; 중국 상방 촉매</div>
+    <blockquote>"The potential for 500 MAX orders from China is a key upside catalyst for Boeing. We maintain our $295 price target and Buy rating."</blockquote>
+    <div class="analysis">목표주가 $295는 현재가 $234 대비 약 26% 상승 여력이다. 중국 500기 수주가 실현되면 수조 달러 규모의 캐시플로우가 10년에 걸쳐 유입된다. 단, 이는 순수하게 무역 협상 결과에 달려 있다 &mdash; 보잉이 통제할 수 없는 변수.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Morningstar &mdash; 중국 리스크 중립 평가</div>
+    <blockquote>"China deliveries are hostage to trade negotiation, but this too shall pass."</blockquote>
+    <div class="analysis"><strong>"this too shall pass"</strong> &mdash; Morningstar의 장기 뷰. 중국 항공사들은 결국 보잉이 필요하다. 중국 COMAC이 자체 항공기를 충분히 생산하기까지는 수년이 필요하고, Airbus도 납기 지연 중이다. 단기 고통이지만 구조적으로는 보잉의 레버리지가 있다는 해석.</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">애널리스트 &mdash; 중동 백로그 리스크</div>
+    <blockquote>"What is the exposure to the Middle East, and what's the timing of those deliveries?"</blockquote>
+    <div class="analysis">Ortberg 답변: "백로그의 14%가 중동이며, 대부분은 2030년 이후 인도." &mdash; 단기 현금흐름에 미치는 영향은 제한적. 그러나 지정학 갈등이 장기화되면 항공사 경영이 악화되어 취소(cancellation)로 이어질 수 있다는 점은 중기 리스크로 남는다.</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>이 실적이 의미하는 것</h2>
+  <table>
+    <tbody>
+      <tr>
+        <td style="width:160px;font-weight:600;color:var(--accent);">Kelly Ortberg</td>
+        <td>"측정 가능한 진전이 있다. 더 할 일이 남아 있지만, 계획대로 가고 있다. 중국은 정부가 풀어야 한다."</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--accent);">Jay Malave</td>
+        <td>"부채 $47.2B 상환이 최우선이다. 현금이 먼저, 배당은 나중이다. FCF 가이던스 $1B~$3B 유지."</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--yellow);">JPMorgan</td>
+        <td>"story stock는 끝났다. 2분기 FCF 숫자가 나와야 진짜 판단한다. 지금은 증명의 시간."</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--yellow);">Jefferies</td>
+        <td>"목표가 $295 유지. 중국 500기 수주가 열리는 날이 보잉의 진짜 리레이팅 시점."</td>
+      </tr>
+      <tr>
+        <td style="font-weight:600;color:var(--blue);">시장 반응</td>
+        <td>장전 발표 당일 +1.23% ($234.13). EPS 70%+ 비트에 비해 반응이 차분 &mdash; 중국 리스크가 상방을 눌렀다.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="kpi-note" style="margin-top:24px;">
+    <strong>결론: 턴어라운드는 실재한다. 그러나 중국이 변수다.</strong><br>
+    Ortberg 취임 이후 보잉은 정말로 달라지고 있다. 143기 인도 + 3개 사업부 동시 성장 + EPS 대폭 비트. 2024년의 재앙적 운항 중단과 파업을 생각하면 놀라운 회복이다. 문제는 외부에 있다. 미중 무역전쟁이 보잉의 가장 큰 잠재 고객인 중국 시장 전체를 블록하고 있다. 2분기에 FCF가 브레이크이븐을 달성하고, 5월 무역 협상에서 항공기 딜이 패키지에 포함된다면 &mdash; 이 두 가지가 충족되는 날이 보잉의 진짜 리레이팅 시점이다.
+  </div>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid">
+    <a class="link-card" href="https://investors.boeing.com/investors/news/press-release-details/2026/Boeing-Reports-First-Quarter-Results/default.aspx" target="_blank">
+      <div class="link-icon">&#x1F4C4;</div>
+      <div class="link-text"><div class="link-title">Boeing IR 보도자료 (Q1 2026)</div><div class="link-url">investors.boeing.com</div></div>
+    </a>
+    <a class="link-card" href="https://seekingalpha.com/article/4892948-the-boeing-company-ba-q1-2026-earnings-call-transcript" target="_blank">
+      <div class="link-icon">&#x1F4DD;</div>
+      <div class="link-text"><div class="link-title">컨퍼런스 콜 전체 트랜스크립트</div><div class="link-url">seekingalpha.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.cnbc.com/2026/04/22/boeing-ba-q1-2026-earnings.html" target="_blank">
+      <div class="link-icon">&#x1F4FA;</div>
+      <div class="link-text"><div class="link-title">CNBC 실적 보도 + Ortberg 인터뷰</div><div class="link-url">cnbc.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.investing.com/news/transcripts/earnings-call-transcript-boeing-reports-q1-2026-earnings-beat-stock-surges-93CH-4630045" target="_blank">
+      <div class="link-icon">&#x1F4C8;</div>
+      <div class="link-text"><div class="link-title">Investing.com 컨콜 하이라이트</div><div class="link-url">investing.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.tikr.com/blog/boeing-reports-22-2b-in-q1-revenue-as-all-three-segments-grow-simultaneously" target="_blank">
+      <div class="link-icon">&#x1F4CA;</div>
+      <div class="link-text"><div class="link-title">TIKR.com 세그먼트 분석</div><div class="link-url">tikr.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.morningstar.com/stocks/boeing-china-deliveries-hostage-trade-negotiation-this-too-shall-pass" target="_blank">
+      <div class="link-icon">&#x1F50E;</div>
+      <div class="link-text"><div class="link-title">Morningstar: 중국 리스크 분석</div><div class="link-url">morningstar.com</div></div>
+    </a>
+    <a class="link-card" href="https://www.insidermonkey.com/blog/the-boeing-company-nyseba-q1-2026-earnings-call-transcript-1744778/" target="_blank">
+      <div class="link-icon">&#x1F4DC;</div>
+      <div class="link-text"><div class="link-title">Insider Monkey 전체 트랜스크립트</div><div class="link-url">insidermonkey.com</div></div>
+    </a>
+    <a class="link-card" href="https://leehamnews.com/2026/03/17/boeing-says-1q-deliveries-will-be-lower-than-forecast-but-will-catch-up-later/" target="_blank">
+      <div class="link-icon">&#x2708;&#xFE0F;</div>
+      <div class="link-text"><div class="link-title">Leeham News: 항공 전문 분석</div><div class="link-url">leehamnews.com</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-04-30 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>
