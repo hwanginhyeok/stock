@@ -234,7 +234,7 @@ def get_yesterday_earnings(target_date: str | None = None) -> list[dict[str, Any
             logger.warning(f"No earnings data for {target_date}")
             return []
         
-        rows = data["data"].get("rows", [])
+        rows = data["data"].get("rows") or []
         earnings_list = []
         
         for row in rows:

@@ -4,10 +4,7 @@ Usage::
 
     from src.collectors.news import RSSNewsCollector
     from src.collectors.market import KoreaMarketCollector, USMarketCollector
-    from src.collectors.sentiment import (
-        CNNFearGreedCollector, PutCallRatioCollector,
-        NaverCommunityCollector, StockTwitsCollector, AAIISentimentCollector,
-    )
+    from src.collectors.sentiment import CNNFearGreedCollector, PutCallRatioCollector
 """
 
 from src.collectors.base import BaseCollector
@@ -18,13 +15,8 @@ from src.collectors.market import (
 )
 from src.collectors.news import BaseNewsCollector, RSSNewsCollector, TitleDeduplicator
 from src.collectors.sentiment import (
-    AAIISentimentCollector,
     CNNFearGreedCollector,
-    GoogleTrendsCollector,
-    NaverCommunityCollector,
     PutCallRatioCollector,
-    RedditSentimentCollector,
-    StockTwitsCollector,
 )
 
 __all__ = [
@@ -37,9 +29,4 @@ __all__ = [
     "USMarketCollector",
     "CNNFearGreedCollector",
     "PutCallRatioCollector",
-    "NaverCommunityCollector",
-    "StockTwitsCollector",
-    "AAIISentimentCollector",
-    "RedditSentimentCollector",
-    "GoogleTrendsCollector",
 ]
