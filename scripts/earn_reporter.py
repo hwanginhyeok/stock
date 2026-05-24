@@ -243,10 +243,13 @@ def get_yesterday_earnings(target_date: str | None = None) -> list[dict[str, Any
                 continue
             
             earnings_list.append({
+                # Nasdaq API 필드명 변경 대응 (2026-05-24 발견):
+                #   epsActual → eps / epsEstimate → epsForecast / companyName → name
+                #   revenueEstimate는 API에서 제거됨 (GLM 분석 단계에서 보강)
                 "ticker": ticker,
-                "company": row.get("companyName", ""),
-                "eps_estimate": _parse_number(row.get("epsEstimate")),
-                "eps_actual": _parse_number(row.get("epsActual")),
+                "company": row.get("companyName") or row.get("name") or "",
+                "eps_estimate": _parse_number(row.get("epsEstimate") or row.get("epsForecast")),
+                "eps_actual": _parse_number(row.get("epsActual") or row.get("eps")),
                 "revenue_estimate": _parse_number(row.get("revenueEstimate")),
                 "time": row.get("time", ""),
             })
