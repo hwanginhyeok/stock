@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 Q1 실적 시즌 섹터 종합 | Earnings Sector Summary</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #0071CE; --accent-dim: #0071CE33;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+  a { color:var(--accent); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+
+  .hero { background:linear-gradient(135deg,#0071CE15,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:48px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; font-family:'IBM Plex Mono',monospace; letter-spacing:1px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #0071CE44; }
+  .verdict.mixed { background:#ffc10722; color:var(--yellow); border:1px solid #ffc10744; }
+  .verdict.unknown { background:#55555522; color:var(--text-dim); border:1px solid #55555544; }
+  .verdict-row { display:flex; gap:12px; margin-top:20px; flex-wrap:wrap; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:64px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-family:'Playfair Display',serif; font-size:30px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); display:flex; align-items:baseline; gap:14px; }
+  .section h3 { font-size:16px; margin:28px 0 14px; color:var(--text-dim); font-weight:500; text-transform:uppercase; letter-spacing:1.5px; }
+
+  .count-pill { font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:500; color:var(--accent); background:var(--accent-dim); padding:4px 12px; border-radius:4px; letter-spacing:.5px; }
+  .badge-row { display:flex; gap:10px; margin:-8px 0 28px; flex-wrap:wrap; }
+
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; vertical-align:middle; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--accent); }
+  .negative { color:var(--red); }
+  .text-muted { color:var(--text-muted); }
+  .mono { font-family:'IBM Plex Mono',monospace; }
+
+  .lead-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin:8px 0 32px; }
+  @media (max-width: 768px) { .lead-grid { grid-template-columns:1fr; } }
+
+  .lead-card { background:var(--surface); border-radius:10px; padding:24px; position:relative; border:1px solid var(--border); }
+  .lead-card.leader { border:1px solid var(--accent); background:linear-gradient(135deg, #0071CE12, var(--surface)); }
+  .lead-card.laggard { border:1px solid var(--red); background:linear-gradient(135deg, #ff4d4d12, var(--surface)); }
+  .lead-card.solo { border:1px solid var(--yellow); background:linear-gradient(135deg, #ffc10712, var(--surface)); }
+  .lead-card .lead-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
+  .lead-card.leader .lead-label { color:var(--accent); }
+  .lead-card.laggard .lead-label { color:var(--red); }
+  .lead-card.solo .lead-label { color:var(--yellow); }
+  .lead-card .lead-ticker { font-family:'IBM Plex Mono',monospace; font-size:30px; font-weight:700; letter-spacing:2px; margin-bottom:2px; }
+  .lead-card .lead-company { font-size:14px; color:var(--text-dim); margin-bottom:14px; }
+  .lead-card .lead-surprise { font-family:'IBM Plex Mono',monospace; font-size:40px; font-weight:700; margin:6px 0; }
+  .lead-card .lead-meta { font-size:12px; color:var(--text-muted); margin-bottom:10px; }
+  .lead-card .lead-verdict { margin-bottom:12px; }
+  .lead-card .lead-comment { font-size:13px; color:var(--text-dim); line-height:1.6; margin-bottom:14px; }
+  .lead-card .lead-link { display:inline-block; font-size:13px; font-family:'IBM Plex Mono',monospace; color:var(--accent); }
+
+  .verdict-mini { display:inline-block; padding:2px 8px; border-radius:3px; font-size:10px; font-weight:600; font-family:'IBM Plex Mono',monospace; letter-spacing:1px; }
+  .verdict-mini.beat { background:var(--accent-dim); color:var(--accent); }
+  .verdict-mini.miss { background:var(--red-dim); color:var(--red); }
+  .verdict-mini.mixed { background:#ffc10722; color:var(--yellow); }
+
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .ticker-link { font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--accent); }
+  .empty-note { padding:24px; background:var(--surface); border:1px dashed var(--border); border-radius:8px; color:var(--text-muted); font-size:13px; text-align:center; margin-bottom:24px; }
+
+  .footer { border-top:1px solid var(--border); padding:32px 0; text-align:center; font-size:12px; color:var(--text-muted); line-height:1.8; }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">2026 Q1 EARNINGS SEASON</div>
+    <h1>섹터별 종합 분석</h1>
+    <div class="company-kr">US Earnings — Sector Summary</div>
+    <div class="subtitle">대형주 48종목 · 11개 GICS 섹터 · EPS 서프라이즈 기반 대장/약자 추출</div>
+    <div class="meta-row">
+      <span>시즌 기간: 2026-04-29 ~ 2026-05-22</span>
+      <span>|</span>
+      <span>분석 종목: 48</span>
+      <span>|</span>
+      <span>EPS 데이터: 35/48</span>
+    </div>
+    <div class="verdict-row">
+      <span class="verdict beat">BEAT 17</span>
+      <span class="verdict mixed">MIXED 15</span>
+      <span class="verdict miss">MISS 16</span>
+      
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 섹터 분포 ===== -->
+<div class="section">
+  <div class="section-label">00 &mdash; OVERVIEW</div>
+  <h2>섹터 분포</h2>
+  <table>
+    <thead><tr><th>섹터</th><th>종목 수</th><th>BEAT</th><th>MIXED</th><th>MISS</th><th>EPS 평균 서프라이즈</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Technology</strong></td><td class='mono'>13</td><td class='mono positive'>5</td><td class='mono'>4</td><td class='mono negative'>4</td><td class='mono positive'>+44.3%</td></tr>
+      <tr><td><strong>Communication Services</strong></td><td class='mono'>5</td><td class='mono positive'>2</td><td class='mono'>3</td><td class='mono negative'>0</td><td class='mono positive'>+33.3%</td></tr>
+      <tr><td><strong>Consumer Cyclical</strong></td><td class='mono'>7</td><td class='mono positive'>4</td><td class='mono'>2</td><td class='mono negative'>1</td><td class='mono positive'>+25.1%</td></tr>
+      <tr><td><strong>Consumer Defensive</strong></td><td class='mono'>3</td><td class='mono positive'>3</td><td class='mono'>0</td><td class='mono negative'>0</td><td class='mono positive'>+7.3%</td></tr>
+      <tr><td><strong>Healthcare</strong></td><td class='mono'>2</td><td class='mono positive'>1</td><td class='mono'>1</td><td class='mono negative'>0</td><td class='mono positive'>+8.4%</td></tr>
+      <tr><td><strong>Financial Services</strong></td><td class='mono'>4</td><td class='mono positive'>1</td><td class='mono'>2</td><td class='mono negative'>1</td><td class='mono negative'>-0.4%</td></tr>
+      <tr><td><strong>Industrials</strong></td><td class='mono'>5</td><td class='mono positive'>1</td><td class='mono'>0</td><td class='mono negative'>4</td><td class='mono positive'>+23.4%</td></tr>
+      <tr><td><strong>Energy</strong></td><td class='mono'>2</td><td class='mono positive'>0</td><td class='mono'>0</td><td class='mono negative'>2</td><td class='mono negative'>-11.0%</td></tr>
+      <tr><td><strong>Utilities</strong></td><td class='mono'>3</td><td class='mono positive'>0</td><td class='mono'>2</td><td class='mono negative'>1</td><td class='mono negative'>-18.7%</td></tr>
+      <tr><td><strong>Real Estate</strong></td><td class='mono'>2</td><td class='mono positive'>0</td><td class='mono'>0</td><td class='mono negative'>2</td><td class='mono '>—</td></tr>
+      <tr><td><strong>Basic Materials</strong></td><td class='mono'>1</td><td class='mono positive'>0</td><td class='mono'>1</td><td class='mono negative'>0</td><td class='mono '>—</td></tr>
+      <tr><td><strong>(Unclassified)</strong></td><td class='mono'>1</td><td class='mono positive'>0</td><td class='mono'>0</td><td class='mono negative'>1</td><td class='mono positive'>+2.1%</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== Technology ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; SECTOR</div>
+  <h2>Technology <span class="count-pill">13 종목</span></h2>
+  <div class="badge-row">
+    <span class="kw-tag bullish">BEAT 5</span>
+    <span class="kw-tag neutral-tag">MIXED 4</span>
+    <span class="kw-tag bearish">MISS 4</span>
+  </div>
+  <div class="lead-grid">
+    <div class="lead-card leader">
+      <div class="lead-label">대장</div>
+      <div class="lead-ticker">INTC</div>
+      <div class="lead-company">인텔</div>
+      <div class="lead-surprise positive">+500.0%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$0.29</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$0.01</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict beat">BEAT</span></div>
+      <div class="lead-comment">BEAT — 매출 +10.2% vs 컨센서스 / EPS $0.29 (컨센 $0.00~$0.01 압도)</div>
+      <a class="lead-link" href="INTC_2026Q1.html">→ 상세 보기</a>
+    </div>
+    <div class="lead-card laggard">
+      <div class="lead-label">약자</div>
+      <div class="lead-ticker">SHOP</div>
+      <div class="lead-company">Shopify Inc.</div>
+      <div class="lead-surprise negative">-58.3%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$0.05</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$0.12</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict miss">MISS</span></div>
+      <div class="lead-comment">MISS — 매출이 전년 대비 20% 이상 급락하며 시장 기대치를 충족하지 못했으나, AI 및 마케팅 툴 확대를 통해 장기적 구조조정 성과를 기대함.</div>
+      <a class="lead-link" href="SHOP_2026Q1.html">→ 상세 보기</a>
+    </div>
+  </div>
+  <h3>섹터 내 전 종목</h3>
+  <table>
+    <thead><tr><th>티커</th><th>회사명</th><th>Verdict</th><th>EPS Actual</th><th>EPS Est</th><th>Surprise</th><th>링크</th></tr></thead>
+    <tbody>
+      <tr><td class='mono'>INTC</td><td>인텔</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>$0.29</td><td class='mono'>$0.01</td><td class='mono positive'>+500.0%</td><td><a class='ticker-link' href='INTC_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>NVDA</td><td>NVIDIA Corporation</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>$0.60</td><td class='mono'>$0.52</td><td class='mono positive'>+15.4%</td><td><a class='ticker-link' href='NVDA_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>PLTR</td><td>Palantir Technologies Inc.</td><td><span class="verdict-mini mixed">MIXED</span></td><td class='mono'>$0.08</td><td class='mono'>$0.07</td><td class='mono positive'>+14.3%</td><td><a class='ticker-link' href='PLTR_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>TSLA</td><td>테슬라</td><td><span class="verdict-mini mixed">MIXED</span></td><td class='mono'>$0.41</td><td class='mono'>$0.38</td><td class='mono positive'>+9.3%</td><td><a class='ticker-link' href='TSLA_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>MSFT</td><td>Microsoft Corporation</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>$4.27</td><td class='mono'>$4.06</td><td class='mono positive'>+5.2%</td><td><a class='ticker-link' href='MSFT_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>AAPL</td><td>Apple Inc.</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>$2.56</td><td class='mono'>$2.45</td><td class='mono positive'>+4.5%</td><td><a class='ticker-link' href='AAPL_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>NOW</td><td>서비스나우</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>$0.97</td><td class='mono'>$0.95</td><td class='mono positive'>+2.1%</td><td><a class='ticker-link' href='NOW_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>CSCO</td><td>Cisco Systems, Inc.</td><td><span class="verdict-mini miss">MISS</span></td><td class='mono'>$0.57</td><td class='mono'>$0.56</td><td class='mono positive'>+1.8%</td><td><a class='ticker-link' href='CSCO_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>AMD</td><td>Advanced Micro Devices, Inc.</td><td><span class="verdict-mini miss">MISS</span></td><td class='mono'>$0.62</td><td class='mono'>$0.61</td><td class='mono positive'>+1.6%</td><td><a class='ticker-link' href='AMD_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>ADI</td><td>Analog Devices, Inc.</td><td><span class="verdict-mini miss">MISS</span></td><td class='mono'>$1.40</td><td class='mono'>$1.53</td><td class='mono negative'>-8.5%</td><td><a class='ticker-link' href='ADI_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>SHOP</td><td>Shopify Inc.</td><td><span class="verdict-mini miss">MISS</span></td><td class='mono'>$0.05</td><td class='mono'>$0.12</td><td class='mono negative'>-58.3%</td><td><a class='ticker-link' href='SHOP_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>FTNT</td><td>Fortinet, Inc.</td><td><span class="verdict-mini mixed">MIXED</span></td><td class='mono'>—</td><td class='mono'>—</td><td class='mono '>—</td><td><a class='ticker-link' href='FTNT_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>UBER</td><td>Uber Technologies, Inc.</td><td><span class="verdict-mini mixed">MIXED</span></td><td class='mono'>—</td><td class='mono'>—</td><td class='mono '>—</td><td><a class='ticker-link' href='UBER_2026Q1.html'>상세 →</a></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== Communication Services ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; SECTOR</div>
+  <h2>Communication Services <span class="count-pill">5 종목</span></h2>
+  <div class="badge-row">
+    <span class="kw-tag bullish">BEAT 2</span>
+    <span class="kw-tag neutral-tag">MIXED 3</span>
+    <span class="kw-tag bearish">MISS 0</span>
+  </div>
+  <div class="lead-grid">
+    <div class="lead-card leader">
+      <div class="lead-label">대장</div>
+      <div class="lead-ticker">GOOGL</div>
+      <div class="lead-company">알파벳</div>
+      <div class="lead-surprise positive">+95.0%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$5.11</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$2.62</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict beat">BEAT</span></div>
+      <div class="lead-comment">BEAT — 매출 +$2.8B vs 컨센서스 / Cloud 63% 성장 완전히 폭발</div>
+      <a class="lead-link" href="GOOGL_2026Q1.html">→ 상세 보기</a>
+    </div>
+    <div class="lead-card laggard">
+      <div class="lead-label">약자</div>
+      <div class="lead-ticker">META</div>
+      <div class="lead-company">메타 플랫폼스</div>
+      <div class="lead-surprise positive">+10.1%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$7.31</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$6.64</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict mixed">MIXED</span></div>
+      <div class="lead-comment">MIXED — 매출·EPS Beat / Capex 기습 상향 → 장후 -6.5%</div>
+      <a class="lead-link" href="META_2026Q1.html">→ 상세 보기</a>
+    </div>
+  </div>
+  <h3>섹터 내 전 종목</h3>
+  <table>
+    <thead><tr><th>티커</th><th>회사명</th><th>Verdict</th><th>EPS Actual</th><th>EPS Est</th><th>Surprise</th><th>링크</th></tr></thead>
+    <tbody>
+      <tr><td class='mono'>GOOGL</td><td>알파벳</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>$5.11</td><td class='mono'>$2.62</td><td class='mono positive'>+95.0%</td><td><a class='ticker-link' href='GOOGL_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>SPOT</td><td>스포티파이</td><td><span class="verdict-mini mixed">MIXED</span></td><td class='mono'>$3.45</td><td class='mono'>$2.95</td><td class='mono positive'>+16.9%</td><td><a class='ticker-link' href='SPOT_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>TMUS</td><td>T-Mobile US</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>$2.27</td><td class='mono'>$2.04</td><td class='mono positive'>+11.3%</td><td><a class='ticker-link' href='TMUS_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>META</td><td>메타 플랫폼스</td><td><span class="verdict-mini mixed">MIXED</span></td><td class='mono'>$7.31</td><td class='mono'>$6.64</td><td class='mono positive'>+10.1%</td><td><a class='ticker-link' href='META_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>DIS</td><td>The Walt Disney Company</td><td><span class="verdict-mini mixed">MIXED</span></td><td class='mono'>—</td><td class='mono'>—</td><td class='mono '>—</td><td><a class='ticker-link' href='DIS_2026Q1.html'>상세 →</a></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== Consumer Cyclical ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; SECTOR</div>
+  <h2>Consumer Cyclical <span class="count-pill">7 종목</span></h2>
+  <div class="badge-row">
+    <span class="kw-tag bullish">BEAT 4</span>
+    <span class="kw-tag neutral-tag">MIXED 2</span>
+    <span class="kw-tag bearish">MISS 1</span>
+  </div>
+  <div class="lead-grid">
+    <div class="lead-card leader">
+      <div class="lead-label">대장</div>
+      <div class="lead-ticker">AMZN</div>
+      <div class="lead-company">아마존</div>
+      <div class="lead-surprise positive">+69.5%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$2.78</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$1.64</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict beat">BEAT</span></div>
+      <div class="lead-comment">BEAT — 매출 +$4.2B vs 컨센서스 / EPS $2.78 vs 예상 $1.64 (+70%)</div>
+      <a class="lead-link" href="AMZN_2026Q1.html">→ 상세 보기</a>
+    </div>
+    <div class="lead-card laggard">
+      <div class="lead-label">약자</div>
+      <div class="lead-ticker">HD</div>
+      <div class="lead-company">The Home Depot, Inc.</div>
+      <div class="lead-surprise positive">+1.8%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$3.86</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$3.79</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict mixed">MIXED</span></div>
+      <div class="lead-comment">MIXED — 전통적인 리모델링 수요는 견조했으나, 대형 프로젝트의 지연으로 매출이 시장 기대치에 미달하며 성장 둔화 우려 지속.</div>
+      <a class="lead-link" href="HD_2026Q1.html">→ 상세 보기</a>
+    </div>
+  </div>
+  <h3>섹터 내 전 종목</h3>
+  <table>
+    <thead><tr><th>티커</th><th>회사명</th><th>Verdict</th><th>EPS Actual</th><th>EPS Est</th><th>Surprise</th><th>링크</th></tr></thead>
+    <tbody>
+      <tr><td class='mono'>AMZN</td><td>아마존</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>$2.78</td><td class='mono'>$1.64</td><td class='mono positive'>+69.5%</td><td><a class='ticker-link' href='AMZN_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>GM</td><td>제너럴 모터스</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>$3.70</td><td class='mono'>$2.62</td><td class='mono positive'>+41.2%</td><td><a class='ticker-link' href='GM_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>SBUX</td><td>Starbucks Corporation</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>$0.45</td><td class='mono'>$0.42</td><td class='mono positive'>+7.1%</td><td><a class='ticker-link' href='SBUX_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>BKNG</td><td>부킹홀딩스</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>$1.14</td><td class='mono'>$1.08</td><td class='mono positive'>+5.6%</td><td><a class='ticker-link' href='BKNG_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>HD</td><td>The Home Depot, Inc.</td><td><span class="verdict-mini mixed">MIXED</span></td><td class='mono'>$3.86</td><td class='mono'>$3.79</td><td class='mono positive'>+1.8%</td><td><a class='ticker-link' href='HD_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>DASH</td><td>DoorDash, Inc.</td><td><span class="verdict-mini mixed">MIXED</span></td><td class='mono'>—</td><td class='mono'>—</td><td class='mono '>—</td><td><a class='ticker-link' href='DASH_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>SE</td><td>Sea Limited</td><td><span class="verdict-mini miss">MISS</span></td><td class='mono'>—</td><td class='mono'>—</td><td class='mono '>—</td><td><a class='ticker-link' href='SE_2026Q1.html'>상세 →</a></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== Consumer Defensive ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; SECTOR</div>
+  <h2>Consumer Defensive <span class="count-pill">3 종목</span></h2>
+  <div class="badge-row">
+    <span class="kw-tag bullish">BEAT 3</span>
+    <span class="kw-tag neutral-tag">MIXED 0</span>
+    <span class="kw-tag bearish">MISS 0</span>
+  </div>
+  <div class="lead-grid">
+    <div class="lead-card leader">
+      <div class="lead-label">대장</div>
+      <div class="lead-ticker">WMT</div>
+      <div class="lead-company">Walmart Inc.</div>
+      <div class="lead-surprise positive">+13.2%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$0.60</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$0.53</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict beat">BEAT</span></div>
+      <div class="lead-comment">BEAT — 미국 소매판매 부진 속에서도도 월마트만의 강력한 식품/필수품 판매와 고소득층 유입으로 매출과 EPS를 모두 시장 예상치 상회하며 견조함을 과시함.</div>
+      <a class="lead-link" href="WMT_2026Q1.html">→ 상세 보기</a>
+    </div>
+    <div class="lead-card laggard">
+      <div class="lead-label">약자</div>
+      <div class="lead-ticker">CL</div>
+      <div class="lead-company">Colgate-Palmolive Company</div>
+      <div class="lead-surprise positive">+2.6%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$0.79</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$0.77</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict beat">BEAT</span></div>
+      <div class="lead-comment">BEAT — 매출은 소폭 부진했으나, 가격 인상과 원가 관리를 통해 이익률이 개선되며 EPS 시장 예상치를 상회함.</div>
+      <a class="lead-link" href="CL_2026Q1.html">→ 상세 보기</a>
+    </div>
+  </div>
+  <h3>섹터 내 전 종목</h3>
+  <table>
+    <thead><tr><th>티커</th><th>회사명</th><th>Verdict</th><th>EPS Actual</th><th>EPS Est</th><th>Surprise</th><th>링크</th></tr></thead>
+    <tbody>
+      <tr><td class='mono'>WMT</td><td>Walmart Inc.</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>$0.60</td><td class='mono'>$0.53</td><td class='mono positive'>+13.2%</td><td><a class='ticker-link' href='WMT_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>KO</td><td>코카콜라</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>$0.86</td><td class='mono'>$0.81</td><td class='mono positive'>+6.2%</td><td><a class='ticker-link' href='KO_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>CL</td><td>Colgate-Palmolive Company</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>$0.79</td><td class='mono'>$0.77</td><td class='mono positive'>+2.6%</td><td><a class='ticker-link' href='CL_2026Q1.html'>상세 →</a></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== Healthcare ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; SECTOR</div>
+  <h2>Healthcare <span class="count-pill">2 종목</span></h2>
+  <div class="badge-row">
+    <span class="kw-tag bullish">BEAT 1</span>
+    <span class="kw-tag neutral-tag">MIXED 1</span>
+    <span class="kw-tag bearish">MISS 0</span>
+  </div>
+  <div class="lead-grid">
+    <div class="lead-card solo">
+      <div class="lead-label">단독</div>
+      <div class="lead-ticker">VRTX</div>
+      <div class="lead-company">Vertex Pharmaceuticals Incorporated</div>
+      <div class="lead-surprise positive">+8.4%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$3.74</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$3.45</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict beat">BEAT</span></div>
+      <div class="lead-comment">BEAT — 난치성 질환인 지중해빈혈(TDT) 치료제 카사그리브의 성장과 폐질환 치료제 트리카프타의 견조한 수행으로 매출과 EPS 시장 예상치를 모두 상회함.</div>
+      <a class="lead-link" href="VRTX_2026Q1.html">→ 상세 보기</a>
+    </div>
+  </div>
+  <h3>섹터 내 전 종목</h3>
+  <table>
+    <thead><tr><th>티커</th><th>회사명</th><th>Verdict</th><th>EPS Actual</th><th>EPS Est</th><th>Surprise</th><th>링크</th></tr></thead>
+    <tbody>
+      <tr><td class='mono'>VRTX</td><td>Vertex Pharmaceuticals Incorporated</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>$3.74</td><td class='mono'>$3.45</td><td class='mono positive'>+8.4%</td><td><a class='ticker-link' href='VRTX_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>CVS</td><td>CVS Health Corporation</td><td><span class="verdict-mini mixed">MIXED</span></td><td class='mono'>—</td><td class='mono'>—</td><td class='mono '>—</td><td><a class='ticker-link' href='CVS_2026Q1.html'>상세 →</a></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== Financial Services ===== -->
+<div class="section">
+  <div class="section-label">06 &mdash; SECTOR</div>
+  <h2>Financial Services <span class="count-pill">4 종목</span></h2>
+  <div class="badge-row">
+    <span class="kw-tag bullish">BEAT 1</span>
+    <span class="kw-tag neutral-tag">MIXED 2</span>
+    <span class="kw-tag bearish">MISS 1</span>
+  </div>
+  <div class="lead-grid">
+    <div class="lead-card leader">
+      <div class="lead-label">대장</div>
+      <div class="lead-ticker">V</div>
+      <div class="lead-company">Visa Inc.</div>
+      <div class="lead-surprise positive">+4.7%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$3.31</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$3.16</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict beat">BEAT</span></div>
+      <div class="lead-comment">BEAT — 매출 +$2.7억 vs 컨센서스 / EPS +$0.15 초과 / 가이던스 상향</div>
+      <a class="lead-link" href="V_2026Q1.html">→ 상세 보기</a>
+    </div>
+    <div class="lead-card laggard">
+      <div class="lead-label">약자</div>
+      <div class="lead-ticker">PYPL</div>
+      <div class="lead-company">PayPal Holdings, Inc.</div>
+      <div class="lead-surprise negative">-3.4%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$1.98</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$2.05</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict mixed">MIXED</span></div>
+      <div class="lead-comment">MIXED — 공격적인 인수 합병(M&amp;A)으로 인해 매출은 전년 대비 9배 이상 폭발적으로 성장했으나, 순익 시장 기대치를 충족하지 못해 투자자들의 신뢰를 얻는 데 실패함.</div>
+      <a class="lead-link" href="PYPL_2026Q1.html">→ 상세 보기</a>
+    </div>
+  </div>
+  <h3>섹터 내 전 종목</h3>
+  <table>
+    <thead><tr><th>티커</th><th>회사명</th><th>Verdict</th><th>EPS Actual</th><th>EPS Est</th><th>Surprise</th><th>링크</th></tr></thead>
+    <tbody>
+      <tr><td class='mono'>V</td><td>Visa Inc.</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>$3.31</td><td class='mono'>$3.16</td><td class='mono positive'>+4.7%</td><td><a class='ticker-link' href='V_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>HOOD</td><td>로빈후드</td><td><span class="verdict-mini miss">MISS</span></td><td class='mono'>$0.38</td><td class='mono'>$0.39</td><td class='mono negative'>-2.6%</td><td><a class='ticker-link' href='HOOD_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>PYPL</td><td>PayPal Holdings, Inc.</td><td><span class="verdict-mini mixed">MIXED</span></td><td class='mono'>$1.98</td><td class='mono'>$2.05</td><td class='mono negative'>-3.4%</td><td><a class='ticker-link' href='PYPL_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>MET</td><td>MetLife, Inc.</td><td><span class="verdict-mini mixed">MIXED</span></td><td class='mono'>—</td><td class='mono'>—</td><td class='mono '>—</td><td><a class='ticker-link' href='MET_2026Q1.html'>상세 →</a></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== Industrials ===== -->
+<div class="section">
+  <div class="section-label">07 &mdash; SECTOR</div>
+  <h2>Industrials <span class="count-pill">5 종목</span></h2>
+  <div class="badge-row">
+    <span class="kw-tag bullish">BEAT 1</span>
+    <span class="kw-tag neutral-tag">MIXED 0</span>
+    <span class="kw-tag bearish">MISS 4</span>
+  </div>
+  <div class="lead-grid">
+    <div class="lead-card leader">
+      <div class="lead-label">대장</div>
+      <div class="lead-ticker">BA</div>
+      <div class="lead-company">보잉</div>
+      <div class="lead-surprise positive">+72.0%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">-$0.20</span> &nbsp;|&nbsp;
+        Est: <span class="mono">-$0.72</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict beat">BEAT</span></div>
+      <div class="lead-comment">BEAT — EPS -$0.20 vs 컨센 -$0.68~-$0.75 / +70.8% 상회  |  매출 $22.2B vs 컨센 $21.85B Beat</div>
+      <a class="lead-link" href="BA_2026Q1.html">→ 상세 보기</a>
+    </div>
+    <div class="lead-card laggard">
+      <div class="lead-label">약자</div>
+      <div class="lead-ticker">ROK</div>
+      <div class="lead-company">Rockwell Automation, Inc.</div>
+      <div class="lead-surprise negative">-6.7%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$2.65</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$2.84</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict miss">MISS</span></div>
+      <div class="lead-comment">MISS — 제조업 불황으로 인해 매출이 시장 기대치에 미달하고 가이던스가 하향 조정되었습니다.</div>
+      <a class="lead-link" href="ROK_2026Q1.html">→ 상세 보기</a>
+    </div>
+  </div>
+  <h3>섹터 내 전 종목</h3>
+  <table>
+    <thead><tr><th>티커</th><th>회사명</th><th>Verdict</th><th>EPS Actual</th><th>EPS Est</th><th>Surprise</th><th>링크</th></tr></thead>
+    <tbody>
+      <tr><td class='mono'>BA</td><td>보잉</td><td><span class="verdict-mini beat">BEAT</span></td><td class='mono'>-$0.20</td><td class='mono'>-$0.72</td><td class='mono positive'>+72.0%</td><td><a class='ticker-link' href='BA_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>UPS</td><td>유나이티드 파슬 서비스</td><td><span class="verdict-mini miss">MISS</span></td><td class='mono'>$1.07</td><td class='mono'>$1.02</td><td class='mono positive'>+4.9%</td><td><a class='ticker-link' href='UPS_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>ROK</td><td>Rockwell Automation, Inc.</td><td><span class="verdict-mini miss">MISS</span></td><td class='mono'>$2.65</td><td class='mono'>$2.84</td><td class='mono negative'>-6.7%</td><td><a class='ticker-link' href='ROK_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>EMR</td><td>Emerson Electric Co.</td><td><span class="verdict-mini miss">MISS</span></td><td class='mono'>—</td><td class='mono'>—</td><td class='mono '>—</td><td><a class='ticker-link' href='EMR_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>ETN</td><td>Eaton Corporation plc</td><td><span class="verdict-mini miss">MISS</span></td><td class='mono'>—</td><td class='mono'>—</td><td class='mono '>—</td><td><a class='ticker-link' href='ETN_2026Q1.html'>상세 →</a></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== Energy ===== -->
+<div class="section">
+  <div class="section-label">08 &mdash; SECTOR</div>
+  <h2>Energy <span class="count-pill">2 종목</span></h2>
+  <div class="badge-row">
+    <span class="kw-tag bullish">BEAT 0</span>
+    <span class="kw-tag neutral-tag">MIXED 0</span>
+    <span class="kw-tag bearish">MISS 2</span>
+  </div>
+  <div class="lead-grid">
+    <div class="lead-card leader">
+      <div class="lead-label">대장</div>
+      <div class="lead-ticker">CVX</div>
+      <div class="lead-company">Chevron Corporation</div>
+      <div class="lead-surprise negative">-9.2%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$2.56</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$2.82</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict miss">MISS</span></div>
+      <div class="lead-comment">MISS — 원유 가격 약세와 정제 마진 감소로 인해 매출과 EPS가 시장 기대치에 미달함.</div>
+      <a class="lead-link" href="CVX_2026Q1.html">→ 상세 보기</a>
+    </div>
+    <div class="lead-card laggard">
+      <div class="lead-label">약자</div>
+      <div class="lead-ticker">XOM</div>
+      <div class="lead-company">Exxon Mobil Corporation</div>
+      <div class="lead-surprise negative">-12.7%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$1.85</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$2.12</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict miss">MISS</span></div>
+      <div class="lead-comment">MISS — 유가 약세와 정제 마진 감소로 인해 매출과 EPS가 시장 기대치에 미달하고 전년 대비 큰 폭으로 감소함.</div>
+      <a class="lead-link" href="XOM_2026Q1.html">→ 상세 보기</a>
+    </div>
+  </div>
+  <h3>섹터 내 전 종목</h3>
+  <table>
+    <thead><tr><th>티커</th><th>회사명</th><th>Verdict</th><th>EPS Actual</th><th>EPS Est</th><th>Surprise</th><th>링크</th></tr></thead>
+    <tbody>
+      <tr><td class='mono'>CVX</td><td>Chevron Corporation</td><td><span class="verdict-mini miss">MISS</span></td><td class='mono'>$2.56</td><td class='mono'>$2.82</td><td class='mono negative'>-9.2%</td><td><a class='ticker-link' href='CVX_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>XOM</td><td>Exxon Mobil Corporation</td><td><span class="verdict-mini miss">MISS</span></td><td class='mono'>$1.85</td><td class='mono'>$2.12</td><td class='mono negative'>-12.7%</td><td><a class='ticker-link' href='XOM_2026Q1.html'>상세 →</a></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== Utilities ===== -->
+<div class="section">
+  <div class="section-label">09 &mdash; SECTOR</div>
+  <h2>Utilities <span class="count-pill">3 종목</span></h2>
+  <div class="badge-row">
+    <span class="kw-tag bullish">BEAT 0</span>
+    <span class="kw-tag neutral-tag">MIXED 2</span>
+    <span class="kw-tag bearish">MISS 1</span>
+  </div>
+  <div class="lead-grid">
+    <div class="lead-card leader">
+      <div class="lead-label">대장</div>
+      <div class="lead-ticker">WEC</div>
+      <div class="lead-company">WEC Energy Group, Inc.</div>
+      <div class="lead-surprise negative">-3.9%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$0.99</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$1.03</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict miss">MISS</span></div>
+      <div class="lead-comment">MISS — 전력 수요는 견조했으나 이익 잠식 리스크로 주가 부담.</div>
+      <a class="lead-link" href="WEC_2026Q1.html">→ 상세 보기</a>
+    </div>
+    <div class="lead-card laggard">
+      <div class="lead-label">약자</div>
+      <div class="lead-ticker">DUK</div>
+      <div class="lead-company">Duke Energy Corporation</div>
+      <div class="lead-surprise negative">-33.6%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$0.83</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$1.25</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict mixed">MIXED</span></div>
+      <div class="lead-comment">MIXED — 압도적인 매출 성장(Hurricane Helene 복구수익 및 요금 인상 반영)을 기록했으나, 일회성 비용과 높은 금리 부담으로 EPS가 시장 기대치에 미달하여 엇갈린 평가</div>
+      <a class="lead-link" href="DUK_2026Q1.html">→ 상세 보기</a>
+    </div>
+  </div>
+  <h3>섹터 내 전 종목</h3>
+  <table>
+    <thead><tr><th>티커</th><th>회사명</th><th>Verdict</th><th>EPS Actual</th><th>EPS Est</th><th>Surprise</th><th>링크</th></tr></thead>
+    <tbody>
+      <tr><td class='mono'>WEC</td><td>WEC Energy Group, Inc.</td><td><span class="verdict-mini miss">MISS</span></td><td class='mono'>$0.99</td><td class='mono'>$1.03</td><td class='mono negative'>-3.9%</td><td><a class='ticker-link' href='WEC_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>DUK</td><td>Duke Energy Corporation</td><td><span class="verdict-mini mixed">MIXED</span></td><td class='mono'>$0.83</td><td class='mono'>$1.25</td><td class='mono negative'>-33.6%</td><td><a class='ticker-link' href='DUK_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>AEP</td><td>American Electric Power Company, Inc.</td><td><span class="verdict-mini mixed">MIXED</span></td><td class='mono'>—</td><td class='mono'>—</td><td class='mono '>—</td><td><a class='ticker-link' href='AEP_2026Q1.html'>상세 →</a></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== Real Estate ===== -->
+<div class="section">
+  <div class="section-label">10 &mdash; SECTOR</div>
+  <h2>Real Estate <span class="count-pill">2 종목</span></h2>
+  <div class="badge-row">
+    <span class="kw-tag bullish">BEAT 0</span>
+    <span class="kw-tag neutral-tag">MIXED 0</span>
+    <span class="kw-tag bearish">MISS 2</span>
+  </div>
+  <div class="empty-note">EPS 서프라이즈 데이터 없음 — 대장/약자 판정 불가</div>
+  <h3>섹터 내 전 종목</h3>
+  <table>
+    <thead><tr><th>티커</th><th>회사명</th><th>Verdict</th><th>EPS Actual</th><th>EPS Est</th><th>Surprise</th><th>링크</th></tr></thead>
+    <tbody>
+      <tr><td class='mono'>O</td><td>Realty Income Corporation</td><td><span class="verdict-mini miss">MISS</span></td><td class='mono'>—</td><td class='mono'>—</td><td class='mono '>—</td><td><a class='ticker-link' href='O_2026Q1.html'>상세 →</a></td></tr>
+      <tr><td class='mono'>SPG</td><td>Simon Property Group, Inc.</td><td><span class="verdict-mini miss">MISS</span></td><td class='mono'>—</td><td class='mono'>—</td><td class='mono '>—</td><td><a class='ticker-link' href='SPG_2026Q1.html'>상세 →</a></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== Basic Materials ===== -->
+<div class="section">
+  <div class="section-label">11 &mdash; SECTOR</div>
+  <h2>Basic Materials <span class="count-pill">1 종목</span></h2>
+  <div class="badge-row">
+    <span class="kw-tag bullish">BEAT 0</span>
+    <span class="kw-tag neutral-tag">MIXED 1</span>
+    <span class="kw-tag bearish">MISS 0</span>
+  </div>
+  <div class="empty-note">EPS 서프라이즈 데이터 없음 — 대장/약자 판정 불가</div>
+  <h3>섹터 내 전 종목</h3>
+  <table>
+    <thead><tr><th>티커</th><th>회사명</th><th>Verdict</th><th>EPS Actual</th><th>EPS Est</th><th>Surprise</th><th>링크</th></tr></thead>
+    <tbody>
+      <tr><td class='mono'>LIN</td><td>Linde plc</td><td><span class="verdict-mini mixed">MIXED</span></td><td class='mono'>—</td><td class='mono'>—</td><td class='mono '>—</td><td><a class='ticker-link' href='LIN_2026Q1.html'>상세 →</a></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== (Unclassified) ===== -->
+<div class="section">
+  <div class="section-label">12 &mdash; SECTOR</div>
+  <h2>(Unclassified) <span class="count-pill">1 종목</span></h2>
+  <div class="badge-row">
+    <span class="kw-tag bullish">BEAT 0</span>
+    <span class="kw-tag neutral-tag">MIXED 0</span>
+    <span class="kw-tag bearish">MISS 1</span>
+  </div>
+  <div class="lead-grid">
+    <div class="lead-card solo">
+      <div class="lead-label">단독</div>
+      <div class="lead-ticker">BRK.B</div>
+      <div class="lead-company">(no name)</div>
+      <div class="lead-surprise positive">+2.1%</div>
+      <div class="lead-meta">
+        EPS Actual: <span class="mono">$4033.24</span> &nbsp;|&nbsp;
+        Est: <span class="mono">$3950.00</span>
+      </div>
+      <div class="lead-verdict"><span class="verdict miss">MISS</span></div>
+      <div class="lead-comment">MISS — 현금 보유액이 사상 최대치를 경신했음에도 불구하고, 경제 불확실성과 고금리로 인해 인수 합병(M&amp;A)이 부진하여 운용 수익률이 정체되었다는 평가를 받습니다.</div>
+      <a class="lead-link" href="BRK.B_2026Q1.html">→ 상세 보기</a>
+    </div>
+  </div>
+  <h3>섹터 내 전 종목</h3>
+  <table>
+    <thead><tr><th>티커</th><th>회사명</th><th>Verdict</th><th>EPS Actual</th><th>EPS Est</th><th>Surprise</th><th>링크</th></tr></thead>
+    <tbody>
+      <tr><td class='mono'>BRK.B</td><td>(no name)</td><td><span class="verdict-mini miss">MISS</span></td><td class='mono'>$4033.24</td><td class='mono'>$3950.00</td><td class='mono positive'>+2.1%</td><td><a class='ticker-link' href='BRK.B_2026Q1.html'>상세 →</a></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 매핑 내역 ===== -->
+<div class="section">
+  <div class="section-label">99 &mdash; APPENDIX</div>
+  <h2>섹터 매핑 내역 (원본 → GICS)</h2>
+  <table>
+    <thead><tr><th>티커</th><th>원본 섹터 텍스트</th><th>GICS 매핑</th></tr></thead>
+    <tbody>
+      <tr><td class='mono'>AAPL</td><td>Technology</td><td>Technology</td></tr>
+      <tr><td class='mono'>ADI</td><td>Technology</td><td>Technology</td></tr>
+      <tr><td class='mono'>AEP</td><td>Utilities</td><td>Utilities</td></tr>
+      <tr><td class='mono'>AMD</td><td>Technology</td><td>Technology</td></tr>
+      <tr><td class='mono'>AMZN</td><td>소비재 / 이커머스 · 클라우드</td><td>Consumer Cyclical</td></tr>
+      <tr><td class='mono'>BA</td><td>산업재 / 항공우주·방산</td><td>Industrials</td></tr>
+      <tr><td class='mono'>BKNG</td><td>소비재 / 온라인 여행 (OTA)</td><td>Consumer Cyclical</td></tr>
+      <tr><td class='mono'>BRK.B</td><td><span class='text-muted'>(empty)</span></td><td><span class='negative'>UNMATCHED</span></td></tr>
+      <tr><td class='mono'>CL</td><td>Consumer Defensive</td><td>Consumer Defensive</td></tr>
+      <tr><td class='mono'>CSCO</td><td>Technology</td><td>Technology</td></tr>
+      <tr><td class='mono'>CVS</td><td>Healthcare</td><td>Healthcare</td></tr>
+      <tr><td class='mono'>CVX</td><td>Energy</td><td>Energy</td></tr>
+      <tr><td class='mono'>DASH</td><td>Consumer Cyclical</td><td>Consumer Cyclical</td></tr>
+      <tr><td class='mono'>DIS</td><td>Communication Services</td><td>Communication Services</td></tr>
+      <tr><td class='mono'>DUK</td><td>Utilities</td><td>Utilities</td></tr>
+      <tr><td class='mono'>EMR</td><td>Industrials</td><td>Industrials</td></tr>
+      <tr><td class='mono'>ETN</td><td>Industrials</td><td>Industrials</td></tr>
+      <tr><td class='mono'>FTNT</td><td>Technology</td><td>Technology</td></tr>
+      <tr><td class='mono'>GM</td><td>자동차 / 이동성</td><td>Consumer Cyclical</td></tr>
+      <tr><td class='mono'>GOOGL</td><td>통신서비스 / 검색·클라우드·광고</td><td>Communication Services</td></tr>
+      <tr><td class='mono'>HD</td><td>Consumer Cyclical</td><td>Consumer Cyclical</td></tr>
+      <tr><td class='mono'>HOOD</td><td>금융 / 자본시장</td><td>Financial Services</td></tr>
+      <tr><td class='mono'>INTC</td><td>반도체 / 파운드리</td><td>Technology</td></tr>
+      <tr><td class='mono'>KO</td><td>소비재 / 음료</td><td>Consumer Defensive</td></tr>
+      <tr><td class='mono'>LIN</td><td>Basic Materials</td><td>Basic Materials</td></tr>
+      <tr><td class='mono'>MET</td><td>Financial Services</td><td>Financial Services</td></tr>
+      <tr><td class='mono'>META</td><td>통신서비스 / 소셜미디어·광고</td><td>Communication Services</td></tr>
+      <tr><td class='mono'>MSFT</td><td>기술 / 클라우드 · 소프트웨어</td><td>Technology</td></tr>
+      <tr><td class='mono'>NOW</td><td>소프트웨어 / Enterprise SaaS</td><td>Technology</td></tr>
+      <tr><td class='mono'>NVDA</td><td>Technology</td><td>Technology</td></tr>
+      <tr><td class='mono'>O</td><td>Real Estate</td><td>Real Estate</td></tr>
+      <tr><td class='mono'>PLTR</td><td>Technology</td><td>Technology</td></tr>
+      <tr><td class='mono'>PYPL</td><td>Financial Services</td><td>Financial Services</td></tr>
+      <tr><td class='mono'>ROK</td><td>Industrials</td><td>Industrials</td></tr>
+      <tr><td class='mono'>SBUX</td><td>소비재 / 레스토랑 · 커피</td><td>Consumer Cyclical</td></tr>
+      <tr><td class='mono'>SE</td><td>Consumer Cyclical</td><td>Consumer Cyclical</td></tr>
+      <tr><td class='mono'>SHOP</td><td>Technology</td><td>Technology</td></tr>
+      <tr><td class='mono'>SPG</td><td>Real Estate</td><td>Real Estate</td></tr>
+      <tr><td class='mono'>SPOT</td><td>미디어 / 스트리밍</td><td>Communication Services</td></tr>
+      <tr><td class='mono'>TMUS</td><td>통신 / 무선</td><td>Communication Services</td></tr>
+      <tr><td class='mono'>TSLA</td><td>자동차 / 에너지 / AI &amp; 로봇</td><td>Technology</td></tr>
+      <tr><td class='mono'>UBER</td><td>Technology</td><td>Technology</td></tr>
+      <tr><td class='mono'>UPS</td><td>산업재 / 물류</td><td>Industrials</td></tr>
+      <tr><td class='mono'>V</td><td>금융 / 결제 네트워크</td><td>Financial Services</td></tr>
+      <tr><td class='mono'>VRTX</td><td>Healthcare</td><td>Healthcare</td></tr>
+      <tr><td class='mono'>WEC</td><td>Utilities</td><td>Utilities</td></tr>
+      <tr><td class='mono'>WMT</td><td>Consumer Defensive</td><td>Consumer Defensive</td></tr>
+      <tr><td class='mono'>XOM</td><td>Energy</td><td>Energy</td></tr>
+    </tbody>
+  </table>
+
+  <h3>데이터 누락 / 이상 노트</h3>
+  <table>
+    <thead><tr><th>티커</th><th>이슈</th></tr></thead>
+    <tbody>
+      <tr><td class='mono'>AEP</td><td class='text-muted'>eps_actual_missing</td></tr>
+      <tr><td class='mono'>BRK.B</td><td class='text-muted'>sector_empty, company_empty</td></tr>
+      <tr><td class='mono'>CVS</td><td class='text-muted'>eps_actual_missing</td></tr>
+      <tr><td class='mono'>DASH</td><td class='text-muted'>eps_actual_missing</td></tr>
+      <tr><td class='mono'>DIS</td><td class='text-muted'>eps_actual_missing</td></tr>
+      <tr><td class='mono'>EMR</td><td class='text-muted'>eps_actual_missing</td></tr>
+      <tr><td class='mono'>ETN</td><td class='text-muted'>eps_actual_missing</td></tr>
+      <tr><td class='mono'>FTNT</td><td class='text-muted'>eps_actual_missing</td></tr>
+      <tr><td class='mono'>INTC</td><td class='text-muted'>surprise_capped_500pct(low_estimate_base)</td></tr>
+      <tr><td class='mono'>LIN</td><td class='text-muted'>eps_actual_missing</td></tr>
+      <tr><td class='mono'>MET</td><td class='text-muted'>eps_actual_missing</td></tr>
+      <tr><td class='mono'>O</td><td class='text-muted'>eps_actual_missing</td></tr>
+      <tr><td class='mono'>SE</td><td class='text-muted'>eps_actual_missing</td></tr>
+      <tr><td class='mono'>SPG</td><td class='text-muted'>eps_actual_missing</td></tr>
+      <tr><td class='mono'>UBER</td><td class='text-muted'>eps_actual_missing</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="footer">
+  데이터 소스: docs/earnings/*_2026Q1.html (48종목) &mdash;
+  생성: 2026-05-24 19:17 &mdash;
+  대장/약자 기준: EPS 서프라이즈 % &mdash;
+  MACROHARD / Be:Analogue<br>
+  <span style="font-size:11px;">⚠️ 면책: 본 자료는 정보 제공 목적이며 투자 권유가 아님. EPS 컨센서스/실적 수치는 각 종목 분석 HTML 기반.</span>
+</div>
+
+</div>
+</body>
+</html>
