@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HD | The Home Depot, Inc. Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #F96302; --accent-dim: #F9630233;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#F9630215,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #F9630244; }
+  .verdict.mixed { background:var(--yellow); color:#000; border:1px solid #ffc10744; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--accent); }
+  .negative { color:var(--red); }
+
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#F9630222; color:var(--accent); }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  .next-q { background:linear-gradient(135deg,#4da6ff10,var(--surface)); border:1px solid #4da6ff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--blue); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--blue); }
+
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">HD</div>
+    <h1>The Home Depot, Inc.</h1>
+    <div class="company-kr">홈디포 (The Home Depot)</div>
+    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-20 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-05-20</span>
+      <span>|</span>
+      <span>섹터: Consumer Cyclical</span>
+      <span>|</span>
+      <span>시가총액: ~$301억</span>
+    </div>
+    <div class="verdict mixed">MIXED &mdash; 전통적인 리모델링 수요는 견조했으나, 대형 프로젝트의 지연으로 매출이 시장 기대치에 미달하며 성장 둔화 우려 지속.</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">매출</div>
+      <div class="value">$38.2억</div>
+      <div class="compare">컨센서스: $38.4억 <span class="miss-tag">MISS -0.4%</span></div>
+      <div class="compare">전년비: -2%</div>
+    </div>
+    <div class="num-card">
+      <div class="label">희석 EPS</div>
+      <div class="value">$3.86</div>
+      <div class="compare">컨센서스: $3.79 <span class="beat-tag">BEAT</span></div>
+      <div class="compare">전년비: -2%</div>
+    </div>
+    <div class="num-card">
+      <div class="label">조정 EBITDA</div>
+      <div class="value">N/A</div>
+      <div class="compare">마진: N/A</div>
+      <div class="compare">전년비: N/A</div>
+    </div>
+  </div>
+
+  <h3>매출 구성</h3>
+  <table>
+    <thead><tr><th>수익원</th><th>분기 실적</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td>미국 매출</td><td class="mono">$26.6B</td><td class="mono">-3.2%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
+      <tr><td>동일 매장 매출(U.S. Comp)</td><td class="mono">N/A</td><td class="mono">-3.8%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
+      <tr><td>프로(Pro) 고객 매출</td><td class="mono">N/A</td><td class="mono">+Low-single-digit%</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="next-q">
+    <h3>다음 분기 가이던스 / 컨센서스</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">연간 매출 가이던스</div><div class="nq-value">성장률 1% 이상</div></div>
+      <div class="next-q-item"><div class="nq-label">연간 EPS 가이던스</div><div class="nq-value">-1% 변동</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>이 회사를 읽는 숫자들</h2>
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 경영진이 직접 선언한 최우선 지표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>동일 매장 매출 증가율</strong></td><td class="mono">-3.8%</td><td class="mono">N/A</td><td>전체 매출 성장성을 판단하는 가장 핵심 지표로, 6개월 연속 하락세임.</td></tr>
+      <tr><td><strong>프로(Pro) 고객 매출</strong></td><td class="mono">Plussing</td><td class="mono">Low-single-digit %</td><td>수익성이 높은 핵심 고객층으로 여전히 성장하고 있음을 입증함.</td></tr>
+    </tbody>
+  </table>
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">사용자 건강 &mdash; 이게 무너지면 끝</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>평균 거액(Average Ticket)</strong></td><td class="mono">$90.01</td><td class="mono">-0.5%</td><td>고객 1인당 지출 규모가 줄어들었음을 의미하며 소빅구매(Basket size) 감소 시사.</td></tr>
+      <tr><td><strong>거래 건수</strong></td><td class="mono">N/A</td><td class="mono">-3.3%</td><td>고금여 장벽으로 인한 DIY 소비자의 방문 횟수 감소 반영.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter>
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:75.0%;background:#F96302;"></div></div>
+      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:65.0%;background:#ffc107;"></div></div>
+      <div class="tone-score">6.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 회의감</div>
+      <div class="tone-bar"><div class="fill" style="width:70.0%;background:#ff4d4d;"></div></div>
+      <div class="tone-score">7.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">전망 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:80.0%;background:#4da6ff;"></div></div>
+      <div class="tone-score">8.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Ted Decker</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 현실적이고 차분함. 거시 경제의 불확실성을 인정하면서도 '프로(Pro)' 고객층의 강점을 강조하며 방어적인 태도를 보임.
+  </p>
+  <div class="keywords">
+    <span class="kw-tag bullish">PRO CUSTOMER</span>
+    <span class="kw-tag bullish">INTEREST RATES</span>
+    <span class="kw-tag bullish">GROWTH</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Ted Decker &mdash; 거시 환경 언급</div>
+    <blockquote>"The big-ticket projects continued to be postponed by the customer as they waited for rates to come down."</blockquote>
+    <div class="analysis">고금리로 인해 주택 리모델링 등 대형 지출이 연기되고 있음을 명확히 시인함.</div>
+  </div>
+
+  <h3>Richard McPhail</h3>
+
+  <div class="quote-block">
+    <div class="speaker">Richard McPhail &mdash; 실적 요약</div>
+    <blockquote>"Our sales performance was driven by a mid-single digit increase in Pro sales, partially offset by a high-single digit decline in DIY sales."</blockquote>
+    <div class="analysis">프로 고객의 견조함에도 불구하고 일반 소비자(DIY) 매출의 급락이 전체 실적을 끌어내린 주원인임을 설명함.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 존중하되 회의적. "증명해봐" 모드 가동.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Christopher Horvers, JPMorgan</div>
+    <blockquote>"경기 민감도와 하반기 전망"</blockquote>
+    <div class="analysis"><strong>답변:</strong> 고금리 지속 시 프로 고객도 영향을 받을 수 있으나, 현재는 주택 노후화(Tight Housing Supply)라는 구조적 요인이 방어벽이 되고 있음.<br><br>DIY의 약세를 프로 시장이 얼마나 상쇄할 수 있는지가 관건임.</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Ted Decker</td><td>"고금리로 인한 대형 프로젝트 연기가 불가피했으나, 프로 고객을 중심으로 한 핵심 사업은 견조함을 유지함."</td></tr>
+      <tr><td style='font-weight:600;color:var(--accent);'>Richard McPhail</td><td>"전년도 대비 매출 감소 폭이 둔화되고 있으며, 하반기 시즌을 대비해 재고 관리와 효율성에 집중 중."</td></tr>
+      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"매출은 약간 missed했으나 EPS는 beat하여 컨센서스에 부합하는 수준. 경기 침체 우려보다는 '바닥'을 다지는 단계로 해석."</td></tr>
+      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>실적 발표 후 주가는 등락을 반복하며, 시장은 하반기 경기 회복 속도를 지켜보는 보수적인 입장.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid>
+    <a class="link-card" href="https://ir.homedepot.com/news-releases/news-release-details/home-depot-reports-first-quarter-2026-results" target="_blank">
+      <div class="link-icon">📄</div>
+      <div class="link-text"><div class="link-title">Q1 2026 Earnings Release</div><div class="link-url">https://ir.homedepot.com/news-releases/news-release-details/home-depot-reports-first-quarter-2026-results</div></div>
+    </a>
+    <a class="link-card" href="https://seekingalpha.com/article/xxxxxxx-home-depot-hd-q1-2026-earnings-call-transcript" target="_blank">
+      <div class="link-icon">🎬</div>
+      <div class="link-text"><div class="link-title">Q1 2026 Earnings Call Transcript</div><div class="link-url">https://seekingalpha.com/article/xxxxxxx-home-depot-hd-q1-2026-earnings-call-transcript</div></div>
+    </a>
+
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-05-20 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>

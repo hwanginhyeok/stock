@@ -8,9 +8,10 @@
 | # | 태스크 | 우선순위 | depends | 비고 |
 |---|--------|----------|---------|------|
 | 1-46 | `stock-notion-sync` 스킬 — Notion DB 연동 PoC | P1 | 1-43, 1-44 | hih-notion-sync 복제. 이슈 DB 1개부터 |
-| 1-47 | 기존 파이프라인 → 새 엔티티 스키마 migration | P1 | 1-44✅, 1-45✅ | **depends 풀림 (1-45 CSV 시드 완성 확인)**. CSV `data/research/stocks/tesla/{issues,milestones,tagged_issues}.csv` → ontology_entities/ontology_events 마이그 스크립트 작성 + 역호환 검증. Hermes에 위임 예정 (stock:1.1 Sonnet 1M 한도 막힘) |
 | 1-53 | 빗각·채널 기반 시그널 (인범 매매법) | P1 | 1-49 | 빗각 터치=매수 대기, 이탈 후 회복=강한 매수, 채널 상단=익절 |
-| 1-66 | APScheduler 데몬 systemd 서비스 등록 (briefing 자동 재시작) | P1 | — | 현재 `run_workflow.py schedule`이 APScheduler 데몬으로 briefing(05:53/17:47) 실행. WSL sleep/PC 재부팅 시 자동 복원 안 됨 → 5/16(금) briefing 미실행 사례. systemd --user 서비스로 등록 → 자동 재시작. 2026-05-17 Hermes RC 분석 결과 |
+| 1-71 | 1-47 Phase 3 — tesla_api.py DB 전환 + dual-read 1주일 + FK 보강 | P1 | 1-47 ✅ | Hermes Phase 1 §8-B + §8-C 권고. tesla_api.py 5개 함수 (list_issues/get_issue_detail/list_tagged_issues/count_tagged_issues + ...)를 DB read로 전환. CSV/DB dual-read 단계 1주일 후 CSV read 제거. TeslaMilestoneDB FK 컬럼 추가 + PRAGMA foreign_keys=ON. PM 발주 대기 |
+| 1-48 | Tesla 보조 데이터 (essence_scores/master_plan/moat_status/thesis/timeline/topics/portfolio 7파일) → SQLite ORM 마이그 | P2 | 1-47 ✅ | 1-47 Phase 1 §8-D 권고. JSON 4개 + CSV 3개. 각각 도메인 ORM 신설 또는 generic key-value 테이블 전략 선택. tesla_api.py가 사용 중이므로 호환 유지 필요. Phase 1: 매핑표 → Phase 2: 마이그 → Phase 3: tesla_api 듀얼 read |
+| 1-67 | sentiment archive 잔여 부채 정리 — analyzers + 테스트 5파일 | P2 | — | `src/analyzers/expected_move.py` + `src/analyzers/market_sentiment.py` + `tests/test_collectors/test_sentiment/` 5파일이 archived 6 클래스(AAII/GoogleTrends/NaverCommunity/OptionsIV/Reddit/StockTwits) 참조. cron 경로 외라 운영 영향 0이지만 해당 모듈 사용 시 ImportError 재발. 1-68 cron fix PR의 잔여 부채 보고로 발견 |
 
 ## 보류 (InvestOS 인프라 집중 전환으로 일시 중단)
 
