@@ -223,6 +223,24 @@ class BaseRepository(Generic[T]):
         )
         return True
 
+    def upsert(self, model: T) -> T:
+        """멱등 적재 헬퍼: ID 존재 시 업데이트, 없으면 생성.
+
+        마이그레이션 스크립트 및 자동 수집 cron에서 재사용 가능.
+
+        Args:
+            model: 삽입 또는 갱신할 Pydantic 모델.
+
+        Returns:
+            최종 저장된 모델 인스턴스.
+        """
+        existing = self.get_by_id(model.id)
+        if existing:
+            update_fields = model.model_dump(exclude={"id", "created_at"})
+            updated = self.update(model.id, **update_fields)
+            return updated if updated is not None else existing
+        return self.create(model)
+
     def count(self, filters: dict[str, Any] | None = None) -> int:
         """Count entities matching optional filters.
 

@@ -498,20 +498,90 @@ class TeslaIssueCategory(StrEnum):
     M = "musk_statement"
 
 
-class TeslaIssue(BaseEntity, TimestampMixin):
-    """Tesla 이슈 추적 (TSLA-{category}-{number} 형식)."""
+class IssueStatus(StrEnum):
+    """Tesla 이슈 라이프사이클 상태."""
 
-    issue_id: str  # TSLA-E-001 형식
+    OPEN = "open"
+    DEVELOPING = "developing"
+    IN_PROGRESS = "in_progress"
+    RESOLVED = "resolved"
+    WONTFIX = "wontfix"
+
+
+class MilestoneStatus(StrEnum):
+    """Tesla 마일스톤 라이프사이클 상태."""
+
+    PLANNED = "planned"
+    IN_PROGRESS = "in_progress"
+    DONE = "done"
+
+
+class ThesisSide(StrEnum):
+    """투자 테제 방향성 (강세/약세)."""
+
+    BULL = "bull"
+    BEAR = "bear"
+
+
+class Sentiment(StrEnum):
+    """뉴스/이슈 감성 분류."""
+
+    POSITIVE = "positive"
+    NEGATIVE = "negative"
+    NEUTRAL = "neutral"
+
+
+class TeslaIssue(BaseEntity, TimestampMixin):
+    """Tesla 이슈 추적 (TSLA-{category}-{number} 형식).
+
+    id 필드가 도메인 ID (TSLA-E-001) 직접 PK로 사용됨 (8-C 결정).
+    """
+
+    # id (BaseEntity) = TSLA-E-001 형식 도메인 ID (PK)
     category: TeslaIssueCategory
     title: str
     summary: str = ""
     essence_component: TeslaEssenceComponent | None = None  # 영향 주는 본질 축
     severity: Severity = Severity.MODERATE
-    status: str = "open"  # open/in_progress/resolved/wontfix
+    status: IssueStatus = IssueStatus.OPEN
+    thesis_side: ThesisSide = ThesisSide.BULL
+    first_occurred_at: datetime | None = None
+    last_event_at: datetime | None = None
+    deadline: datetime | None = None
+    blocker: str = ""
+    owner: str = ""
+    related_topic_id: str = ""
     related_entity_ids: list[str] = Field(default_factory=list)
-    related_event_ids: list[str] = Field(default_factory=list)
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
+    source_hint: str = ""
+    notion_page_id: str = ""
+    updated_at: datetime = Field(default_factory=_utcnow)
+
+
+class TeslaMilestone(BaseEntity, TimestampMixin):
+    """Tesla 이슈 하위 마일스톤 (TSLA-E-001-M1 형식). FK → TeslaIssue.id."""
+
+    # id (BaseEntity) = TSLA-E-001-M1 형식 도메인 ID (PK)
+    issue_id: str  # FK → tesla_issues.id
+    title: str
+    occurred_at: datetime | None = None
+    target_at: datetime | None = None
+    status: MilestoneStatus = MilestoneStatus.PLANNED
+    confidence: int = 100
+    evidence_url: str = ""
+    source_hint: str = ""
+
+
+class TeslaTaggedIssue(BaseEntity, TimestampMixin):
+    """Tesla tagged issue (별개 stream, TSLA-I-001 등). FK 없음 — issues와 독립."""
+
+    # id (BaseEntity) = TSLA-I-001 등 형식 (issues.csv와 별개 시리얼)
+    title: str
+    category: TeslaIssueCategory
+    essence_component: TeslaEssenceComponent | None = None
+    severity: Severity = Severity.MODERATE
+    sentiment: Sentiment = Sentiment.NEUTRAL
+    tagged_at: datetime = Field(default_factory=_utcnow)
+    summary: str = ""
 
 
 class GeoIssue(BaseEntity, TimestampMixin):

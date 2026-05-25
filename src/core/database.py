@@ -399,6 +399,88 @@ class OntologyLinkDB(Base):
     )
 
 
+class TeslaIssueDB(Base):
+    """ORM model for Tesla 본질론 이슈 (TSLA-E-001 형식). id = 도메인 ID 직접 PK."""
+
+    __tablename__ = "tesla_issues"
+
+    id: Mapped[str] = mapped_column(String(20), primary_key=True)  # TSLA-E-001 형식
+    category: Mapped[str] = mapped_column(String(20), nullable=False)
+    title: Mapped[str] = mapped_column(String(500), nullable=False)
+    summary: Mapped[str] = mapped_column(Text, default="")
+    essence_component: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    severity: Mapped[str] = mapped_column(String(20), nullable=False, default="moderate")
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="open")
+    thesis_side: Mapped[str] = mapped_column(String(10), nullable=False, default="bull")
+    first_occurred_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_event_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    deadline: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    blocker: Mapped[str] = mapped_column(Text, default="")
+    owner: Mapped[str] = mapped_column(String(50), default="")
+    related_topic_id: Mapped[str] = mapped_column(String(50), default="")
+    related_entity_ids: Mapped[str] = mapped_column(Text, default="[]")  # JSON 문자열
+    source_hint: Mapped[str] = mapped_column(Text, default="")
+    notion_page_id: Mapped[str] = mapped_column(String(64), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow, nullable=False)
+
+    __table_args__ = (
+        Index("ix_tesla_issue_category", "category"),
+        Index("ix_tesla_issue_essence_component", "essence_component"),
+        Index("ix_tesla_issue_status", "status"),
+        Index("ix_tesla_issue_severity", "severity"),
+        Index("ix_tesla_issue_thesis_side", "thesis_side"),
+    )
+
+
+class TeslaMilestoneDB(Base):
+    """ORM model for Tesla 이슈 하위 마일스톤. FK issue_id → tesla_issues.id."""
+
+    __tablename__ = "tesla_milestones"
+
+    id: Mapped[str] = mapped_column(String(30), primary_key=True)  # TSLA-E-001-M1 형식
+    issue_id: Mapped[str] = mapped_column(String(20), nullable=False)  # FK (논리적 FK, 제약 별도)
+    title: Mapped[str] = mapped_column(String(500), nullable=False)
+    occurred_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    target_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="planned")
+    confidence: Mapped[int] = mapped_column(Integer, default=100)
+    evidence_url: Mapped[str] = mapped_column(Text, default="")
+    source_hint: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, nullable=False)
+
+    __table_args__ = (
+        Index("ix_tesla_milestone_issue_id", "issue_id"),
+        Index("ix_tesla_milestone_occurred_at", "occurred_at"),
+        Index("ix_tesla_milestone_target_at", "target_at"),
+        Index("ix_tesla_milestone_status", "status"),
+    )
+
+
+class TeslaTaggedIssueDB(Base):
+    """ORM model for Tesla tagged issue (별개 stream, TSLA-I-001 등). FK 없음."""
+
+    __tablename__ = "tesla_tagged_issues"
+
+    id: Mapped[str] = mapped_column(String(20), primary_key=True)  # TSLA-I-001 등 형식
+    title: Mapped[str] = mapped_column(String(500), nullable=False)
+    category: Mapped[str] = mapped_column(String(20), nullable=False)
+    essence_component: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    severity: Mapped[str] = mapped_column(String(20), nullable=False, default="moderate")
+    sentiment: Mapped[str] = mapped_column(String(10), nullable=False, default="neutral")
+    tagged_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    summary: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, nullable=False)
+
+    __table_args__ = (
+        Index("ix_tesla_tagged_category", "category"),
+        Index("ix_tesla_tagged_essence_component", "essence_component"),
+        Index("ix_tesla_tagged_severity", "severity"),
+        Index("ix_tesla_tagged_sentiment", "sentiment"),
+        Index("ix_tesla_tagged_tagged_at", "tagged_at"),
+    )
+
+
 class GeoIssueDB(Base):
     """ORM model for geopolitical issues."""
 
@@ -666,6 +748,7 @@ _JSON_FIELDS = frozenset({
     "event_ids", "entity_ids",  # GeoIssue
     "entities", "tickers", "numbers",  # NewsFact
     "fundamental_truths", "related_fact_ids",  # FirstPrincipleAnalysis
+    "related_entity_ids",  # TeslaIssue
 })
 
 # Lazy-initialized Pydantic -> ORM type mapping
@@ -694,6 +777,9 @@ def _get_orm_map() -> dict[type, type[Base]]:
             SentimentRecord,
             StockAnalysis,
             StoryThread,
+            TeslaIssue,
+            TeslaMilestone,
+            TeslaTaggedIssue,
             Thesis,
             TrendsRecord,
         )
@@ -719,6 +805,9 @@ def _get_orm_map() -> dict[type, type[Base]]:
             Thesis: ThesisDB,
             NewsFact: NewsFactDB,
             FirstPrincipleAnalysis: FirstPrincipleAnalysisDB,
+            TeslaIssue: TeslaIssueDB,
+            TeslaMilestone: TeslaMilestoneDB,
+            TeslaTaggedIssue: TeslaTaggedIssueDB,
         })
     return _ORM_MAP
 
