@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRWD | CrowdStrike Holdings, Inc. Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #002d5c; --accent-dim: #002d5c33;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#002d5c15,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #002d5c44; }
+  .verdict.mixed { background:var(--yellow); color:#000; border:1px solid #ffc10744; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--accent); }
+  .negative { color:var(--red); }
+
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#002d5c22; color:var(--accent); }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  .next-q { background:linear-gradient(135deg,#4da6ff10,var(--surface)); border:1px solid #4da6ff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--blue); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--blue); }
+
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">CRWD</div>
+    <h1>CrowdStrike Holdings, Inc.</h1>
+    <div class="company-kr">크라우드스트라이크</div>
+    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-06-04 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-06-04</span>
+      <span>|</span>
+      <span>섹터: Technology</span>
+      <span>|</span>
+      <span>시가총액: ~$190억</span>
+    </div>
+    <div class="verdict beat">BEAT &mdash; 시장 예상을 상회하는 매출과 조정 EPS를 기록했으며, ARR 성장률과 고객 확보 지표에서도 견조한 모습을 보임. AI 기반 보안 수요와 엔드포인트 보안 시장의 강세를 반영함.</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">매출</div>
+      <div class="value">$1.3억</div>
+      <div class="compare">컨센서스: $1.3억 <span class="beat-tag">BEAT +2.0%</span></div>
+      <div class="compare">전년비: +33%</div>
+    </div>
+    <div class="num-card">
+      <div class="label">희석 EPS</div>
+      <div class="value">$0.93</div>
+      <div class="compare">컨센서스: $0.84 <span class="beat-tag">BEAT</span></div>
+      <div class="compare">전년비: +22%</div>
+    </div>
+    <div class="num-card">
+      <div class="label">조정 EBITDA</div>
+      <div class="value">N/A</div>
+      <div class="compare">마진: N/A</div>
+      <div class="compare">전년비: N/A</div>
+    </div>
+  </div>
+
+  <h3>매출 구성</h3>
+  <table>
+    <thead><tr><th>수익원</th><th>분기 실적</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td>Subscription</td><td class="mono">$12.5억</td><td class="mono">+35%</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
+      <tr><td>Professional Services</td><td class="mono">$0.5억</td><td class="mono">Flat</td><td><span class="kw-tag neutral-tag">STEADY</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="next-q">
+    <h3>다음 분기 가이던스 / 컨센서스</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">Q2 매출 가이던스</div><div class="nq-value">$13.01억 ~ $13.20억 (예상 중간값 $13.10억)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>이 회사를 읽는 숫자들</h2>
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 경영진이 직접 선언한 최우선 지표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>ARR (Annual Recurring Revenue)</strong></td><td class="mono">$4.28억</td><td class="mono">+34%</td><td>구독형 SaaS 기업의 핵심 성장 지표이자 미래 매출의 선행 지표</td></tr>
+      <tr><td><strong>Net New ARR</strong></td><td class="mono">$212M</td><td class="mono">+34%</td><td>분기별 신규 매출 창출 규모를 나타내는 성장성 지표</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter>
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:85.0%;background:#002d5c;"></div></div>
+      <div class="tone-score">8.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:60.0%;background:#ffc107;"></div></div>
+      <div class="tone-score">6.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 회의감</div>
+      <div class="tone-bar"><div class="fill" style="width:70.0%;background:#ff4d4d;"></div></div>
+      <div class="tone-score">7.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">전망 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:75.0%;background:#4da6ff;"></div></div>
+      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>George Kurtz</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 기술적 낙관론자
+  </p>
+  <div class="keywords">
+    <span class="kw-tag bullish">AI</span>
+    <span class="kw-tag bullish">XDR</span>
+    <span class="kw-tag bullish">Market Share</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">George Kurtz &mdash; 오프닝</div>
+    <blockquote>"We delivered another strong quarter, with ARR growing 34% year-over-year to $4.28 billion, driven by high demand for our unified platform."</blockquote>
+    <div class="analysis">연례 기준 34%의 ARR 성장과 통합 플랫폼에 대한 높은 수요를 강조하며 강력한 실적을 강조</div>
+  </div>
+
+  <h3>Burt Podbere</h3>
+
+  <div class="quote-block">
+    <div class="speaker">Burt Podbere &mdash; 가이던스</div>
+    <blockquote>"Our Q2 guidance for revenue is $1.301 billion to $1.320 billion, representing 32% year-over-year growth."</blockquote>
+    <div class="analysis">2분기 매출 가이던스를 제시하며 연간 32% 성장 전망을 견조하게 유지</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 존중하되 회의적. "증명해봐" 모드 가동.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Gabriela Borges, Goldman Sachs</div>
+    <blockquote>"Zscaler와의 경쟁 상황과 패키지 효과"</blockquote>
+    <div class="analysis"><strong>답변:</strong> 우리의 강점은 단일 에이전트와 플랫폼 접근 방식에 있으며, 이는 경쟁사와 차별화된 가치를 제공<br><br>경쟁사 대비 통합 플랫폼의 기술적 우위를 강조하며 패키지 판매의 긍정적 효과 설명</div>
+  </div>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Shaul Ehrlich, Deutsche Bank</div>
+    <blockquote>"Delta 공급망 탈퇴 고객의 유입 효과"</blockquote>
+    <div class="analysis"><strong>답변:</strong> 특정 경쟁사의 이슈로 인한 단기적인 유입 효과보다는 꾸준한 시장 점유율 확보에 집중<br><br>경쟁사 이슈에 따른 '수혜' 효과는 자연스러운 시장 흐름임을 강조하며 승리의 여유를 드러냄</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>George Kurtz</td><td>"통합 보안 플랫폼에 대한 수요가 견조하며 AI 기술 경쟁력을 강화해 나가겠다."</td></tr>
+      <tr><td style='font-weight:600;color:var(--accent);'>Burt Podbere</td><td>"전년 대비 30%대 성장을 유지할 수 있도록 효율적인 비용 관리에 주력하겠다."</td></tr>
+      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"Zscaler와의 경쟁에서 우위를 점하고 있으며, 경쟁사의 고객 유출이 CRWD의 수혜로 이어지고 있다."</td></tr>
+      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>매출 및 EPS 초과 달성에도 불구하고 매크로 경제 우려로 인해 주가 반응은 보합세를 보이는 중.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid>
+    <a class="link-card" href="https://investors.crowdstrike.com/news-releases/news-release-details/crowdstrike-reports-financial-results-first-quarter-fiscal-2026" target="_blank">
+      <div class="link-icon">📄</div>
+      <div class="link-text"><div class="link-title">IR 보도자료</div><div class="link-url">https://investors.crowdstrike.com/news-releases/news-release-details/crowdstrike-reports-financial-results-first-quarter-fiscal-2026</div></div>
+    </a>
+    <a class="link-card" href="https://seekingalpha.com/article/4705403-crowdstrike-crwd-q1-2026-earnings-call-transcript" target="_blank">
+      <div class="link-icon">🎬</div>
+      <div class="link-text"><div class="link-title">컨콜 트랜스크립트</div><div class="link-url">https://seekingalpha.com/article/4705403-crowdstrike-crwd-q1-2026-earnings-call-transcript</div></div>
+    </a>
+
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-06-04 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>

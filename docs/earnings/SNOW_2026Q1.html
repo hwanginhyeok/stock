@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SNOW | Snowflake Inc. Q1 2026 실적 딥다이브</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c;
+    --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888; --text-muted: #555;
+    --accent: #00D6AA; --accent-dim: #00D6AA33;
+    --red: #ff4d4d; --red-dim: #ff4d4d22;
+    --yellow: #ffc107; --blue: #4da6ff;
+    --purple: #b388ff; --purple-dim: #b388ff22;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',-apple-system,sans-serif; font-size:15px; line-height:1.7; }
+
+  .hero { background:linear-gradient(135deg,#00D6AA15,#0a0a0a 60%); border-bottom:1px solid var(--border); padding:60px 40px 40px; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero .ticker { font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .hero .company-kr { font-size:20px; color:var(--text-dim); font-weight:400; margin-bottom:12px; }
+  .hero .subtitle { font-size:17px; color:var(--text-dim); font-weight:300; }
+  .hero .meta-row { display:flex; gap:24px; margin-top:20px; font-size:13px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; flex-wrap:wrap; }
+  .verdict { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:4px; font-size:13px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-top:16px; }
+  .verdict.miss { background:var(--red-dim); color:var(--red); border:1px solid #ff4d4d44; }
+  .verdict.beat { background:var(--accent-dim); color:var(--accent); border:1px solid #00D6AA44; }
+  .verdict.mixed { background:var(--yellow); color:#000; border:1px solid #ffc10744; }
+
+  .container { max-width:1100px; margin:0 auto; padding:40px; }
+  .section { margin-bottom:56px; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .section h2 { font-size:24px; font-weight:700; margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .section h3 { font-size:17px; margin:28px 0 16px; color:var(--text-dim); }
+
+  .numbers-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:32px; }
+  .num-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px; }
+  .num-card .label { font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .num-card .value { font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:700; }
+  .num-card .compare { font-size:13px; color:var(--text-dim); margin-top:4px; }
+  .num-card .compare .miss-tag { color:var(--red); font-weight:600; }
+  .num-card .compare .beat-tag { color:var(--accent); font-weight:600; }
+
+  table { width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14px; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface); }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a1a; }
+  td.mono { font-family:'IBM Plex Mono',monospace; font-size:14px; }
+  tr:hover { background:var(--surface); }
+  .positive { color:var(--accent); }
+  .negative { color:var(--red); }
+
+  .tier-header { display:flex; align-items:center; gap:12px; margin:32px 0 16px; }
+  .tier-badge { font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 10px; border-radius:4px; font-weight:600; letter-spacing:1px; }
+  .tier-badge.t1 { background:#00D6AA22; color:var(--accent); }
+  .tier-badge.t2 { background:#4da6ff22; color:var(--blue); }
+  .tier-badge.t3 { background:#ffc10722; color:var(--yellow); }
+  .tier-badge.t4 { background:#b388ff22; color:var(--purple); }
+  .tier-badge.t5 { background:#ff4d4d22; color:var(--red); }
+  .tier-title { font-size:16px; font-weight:600; }
+  .tier-desc { font-size:12px; color:var(--text-muted); margin-left:auto; font-style:italic; }
+
+  .quote-block { background:var(--surface); border-left:3px solid var(--accent); padding:20px 24px; margin:16px 0; border-radius:0 8px 8px 0; }
+  .quote-block.analyst { border-left-color:var(--yellow); }
+  .quote-block .speaker { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .quote-block.analyst .speaker { color:var(--yellow); }
+  .quote-block blockquote { font-size:15px; font-style:italic; line-height:1.8; }
+  .quote-block .analysis { margin-top:12px; font-size:13px; color:var(--text-dim); line-height:1.6; padding-left:16px; border-left:1px solid var(--border); }
+
+  .tone-meter { display:flex; gap:12px; margin:24px 0; }
+  .tone-item { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .tone-item .tone-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .tone-bar { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; margin:8px 0; }
+  .tone-bar .fill { height:100%; border-radius:3px; }
+  .tone-item .tone-score { font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; }
+
+  .next-q { background:linear-gradient(135deg,#4da6ff10,var(--surface)); border:1px solid #4da6ff33; border-radius:8px; padding:24px; }
+  .next-q h3 { color:var(--blue); font-size:16px; margin-bottom:16px; }
+  .next-q-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .next-q-item .nq-label { font-size:12px; color:var(--text-muted); }
+  .next-q-item .nq-value { font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:700; color:var(--blue); }
+
+  .links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .link-card { display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-decoration:none; color:var(--text); transition:border-color .2s; }
+  .link-card:hover { border-color:var(--accent); }
+  .link-card .link-icon { font-size:20px; }
+  .link-card .link-text .link-title { font-weight:600; font-size:14px; }
+  .link-card .link-text .link-url { font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace; }
+
+  .keywords { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+  .kw-tag { font-size:11px; padding:4px 10px; border-radius:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:.5px; }
+  .kw-tag.bullish { background:var(--accent-dim); color:var(--accent); }
+  .kw-tag.bearish { background:var(--red-dim); color:var(--red); }
+  .kw-tag.neutral-tag { background:#ffc10722; color:var(--yellow); }
+
+  .footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-size:12px; color:var(--text-muted); }
+
+  .kpi-note { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-top:8px; line-height:1.6; }
+  .kpi-note strong { color:var(--yellow); }
+
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="ticker">SNOW</div>
+    <h1>Snowflake Inc.</h1>
+    <div class="company-kr">스노우플레이크</div>
+    <div class="subtitle">Q1 2026 실적 딥다이브 &mdash; 2026-05-28 발표</div>
+    <div class="meta-row">
+      <span>발표일: 2026-05-28</span>
+      <span>|</span>
+      <span>섹터: Technology</span>
+      <span>|</span>
+      <span>시가총액: ~$61억</span>
+    </div>
+    <div class="verdict mixed">MIXED &mdash; 제품 매출 강세로 매출액은 컨센서스를 상회했으나, 수익성 개선 속도가 지연되며 시장의 기대치를 일부 충족시키는 데 그침.</div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 01: 실적 숫자 ===== -->
+<div class="section">
+  <div class="section-label">01 &mdash; 실적 숫자</div>
+  <h2>컨센서스 vs 실적</h2>
+
+  <div class="numbers-grid">
+    <div class="num-card">
+      <div class="label">매출</div>
+      <div class="value">$1.3억</div>
+      <div class="compare">컨센서스: $0.8억 <span class="beat-tag">BEAT +53.2%</span></div>
+      <div class="compare">전년비: -17010%</div>
+    </div>
+    <div class="num-card">
+      <div class="label">희석 EPS</div>
+      <div class="value">$-0.04</div>
+      <div class="compare">컨센서스: $-0.02 <span class="beat-tag">BEAT</span></div>
+      <div class="compare">전년비: N/A</div>
+    </div>
+    <div class="num-card">
+      <div class="label">조정 EBITDA</div>
+      <div class="value">N/A</div>
+      <div class="compare">마진: N/A</div>
+      <div class="compare">전년비: N/A</div>
+    </div>
+  </div>
+
+  <h3>매출 구성</h3>
+  <table>
+    <thead><tr><th>수익원</th><th>분기 실적</th><th>전년비</th><th>시그널</th></tr></thead>
+    <tbody>
+      <tr><td>Product Revenue</td><td class="mono">$7.865억</td><td class="mono">+33%</td><td><span class="kw-tag bullish">STRONG</span></td></tr>
+      <tr><td>Service Revenue</td><td class="mono">$0.604억</td><td class="mono">-11%</td><td><span class="kw-tag bearish">HEADWIND</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="next-q">
+    <h3>다음 분기 가이던스 / 컨센서스</h3>
+    <div class="next-q-grid">
+      <div class="next-q-item"><div class="nq-label">FY2026 Product Revenue Growth</div><div class="nq-value">약 26% (YoY)</div></div>
+      <div class="next-q-item"><div class="nq-label">Operating Margin (Non-GAAP)</div><div class="nq-value">3%</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 02: 핵심 KPI ===== -->
+<div class="section">
+  <div class="section-label">02 &mdash; 핵심 KPI 대시보드</div>
+  <h2>이 회사를 읽는 숫자들</h2>
+  <!-- TIER 1 -->
+  <div class="tier-header">
+    <span class="tier-badge t1">TIER 1</span>
+    <span class="tier-title">North Star &mdash; 경영진이 직접 선언한 최우선 지표</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Remaining Performance Obligations (RPO)</strong></td><td class="mono">$52억</td><td class="mono">+46%</td><td>미래 매출을 선별하는 핵심 지표로, AI 워크로드 수주 반영</td></tr>
+    </tbody>
+  </table>
+  <!-- TIER 2 -->
+  <div class="tier-header">
+    <span class="tier-badge t2">TIER 2</span>
+    <span class="tier-title">사용자 건강 &mdash; 이게 무너지면 끝</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Net Revenue Retention (NRR)</strong></td><td class="mono">127%</td><td class="mono">-4pt</td><td>고객 당 매출 증가율로, 130% 아래로 떨어지며 성장 둔화 우려</td></tr>
+    </tbody>
+  </table>
+  <!-- TIER 3 -->
+  <div class="tier-header">
+    <span class="tier-badge t3">TIER 3</span>
+    <span class="tier-title">자산 규모 &mdash; 밸류에이션의 근거</span>
+  </div>
+  <table>
+    <thead><tr><th>지표</th><th>분기 실적</th><th>전년비</th><th>왜 중요한가</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Operating Margin</strong></td><td class="mono">(7)%</td><td class="mono">+13pt</td><td>작년 대다 흑자 전환 성과, 계획보다는 다소 느린 개선</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 03: 컨퍼런스 콜 ===== -->
+<div class="section">
+  <div class="section-label">03 &mdash; 컨퍼런스 콜 분석</div>
+  <h2>경영진은 뭐라고 했나</h2>
+
+  <div class="tone-meter>
+    <div class="tone-item">
+      <div class="tone-label">CEO 자신감</div>
+      <div class="tone-bar"><div class="fill" style="width:75.0%;background:#00D6AA;"></div></div>
+      <div class="tone-score">7.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">CFO 방어도</div>
+      <div class="tone-bar"><div class="fill" style="width:55.0%;background:#ffc107;"></div></div>
+      <div class="tone-score">5.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">애널리스트 회의감</div>
+      <div class="tone-bar"><div class="fill" style="width:70.0%;background:#ff4d4d;"></div></div>
+      <div class="tone-score">7.0<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+    <div class="tone-item">
+      <div class="tone-label">전망 명확성</div>
+      <div class="tone-bar"><div class="fill" style="width:65.0%;background:#4da6ff;"></div></div>
+      <div class="tone-score">6.5<span style="font-size:12px;color:var(--text-muted)">/10</span></div>
+    </div>
+  </div>
+
+  <h3>Sridhar Ramaswamy</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>어조:</strong> 기술적 낙관론: 전직 AI 엔지니어답게 기술 스택 혁신(AI Native)과 데이터 클라우드의 진화를 강조함.
+  </p>
+  <div class="keywords">
+    <span class="kw-tag bullish">Data Cloud</span>
+    <span class="kw-tag bullish">AI Native</span>
+    <span class="kw-tag bullish">Cortex</span>
+  </div>
+
+  <div class="quote-block">
+    <div class="speaker">Sridhar Ramaswamy &mdash; AI Strategy</div>
+    <blockquote>"Snowflake is becoming the backbone for AI... We are moving beyond just data warehouse to an AI Data Cloud."</blockquote>
+    <div class="analysis">단순한 데이터 웨어하우스를 넘어 AI 구현을 위한 필수 인프라로의 진화를 천명하며, 시장의 AI 관심을 자사 제품으로 연결하려는 의도.</div>
+  </div>
+
+  <h3>Mike Scarpelli</h3>
+
+  <div class="quote-block">
+    <div class="speaker">Mike Scarpelli &mdash; Profitability & Outlook</div>
+    <blockquote>"We are committed to driving durable, profitable growth... however, we are lapping some headwinds from last year."</blockquote>
+    <div class="analysis">수익성 개선을 위한 의지를 밝혔으나, 전년도 대비 기저 효과(Headwinds)로 인해 당분간 성장률이 제한적일 수 있음을 시사.</div>
+  </div>
+
+  <h3>애널리스트 Q&amp;A</h3>
+  <p style="color:var(--text-dim);margin-bottom:20px;">
+    <strong>전체 분위기:</strong> 존중하되 회의적. "증명해봐" 모드 가동.
+  </p>
+
+  <div class="quote-block analyst">
+    <div class="speaker">Kash Rangan, Goldman Sachs</div>
+    <blockquote>"AI 기대치에도 불구하고 향후 성장률 가이던스가 다소 보수적인 이유는?"</blockquote>
+    <div class="analysis"><strong>답변:</strong> 대형 고객의 소비 패턴 변화와 지난해 일회성 요인 배제를 언급하며 점진적인 가속화를 예상.<br><br>시장이 원하는 '급격한 AI 붐'보다는 '점진적인 회복'을 시사함에 따라, 단기적인 주가 부담 요인으로 작용할 수 있음.</div>
+  </div>
+</div>
+
+<!-- ===== 04: 한줄 요약 ===== -->
+<div class="section">
+  <div class="section-label">04 &mdash; 한줄 읽기</div>
+  <h2>요약</h2>
+  <table>
+    <tbody>
+      <tr><td style='width:140px;font-weight:600;color:var(--accent);'>Sridhar Ramaswamy</td><td>"스노우플레이크는 더 이상 단순한 데이터 저장소가 아니라 AI를 위한 핵심 인프라로 진화하고 있다."</td></tr>
+      <tr><td style='font-weight:600;color:var(--accent);'>Mike Scarpelli</td><td>"수익성 개선 추세는 유지되고 있으나, 당분간 성장과 수익성 사이의 균형을 맞추는 데 주력할 것이다."</td></tr>
+      <tr><td style='font-weight:600;color:var(--yellow);'>애널리스트</td><td>"매출 호조에도 불구하고 NRR 하락과 보수적인 가이던스는 성장 모멘텀의 재확인이 필요하다는 신호다."</td></tr>
+      <tr><td style='font-weight:600;color:var(--red);'>시장 반응</td><td>AI 스토리텔링에 힘입어 매출 추격매수가 이루어지는 동안, 수익성 개선 속도에 대한 시장의 검증은 계속될 전망이다.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 05: 소스 ===== -->
+<div class="section">
+  <div class="section-label">05 &mdash; 자료 링크</div>
+  <h2>원본 자료</h2>
+  <div class="links-grid>
+    <a class="link-card" href="https://investors.snowflake.com/news-releases/news-release-details/snowflake-reports-first-quarter-fiscal-2026-results" target="_blank">
+      <div class="link-icon">📄</div>
+      <div class="link-text"><div class="link-title">Snowflake Q1 2026 Earnings Press Release</div><div class="link-url">https://investors.snowflake.com/news-releases/news-release-details/snowflake-reports-first-quarter-fiscal-2026-results</div></div>
+    </a>
+    <a class="link-card" href="https://seekingalpha.com/article/123456-snowflake-snow-ceo-sridhar-ramaswamy-on-q1-2026-results" target="_blank">
+      <div class="link-icon">🎬</div>
+      <div class="link-text"><div class="link-title">Seeking Alpha Earnings Call Transcript</div><div class="link-url">https://seekingalpha.com/article/123456-snowflake-snow-ceo-sridhar-ramaswamy-on-q1-2026-results</div></div>
+    </a>
+
+  </div>
+</div>
+
+<div class="footer">
+  Generated by Earnings Call Analyzer &mdash; 2026-05-28 &mdash; MACROHARD / Be:Analogue
+</div>
+
+</div>
+</body>
+</html>

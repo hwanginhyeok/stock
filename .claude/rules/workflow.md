@@ -1,132 +1,132 @@
 # Workflow Rules
 
-## 워크플로우 원칙
+## Workflow Principles
 
-1. **수집** → **분석** → **생성** → **게시** 순서 엄수
-2. 모든 단계의 결과는 DB에 저장
-3. 생성된 콘텐츠에는 반드시 면책조항 포함
-4. 투자 권유/추천 표현 금지
+1. Strictly follow the order: **Collect** → **Analyze** → **Generate** → **Publish**
+2. Store the results of every stage in the DB
+3. Generated content must always include a disclaimer
+4. No investment solicitation/recommendation language
 
-## 보안 규칙
+## Security Rules
 
-- API 키 하드코딩 절대 금지 → `.env` 파일로 관리
-- `.env` 파일은 `.gitignore`에 포함
-- 로그에 API 키, 토큰 등 민감 정보 출력 금지
-- 크롤링 시 robots.txt 준수, rate limiting 적용
+- Never hardcode API keys → manage them in the `.env` file
+- The `.env` file must be included in `.gitignore`
+- Do not output sensitive information such as API keys, tokens, etc. in logs
+- When crawling, comply with robots.txt and apply rate limiting
 
-## TASK 상세 관리
+## TASK Detailed Management
 
-### 분야 코드 & 넘버링
+### Field Codes & Numbering
 
-모든 TASK는 `{분야코드}-{순번}` 형식으로 번호를 부여한다. 순번은 해당 분야 내 등록 순서(발행일 기준).
+Every TASK is assigned a number in the `{field_code}-{sequence}` format. The sequence is the registration order within that field (based on publication date).
 
-| 분야코드 | 분야 | 정의 |
+| Field code | Field | Definition |
 |----------|------|------|
-| `1-x` | 시스템 | 인프라·파이프라인·수집기·스케줄러 등 **자동으로 돌아가는 것** 구축 |
-| `2-x` | 코드 | 알고리즘·지표·기능 **단위 구현** (시스템 안의 부품) |
-| `3-x` | 분석 | 데이터 **해석·검증·백테스트** — 코드 산출물이 없어도 됨 |
-| `4-x` | 아티클 | 콘텐츠 기획 → 리서치 → 초안 → 퇴고 → **게시** 전 과정 |
-| `5-x` | 리서치 | 기업/섹터/시장 **심층 조사** (아티클로 발전하거나 내부 참고로 종결) |
+| `1-x` | 시스템 (System) | Building **things that run automatically** — infrastructure, pipelines, collectors, schedulers, etc. |
+| `2-x` | 코드 (Code) | **Unit implementation** of algorithms, indicators, features (parts inside the system) |
+| `3-x` | 분석 (Analysis) | Data **interpretation, validation, backtesting** — no code deliverable required |
+| `4-x` | 아티클 (Article) | The full process: content planning → research → draft → revision → **publish** |
+| `5-x` | 리서치 (Research) | **In-depth investigation** of companies/sectors/markets (develops into an article or concludes as internal reference) |
 
-### TASK 테이블 컬럼 구조
+### TASK Table Column Structure
 
-**🔥 현재 진행 중:**
+**🔥 Currently in progress:**
 ```
 | # | 분야 | 작업 | 담당 | 진행 상황 | 다음 할 일 |
 ```
 
-**⏸️ 사용자 액션 대기 (코드 완료, 사용자 실행만 남음):**
+**⏸️ Awaiting user action (code complete, only user execution remains):**
 ```
 | # | 분야 | 작업 | 남은 사용자 액션 |
 ```
 
-**작업 현황 (P등급 소그룹별):**
+**Task status (by P-grade subgroup):**
 ```
 | # | 분야 | 작업 | 중요도 | 담당 | 발행일 | 상태 | 비고 |
 ```
 
-**완료:**
+**Completed:**
 ```
 | # | 분야 | 작업 | 완료일 | 비고 |
 ```
 
-### 상태 단계
+### Status Stages
 
-`예정` → `요청` → `진행` → `완료`
+`예정` (planned) → `요청` (requested) → `진행` (in progress) → `완료` (done)
 
-| 상태 | 의미 |
+| Status | Meaning |
 |------|------|
-| `예정` | 언젠가 할 것, 아직 착수 안 함 |
-| `요청` | 사용자가 구체적으로 요청했지만 아직 미착수 |
-| `진행` | 현재 작업 중 |
-| `완료` | 완료 조건 충족, 완료 섹션으로 이동 |
+| `예정` (planned) | Something to do someday, not yet started |
+| `요청` (requested) | User specifically requested it but not yet started |
+| `진행` (in progress) | Currently being worked on |
+| `완료` (done) | Completion conditions met, move to the completed section |
 
-### TASK 파일 실시간 갱신 규칙
+### TASK File Real-Time Update Rules
 
-> 파일 구조: `CURRENT_TASK.md` (진행) / `PREPARED_TASK.md` (예정) / `FINISHED_TASK.md` (완료)
+> File structure: `CURRENT_TASK.md` (in progress) / `PREPARED_TASK.md` (planned) / `FINISHED_TASK.md` (completed)
 
-| 트리거 | 행동 |
+| Trigger | Action |
 |--------|------|
-| **작업 착수 시** | `PREPARED_TASK.md` → `CURRENT_TASK.md`로 이동 + 시작일 기록 |
-| **blocked 발생 시** | `CURRENT_TASK.md`의 blocked 컬럼에 사유 기록 |
-| **작업 완료 시** | `CURRENT_TASK.md` → `FINISHED_TASK.md`로 이동 + 완료일 기록 |
-| **새 작업 발견 시** | `PREPARED_TASK.md`에 등록 + 우선순위 지정 |
-| **커밋 직전** | TASK 파일 상태가 실제와 일치하는지 점검 |
-| **월말** | `FINISHED_TASK.md` → `TASK_ARCHIVE/YYYY-MM.md`로 이동 |
+| **On starting work** | Move from `PREPARED_TASK.md` → `CURRENT_TASK.md` + record start date |
+| **When blocked** | Record the reason in the blocked column of `CURRENT_TASK.md` |
+| **On completing work** | Move from `CURRENT_TASK.md` → `FINISHED_TASK.md` + record completion date |
+| **On discovering new work** | Register in `PREPARED_TASK.md` + assign priority |
+| **Just before commit** | Check that the TASK file status matches reality |
+| **End of month** | Move from `FINISHED_TASK.md` → `TASK_ARCHIVE/YYYY-MM.md` |
 
-### 우선순위 기준 (P1 / P2 / P3)
+### Priority Criteria (P1 / P2 / P3)
 
-| 등급 | 기준 |
+| Grade | Criteria |
 |------|------|
-| `P1` | 다른 작업이 이것에 막혀 있음 / 사용자가 오늘 필요 / 수익·퀄리티에 직결 |
-| `P2` | 조만간 필요 / P1 완료 후 자연스럽게 이어지는 것 |
-| `P3` | 있으면 좋지만 없어도 무방 / 장기 개선 사항 |
+| `P1` | Other work is blocked by this / user needs it today / directly tied to revenue/quality |
+| `P2` | Needed soon / naturally follows after P1 is done |
+| `P3` | Nice to have but fine without it / long-term improvement |
 
-**작업 현황의 P등급 소그룹 구분:**
+**P-grade subgroup divisions in the task status** (literal divider strings as used in TASK files — Korean glossed in English):
 ```
-── P1 긴급 ──
-── P2 즉시 착수 가능 ──
-── P2 선행 작업 대기 ──  (⏳ 선행작업: X-x 완료 후 착수)
-── P3 향후 ──
+── P1 긴급 ──                                              (P1 Urgent)
+── P2 즉시 착수 가능 ──                                     (P2 Can start immediately)
+── P2 선행 작업 대기 ──  (⏳ 선행작업: X-x 완료 후 착수)      (P2 Waiting on prerequisite — ⏳ prerequisite: start after X-x is complete)
+── P3 향후 ──                                              (P3 Future)
 ```
 
-### 지연 강조
+### Delay Emphasis
 
-발행 후 **3일 이상** `예정` 또는 `요청` 상태가 유지되면 상태 앞에 `**[지연]**` 표시.
+If the `예정` or `요청` status is maintained for **3 or more days** after publication, mark `**[지연]**` in front of the status.
 
-### "완료" 정의 (분야별)
+### Definition of "Done" (by field)
 
-| 분야 | 완료 조건 |
+| Field | Completion condition |
 |------|-----------|
-| `시스템` | 실제 실행 결과가 나오고 dry-run 또는 실 동작 확인 |
-| `코드` | 기능이 리포트/출력물에 반영되어 사용자가 확인 |
-| `분석` | 발견 사항이 문서화되고 사용자가 내용 검토 |
-| `아티클` | 게시 완료 (또는 사용자가 명시적으로 완료 선언) |
-| `리서치` | 목적 문서 작성 완료 후 사용자 검토 |
+| `시스템` (System) | Actual execution results are produced and confirmed via dry-run or real operation |
+| `코드` (Code) | The feature is reflected in a report/output and the user has confirmed it |
+| `분석` (Analysis) | Findings are documented and the user has reviewed the content |
+| `아티클` (Article) | Publishing complete (or the user explicitly declares it done) |
+| `리서치` (Research) | The target document is written and the user has reviewed it |
 
-### TASK 상세 로그 작성 기준
+### TASK Detailed Log Writing Criteria
 
-`docs/프로젝트/task/{ID}.md`에 작성하는 경우:
+When writing to `docs/프로젝트/task/{ID}.md`:
 
-- 설계 결정이 포함된 작업 (왜 A를 선택하고 B를 기각했는지)
-- 여러 파일을 변경한 작업 (변경 추적 필요)
-- 나중에 "왜 이렇게 했지?" 질문이 예상되는 작업
-- 사용자 검토가 필요한 작업 (미결 이슈 기록)
-- **아티클 태스크(4-x)는 필수** — 퇴고 이력 추적을 위해 항상 생성
+- Work involving design decisions (why A was chosen and B rejected)
+- Work changing multiple files (change tracking needed)
+- Work where a "why was it done this way?" question is expected later
+- Work requiring user review (record open issues)
+- **Mandatory for article tasks (4-x)** — always create one to track revision history
 
-### 아티클 퇴고 이력 관리 규칙
+### Article Revision History Management Rules
 
-**트리거**: 사용자가 아티클에 대한 피드백을 줄 때마다 즉시 기록
+**Trigger**: Record immediately whenever the user gives feedback on an article
 
-**기록 위치**: `docs/프로젝트/task/4-x.md` → `## 퇴고 이력` 섹션
+**Recording location**: `docs/프로젝트/task/4-x.md` → `## 퇴고 이력` section
 
-**기록 내용**:
-1. 사용자 피드백 원문 또는 요약
-2. 변경 결정 (어디를, 왜, 어떻게 바꿨는가)
-3. 보류 항목 (다음 버전으로 넘긴 것과 이유)
+**What to record**:
+1. The user's feedback verbatim or summarized
+2. Change decisions (where, why, and how it was changed)
+3. Deferred items (what was pushed to the next version and why)
 
-**원칙 승격 프로세스**:
-- 같은 유형의 피드백이 **3회 이상** 반복되면 → `반복 패턴 메모`에 기록
-- 패턴이 확인되면 → `.claude/rules/article-writing.md`에 원칙으로 추가
+**Principle promotion process**:
+- When the same type of feedback repeats **3 or more times** → record it in `반복 패턴 메모`
+- Once the pattern is confirmed → add it as a principle in `.claude/rules/article-writing.md`
 
-**템플릿**: `docs/프로젝트/task/TEMPLATE_article.md` (코드 태스크와 별도)
+**Template**: `docs/프로젝트/task/TEMPLATE_article.md` (separate from code tasks)

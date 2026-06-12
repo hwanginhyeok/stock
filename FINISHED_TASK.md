@@ -1,50 +1,50 @@
 # Finished Tasks
 
-> 2026-03 이전 → [TASK_ARCHIVE/2026-03.md](TASK_ARCHIVE/2026-03.md)
+> Before 2026-03 → [TASK_ARCHIVE/2026-03.md](TASK_ARCHIVE/2026-03.md)
 
-| # | 태스크 | 완료일 | 비고 |
+| # | Task | Completed | Notes |
 |---|--------|--------|------|
-| 1-47 | Tesla CSV → SQLite ORM 마이그 (issues/milestones/tagged_issues) | 2026-05-25 | 25일 정체 (5/1 시작) → 5/24 PM /hih-investigate → Hermes Phase 1 매핑표 v1 (`docs/specs/1-47-csv-to-db-mapping-v1.md`) + Phase 2 마이그 (커밋 `e298e32`, 5 파일 +686 LOC). 적재 결과 10/24/10 ✅ 멱등 3회 검증 ✅ enum 분포 100% 일치. Phase 3 (tesla_api DB 전환 + dual-read + FK 보강)은 1-71로 분리. 보조 7파일 마이그는 1-48 P2. Sonnet 위임 + Opus L2 검증 글로벌 룰 작동 사례 |
-| 1-70 | earn_reporter Nasdaq API 필드명 deprecated 대응 (eps/epsForecast/name fallback) | 2026-05-24 | 1-64 발견. PR 없이 master `a3d71a8` 직접 push (1줄 → 3줄 확장 fix). RC: Nasdaq API silent rename — epsActual/epsEstimate/companyName 모두 항상 None, 실제값은 eps/epsForecast/name. 검증: 5/21 데이터 company 55/55, eps_estimate 24/55, eps_actual 33/55 (이전 0). 메모리 신규: [[external-api-silent-field-rename]] |
-| 1-69 | sector_summary 매월 1일 cron 등록 (Hermes) | 2026-05-24 | 1-64 자동화 보너스. `0 0 1 * * cd /home/window11/stock && /usr/bin/python3 scripts/generate_sector_summary.py 2026 Q1 --output ... >> ~/.pm_logs/sector_summary.log 2>&1`. 첫 자동 발화 2026-06-01 00:00 KST. ⚠ 스크립트 argparse 미사용 → 매월 같은 2026Q1만 재생성. Q2 자동 갱신 위해 argparse 추가 별도 task 필요. 메모리 신규: [[cron-line-write-first]] |
-| 1-64 | 2026Q1 실적 시즌 섹터 종합 분석 HTML | 2026-05-24 | 04-29 시작 → 25일 정체 → cron 정상화 후 즉시 진행. 48종목 (시즌 4/29~5/22) → 11 GICS 섹터 그루핑 + 대장/약자(EPS surprise %) + 매핑 부록. PM `/hih-investigate` cron 복구 직후 Sonnet subagent 위임. 산출물: `docs/earnings/2026Q1_sector_summary.html` (50KB) + `scripts/generate_sector_summary.py` (31KB idempotent, Q2~Q4 재사용 가능). 커밋 `3fea264` + GDrive 업로드 https://drive.google.com/open?id=1QQekvCcHCa2TcZVnics_3_7krpP__WRW. 데이터 이슈 15건 (EPS N/A 13 + BRK.B 빈칸 + INTC 캡) appendix 명시 |
-| 1-68 | cron 사망 RC1+RC2 fix — sentiment ImportError + earn_reporter rows None | 2026-05-24 | PR #1 `74b38b8`. RC1 (5/12 c233d81 archive 후속 __init__.py 미정리 → kr/us news 4일 90회 실패) + RC2 (Nasdaq API `{"data": {"rows": null}}` 응답 변경 → 240줄 NoneType iter). 검증: KR 182건/US 89건/earn_reporter exit 0. 잔여 부채 1-67로 분리 |
-| 1-66 | APScheduler 데몬 systemd 서비스 등록 (briefing 자동 재시작) | 2026-05-24 | `~/.config/systemd/user/stock-briefing.service` 등록 + enable + linger yes. 2차 RC4 발견: numpy 2.4.4 vs 시스템 matplotlib 3.6.3 ABI 충돌 → ~/.local matplotlib 3.10.9 upgrade로 해결. 실제 schedule: morning 08:00/closing 16:30/weekly SAT 10:00/ohlcv 17:00 ET/morning_email 08:00 mon-sat (메모리 05:53/17:47은 stale, 갱신 필요) |
-| 1-45 | Tesla 이슈 DB — TSLA-E/P/C/F/I/R/M 체계 | 2026-04-21 | CSV 시드 완성: `data/research/stocks/tesla/issues.csv` 10건 + `milestones.csv` 24건 + `tagged_issues.csv` 10건. `src/core/models.py:501` 데이터모델. CSV→DB 마이그는 1-47이 담당 (의도된 분리). **실제 완료 04-21경, 메모리 미갱신으로 21일 blocked 표기 → 2026-05-17 PM 검증으로 인지** |
-| 1-52 | VWMA100 터치 전략 백테스트 + 스크리너 구현 | 2026-05-15 | sma_signals 백테스트→VWMA100 터치 전략으로 방향 전환. TSLA 5y A/B 비교. NASDAQ100+SP500 스크리너 cron 등록 |
-| 1-59 | Essence 상단 3카드 실데이터 연동 — 비중·주가·모멘텀 | 2026-05-15 | 현재주가 $443.30 실시간 / P&L +80.35% / VWMA100 채널위치 / 비중 28.7% 동적계산 |
-| 1-58 | 트레이딩 차트 반영 — pandas_ta→sma_signals 전환 + signals API 복구 | 2026-05-15 | numba/coverage 충돌 해결. VWMA100 BUY 2026-05-08, TREND_UP |
-| 1-60 | 타임라인 핵심 압축 — core/important/all 토글 + 동일날 그룹핑 | 2026-05-14 | importance 점수 기반 필터 + topic 그룹핑. important 임계값 10으로 최종 조정 |
-| 1-63 | earn_reporter.py 검증 + 크론 등록 | 2026-05-10 | EPS·매출 N/A 버그 3개 수정 후 검증 완료. crontab 등록 승인 |
-| 1-65 | 실적 리포트 voice/톤 검토 — 사용자 리뷰 | 2026-05-10 | 딥다이브 17개 검토 완료. EPS N/A·단위불일치·NaN 버그 3개 수정. 전체 재생성 + GDrive 업로드 |
-| 1-32 | X 시황 포스트 — 테슬라 | 2026-05-05 | 폐기 — 31일 품질 피드백 보류, 방향 재설정 필요 |
-| 1-62 | 실적 딥다이브 — 빅테크 4 (META/GOOGL/MSFT/AMZN) | 2026-04-30 | 딥다이브 4종 |
-| 1-61 | 실적 딥다이브 리포트 백필 | 2026-04-30 | 17개 딥다이브 + 9개 trend |
-| 1-55 | Thesis + Timeline + Topic Quarterly | 2026-04-23 | Essence Dashboard 구성 요소 |
-| 1-56 | Timeline 레인 분리 + 충돌 방지 | 2026-04-23 | swimlane 렌더링 |
-| 1-57 | occurred_at 통일 + 사실성 감사 | 2026-04-24 | 이벤트 날짜 정합성 |
-| 1-54 | Tesla Essence Dashboard | 2026-04-23 | 웹 대시보드 |
-| 1-44 | Tesla 특화 엔티티 스키마 설계 (본질론 기반) | 2026-04-23 | 코드 완료 |
-| 1-48 | properties dict 웹 UI 노출 (3단 분류) | 2026-04-23 | 코드 완료 |
-| 1-51 | 미래 이벤트 차트 표시 (실적·FOMC 등) | 2026-04-23 | 코드 완료 |
-| 1-30 | InvestOS — 테슬라 인텔리전스 인프라 | 2026-04-24 | 1-44~1-47로 분해 완료 |
-| 1-43 | HIH_2 entity 체계 조사 & stock 매핑 설계 | 2026-04-23 | 블로커 해제 (독립 진행). stock 현황 조사 완료 → 1-44~1-48로 분해. `docs/프로젝트/task/1-43.md` |
-| 1-50 | 차트 이벤트 가중 필터 (importance 점수) | 2026-04-15 | severity × relevance × freshness. 키워드 기반 Tesla 직접/간접/거시 분류. core/important/all 셀렉터 |
-| 1-49 | 자체 차트 시스템 구축 (TSLA) | 2026-04-15 | TV 위젯 + lightweight-charts + yfinance + SMA6/VWMA100/VPVR/RSI/MACD + 멀티 타임프레임(1H/4H/D/W/M) + 매수매도 시그널 + 인범 빗각(고고저/저저고) + 평행 채널 + VP 교차 + XY축 독립 줌. 후속: 1-50~53. D-006 기록 |
-| 5-9 | trend_detector Ollama→Gemini Flash 전환 | 2026-04-08 | gemini -p 1차 + Ollama fallback, dry-run 통과 |
-| 1-41 | 엔티티 노이즈 필터 강화 — 금액/수량/비자 패턴 | 2026-04-08 | 공통 모듈 + DB 45개 정리 (3183→3138) |
-| 1-42 | 뉴스 티커 최신화 + GEO/US/KR 핫뉴스 2개씩 | 2026-04-08 | published_at 정렬, 카테고리별 선별 |
-| 1-37 | 관계 브리핑 가독성 개선 — 중요도 순 + 한국어 라벨 | 2026-04-08 | 엔티티별 집계, 빈도×신뢰도 소팅 |
-| 1-38 | 관계도 깊이/밀도 제어 — BFS depth + pruning | 2026-04-08 | depth 1/2/3 선택, 하위 30% 자동 제거 |
-| 5-10 | 온톨로지 이론 기반 문서화 (276줄) | 2026-04-08 | 철학 계보 + 본질론 + 공학 방법론 + FIBO |
-| 1-39 | Stock 엔티티 온톨로지 설계 — 본질적 속성 추출 | 2026-04-08 | 프롬프트 + config 스키마 (essential/propria) |
-| 1-36 | 관계도 Top N 필터 + 이벤트 카테고리 확장 | 2026-04-07 | Top 10/20/50/전체 필터, degree 랭킹 |
-| 1-35 | InvestOS 이벤트 체계 대개편 — EventType 분리 + 스토리 체이닝 + 타임라인 뷰 | 2026-04-07 | 275개 이벤트, 121개 story_thread |
-| 1-34 | 심층분석 파이프라인 + cron 재설계 | 2026-04-06 | Ollama 하루2회(05:30/17:30), 수집 15분→1시간 |
-| 1-33 | cron 뉴스 수집 URL/도메인 노이즈 3단 필터 | 2026-04-06 | title 소스명 제거 + 저장 필터 + 92개 오염 엔티티 삭제 |
-| 1-31a | InvestOS US/KR 주식 탭 + 엔티티 추출 + 리뷰 파이프라인 | 2026-04-04 | 3탭, Ollama 추출 cron, 리뷰(타입368+병합55+중복159), 번역, 캐시 |
-| 1-31b | GeoInvest Ollama 전환 (Claude API 제거) | 2026-04-04 | API 비용 0원 |
-| 1-31c | 뉴스 티커 한국어 번역 + 속도 조절 | 2026-04-04 | Ollama 일괄 번역, 10분 캐시 |
-| 1-31d | 타임라인 최신순 정렬 + entity_type 유효성 | 2026-04-04 | reverse=True, institution fallback |
-| 1-23 | 크립토 이메일 Section 6 | 2026-04-03 | COIN/HOOD/MSTR/SQ/BLK/BMNR |
-| 2-13 | naver HTML 한글 깨짐 수정 + briefing_server | 2026-04-01 | fragment→full document wrapper |
+| 1-47 | Tesla CSV → SQLite ORM migration (issues/milestones/tagged_issues) | 2026-05-25 | Stalled 25 days (started 5/1) → 5/24 PM /hih-investigate → Hermes Phase 1 mapping table v1 (`docs/specs/1-47-csv-to-db-mapping-v1.md`) + Phase 2 migration (commit `e298e32`, 5 files +686 LOC). Load result 10/24/10 ✅ idempotency verified 3 times ✅ enum distribution 100% match. Phase 3 (tesla_api DB switch + dual-read + FK reinforcement) split off as 1-71. Auxiliary 7-file migration is 1-48 P2. A case of the global rule "Sonnet delegation + Opus L2 verification" working |
+| 1-70 | earn_reporter Nasdaq API deprecated field-name handling (eps/epsForecast/name fallback) | 2026-05-24 | Found via 1-64. Pushed directly to master `a3d71a8` without a PR (1-line → 3-line expansion fix). RC: Nasdaq API silent rename — epsActual/epsEstimate/companyName are all always None; actual values are eps/epsForecast/name. Verification: 5/21 data company 55/55, eps_estimate 24/55, eps_actual 33/55 (previously 0). New memory: [[external-api-silent-field-rename]] |
+| 1-69 | sector_summary cron registered for the 1st of each month (Hermes) | 2026-05-24 | Automation bonus from 1-64. `0 0 1 * * cd /home/window11/stock && /usr/bin/python3 scripts/generate_sector_summary.py 2026 Q1 --output ... >> ~/.pm_logs/sector_summary.log 2>&1`. First auto-fire 2026-06-01 00:00 KST. ⚠ Script does not use argparse → regenerates the same 2026Q1 every month. A separate task is needed to add argparse for Q2 auto-update. New memory: [[cron-line-write-first]] |
+| 1-64 | 2026Q1 earnings-season sector summary analysis HTML | 2026-05-24 | Started 04-29 → stalled 25 days → resumed immediately after cron was restored. 48 tickers (season 4/29~5/22) → grouped into 11 GICS sectors + leaders/laggards (EPS surprise %) + mapping appendix. Delegated to a Sonnet subagent right after PM `/hih-investigate` cron recovery. Output: `docs/earnings/2026Q1_sector_summary.html` (50KB) + `scripts/generate_sector_summary.py` (31KB idempotent, reusable for Q2~Q4). Commit `3fea264` + GDrive upload https://drive.google.com/open?id=1QQekvCcHCa2TcZVnics_3_7krpP__WRW. 15 data issues (EPS N/A 13 + BRK.B blank + INTC cap) noted in appendix |
+| 1-68 | cron death RC1+RC2 fix — sentiment ImportError + earn_reporter rows None | 2026-05-24 | PR #1 `74b38b8`. RC1 (after 5/12 c233d81 archive, follow-up __init__.py not cleaned up → kr/us news failed 90 times over 4 days) + RC2 (Nasdaq API response change `{"data": {"rows": null}}` → NoneType iter at line 240). Verification: KR 182 items / US 89 items / earn_reporter exit 0. Remaining debt split off as 1-67 |
+| 1-66 | APScheduler daemon registered as a systemd service (briefing auto-restart) | 2026-05-24 | Registered `~/.config/systemd/user/stock-briefing.service` + enable + linger yes. Secondary RC4 found: numpy 2.4.4 vs system matplotlib 3.6.3 ABI conflict → resolved by upgrading ~/.local matplotlib to 3.10.9. Actual schedule: morning 08:00 / closing 16:30 / weekly SAT 10:00 / ohlcv 17:00 ET / morning_email 08:00 mon-sat (memory's 05:53/17:47 is stale, needs updating) |
+| 1-45 | Tesla issue DB — TSLA-E/P/C/F/I/R/M system | 2026-04-21 | CSV seed completed: `data/research/stocks/tesla/issues.csv` 10 items + `milestones.csv` 24 items + `tagged_issues.csv` 10 items. `src/core/models.py:501` data model. CSV→DB migration is handled by 1-47 (intended separation). **Actually completed around 04-21, but marked blocked for 21 days due to memory not being updated → recognized via 2026-05-17 PM verification** |
+| 1-52 | VWMA100 touch strategy backtest + screener implementation | 2026-05-15 | sma_signals backtest → pivoted to VWMA100 touch strategy. TSLA 5y A/B comparison. NASDAQ100+SP500 screener cron registered |
+| 1-59 | Essence top 3-card real-data integration — weight·price·momentum | 2026-05-15 | Current price $443.30 real-time / P&L +80.35% / VWMA100 channel position / weight 28.7% dynamically calculated |
+| 1-58 | Trading chart integration — pandas_ta→sma_signals switch + signals API recovery | 2026-05-15 | Resolved numba/coverage conflict. VWMA100 BUY 2026-05-08, TREND_UP |
+| 1-60 | Timeline core compression — core/important/all toggle + same-day grouping | 2026-05-14 | importance-score-based filter + topic grouping. important threshold finally tuned to 10 |
+| 1-63 | earn_reporter.py verification + cron registration | 2026-05-10 | Verified after fixing 3 EPS·revenue N/A bugs. crontab registration approved |
+| 1-65 | Earnings report voice/tone review — user review | 2026-05-10 | 17 deep-dives reviewed. Fixed 3 bugs: EPS N/A·unit mismatch·NaN. Full regeneration + GDrive upload |
+| 1-32 | X market post — Tesla | 2026-05-05 | Scrapped — held for 31 days on quality feedback, needs redirection |
+| 1-62 | Earnings deep-dive — Big Tech 4 (META/GOOGL/MSFT/AMZN) | 2026-04-30 | 4 deep-dives |
+| 1-61 | Earnings deep-dive report backfill | 2026-04-30 | 17 deep-dives + 9 trend |
+| 1-55 | Thesis + Timeline + Topic Quarterly | 2026-04-23 | Essence Dashboard component |
+| 1-56 | Timeline lane separation + collision avoidance | 2026-04-23 | swimlane rendering |
+| 1-57 | occurred_at unification + factuality audit | 2026-04-24 | Event date consistency |
+| 1-54 | Tesla Essence Dashboard | 2026-04-23 | Web dashboard |
+| 1-44 | Tesla-specific entity schema design (essentialism-based) | 2026-04-23 | Code complete |
+| 1-48 | properties dict web UI exposure (3-tier classification) | 2026-04-23 | Code complete |
+| 1-51 | Future event chart display (earnings·FOMC etc.) | 2026-04-23 | Code complete |
+| 1-30 | InvestOS — Tesla intelligence infrastructure | 2026-04-24 | Decomposed into 1-44~1-47 |
+| 1-43 | HIH_2 entity system investigation & stock mapping design | 2026-04-23 | Blocker cleared (proceeds independently). stock current-state investigation done → decomposed into 1-44~1-48. `docs/프로젝트/task/1-43.md` |
+| 1-50 | Chart event weighted filter (importance score) | 2026-04-15 | severity × relevance × freshness. Keyword-based Tesla direct/indirect/macro classification. core/important/all selector |
+| 1-49 | In-house chart system build (TSLA) | 2026-04-15 | TV widget + lightweight-charts + yfinance + SMA6/VWMA100/VPVR/RSI/MACD + multi-timeframe (1H/4H/D/W/M) + buy/sell signals + diagonal lines (higher-high-lower / lower-low-higher) + parallel channels + VP crossover + independent XY-axis zoom. Follow-up: 1-50~53. D-006 recorded |
+| 5-9 | trend_detector Ollama→Gemini Flash switch | 2026-04-08 | gemini -p primary + Ollama fallback, dry-run passed |
+| 1-41 | Entity noise filter reinforcement — amount/quantity/visa patterns | 2026-04-08 | Common module + DB 45 cleaned up (3183→3138) |
+| 1-42 | News ticker refresh + 2 hot news each for GEO/US/KR | 2026-04-08 | published_at sort, per-category selection |
+| 1-37 | Relationship briefing readability improvement — by importance + Korean labels | 2026-04-08 | Per-entity aggregation, frequency×confidence sorting |
+| 1-38 | Relationship-graph depth/density control — BFS depth + pruning | 2026-04-08 | depth 1/2/3 selection, bottom 30% auto-removed |
+| 5-10 | Ontology-theory-based documentation (276 lines) | 2026-04-08 | Philosophical lineage + essentialism + engineering methodology + FIBO |
+| 1-39 | Stock entity ontology design — essential property extraction | 2026-04-08 | Prompt + config schema (essential/propria) |
+| 1-36 | Relationship-graph Top N filter + event category expansion | 2026-04-07 | Top 10/20/50/all filter, degree ranking |
+| 1-35 | InvestOS event system overhaul — EventType separation + story chaining + timeline view | 2026-04-07 | 275 events, 121 story_thread |
+| 1-34 | Deep-analysis pipeline + cron redesign | 2026-04-06 | Ollama twice daily (05:30/17:30), collection 15min→1hour |
+| 1-33 | cron news collection URL/domain noise 3-tier filter | 2026-04-06 | title source-name removal + storage filter + 92 polluted entities deleted |
+| 1-31a | InvestOS US/KR stock tabs + entity extraction + review pipeline | 2026-04-04 | 3 tabs, Ollama extraction cron, review (type 368 + merge 55 + dup 159), translation, cache |
+| 1-31b | GeoInvest Ollama switch (Claude API removed) | 2026-04-04 | API cost 0 |
+| 1-31c | News ticker Korean translation + speed control | 2026-04-04 | Ollama batch translation, 10-min cache |
+| 1-31d | Timeline latest-first sort + entity_type validation | 2026-04-04 | reverse=True, institution fallback |
+| 1-23 | Crypto email Section 6 | 2026-04-03 | COIN/HOOD/MSTR/SQ/BLK/BMNR |
+| 2-13 | naver HTML Korean mojibake fix + briefing_server | 2026-04-01 | fragment→full document wrapper |

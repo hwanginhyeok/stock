@@ -1,5 +1,5 @@
 # Current Tasks
 
-| # | 태스크 | 시작일 | blocked | 비고 |
+| # | Task | Start date | blocked | Notes |
 |---|--------|--------|---------|------|
-| _(없음)_ | 2026-05-24 PM 세션: cron 사망 3종 복구 + 1-64 완료. 다음: PREPARED P1 1-46/1-47/1-53 중 선택 | — | — | — |
+| _(none)_ | 2026-05-24 PM session: recovered 3 dead cron jobs + completed 1-64. Next: choose among PREPARED P1 1-46/1-47/1-53 | — | — | — |

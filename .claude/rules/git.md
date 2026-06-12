@@ -1,12 +1,12 @@
 # Git Rules
 
-## 커밋 컨벤션
+## Commit Convention
 
-- 커밋 메시지: `[카테고리] 내용` 형식
-- 카테고리: `설정`, `수집`, `분석`, `생성`, `게시`, `인프라`, `테스트`, `문서`, `수정`
-- 예시: `[설정] 프로젝트 초기 구조 생성`
+- Commit message: `[category] content` format
+- Categories: `config`, `collect`, `analysis`, `generate`, `publish`, `infra`, `test`, `docs`, `fix`
+- Example: `[config] create initial project structure`
 
-## 브랜치 전략
+## Branching Strategy
 
-- `master` — 메인 브랜치
-- 기능 개발 시 별도 브랜치 생성 후 PR
+- `master` — main branch
+- When developing a feature, create a separate branch and open a PR

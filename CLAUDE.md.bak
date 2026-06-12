@@ -1,4 +1,3 @@
-/usr/bin/bash: warning: setlocale: LC_ALL: cannot change locale (ko_KR.UTF-8)
 # Stock Tycoon Project
 
 > **Tesla Investment Intelligence** — research + trading + content
@@ -155,30 +154,3 @@ Key routing rules:
 - Design system, brand → invoke design-consultation
 - Visual audit, design polish → invoke design-review
 - Architecture review → invoke plan-eng-review
-
-## Superpowers 활성화
-
-### 세션 시작 시 자동 로드
-
-모든 세션 시작 시 `using-superpowers` 스킬을 **반드시 먼저** Skill 도구로 호출할 것.
-
-### 작업 유형별 필수 프로세스
-
-| 작업 유형 | 필수 프로세스 |
-|-----------|--------------|
-| 새 기능 / 기능 수정 | brainstorming → writing-plans → matt-tdd → verification-before-completion |
-| 버그 수정 | systematic-debugging (재현→원인파악→수정→검증) → verification-before-completion |
-| 완료 / 배포 | verification-before-completion → ship |
-| 계획 수립 | brainstorming → writing-plans → executing-plans |
-
-### 스킬 호출 규칙
-
-1. **Skill 도구 사용**: Read 도구로 직접 읽지 않고 반드시 Skill 도구로 호출
-2. **우선 호출**: 1% 가능성이라도 관련 스킬이 있으면 반드시 호출
-3. **순서 준수**: 프로세스 스킬 먼저 (brainstorming, debugging), 구현 스킬 나중에 (TDD)
-4. **체크리스트 추적**: 체크리스트가 있으면 TodoWrite로 각 항목 추적
-
-### 언어 규칙
-
-- 한국어로 응답 (로그, 코멘트, 메시지 모두)
-- 코드 변수명/함수명은 영어 유지

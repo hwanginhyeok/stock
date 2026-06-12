@@ -1,76 +1,76 @@
 # Difficulties & Know-how
 
-## D-001: 네이버 HTML 한글 깨짐
-- **날짜**: 2026-03-23 ~ 2026-04-01
-- **상황**: 브리핑 HTML을 네이버 블로그에 붙여넣으면 한글이 깨져서 출력
-- **이슈**: `<meta charset="utf-8">`을 넣었는데도 브라우저가 인코딩을 무시. 네이버 에디터에서 HTML fragment를 직접 렌더링하면 charset 선언이 적용 안 됨
-- **삽질**: (1) meta charset을 HTML 상단에 추가 → 효과 없음 (2) BOM 추가 시도 → 네이버가 BOM 제거 (3) Content-Type 헤더 시도 → 파일 붙여넣기라 HTTP 헤더 불가
-- **해결**: `briefing_server.py` 로컬 서버를 만들어 HTML fragment를 `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>...` 전체 문서로 감싸서 서빙. 브라우저에서 렌더링 후 복사-붙여넣기
-- **대안**: (a) Python으로 직접 네이버 API 호출 → API가 HTML 본문 지원 안 함 (b) Playwright로 자동 붙여넣기 → 네이버 에디터 DOM 구조가 복잡해서 불안정
-- **노하우**: HTML fragment를 브라우저에서 볼 때는 반드시 `<head>` 안에 charset을 넣은 full document wrapper로 서빙. fragment 단독으로는 charset이 작동 안 함
-- **회고**: 처음부터 로컬 preview 서버를 만들었으면 디버깅이 훨씬 빨랐을 것. "왜 meta charset이 안 먹지?"에서 출발했는데, 질문 자체가 잘못됨 — fragment에는 head가 없으니 meta가 의미 없음
-- **관련 파일**: `scripts/briefing_server.py`, `src/generators/briefing_generator.py`
+## D-001: Naver HTML Korean text corruption
+- **Date**: 2026-03-23 ~ 2026-04-01
+- **Situation**: When pasting the briefing HTML into the Naver blog, Korean text is rendered corrupted
+- **Issue**: Even after adding `<meta charset="utf-8">`, the browser ignores the encoding. When the Naver editor renders an HTML fragment directly, the charset declaration is not applied
+- **Trial and error**: (1) Added meta charset at the top of the HTML → no effect (2) Tried adding a BOM → Naver strips the BOM (3) Tried a Content-Type header → since it's a file paste, an HTTP header is not possible
+- **Solution**: Created a `briefing_server.py` local server that wraps the HTML fragment into a full document `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>...` and serves it. Render in the browser, then copy-paste
+- **Alternatives**: (a) Calling the Naver API directly from Python → the API does not support HTML body (b) Auto-pasting with Playwright → unstable because the Naver editor DOM structure is complex
+- **Know-how**: When viewing an HTML fragment in the browser, you must serve it as a full document wrapper with the charset inside `<head>`. The charset does not work with a fragment alone
+- **Retrospective**: If I had built a local preview server from the start, debugging would have been much faster. I started from "why doesn't meta charset work?", but the question itself was wrong — a fragment has no head, so the meta is meaningless
+- **Related files**: `scripts/briefing_server.py`, `src/generators/briefing_generator.py`
 
-## D-002: RSS 뉴스 수집 소스 도메인/URL 노이즈
-- **날짜**: 2026-03-25 ~ 2026-04-06
-- **상황**: 15분마다 RSS 수집 → Ollama 엔티티 추출 → InvestOS 대시보드에서 `cnn.com`, `marketplace.org` 같은 도메인이 엔티티로 표시
-- **이슈**: Google News RSS title이 `"헤드라인 - CNBC"` 형식으로 소스명 포함. Ollama gemma3:4b가 이를 엔티티로 추출. 또한 `$71,500`, `metadata`, `2월` 같은 노이즈도 추출
-- **삽질**: (1) Ollama 프롬프트에 "도메인 추출 금지" 추가 → gemma3:4b가 무시 (2) content 필드에서 URL 검색 → 0.4%만 해당, 핵심 원인 아님 (3) RSS summary 확인 → Google News는 HTML에 URL 포함하지만 _extract_text()가 잘 처리
-- **해결**: 3단 필터 조합: (A) `_parse_entry()`에서 title 끝 `" - SourceName"` 정규식 제거 (B) `_save_extraction()`에서 도메인 패턴/노이즈 단어 필터 (C) `review_entities.py` Phase 0에서 기존 오염 92개 삭제
-- **대안**: (a) 더 큰 모델(12b) 사용 → RTX 2060 6GB에서 느림 (b) Claude API로 추출 → 비용 발생 (c) 프롬프트만 개선 → 소형 모델 한계
-- **노하우**: LLM 추출 결과는 반드시 사후 필터를 거쳐야 함. 입력 정제(A) + 출력 필터(B) + 정기 청소(C) 3단 방어가 필요. 프롬프트 하나로 소형 모델의 한계를 극복하려 하지 말 것
-- **회고**: 처음 RSS content를 자세히 봤으면 "title = content = summary (동일)"이라는 Google News의 빈약한 데이터 구조를 빨리 파악했을 것. content에서 URL을 찾는 데 시간을 낭비
-- **관련 파일**: `src/collectors/news/rss_collector.py`, `scripts/update_geoinvest.py`, `scripts/update_stockinvest.py`, `scripts/review_entities.py`
+## D-002: RSS news collection source domain/URL noise
+- **Date**: 2026-03-25 ~ 2026-04-06
+- **Situation**: RSS collection every 15 min → Ollama entity extraction → domains like `cnn.com`, `marketplace.org` show up as entities in the InvestOS dashboard
+- **Issue**: The Google News RSS title is in the format `"헤드라인 - CNBC"`, including the source name. Ollama gemma3:4b extracts this as an entity. It also extracts noise such as `$71,500`, `metadata`, `2월`
+- **Trial and error**: (1) Added "do not extract domains" to the Ollama prompt → gemma3:4b ignores it (2) Searched the content field for URLs → only 0.4% applied, not the core cause (3) Checked the RSS summary → Google News includes the URL in the HTML but `_extract_text()` handles it well
+- **Solution**: A 3-stage filter combination: (A) regex-remove the trailing `" - SourceName"` from the title in `_parse_entry()` (B) filter domain patterns/noise words in `_save_extraction()` (C) delete 92 existing polluted entries in `review_entities.py` Phase 0
+- **Alternatives**: (a) Use a larger model (12b) → slow on an RTX 2060 6GB (b) Extract with the Claude API → incurs cost (c) Improve only the prompt → a limit of small models
+- **Know-how**: LLM extraction results must always go through a post-filter. A 3-stage defense is needed: input cleansing (A) + output filter (B) + periodic cleanup (C). Do not try to overcome a small model's limits with a single prompt
+- **Retrospective**: If I had looked at the RSS content closely at first, I would have quickly grasped Google News's thin data structure where "title = content = summary (identical)". I wasted time looking for URLs in the content
+- **Related files**: `src/collectors/news/rss_collector.py`, `scripts/update_geoinvest.py`, `scripts/update_stockinvest.py`, `scripts/review_entities.py`
 
-## D-003: 모닝 이메일 부분 실패 시 전체 발송 중단
-- **날짜**: 2026-03-26
-- **상황**: FRED API 일시 장애로 유동성 데이터 수집 실패 → 모닝 이메일 전체가 발송되지 않음
-- **이슈**: `send_morning_email.py`가 FRED 데이터 수집 단계에서 예외 발생 시 전체 프로세스가 중단. FX, 크립토, 차트 등 다른 섹션은 정상인데도 이메일 자체가 안 나감
-- **삽질**: (1) FRED API에 retry 3회 추가 → API 자체가 다운이면 의미 없음 (2) 캐시된 데이터 사용 시도 → 캐시 구조가 없었음
-- **해결**: 각 데이터 수집 단계(FRED/FX/Crypto/Charts)를 개별 try-except로 감싸고, 부분 실패 시에도 가용 데이터로 이메일 발송. 제목에 `[일부 누락]` 접두사, 템플릿에 ⚠️ 배너 표시. FRED+FX 동시 실패(핵심 데이터 없음)일 때만 발송 중단
-- **대안**: (a) 모든 API에 로컬 캐시 레이어 추가 → 구현 복잡도 높음, 데이터 신선도 문제 (b) 실패 시 30분 후 재시도 cron → 복잡하고 중복 발송 위험
-- **노하우**: 데이터 파이프라인은 "전부 아니면 무(all-or-nothing)"가 아니라 "가능한 만큼(best-effort)"으로 설계. 특히 매일 반복되는 cron 작업은 부분 결과라도 보내는 게 안 보내는 것보다 나음
-- **회고**: 처음부터 각 섹션을 독립적으로 설계했으면 좋았겠다. "정상 경로"만 생각하고 만들면 첫 장애에서 전체가 무너짐
-- **관련 파일**: `scripts/send_morning_email.py`, `src/publishers/email_publisher.py`, `templates/email/morning_report.html.j2`
+## D-003: Whole morning-email send halted on partial failure
+- **Date**: 2026-03-26
+- **Situation**: A temporary FRED API outage caused liquidity data collection to fail → the entire morning email was not sent
+- **Issue**: When `send_morning_email.py` raises an exception in the FRED data collection step, the entire process halts. Even though other sections like FX, crypto, and charts are fine, the email itself is not sent
+- **Trial and error**: (1) Added 3 retries to the FRED API → meaningless if the API itself is down (2) Tried using cached data → there was no cache structure
+- **Solution**: Wrap each data collection step (FRED/FX/Crypto/Charts) in its own try-except, and even on partial failure, send the email with whatever data is available. Add a `[일부 누락]` prefix to the subject and show a ⚠️ banner in the template. Only halt sending when FRED+FX fail simultaneously (no core data)
+- **Alternatives**: (a) Add a local cache layer to all APIs → high implementation complexity, data freshness issues (b) A retry cron after 30 min on failure → complex and risks duplicate sends
+- **Know-how**: Design data pipelines as "best-effort" (as much as possible), not "all-or-nothing". Especially for daily recurring cron jobs, sending a partial result is better than sending nothing
+- **Retrospective**: It would have been good to design each section independently from the start. If you build thinking only about the "happy path", the whole thing collapses at the first failure
+- **Related files**: `scripts/send_morning_email.py`, `src/publishers/email_publisher.py`, `templates/email/morning_report.html.j2`
 
-## D-004: deep_analysis.py Market enum 매핑 에러
-- **날짜**: 2026-04-06
-- **상황**: 심층분석 파이프라인 LIVE 첫 실행 시 stock_kr 이슈에서 Pydantic ValidationError 발생
-- **이슈**: `OntologyEvent(market=...)` 생성 시 `"kr"` 전달 → Market enum에는 `"korea"`, `"us"`만 있음. `stock_kr`에서 `replace("stock_", "")` → `"kr"` → 에러. 보정 코드가 event 생성 **이후**에 있어서 의미 없음
-- **삽질**: (1) 첫 실행에서 에러 발견 → 수정 후 재실행 → 같은 에러 (이전 실행의 로그를 새 실행 결과로 착각) (2) Pydantic이 생성자에서 즉시 검증하므로 "생성 후 보정" 전략 자체가 불가능
-- **해결**: event 생성 전에 `market = "korea" if "kr" in cat else "us"` 매핑. 보정 코드 삭제
-- **대안**: (a) Market enum에 `KR = "kr"` 추가 → 시스템 전체에 영향, 다른 곳에서 "korea" 기대 (b) `model_validator`로 자동 변환 → 과도한 마법
-- **노하우**: Pydantic BaseModel은 `__init__`에서 즉시 검증. "만들고 나서 고치자"는 안 됨. enum 값은 생성 전에 확정할 것. 또한 에러 로그 확인 시 타임스탬프를 반드시 체크 — 이전 실행 로그와 현재 로그를 혼동하지 말 것
-- **회고**: 테스트를 dry-run으로만 하지 말고, stock_kr 이슈 1개라도 LIVE로 테스트했으면 바로 잡았을 것. dry-run은 DB 저장 경로를 타지 않으므로 Pydantic 검증을 통과
-- **관련 파일**: `scripts/deep_analysis.py`, `src/core/models.py` (Market enum)
+## D-004: deep_analysis.py Market enum mapping error
+- **Date**: 2026-04-06
+- **Situation**: On the first LIVE run of the deep-analysis pipeline, a Pydantic ValidationError occurred on a stock_kr issue
+- **Issue**: When creating `OntologyEvent(market=...)`, passing `"kr"` → the Market enum only has `"korea"`, `"us"`. `stock_kr` → `replace("stock_", "")` → `"kr"` → error. The correction code is **after** event creation, so it's meaningless
+- **Trial and error**: (1) Found the error on the first run → fixed and re-ran → same error (mistook the previous run's log as the new run's result) (2) Pydantic validates immediately in the constructor, so the "correct after creation" strategy itself is impossible
+- **Solution**: Map `market = "korea" if "kr" in cat else "us"` before event creation. Delete the correction code
+- **Alternatives**: (a) Add `KR = "kr"` to the Market enum → affects the whole system, other places expect "korea" (b) Auto-convert with `model_validator` → excessive magic
+- **Know-how**: A Pydantic BaseModel validates immediately in `__init__`. "Create it then fix it" won't work. Determine enum values before creation. Also, always check timestamps when reviewing error logs — do not confuse a previous run's log with the current log
+- **Retrospective**: Instead of testing only via dry-run, if I had tested even one stock_kr issue LIVE, I would have caught it right away. A dry-run does not go through the DB save path, so it passes Pydantic validation
+- **Related files**: `scripts/deep_analysis.py`, `src/core/models.py` (Market enum)
 
-## D-005: matplotlib 한글 폰트 렌더링
-- **날짜**: 2026-02 (프로젝트 초기)
-- **상황**: WSL Ubuntu에서 matplotlib 차트 생성 시 한글이 □(두부)로 표시
-- **이슈**: `plt.rcParams["font.family"] = "Noto Sans CJK KR"` 설정만으로는 안 됨. matplotlib가 시스템 폰트를 자동 탐색하지 않음
-- **삽질**: (1) `rcParams` font.family만 설정 → 폰트 못 찾음 (2) `fc-list`로 폰트 경로 확인 후 `font_manager.FontProperties` 직접 지정 → 매 차트마다 반복 필요 (3) `Noto Sans CJK KR` 이름으로 검색 → .ttc 컬렉션은 첫 폰트(JP)만 등록
-- **해결**: `fontManager.addfont()` 호출로 .ttc 파일을 명시적 등록 후, 등록된 이름 `"Noto Sans CJK JP"` (JP가 먼저 등록됨)로 family 설정. JP 폰트도 한글 글리프 포함하므로 렌더링 정상. `axes.unicode_minus = False` 필수 (마이너스 부호 깨짐 방지)
-- **대안**: (a) 한글 전용 폰트(나눔고딕) 설치 → WSL에서 추가 패키지 필요 (b) 이미지에 한글 안 쓰기 → 비현실적
-- **노하우**: matplotlib + CJK 폰트는 `addfont()` → `rcParams["font.family"]` 2단계 필수. .ttc 컬렉션은 첫 번째 폰트만 등록됨을 인지. 헤드리스 환경에서는 `matplotlib.use("Agg")` 백엔드 설정 필수
-- **회고**: 이 문제는 "한번 해결하면 끝"인데 삽질 시간이 길었다. `.claude/rules/coding.md`에 스니펫으로 기록해둔 게 정답 — 이후 모든 차트 스크립트에서 복사-붙여넣기로 해결
-- **관련 파일**: `.claude/rules/coding.md` (한글 폰트 스니펫), `src/exporters/` 전체
+## D-005: matplotlib Korean font rendering
+- **Date**: 2026-02 (early project)
+- **Situation**: When generating matplotlib charts on WSL Ubuntu, Korean appears as □ (tofu)
+- **Issue**: Setting `plt.rcParams["font.family"] = "Noto Sans CJK KR"` alone is not enough. matplotlib does not auto-discover system fonts
+- **Trial and error**: (1) Set only `rcParams` font.family → font not found (2) After checking the font path with `fc-list`, specified `font_manager.FontProperties` directly → has to be repeated for every chart (3) Searched by the name `Noto Sans CJK KR` → for a .ttc collection, only the first font (JP) is registered
+- **Solution**: Explicitly register the .ttc file via `fontManager.addfont()`, then set family to the registered name `"Noto Sans CJK JP"` (JP is registered first). The JP font also contains Korean glyphs, so rendering is fine. `axes.unicode_minus = False` is required (prevents the minus sign from breaking)
+- **Alternatives**: (a) Install a Korean-only font (Nanum Gothic) → requires an extra package on WSL (b) Don't use Korean in images → unrealistic
+- **Know-how**: matplotlib + a CJK font requires 2 steps: `addfont()` → `rcParams["font.family"]`. Be aware that only the first font is registered for a .ttc collection. In a headless environment, the `matplotlib.use("Agg")` backend setting is required
+- **Retrospective**: This problem is "solve once and done", but the trial-and-error took a long time. Recording it as a snippet in `.claude/rules/coding.md` was the right call — afterwards every chart script solves it by copy-paste
+- **Related files**: `.claude/rules/coding.md` (Korean font snippet), the entire `src/exporters/`
 
-## D-006: lightweight-charts setData 후 fitContent/setVisibleLogicalRange 무효화
-- **날짜**: 2026-04-12
-- **상황**: 차트 기간 전환 시(예: 6M→MAX) `fitContent()` 호출했지만 visible range가 이전 6M 구간에 그대로 고정. 코드에서 호출은 됐는데 효과가 없음
-- **이슈**: lightweight-charts가 `setData()` 후 내부적으로 비동기 auto-scroll을 수행하는데, 이 작업이 setTimeout(300ms~600ms) 안의 fitContent보다 늦게 실행되어 우리가 설정한 range를 덮어씀. 추가로 차트 3개(메인/RSI/MACD)의 타임스케일 동기화 리스너가 피드백 루프를 일으켜 range가 즉시 리셋
-- **삽질**: (1) setTimeout 100ms→300ms→600ms 점진 증가 → 효과 없음 (2) `requestAnimationFrame` 2번 중첩 → 효과 없음 (3) `subscribeVisibleLogicalRangeChange` 1회용 리스너로 첫 트리거에서 range 설정 → 첫 setData 시점이라 데이터 미완 (4) 브라우저 콘솔에서 수동 호출은 동작 → 자동 호출만 안 됨
-- **해결**: `_isSyncingTimeScale` 플래그를 setData 전체 동안 true로 유지(동기화 리스너 비활성화) + 2단계 setTimeout(100ms → fitContent → 100ms → 서브차트 동기화). SMA 시리즈는 매번 삭제/재생성 대신 `initLightweightChart()`에서 한 번만 만들고 `setData()`만 호출
-- **대안**: (a) timeScale 동기화 자체를 제거 → 메인/RSI/MACD가 따로 놀게 됨 (b) `setVisibleRange` (시간 기준) → string time 파싱 이슈 (c) `scrollToPosition(-N)` → 정확한 범위 제어 안 됨
-- **노하우**: lightweight-charts에서 시리즈를 동적으로 추가/제거하면 내부 auto-scroll이 매번 트리거됨 → **시리즈는 한 번만 생성하고 setData로 데이터만 갱신**. 멀티 차트 동기화는 피드백 루프 방지 플래그 필수. visible range는 모든 데이터 로딩이 끝난 뒤 별도 setTimeout으로 강제 설정
-- **회고**: lightweight-charts 공식 문서가 "data updates and auto-scaling" 섹션을 명시 안 함. 처음부터 시리즈 재사용 패턴으로 설계했어야. removeSeries→addLineSeries 반복은 성능도 나쁨
-- **관련 파일**: `src/web/static/app.js` (initLightweightChart, loadChartData, syncTimeScale)
+## D-006: lightweight-charts fitContent/setVisibleLogicalRange invalidated after setData
+- **Date**: 2026-04-12
+- **Situation**: On chart period switch (e.g., 6M→MAX), `fitContent()` was called but the visible range stayed fixed on the previous 6M span. The code calls it but it has no effect
+- **Issue**: lightweight-charts performs an internal async auto-scroll after `setData()`, and this runs later than the fitContent inside setTimeout(300ms~600ms), overwriting the range we set. Additionally, the time-scale sync listeners of the 3 charts (main/RSI/MACD) cause a feedback loop that resets the range immediately
+- **Trial and error**: (1) Gradually increased setTimeout 100ms→300ms→600ms → no effect (2) Nested `requestAnimationFrame` twice → no effect (3) A one-time `subscribeVisibleLogicalRangeChange` listener that sets the range on the first trigger → at the first setData moment the data is incomplete (4) Manual calls from the browser console work → only the automatic call fails
+- **Solution**: Keep the `_isSyncingTimeScale` flag true throughout setData (disabling the sync listeners) + a 2-stage setTimeout (100ms → fitContent → 100ms → subchart sync). Instead of deleting/recreating the SMA series each time, create it only once in `initLightweightChart()` and only call `setData()`
+- **Alternatives**: (a) Remove the timeScale sync itself → main/RSI/MACD would move independently (b) `setVisibleRange` (time-based) → string-time parsing issues (c) `scrollToPosition(-N)` → no precise range control
+- **Know-how**: In lightweight-charts, dynamically adding/removing series triggers the internal auto-scroll every time → **create series only once and refresh only the data via setData**. Multi-chart sync requires a feedback-loop-prevention flag. Force-set the visible range with a separate setTimeout only after all data loading is finished
+- **Retrospective**: The official lightweight-charts docs don't explicitly cover a "data updates and auto-scaling" section. I should have designed with the series-reuse pattern from the start. Repeating removeSeries→addLineSeries also performs poorly
+- **Related files**: `src/web/static/app.js` (initLightweightChart, loadChartData, syncTimeScale)
 
-## D-007: numba/coverage 의존성 충돌로 pandas_ta 전면 불능
-- **날짜**: 2026-05-15
-- **상황**: chart_api.py의 `import pandas_ta as ta` 호출 시 500 에러
-- **문제**: pandas_ta → numba → `coverage.types.Tracer` 참조 → coverage 7.4.4에서 해당 속성 제거됨. `except ImportError`로만 잡아서 `AttributeError`가 뚫림
-- **삽질**: `except ImportError` → `except Exception`으로 바꾸면 `_compute_indicators`는 해결. 그런데 `get_trend_signals` 함수에도 bare `import pandas_ta as ta`가 있어서 500 재발
-- **해결**: 두 곳 모두 수정. `get_trend_signals`는 pandas_ta 전체를 `sma_signals.py`의 `vwma_series/sma_series` + 수동 RSI rolling으로 대체. ADX는 조건에서 제거 (RSI 단독 필터로도 충분)
-- **노하우**: `except ImportError`만 잡으면 의존성 체인 중간의 `AttributeError/ImportError` 변종을 못 잡음. 서드파티 라이브러리 import는 항상 `except Exception`으로. pandas_ta 없이 VWMA/SMA/RSI는 pandas rolling으로 직접 구현 가능 (20줄 이내)
-- **관련 파일**: `src/web/chart_api.py`, `src/analyzers/sma_signals.py`
+## D-007: numba/coverage dependency conflict makes pandas_ta entirely unusable
+- **Date**: 2026-05-15
+- **Situation**: A 500 error on the `import pandas_ta as ta` call in chart_api.py
+- **Problem**: pandas_ta → numba → references `coverage.types.Tracer` → that attribute was removed in coverage 7.4.4. Because only `except ImportError` was used, the `AttributeError` slipped through
+- **Trial and error**: Changing `except ImportError` → `except Exception` solves `_compute_indicators`. But the `get_trend_signals` function also has a bare `import pandas_ta as ta`, so the 500 recurs
+- **Solution**: Fix both places. Replace the entire pandas_ta in `get_trend_signals` with `vwma_series/sma_series` from `sma_signals.py` + manual RSI rolling. Remove ADX from the conditions (the RSI-only filter is sufficient)
+- **Know-how**: Catching only `except ImportError` misses `AttributeError/ImportError` variants in the middle of the dependency chain. Always import third-party libraries with `except Exception`. VWMA/SMA/RSI can be implemented directly with pandas rolling without pandas_ta (within 20 lines)
+- **Related files**: `src/web/chart_api.py`, `src/analyzers/sma_signals.py`

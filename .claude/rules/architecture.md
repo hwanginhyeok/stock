@@ -1,38 +1,38 @@
 # Architecture
 
-## 디렉토리 구조
+## Directory structure
 
-- `config/` - YAML 설정 파일
-- `agents/` - 에이전트 역할 정의
-- `src/core/` - 공통 인프라 (config, logger, models, db, claude_client)
-- `src/collectors/` - 데이터 수집 (news, market)
-- `src/analyzers/` - 분석 (technical, fundamental, sentiment, screener)
-- `src/generators/` - 콘텐츠 생성 (article, summary, insight, image, hashtag)
-- `src/publishers/` - SNS 게시 (instagram, x, formatter, media)
-- `src/storage/` - DB CRUD, 테이블 정의
-- `src/exporters/` - Excel 리포트 빌더 (시그널, 대시보드, 섹터 등)
-- `src/backtesting/` - 백테스팅 엔진 (전략, 메트릭, 리포트)
-- `src/services/` - 독립 서비스 (뉴스 타임라인 등)
-- `src/web/` - 웹 서버 (브리핑 페이지 등)
-- `src/workflows/` - 오케스트레이션 (morning, closing, weekly, breaking, research)
-- `templates/` - Jinja2 템플릿 (articles, sns, prompts)
-- `data/` - 데이터 (raw, processed, cache, db, articles, briefings, facts, timelines, research) - git ignored
-- `logs/` - 로그 파일 - git ignored
-- `tests/` - 테스트
-- `scripts/` - 유틸리티 스크립트
-- `docs/프로젝트/` - TASK 관리 + 상세 로그
+- `config/` - YAML config files
+- `agents/` - Agent role definitions
+- `src/core/` - Shared infrastructure (config, logger, models, db, claude_client)
+- `src/collectors/` - Data collection (news, market)
+- `src/analyzers/` - Analysis (technical, fundamental, sentiment, screener)
+- `src/generators/` - Content generation (article, summary, insight, image, hashtag)
+- `src/publishers/` - SNS publishing (instagram, x, formatter, media)
+- `src/storage/` - DB CRUD, table definitions
+- `src/exporters/` - Excel report builder (signals, dashboard, sector, etc.)
+- `src/backtesting/` - Backtesting engine (strategy, metrics, report)
+- `src/services/` - Independent services (news timeline, etc.)
+- `src/web/` - Web server (briefing pages, etc.)
+- `src/workflows/` - Orchestration (morning, closing, weekly, breaking, research)
+- `templates/` - Jinja2 templates (articles, sns, prompts)
+- `data/` - Data (raw, processed, cache, db, articles, briefings, facts, timelines, research) - git ignored
+- `logs/` - Log files - git ignored
+- `tests/` - Tests
+- `scripts/` - Utility scripts
+- `docs/프로젝트/` - TASK management + detailed logs
 
-## 에이전트 역할
+## Agent roles
 
-0. **팀장** - 워크플로우 오케스트레이션/품질 게이트/예외 처리/에이전트 지휘
-1. **뉴스분석가** - 뉴스 수집/분류/감성분석
-2. **시장분석가** - 시장 데이터 수집/기술적·기본적 분석/스크리닝
-3. **아티클작성가** - Claude API 기반 콘텐츠 생성/품질 관리
-4. **SNS매니저** - Instagram/X 포맷 변환/게시/스케줄 관리
-5. **리서치어시스턴트** - 온디맨드 심층 리서치/SWOT/비교분석
+0. **Team lead** - Workflow orchestration / quality gate / exception handling / agent direction
+1. **News analyst** - News collection / classification / sentiment analysis
+2. **Market analyst** - Market data collection / technical & fundamental analysis / screening
+3. **Article writer** - Claude API-based content generation / quality management
+4. **SNS manager** - Instagram/X format conversion / publishing / schedule management
+5. **Research assistant** - On-demand deep research / SWOT / comparative analysis
 
-### AI 모델 정책
-- **Opus**: 아티클작성가, 리서치어시스턴트 (글쓰기·심층 분석 — 품질이 곧 산출물)
-- **Sonnet**: 팀장, 뉴스분석가, 시장분석가, SNS매니저 (오케스트레이션·수집·포맷 변환)
-- 태스크별 max_tokens / temperature 차별화로 파라미터 조절
-- 설정: `config/settings.yaml` → `claude.models`
+### AI model policy
+- **Opus**: Article writer, Research assistant (writing & deep analysis — quality is the deliverable itself)
+- **Sonnet**: Team lead, News analyst, Market analyst, SNS manager (orchestration, collection, format conversion)
+- Parameter tuning via per-task max_tokens / temperature differentiation
+- Config: `config/settings.yaml` → `claude.models`
