@@ -1,3 +1,8 @@
+---
+name: ontology-analysis
+description: 'Build an entity-event-link ontology from news facts and run first-principles gap analysis for thesis candidates. Use when the user says "온톨로지 분석", "제1원칙 분석", "뉴스 심층 분석", or requests post-briefing analysis.'
+---
+
 # 온톨로지 분석 + 제1원칙 사고 스킬
 
 > 뉴스 팩트 → 온톨로지 그래프 구축 → 제1원칙 분석 수행 절차.

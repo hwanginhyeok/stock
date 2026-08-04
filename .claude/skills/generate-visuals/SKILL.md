@@ -1,3 +1,8 @@
+---
+name: generate-visuals
+description: 'Generate and QA 1080×1080 Korean investment-article PNG visuals with the project matplotlib design system. Use after visualization planning or when the user says "시각화 만들어줘", "차트 생성", "아티클 이미지", or "PNG 만들어줘".'
+---
+
 # 시각화 생성 스킬
 
 ## 목적

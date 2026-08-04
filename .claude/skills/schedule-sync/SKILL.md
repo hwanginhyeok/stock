@@ -1,3 +1,8 @@
+---
+name: schedule-sync
+description: 'Synchronize article stage, publication status, weekly slots, and schedule visualization after pipeline changes. Use when an article changes stage, moves to published, is newly registered or posted, or when the user says "스케줄 동기화", "일정 갱신", or "상태 반영".'
+---
+
 # 스케줄 동기화 (schedule-sync)
 
 ## 목적
@@ -66,7 +71,7 @@ S_PLAN     = "#484f58"  # 회색 — 기획 예정
 ### 4단계: 시각화 재생성 (선택)
 
 ```bash
-cd /home/window11/stock
+cd /home/window11/주식부자프로젝트
 source .venv-wsl/bin/activate && python docs/프로젝트/generate_schedule_visual.py
 ```
 

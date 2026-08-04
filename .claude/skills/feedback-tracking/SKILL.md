@@ -1,3 +1,8 @@
+---
+name: feedback-tracking
+description: 'Record article revision feedback, classify recurring patterns, and promote confirmed patterns into writing rules. Use whenever the user gives article feedback, directly edits a draft, or says "피드백 기록", "퇴고 이력", or "반복 패턴 확인".'
+---
+
 # 퇴고 피드백 추적 (feedback-tracking)
 
 ## 목적

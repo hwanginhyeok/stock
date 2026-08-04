@@ -1,3 +1,8 @@
+---
+name: publish-review
+description: 'Score an investment article across eight publish-readiness dimensions and produce a SHIP, REVISE, or HOLD verdict with concrete edits. Use when the user says "리뷰해줘", "게시 리뷰", "publish-review", or after v1/v2 completion.'
+---
+
 # 아티클 게시 리뷰 (publish-review)
 
 ## 목적
@@ -21,9 +26,9 @@
 
 | 순서 | 파일 | 용도 |
 |------|------|------|
-| 1 | `.claude/skills/writing-voice.md` | 저자 DNA — 어조, 문체, 감정, 논리 패턴 |
-| 2 | `.claude/skills/article-writing.md` | 구조, 포맷, 팩트체크, 하단 구조 규칙 |
-| 3 | `.claude/skills/article-shipping.md` | WIP 제한, 타임박스 확인 |
+| 1 | `docs/guides/writing-voice.md` | 저자 DNA — 어조, 문체, 감정, 논리 패턴 |
+| 2 | `docs/guides/article-writing.md` | 구조, 포맷, 팩트체크, 하단 구조 규칙 |
+| 3 | `.claude/skills/article-shipping/SKILL.md` | WIP 제한, 타임박스 확인 |
 | 4 | 해당 아티클의 `research/sources.md` | 출처 대조용 |
 
 ## 리뷰 프로세스

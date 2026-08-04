@@ -97,30 +97,30 @@ When a new session starts, before getting into coding, always follow this order:
 
 | File | Contents | Trigger |
 |------|------|--------|
-| `.claude/skills/README.md` | skill authoring guide | when adding a new skill |
-| `.claude/skills/article-writing.md` | article structure/format/category/visualization rules | when writing an article |
-| `.claude/skills/writing-voice.md` | author's voice/style/emotion/logical-progression patterns + revision feedback log | when drafting/revising an article |
-| `.claude/skills/naver-html.md` | Naver blog HTML format/style/color/workflow guide | when converting to Naver HTML |
-| `.claude/skills/article-research.md` | 4-step article research workflow | when planning/researching an investment article |
-| `.claude/skills/generate-visuals.md` | 1080×1080 PNG visualization generation (matplotlib + QA) | when generating article visuals |
-| `.claude/skills/publish-x.md` | X Notes publishing checklist + per-topic hashtags | when publishing an article to X |
-| `.claude/skills/article-drafting.md` | article draft — write outline → user approval → v1 draft → self-check | after research Phase 4 / on "let's draft" instruction |
-| `.claude/skills/article-revision.md` | article revision — decision tree + 6-item checklist + v2/x_publish conversion | after draft completion / on receiving revision feedback |
-| `.claude/skills/feedback-tracking.md` | revision feedback tracking — record/classify/pattern-detect/promote-to-principle | on receiving revision feedback / at session start |
-| `.claude/skills/image-markers.md` | 📎 image marker placement & cross-validation — placement principles + mapping + cross-file consistency | when writing v1 / after visualization / during revision/conversion |
-| `.claude/skills/naver-packaging.md` | Naver conversion packaging — HTML conversion + image renaming + README + QA | when converting to Naver after X publishing |
-| `.claude/skills/schedule-briefing.md` | schedule briefing — master vs actual-folder 2-way verification + report output | on "tell me the schedule" / at session start |
-| `.claude/skills/schedule-sync.md` | schedule sync — update master table in one place + regenerate visualizations | on article status change / when a mismatch is found |
-| `.claude/skills/news-fact-extraction.md` | news fact extraction — rule-based auto + Claude Code manual hybrid | on "extract facts", "summarize news", when preparing market-briefing data |
-| `.claude/skills/ontology-analysis.md` | ontology analysis + First Principles thinking — facts→graph→conventional-wisdom breakdown→Gap→opportunity | on "ontology analysis", "First Principles analysis", deep news analysis |
-| `.claude/skills/article-shipping.md` | article shipping — WIP limit + timebox + post-publish learning loop | when wrapping up pending publication / WIP check at session start |
-| `.claude/skills/publish-review.md` | publish review — 8-dimension scorecard + interactive edits + SHIP/REVISE/HOLD decision | on "review it", "publish review", after v1/v2 completion |
-| `.claude/skills/morning-email.md` | morning email execution (data collection→review→dry-run→send) | on "morning email", "send the email" |
-| `.claude/skills/sigma-analysis.md` | IV sigma analysis (intraday/off-hours branching, IV/HV20 fallback) | on "sigma analysis", "IV analysis", when checking stock volatility |
-| `.claude/skills/signal-report.md` | signal report + dashboard Excel generation + outlier review | on "signal report", "dashboard", weekly report |
+| `docs/guides/article-writing.md` | article structure/format/category/visualization rules | when writing an article |
+| `docs/guides/writing-voice.md` | author's voice/style/emotion/logical-progression patterns + revision feedback log | when drafting/revising an article |
+| `docs/guides/naver-html.md` | Naver blog HTML format/style/color/workflow guide | when converting to Naver HTML |
+| `.claude/skills/article-research/SKILL.md` | 4-step article research workflow | when planning/researching an investment article |
+| `.claude/skills/generate-visuals/SKILL.md` | 1080×1080 PNG visualization generation (matplotlib + QA) | when generating article visuals |
+| `.claude/skills/publish-x/SKILL.md` | X Notes publishing checklist + per-topic hashtags | when publishing an article to X |
+| `.claude/skills/article-drafting/SKILL.md` | article draft — write outline → user approval → v1 draft → self-check | after research Phase 4 / on "let's draft" instruction |
+| `.claude/skills/article-revision/SKILL.md` | article revision — decision tree + 6-item checklist + v2/x_publish conversion | after draft completion / on receiving revision feedback |
+| `.claude/skills/feedback-tracking/SKILL.md` | revision feedback tracking — record/classify/pattern-detect/promote-to-principle | on receiving revision feedback / at session start |
+| `.claude/skills/image-markers/SKILL.md` | 📎 image marker placement & cross-validation — placement principles + mapping + cross-file consistency | when writing v1 / after visualization / during revision/conversion |
+| `.claude/skills/naver-packaging/SKILL.md` | Naver conversion packaging — HTML conversion + image renaming + README + QA | when converting to Naver after X publishing |
+| `.claude/skills/schedule-briefing/SKILL.md` | schedule briefing — master vs actual-folder 2-way verification + report output | on "tell me the schedule" / at session start |
+| `.claude/skills/schedule-sync/SKILL.md` | schedule sync — update master table in one place + regenerate visualizations | on article status change / when a mismatch is found |
+| `.claude/skills/news-fact-extraction/SKILL.md` | news fact extraction — rule-based auto + Claude Code manual hybrid | on "extract facts", "summarize news", when preparing market-briefing data |
+| `.claude/skills/ontology-analysis/SKILL.md` | ontology analysis + First Principles thinking — facts→graph→conventional-wisdom breakdown→Gap→opportunity | on "ontology analysis", "First Principles analysis", deep news analysis |
+| `.claude/skills/article-shipping/SKILL.md` | article shipping — WIP limit + timebox + post-publish learning loop | when wrapping up pending publication / WIP check at session start |
+| `.claude/skills/publish-review/SKILL.md` | publish review — 8-dimension scorecard + interactive edits + SHIP/REVISE/HOLD decision | on "review it", "publish review", after v1/v2 completion |
+| `.claude/skills/morning-email/SKILL.md` | morning email execution (data collection→review→dry-run→send) | on "morning email", "send the email" |
+| `.claude/skills/sigma-analysis/SKILL.md` | IV sigma analysis (intraday/off-hours branching, IV/HV20 fallback) | on "sigma analysis", "IV analysis", when checking stock volatility |
+| `.claude/skills/signal-report/SKILL.md` | signal report + dashboard Excel generation + outlier review | on "signal report", "dashboard", weekly report |
 
 > A skill is a file defining a repeatable work procedure. When performing that task, always read it and follow the procedure.
 > When adding a new skill, update this table as well.
+> Legacy archive: `docs/archive/skills/README.md` preserves the obsolete bare-file authoring guide for history only; do not follow it.
 
 ## Automation Status
 

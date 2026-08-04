@@ -1,3 +1,8 @@
+---
+name: sigma-analysis
+description: 'Analyze a stock''s IV or HV20 sigma position with intraday and off-hours fallback handling. Use when the user says "시그마 분석", "IV 분석", "변동성 분석", "sigma", or "{티커} 시그마".'
+---
+
 # IV 시그마 분석 스킬 (sigma-analysis)
 
 > **트리거**: 아래 표현이 나오면 이 스킬을 즉시 실행한다.
@@ -29,7 +34,7 @@ HV20 폴백은 정상 동작이다 — 경고 표시하되 분석은 유효.
 ### STEP 2 — 분석 실행
 
 ```bash
-cd /home/window11/stock
+cd /home/window11/주식부자프로젝트
 source .venv-wsl/bin/activate
 
 # 단일 종목

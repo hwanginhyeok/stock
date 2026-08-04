@@ -1,3 +1,8 @@
+---
+name: naver-packaging
+description: 'Convert a published X article into a QA-checked Naver HTML package with ordered images, tags, and posting instructions. Use after X publication or when the user says "네이버 변환해 줘", "네이버 패키징", or "블로그용으로 만들어줘".'
+---
+
 # 네이버 변환 패키징 (naver-packaging)
 
 ## 목적
@@ -23,13 +28,13 @@
 
 | 파일 | 확인 내용 |
 |------|-----------|
-| `.claude/rules/naver-html.md` | HTML 형식·스타일·색상·워크플로우 사양 |
-| `.claude/skills/publish-x.md` | 태그 사전 (공통 + 카테고리별) |
+| `docs/guides/naver-html.md` | HTML 형식·스타일·색상·워크플로우 사양 |
+| `.claude/skills/publish-x/SKILL.md` | 태그 사전 (공통 + 카테고리별) |
 
 ### 2단계: HTML 변환
 
 ```bash
-cd /home/window11/stock
+cd /home/window11/주식부자프로젝트
 source .venv-wsl/bin/activate && python scripts/generate_naver_html.py <v2_마크다운_파일_경로>
 ```
 
@@ -167,7 +172,7 @@ published/{순번}_{티커}_{slug}/
 | 구성 | 소스 | 개수 목안 |
 |------|------|-----------|
 | 공통 | 투자분석, 주식분석, 심층분석 | 3개 |
-| 카테고리 | `.claude/rules/naver-html.md` 태그 사전 | 8~12개 |
+| 카테고리 | `docs/guides/naver-html.md` 태그 사전 | 8~12개 |
 | 고유 | 아티클 핵심 토픽 키워드 | 5~10개 |
 | **합계** | | **15~25개** |
 

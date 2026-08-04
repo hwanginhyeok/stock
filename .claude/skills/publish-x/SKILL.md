@@ -1,3 +1,8 @@
+---
+name: publish-x
+description: 'Prepare and guide the manual publication of a completed long-form article to X Notes, including image order and the introduction post. Use when the article package is ready or the user says "X에 게시", "X Notes 발행", "트위터에 올리자", or "게시하자".'
+---
+
 # X 게시 스킬
 
 ## 목적

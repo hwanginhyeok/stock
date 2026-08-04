@@ -6,7 +6,7 @@
 
 | 순서 | 파일 | 용도 |
 |------|------|------|
-| 1 | `.claude/rules/writing-voice.md` | 저자의 어조·문체·감정 표현 패턴 |
+| 1 | `docs/guides/writing-voice.md` | 저자의 어조·문체·감정 표현 패턴 |
 | 2 | `docs/프로젝트/PUBLISH_SCHEDULE.md` | 게시 스케줄 + 게시 트래커 |
 | 3 | `docs/프로젝트/PUBLISH_SCHEDULE.md` `아티클 마스터` | 전체 아티클 현황 + 디렉토리 위치 |
 
@@ -215,7 +215,7 @@ data/
 3. `_naver.html`을 `naver/` 하위 디렉토리로 이동
 4. 이미지를 `naver/`에 번호순 한글 이름으로 복사 (`01_이미지명.png` ...)
 5. `naver/README.md` 작성 (이미지 삽입 순서 + 태그 + 체크리스트)
-6. 형식·스타일 상세: `.claude/rules/naver-html.md` 참조
+6. 형식·스타일 상세: `docs/guides/naver-html.md` 참조
 
 > x_publish는 X Notes 전용 (테이블→텍스트 변환 상태). 네이버 변환에 쓰면 HTML 테이블이 생성되지 않는다.
 

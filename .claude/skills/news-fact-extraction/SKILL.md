@@ -1,3 +1,8 @@
+---
+name: news-fact-extraction
+description: 'Extract verifiable numerical and event facts from collected news into the project fact schema and briefing outputs. Use when the user says "팩트 추출", "뉴스 분석", "뉴스 정리", or when preparing market-briefing facts.'
+---
+
 # 뉴스 팩트 추출 스킬
 
 > 뉴스에서 숫자와 사실만 추출하여 구조화된 데이터로 저장하는 절차.

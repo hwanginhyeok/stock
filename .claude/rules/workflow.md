@@ -127,6 +127,6 @@ When writing to `docs/프로젝트/task/{ID}.md`:
 
 **Principle promotion process**:
 - When the same type of feedback repeats **3 or more times** → record it in `반복 패턴 메모`
-- Once the pattern is confirmed → add it as a principle in `.claude/rules/article-writing.md`
+- Once the pattern is confirmed → add it as a principle in `docs/guides/article-writing.md`
 
 **Template**: `docs/프로젝트/task/TEMPLATE_article.md` (separate from code tasks)

@@ -1,3 +1,8 @@
+---
+name: image-markers
+description: 'Place and cross-validate article image markers across drafts, X guides, Naver HTML, and source files. Use while drafting or revising an article, after visuals are generated, or when the user says "이미지 마커", "이미지 위치 확인", or "마커 검증".'
+---
+
 # 이미지 마커 배치 & 검증 (image-markers)
 
 ## 목적

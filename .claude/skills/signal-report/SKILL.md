@@ -1,3 +1,8 @@
+---
+name: signal-report
+description: 'Generate and QA the market signal-report and dashboard Excel workbooks, including anomaly and regime checks. Use when the user says "시그널 리포트", "대시보드", "Excel 리포트", "signal report", or requests a weekly report.'
+---
+
 # 시그널 리포트 생성 스킬 (signal-report)
 
 > **트리거**: 아래 표현이 나오면 이 스킬을 즉시 실행한다.
@@ -31,7 +36,7 @@
 ### STEP 1 — 데이터 수집 상태 확인
 
 ```bash
-cd /home/window11/stock
+cd /home/window11/주식부자프로젝트
 source .venv-wsl/bin/activate
 ```
 

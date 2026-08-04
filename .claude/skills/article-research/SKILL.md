@@ -1,3 +1,8 @@
+---
+name: article-research
+description: 'Run the four-phase research workflow for an investment article, from thesis capture through visualization planning. Use when the user says "아티클 리서치", "자료 조사", "테제 검증", or starts a new investment article.'
+---
+
 # 아티클 리서치 스킬
 
 ## 목적

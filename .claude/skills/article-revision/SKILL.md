@@ -1,3 +1,8 @@
+---
+name: article-revision
+description: 'Revise a v1 investment article into v2 and X-ready copy while tracking feedback and format checks. Use after a draft is complete or when the user says "퇴고하자", "수정해줘", "최종 퇴고", or gives revision feedback.'
+---
+
 # 아티클 퇴고 (article-revision)
 
 ## 목적
@@ -22,8 +27,8 @@
 
 | 순서 | 파일 | 용도 |
 |------|------|------|
-| 1 | `.claude/rules/writing-voice.md` | 저자의 어조·문체·감정 패턴 + 퇴고 피드백 로그 |
-| 2 | `.claude/rules/article-writing.md` | 아티클 구조·포맷·하단 구조·시각화 규칙 |
+| 1 | `docs/guides/writing-voice.md` | 저자의 어조·문체·감정 패턴 + 퇴고 피드백 로그 |
+| 2 | `docs/guides/article-writing.md` | 아티클 구조·포맷·하단 구조·시각화 규칙 |
 | 3 | `docs/프로젝트/task/4-x.md` | 해당 아티클의 퇴고 이력 (없으면 생성) |
 
 ### 1단계: 현재 상태 판단 (의사결정 트리)

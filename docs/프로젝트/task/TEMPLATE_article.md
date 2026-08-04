@@ -35,7 +35,7 @@ data/articles/{순번}_{티커}_{slug}/
 ## 퇴고 이력
 
 > 이 섹션은 사용자 피드백을 받을 때마다 실시간으로 업데이트한다.
-> 패턴이 반복되면 `.claude/rules/article-writing.md`에 원칙으로 승격한다.
+> 패턴이 반복되면 `docs/guides/article-writing.md`에 원칙으로 승격한다.
 
 ---
 

@@ -1,3 +1,8 @@
+---
+name: morning-email
+description: 'Preview, review, and send the manual morning market email with data-source fallback checks. Use when the user says "모닝 이메일", "이메일 보내줘", "이메일 테스트", "이메일 확인", or "morning email".'
+---
+
 # 모닝 이메일 실행 스킬 (morning-email)
 
 > **트리거**: 아래 표현이 나오면 이 스킬을 즉시 실행한다.
@@ -19,7 +24,7 @@
 ### STEP 1 — 환경 확인
 
 ```bash
-cd /home/window11/stock
+cd /home/window11/주식부자프로젝트
 source .venv-wsl/bin/activate
 
 # .env 확인 (API 키들)

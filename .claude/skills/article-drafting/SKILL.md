@@ -1,3 +1,8 @@
+---
+name: article-drafting
+description: 'Create an approved outline and v1 investment article from completed research. Use after article-research Phase 4 or when the user says "초안 쓰자", "아웃라인 만들자", or "글 쓰자".'
+---
+
 # 아티클 초안 작성 (article-drafting)
 
 ## 목적
@@ -19,8 +24,8 @@
 
 | 순서 | 파일 | 용도 |
 |------|------|------|
-| 1 | `.claude/rules/writing-voice.md` | 어조·문체·논리 전개 패턴 |
-| 2 | `.claude/rules/article-writing.md` | 아티클 구조·포맷·분량·하단 구조 |
+| 1 | `docs/guides/writing-voice.md` | 어조·문체·논리 전개 패턴 |
+| 2 | `docs/guides/article-writing.md` | 아티클 구조·포맷·분량·하단 구조 |
 | 3 | `research/thesis.md` | 핵심 테제 확인 |
 | 4 | `research/claims.md` | 검증된 주장 목록 |
 | 5 | `research/sources.md` | 출처 목록 |

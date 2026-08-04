@@ -1,3 +1,8 @@
+---
+name: article-shipping
+description: 'Drive unfinished articles to publication with WIP limits, timeboxes, publishing priority, and post-publish learning. Use when wrapping up publication, checking article WIP, or when the user says "마감하자", "게시부터 하자", or "발행 대기 정리".'
+---
+
 # 아티클 마감 (article-shipping)
 
 ## 목적

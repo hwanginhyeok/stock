@@ -1,3 +1,8 @@
+---
+name: schedule-briefing
+description: 'Compare the article master schedule with actual article directories and report this week, inventory, mismatches, and next actions. Use when the user says "스케줄 알려줘", "게시 일정", "아티클 현황", or before publication planning.'
+---
+
 # 스케줄 브리핑 (schedule-briefing)
 
 ## 목적
@@ -50,7 +55,7 @@ data/articles/published/ → 게시 대기/완료 폴더 목록
 ### 4단계: 시각화 생성
 
 ```bash
-cd /home/window11/stock
+cd /home/window11/주식부자프로젝트
 source .venv-wsl/bin/activate && python docs/프로젝트/generate_schedule_visual.py
 ```
 
